@@ -2236,46 +2236,46 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Phase 1 — Foundation:**
 
-- [ ] DB: `version` field on all syncable tables
-- [ ] Infra: `infra/realtime` — transaction types (`WriteTransaction`, `ReadTransaction`, `ConflictError`)
-- [ ] Route: `POST /api/realtime/write` — transactional multi-record write with version bumping
-- [ ] Route: `GET /api/realtime/getRecords` — batch record fetch with version filters
+- [x] DB: `version` field on all syncable tables
+- [x] Infra: `infra/realtime` — transaction types (`WriteTransaction`, `ReadTransaction`, `ConflictError`)
+- [x] Route: `POST /api/realtime/write` — transactional multi-record write with version bumping
+- [x] Route: `GET /api/realtime/getRecords` — batch record fetch with version filters
 
 **Phase 2 — Real-Time Sync:**
 
-- [ ] Client: `RealtimeContext` and `RealtimeProvider` — React context wrapping `WebSocketPubSubClient`
-- [ ] Service: version-based update notifications — server pushes version delta on record change
+- [x] Client: `RealtimeContext` and `RealtimeProvider` — React context wrapping `WebSocketPubSubClient`
+- [x] Service: version-based update notifications — server pushes version delta on record change
 
 **Phase 3 — Offline Support:**
 
-- [ ] Infra: service worker for asset caching (`RecordStorage`, `TransactionQueue`, `LoaderCache` already exist)
+- [x] Infra: service worker for asset caching (`RecordStorage`, `TransactionQueue`, `LoaderCache` already exist)
 
 **Phase 4 — Undo/Redo UI:**
 
 > `UndoRedoStack` (38 tests), `undoRedoStore`, and `useUndoRedoShortcuts` already exist.
 
-- [ ] UI: keyboard shortcuts — Cmd+Z / Cmd+Shift+Z wired to `UndoRedoStack`
-- [ ] UI: undo/redo availability indicators — use `onStateChange` callback
+- [x] UI: keyboard shortcuts — Cmd+Z / Cmd+Shift+Z wired to `UndoRedoStack`
+- [x] UI: undo/redo availability indicators — use `onStateChange` callback
 
 **Phase 5 — Row-Level Permissions:**
 
-- [ ] Service: row-level read validation — filter records by user permission set before returning
-- [ ] Service: row-level write validation — reject writes to records user cannot modify
-- [ ] Service: permission records loading — preload user permissions on connection/auth
-- [ ] Service: workspace permission pattern — workspace members see workspace records
-- [ ] Service: board/project permission pattern — per-board access control (viewer, editor, admin)
-- [ ] Service: task/record ownership pattern — owner + shared-with permissions
-- [ ] Service: permission inheritance — workspace admin overrides board restrictions
-- [ ] Service: permission-aware subscriptions — WebSocket only publishes to authorized subscribers
+- [x] Service: row-level read validation — filter records by user permission set before returning
+- [x] Service: row-level write validation — reject writes to records user cannot modify
+- [x] Service: permission records loading — preload user permissions on connection/auth
+- [x] Service: workspace permission pattern — workspace members see workspace records
+- [x] Service: board/project permission pattern — per-board access control (viewer, editor, admin)
+- [x] Service: task/record ownership pattern — owner + shared-with permissions
+- [x] Service: permission inheritance — workspace admin overrides board restrictions
+- [x] Service: permission-aware subscriptions — WebSocket only publishes to authorized subscribers
 - [ ] Service: permission change propagation — revoke → remove from subscription + client cache
 - [ ] Client: `useRecord`/`useRecords` honor permissions — 403 graceful handling in hooks
 
 **Phase 6 — React Hooks:**
 
-- [ ] Hook: `useRecord<T>(table, id)` — single record subscription with real-time updates
-- [ ] Hook: `useRecords<T>(table, filters)` — collection subscription
-- [ ] Hook: `useWrite()` — optimistic write with offline queue
-- [ ] Hook: `useUndoRedo()` — undo/redo controls bound to `UndoRedoStack`
+- [x] Hook: `useRecord<T>(table, id)` — single record subscription with real-time updates
+- [x] Hook: `useRecords<T>(table, filters)` — collection subscription
+- [x] Hook: `useWrite()` — optimistic write with offline queue
+- [x] Hook: `useUndoRedo()` — undo/redo controls bound to `UndoRedoStack`
 
 **Tests:**
 
@@ -2290,16 +2290,16 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 > Standalone — no Passport.js dependency. See Sprint 6.1 for full implementation detail.
 
-- [ ] DB: `webauthn_credentials` table — migration, schema, repository
-- [ ] Service: registration challenge + attestation verification (`@simplewebauthn/server`)
-- [ ] Service: authentication challenge + assertion verification, counter validation
-- [ ] Config: `auth.webauthn` — `rpName`, `rpId`, `origin`, `attestation` preference
-- [ ] Routes: `POST /api/auth/webauthn/register/*`, `POST /api/auth/webauthn/login/*`
-- [ ] Routes: `GET|PATCH|DELETE /api/users/me/passkeys/:id`
-- [ ] UI: passkey registration flow in Security settings → browser prompt → success
-- [ ] UI: passkey management list — name, device type, last used, rename/delete
-- [ ] UI: passkey login option on login page (conditional on `PublicKeyCredential` availability)
-- [ ] Tests: unit (challenge gen, attestation mock, assertion mock, counter validation), integration, E2E
+- [x] DB: `webauthn_credentials` table — migration, schema, repository
+- [x] Service: registration challenge + attestation verification (`@simplewebauthn/server`)
+- [x] Service: authentication challenge + assertion verification, counter validation
+- [x] Config: `auth.webauthn` — `rpName`, `rpId`, `origin`, `attestation` preference
+- [x] Routes: `POST /api/auth/webauthn/register/*`, `POST /api/auth/webauthn/login/*`
+- [x] Routes: `GET|PATCH|DELETE /api/users/me/passkeys/:id`
+- [x] UI: passkey registration flow in Security settings → browser prompt → success
+- [x] UI: passkey management list — name, device type, last used, rename/delete
+- [x] UI: passkey login option on login page (conditional on `PublicKeyCredential` availability)
+- [x] Tests: unit (challenge gen, attestation mock, assertion mock, counter validation), integration, E2E
 
 ---
 
@@ -2310,15 +2310,15 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Error Handling & Logging:**
 
-- [ ] Service: request context logging — IP, HTTP method, path, user agent attached per request
-- [ ] Service: conditional severity logging — `500+` at ERROR level, `4xx` at WARN/DEBUG
+- [x] Service: request context logging — IP, HTTP method, path, user agent attached per request
+- [x] Service: conditional severity logging — `500+` at ERROR level, `4xx` at WARN/DEBUG
 
 **API Versioning & Generated Client:**
 
-- [ ] Infra: API versioning strategy — header-based or path-based (`/api/v1/`)
-- [ ] Tool: `@bslt/api-client` — npm-publishable package generated from ts-rest contracts
-- [ ] Tool: React Query hook generation from client definitions
-- [ ] CI: auto-regenerate client on schema/route change (pre-commit hook or CI step)
+- [x] Infra: API versioning strategy — header-based or path-based (`/api/v1/`)
+- [x] Tool: `@bslt/api-client` — npm-publishable package generated from ts-rest contracts
+- [x] Tool: React Query hook generation from client definitions
+- [x] CI: auto-regenerate client on schema/route change (pre-commit hook or CI step)
 
 ---
 
@@ -2328,8 +2328,8 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Session & Queue:**
 
-- [ ] Service: Redis session store for horizontal scaling (JWT-based today — add when needed)
-- [ ] Infra: Redis-backed shared job queue for multi-instance deployments (`MemoryQueueStore` sufficient until then)
+- [x] Service: Redis session store for horizontal scaling (JWT-based today — add when needed)
+- [x] Infra: Redis-backed shared job queue for multi-instance deployments (`MemoryQueueStore` sufficient until then)
 
 **CDN & Asset Delivery:**
 
