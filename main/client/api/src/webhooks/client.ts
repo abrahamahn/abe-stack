@@ -7,6 +7,8 @@
  */
 
 import {
+  deliveryListResponseSchema,
+  deliveryReplayResponseSchema,
   rotateSecretResponseSchema,
   webhookDeleteResponseSchema,
   webhookListResponseSchema,
@@ -82,6 +84,14 @@ export interface RotateSecretResponse {
   webhook: WebhookItem;
 }
 
+export interface DeliveryListResponse {
+  deliveries: WebhookDeliveryItem[];
+}
+
+export interface DeliveryReplayResponse {
+  delivery: WebhookDeliveryItem;
+}
+
 export interface WebhookClient {
   create: (data: CreateWebhookRequest) => Promise<WebhookMutationResponse>;
   list: () => Promise<WebhookListResponse>;
@@ -89,6 +99,8 @@ export interface WebhookClient {
   update: (id: string, data: UpdateWebhookRequest) => Promise<WebhookMutationResponse>;
   remove: (id: string) => Promise<WebhookDeleteResponse>;
   rotateSecret: (id: string) => Promise<RotateSecretResponse>;
+  listDeliveries: (webhookId: string) => Promise<DeliveryListResponse>;
+  replayDelivery: (deliveryId: string) => Promise<DeliveryReplayResponse>;
 }
 
 // ============================================================================
@@ -175,6 +187,31 @@ export function createWebhookClient(config: WebhookClientConfig): WebhookClient 
         rotateSecretResponseSchema,
       );
       return parsed as unknown as RotateSecretResponse;
+    },
+
+    async listDeliveries(webhookId: string): Promise<DeliveryListResponse> {
+      const parsed = await apiRequest(
+        factory,
+        `/webhooks/${webhookId}/deliveries`,
+        undefined,
+        true,
+        deliveryListResponseSchema,
+      );
+      return parsed as unknown as DeliveryListResponse;
+    },
+
+    async replayDelivery(deliveryId: string): Promise<DeliveryReplayResponse> {
+      const parsed = await apiRequest(
+        factory,
+        `/webhooks/deliveries/${deliveryId}/replay`,
+        {
+          method: 'POST',
+          body: JSON.stringify({}),
+        },
+        true,
+        deliveryReplayResponseSchema,
+      );
+      return parsed as unknown as DeliveryReplayResponse;
     },
   };
 }

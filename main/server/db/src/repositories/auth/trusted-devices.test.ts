@@ -26,6 +26,7 @@ const createMockDb = (): RawDb =>
     getClient: vi.fn() as RawDb['getClient'],
     queryOne: vi.fn(),
     execute: vi.fn(),
+    withSession: vi.fn() as RawDb['withSession'],
   }) as unknown as RawDb;
 
 // ============================================================================
@@ -129,8 +130,8 @@ describe('createTrustedDeviceRepository', () => {
       const result = await repo.findByUser('usr-123');
 
       expect(result).toHaveLength(2);
-      expect(result[0].userId).toBe('usr-123');
-      expect(result[1].deviceFingerprint).toBe('def456hash');
+      expect(result[0]?.userId).toBe('usr-123');
+      expect(result[1]?.deviceFingerprint).toBe('def456hash');
       expect(mockDb.query).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining('user_id'),

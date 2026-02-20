@@ -53,7 +53,7 @@ export const ForgotPasswordForm = ({
         <AuthFormLayout.Header>
           <AuthFormLayout.Title>Reset password</AuthFormLayout.Title>
           <AuthFormLayout.Subtitle>
-            Enter your email address and we'll send you a link to reset your password
+            Enter your email address and we&apos;ll send you a link to reset your password
           </AuthFormLayout.Subtitle>
         </AuthFormLayout.Header>
 

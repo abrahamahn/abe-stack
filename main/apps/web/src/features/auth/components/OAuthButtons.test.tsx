@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { OAuthButtons } from './OAuthButtons';
 
 vi.mock('@bslt/ui', () => {
-  const mockButton = ({ children }: { children: React.ReactNode }) => <Button>{children}</Button>;
+  const mockButton = ({ children }: { children: React.ReactNode }) => <div>{children}</div>;
   return {
     Button: mockButton,
     OAuthButton: mockButton,

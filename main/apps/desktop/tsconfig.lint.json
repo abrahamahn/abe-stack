@@ -1,0 +1,23 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "composite": false,
+    "noEmit": true,
+    "declaration": false,
+    "declarationMap": false,
+    "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.desktop.lint.tsbuildinfo"
+  },
+  "include": [
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "src/**/*.spec.ts",
+    "src/**/*.spec.tsx",
+    "src/**/__tests__/**/*",
+    "../web/src/**/*.test.ts",
+    "../web/src/**/*.test.tsx",
+    "../web/src/**/*.spec.ts",
+    "../web/src/**/*.spec.tsx",
+    "../web/src/**/__tests__/**/*"
+  ],
+  "exclude": ["node_modules"]
+}

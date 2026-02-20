@@ -7,12 +7,12 @@
  * implementations, keeping the package framework-agnostic.
  */
 
-import type { BaseContext, Logger, RequestContext } from '@bslt/shared';
 import type {
   AuditEventRepository,
+  ConsentRecordRepository,
   LegalDocumentRepository,
-  UserAgreementRepository,
 } from '../../../db/src';
+import type { BaseContext, Logger, RequestContext } from '@bslt/shared';
 
 // ============================================================================
 // Handler Context Types
@@ -27,7 +27,7 @@ import type {
 export interface LegalAppContext extends BaseContext {
   readonly repos: {
     readonly legalDocuments: LegalDocumentRepository;
-    readonly userAgreements: UserAgreementRepository;
+    readonly consentRecords: ConsentRecordRepository;
     readonly auditEvents?: AuditEventRepository;
   };
   readonly log: Logger;

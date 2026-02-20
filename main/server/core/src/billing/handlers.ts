@@ -29,6 +29,9 @@ import {
   updateSubscription,
 } from './service';
 
+import type { BillingAppContext, BillingRepositories, BillingRequest } from './types';
+import type { Plan as DbPlan, Subscription as DbSubscription } from '../../../db/src';
+import type { AuditRecordParams } from '../audit/types';
 import type {
   AddPaymentMethodRequest,
   CancelSubscriptionRequest,
@@ -36,6 +39,7 @@ import type {
   CheckoutResponse,
   Invoice,
   InvoiceResponse,
+  InvoiceStatus,
   InvoicesListResponse,
   PaymentMethod,
   PaymentMethodResponse,
@@ -52,9 +56,6 @@ import type {
   UpdateSubscriptionRequest,
   UserId,
 } from '@bslt/shared';
-import type { Plan as DbPlan, Subscription as DbSubscription } from '../../../db/src';
-import type { AuditRecordParams } from '../audit/types';
-import type { BillingAppContext, BillingRepositories, BillingRequest } from './types';
 
 // ============================================================================
 // Helper Functions
@@ -151,7 +152,7 @@ function formatSubscription(subscription: DbSubscription & { plan: DbPlan }): Su
  */
 function formatInvoice(invoice: {
   id: string;
-  status: 'draft' | 'open' | 'paid' | 'void' | 'uncollectible';
+  status: InvoiceStatus;
   amountDue: number;
   amountPaid: number;
   currency: string;
@@ -396,7 +397,7 @@ export async function handleCreateCheckout(
  */
 export async function handleCreatePortalSession(
   ctx: BillingAppContext,
-  body: { returnUrl?: string },
+  body: { returnUrl?: string | undefined },
   request: BillingRequest,
 ): Promise<
   | { status: 200; body: PortalSessionResult }

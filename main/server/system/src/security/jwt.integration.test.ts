@@ -7,9 +7,10 @@
 
 import { createHmac } from 'node:crypto';
 
+import { AppError } from '@bslt/shared';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { checkTokenSecret, decode, JwtError, sign, verify } from './jwt';
+import { checkTokenSecret, decode, JwtError, sign, verify } from '@bslt/shared/system/crypto';
 
 describe('JWT Integration', () => {
   const SECRET = 'super-secret-key-for-testing-jwt-123!@#';
@@ -328,6 +329,43 @@ describe('JWT Integration', () => {
         expect(e).toBeInstanceOf(JwtError);
         expect((e as JwtError).code).toBe('TOKEN_EXPIRED');
       }
+    });
+
+    it('JwtError is an AppError', () => {
+      const err = new JwtError('test', 'INVALID_TOKEN');
+      expect(err).toBeInstanceOf(AppError);
+      expect(err).toBeInstanceOf(JwtError);
+    });
+
+    it('MALFORMED_TOKEN has statusCode 400', () => {
+      const err = new JwtError('bad format', 'MALFORMED_TOKEN');
+      expect(err.statusCode).toBe(400);
+      expect(err.expose).toBe(true); // 4xx → expose
+    });
+
+    it('INVALID_TOKEN has statusCode 401', () => {
+      expect(new JwtError('invalid', 'INVALID_TOKEN').statusCode).toBe(401);
+    });
+
+    it('INVALID_SIGNATURE has statusCode 401', () => {
+      expect(new JwtError('bad sig', 'INVALID_SIGNATURE').statusCode).toBe(401);
+    });
+
+    it('TOKEN_EXPIRED has statusCode 401', () => {
+      expect(new JwtError('expired', 'TOKEN_EXPIRED').statusCode).toBe(401);
+    });
+
+    it('verify throws JwtError (401) for expired token — catches correctly as AppError', () => {
+      const token = sign({}, SECRET, { expiresIn: '1s' });
+      vi.advanceTimersByTime(2000);
+      let caught: unknown;
+      try {
+        verify(token, SECRET);
+      } catch (e) {
+        caught = e;
+      }
+      expect(caught).toBeInstanceOf(AppError);
+      expect((caught as AppError).statusCode).toBe(401);
     });
   });
 

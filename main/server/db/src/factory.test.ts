@@ -20,17 +20,25 @@ vi.mock('postgres', () => {
 
 import { createRepositories, getRepositoryContext, closeRepositories } from './factory';
 
-import type { Repositories } from './factory';
+import type { Repositories, RepositoryContext } from './factory';
 
 // ============================================================================
 // Tests
 // ============================================================================
 
-describe('createRepositories', () => {
+describe('getRepositoryContext', () => {
   const testConnectionString = 'postgres://test:test@localhost:5432/test_db';
+  const originalNodeEnv = process.env['NODE_ENV'];
+
+  afterEach(() => {
+    process.env['NODE_ENV'] = originalNodeEnv;
+    // Clean up global singleton
+    const globalWithRepos = globalThis as typeof globalThis & { repositoryContext?: unknown };
+    delete globalWithRepos.repositoryContext;
+  });
 
   it('should return a RepositoryContext with raw and repos', () => {
-    const ctx = createRepositories(testConnectionString);
+    const ctx = getRepositoryContext(testConnectionString);
 
     expect(ctx).toHaveProperty('raw');
     expect(ctx).toHaveProperty('repos');
@@ -39,7 +47,7 @@ describe('createRepositories', () => {
   });
 
   it('should create all repository keys', () => {
-    const ctx = createRepositories(testConnectionString);
+    const ctx = getRepositoryContext(testConnectionString);
     const repos = ctx.repos;
 
     // Core entities
@@ -47,16 +55,12 @@ describe('createRepositories', () => {
     expect(repos.refreshTokens).toBeDefined();
 
     // Auth
-    expect(repos.refreshTokenFamilies).toBeDefined();
+    expect(repos.authTokens).toBeDefined();
     expect(repos.loginAttempts).toBeDefined();
-    expect(repos.passwordResetTokens).toBeDefined();
-    expect(repos.emailVerificationTokens).toBeDefined();
     expect(repos.securityEvents).toBeDefined();
     expect(repos.totpBackupCodes).toBeDefined();
-    expect(repos.emailChangeTokens).toBeDefined();
-
-    // Magic Link
-    expect(repos.magicLinkTokens).toBeDefined();
+    expect(repos.trustedDevices).toBeDefined();
+    expect(repos.webauthnCredentials).toBeDefined();
 
     // OAuth
     expect(repos.oauthConnections).toBeDefined();
@@ -101,22 +105,27 @@ describe('createRepositories', () => {
     expect(repos.usageMetrics).toBeDefined();
     expect(repos.usageSnapshots).toBeDefined();
 
+    // Activities
+    expect(repos.activities).toBeDefined();
+
+    // Files
+    expect(repos.files).toBeDefined();
+
     // Compliance
     expect(repos.legalDocuments).toBeDefined();
-    expect(repos.userAgreements).toBeDefined();
-    expect(repos.consentLogs).toBeDefined();
+    expect(repos.consentRecords).toBeDefined();
     expect(repos.dataExportRequests).toBeDefined();
   });
 
-  it('should have exactly 42 keys in repos', () => {
-    const ctx = createRepositories(testConnectionString);
+  it('should have exactly 36 keys in repos', () => {
+    const ctx = getRepositoryContext(testConnectionString);
     const repoKeys = Object.keys(ctx.repos);
 
-    expect(repoKeys).toHaveLength(42);
+    expect(repoKeys).toHaveLength(36);
   });
 
   it('should expose repository methods', () => {
-    const ctx = createRepositories(testConnectionString);
+    const ctx = getRepositoryContext(testConnectionString);
 
     // Spot-check key methods exist
     expect(typeof ctx.repos.users.findByEmail).toBe('function');
@@ -125,11 +134,11 @@ describe('createRepositories', () => {
     expect(typeof ctx.repos.refreshTokens.deleteByToken).toBe('function');
     expect(typeof ctx.repos.plans.listActive).toBe('function');
     expect(typeof ctx.repos.oauthConnections.findByProviderUserId).toBe('function');
-    expect(typeof ctx.repos.magicLinkTokens.create).toBe('function');
+    expect(typeof ctx.repos.authTokens.create).toBe('function');
   });
 
   it('should expose raw database client methods', () => {
-    const ctx = createRepositories(testConnectionString);
+    const ctx = getRepositoryContext(testConnectionString);
 
     expect(typeof ctx.raw.query).toBe('function');
     expect(typeof ctx.raw.queryOne).toBe('function');
@@ -137,27 +146,6 @@ describe('createRepositories', () => {
     expect(typeof ctx.raw.transaction).toBe('function');
     expect(typeof ctx.raw.healthCheck).toBe('function');
     expect(typeof ctx.raw.close).toBe('function');
-  });
-});
-
-describe('getRepositoryContext', () => {
-  const testConnectionString = 'postgres://test:test@localhost:5432/test_db';
-  const originalNodeEnv = process.env['NODE_ENV'];
-
-  afterEach(() => {
-    process.env['NODE_ENV'] = originalNodeEnv;
-    // Clean up global singleton
-    const globalWithRepos = globalThis as typeof globalThis & { repositoryContext?: unknown };
-    delete globalWithRepos.repositoryContext;
-  });
-
-  it('should return a RepositoryContext in development', () => {
-    process.env['NODE_ENV'] = 'development';
-
-    const ctx = getRepositoryContext(testConnectionString);
-
-    expect(ctx).toHaveProperty('raw');
-    expect(ctx).toHaveProperty('repos');
   });
 
   it('should return singleton in development', () => {
@@ -179,11 +167,23 @@ describe('getRepositoryContext', () => {
   });
 });
 
+describe('createRepositories', () => {
+  const testConnectionString = 'postgres://test:test@localhost:5432/test_db';
+
+  it('should return a flat Repositories object', () => {
+    const ctx = getRepositoryContext(testConnectionString);
+    const repos = createRepositories(ctx.raw);
+
+    expect(repos.users).toBeDefined();
+    expect(repos.plans).toBeDefined();
+  });
+});
+
 describe('closeRepositories', () => {
   const testConnectionString = 'postgres://test:test@localhost:5432/test_db';
 
   it('should close the database connection', async () => {
-    const ctx = createRepositories(testConnectionString);
+    const ctx = getRepositoryContext(testConnectionString);
     const closeSpy = vi.spyOn(ctx.raw, 'close');
 
     await closeRepositories(ctx);
@@ -195,7 +195,7 @@ describe('closeRepositories', () => {
 describe('Repositories type completeness', () => {
   it('should satisfy the Repositories interface', () => {
     const testConnectionString = 'postgres://test:test@localhost:5432/test_db';
-    const ctx = createRepositories(testConnectionString);
+    const ctx: RepositoryContext = getRepositoryContext(testConnectionString);
 
     // This is a compile-time check - if Repositories interface changes,
     // factory.ts must be updated to match

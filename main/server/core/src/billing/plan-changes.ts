@@ -17,9 +17,9 @@ import {
   SubscriptionNotActiveError,
 } from '@bslt/shared';
 
-import type { BillingService } from '@bslt/shared';
-import type { Plan as DbPlan, Subscription as DbSubscription } from '../../../db/src';
 import type { BillingRepositories } from './types';
+import type { Plan as DbPlan, Subscription as DbSubscription } from '../../../db/src';
+import type { BillingService } from '@bslt/shared';
 
 // ============================================================================
 // Types

@@ -38,7 +38,9 @@ export function useUILibraryPanes(storageKey = 'demo-pane-config'): UseUILibrary
     if (!hasInitialized && isMobile) {
       setPaneConfig(MOBILE_PANE_CONFIG);
     }
-    setHasInitialized(true);
+    queueMicrotask(() => {
+      setHasInitialized(true);
+    });
   }, [isMobile, hasInitialized, setPaneConfig]);
 
   const togglePane = useCallback(

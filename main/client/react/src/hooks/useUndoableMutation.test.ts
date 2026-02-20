@@ -140,10 +140,10 @@ describe('useUndoableMutation', () => {
       value: unknown;
       previousValue: unknown;
     };
-    expect(op?.type).toBe('set');
-    expect(op?.path).toEqual(['users', '1', 'name']);
-    expect(op?.value).toBe('Alice');
-    expect(op?.previousValue).toBe('Bob');
+    expect(op.type).toBe('set');
+    expect(op.path).toEqual(['users', '1', 'name']);
+    expect(op.value).toBe('Alice');
+    expect(op.previousValue).toBe('Bob');
   });
 
   it('does not push transaction when values have not changed', async () => {
@@ -187,7 +187,7 @@ describe('useUndoableMutation', () => {
 
     const tx = mockStore.getState().undoStack[0];
     const op = tx?.operations[0] as { type: string; previousValue: unknown };
-    expect(op?.previousValue).toBe('initial');
+    expect(op.previousValue).toBe('initial');
   });
 
   it('calls original onSuccess callback', async () => {

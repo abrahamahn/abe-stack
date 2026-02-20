@@ -68,16 +68,8 @@ type ModalRootProps = {
  * ```
  */
 const ModalRoot = ({ open, onClose, children }: ModalRootProps): ReactElement | null => {
-  const [mounted, setMounted] = useState(false);
   const [titleId, setTitleId] = useState<string | undefined>(undefined);
   const [descriptionId, setDescriptionId] = useState<string | undefined>(undefined);
-
-  useEffect((): (() => void) => {
-    setMounted(true);
-    return (): void => {
-      setMounted(false);
-    };
-  }, []);
 
   useEffect((): (() => void) | undefined => {
     if (!open || onClose === undefined) return undefined;
@@ -95,7 +87,8 @@ const ModalRoot = ({ open, onClose, children }: ModalRootProps): ReactElement | 
     };
   }, [open, onClose]);
 
-  if (!open || !mounted) return null;
+  // Guard: portals require the DOM (client-only component).
+  if (!open || typeof document === 'undefined') return null;
 
   return createPortal(
     <ModalContext.Provider

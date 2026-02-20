@@ -16,8 +16,8 @@ import { MS_PER_MINUTE } from '@bslt/shared';
 
 import { MAX_DELIVERY_ATTEMPTS, RETRY_DELAYS_MINUTES, WEBHOOK_RESPONSE_MAX_LENGTH } from './types';
 
-import type { Repositories, WebhookDelivery } from '../../../db/src';
 import type { WebhookDispatchResult } from './types';
+import type { Repositories, WebhookDelivery } from '../../../db/src';
 
 // ============================================================================
 // HMAC Signature Functions

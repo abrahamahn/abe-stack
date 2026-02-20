@@ -12,9 +12,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createUserRepository } from './users';
 
+import type { AdminUserListFilters } from './users';
 import type { RawDb } from '../../client';
 import type { NewUser, UpdateUser, User } from '../../schema/index';
-import type { AdminUserListFilters } from './users';
 
 // ============================================================================
 // Mock Database
@@ -29,6 +29,7 @@ const createMockDb = (): RawDb => ({
   getClient: vi.fn() as RawDb['getClient'],
   queryOne: vi.fn(),
   execute: vi.fn(),
+  withSession: vi.fn() as RawDb['withSession'],
 });
 
 // ============================================================================
@@ -39,14 +40,34 @@ const mockUser: User = {
   id: 'usr-123',
   email: 'test@example.com',
   canonicalEmail: 'test@example.com',
+  username: 'testuser',
   passwordHash: '$2b$10$hashedpassword',
-  name: 'Test User',
+  firstName: 'Test',
+  lastName: 'User',
   avatarUrl: null,
   role: 'user',
   emailVerified: false,
   emailVerifiedAt: null,
   lockedUntil: null,
+  lockReason: null,
   failedLoginAttempts: 0,
+  totpSecret: null,
+  totpEnabled: false,
+  phone: null,
+  phoneVerified: null,
+  dateOfBirth: null,
+  gender: null,
+  city: null,
+  state: null,
+  country: null,
+  bio: null,
+  language: null,
+  website: null,
+  lastUsernameChange: null,
+  deactivatedAt: null,
+  deletedAt: null,
+  deletionGracePeriodEnds: null,
+  tokenVersion: 1,
   createdAt: new Date('2024-01-01T10:00:00Z'),
   updatedAt: new Date('2024-01-01T10:00:00Z'),
   version: 1,
@@ -56,14 +77,34 @@ const mockDbRow = {
   id: 'usr-123',
   email: 'test@example.com',
   canonical_email: 'test@example.com',
+  username: 'testuser',
   password_hash: '$2b$10$hashedpassword',
-  name: 'Test User',
+  first_name: 'Test',
+  last_name: 'User',
   avatar_url: null,
   role: 'user',
   email_verified: false,
   email_verified_at: null,
   locked_until: null,
+  lock_reason: null,
   failed_login_attempts: 0,
+  totp_secret: null,
+  totp_enabled: false,
+  phone: null,
+  phone_verified: null,
+  date_of_birth: null,
+  gender: null,
+  city: null,
+  state: null,
+  country: null,
+  bio: null,
+  language: null,
+  website: null,
+  last_username_change: null,
+  deactivated_at: null,
+  deleted_at: null,
+  deletion_grace_period_ends: null,
+  token_version: 1,
   created_at: new Date('2024-01-01T10:00:00Z'),
   updated_at: new Date('2024-01-01T10:00:00Z'),
   version: 1,
@@ -250,16 +291,20 @@ describe('createUserRepository', () => {
       const newUser: NewUser = {
         email: 'new@example.com',
         canonicalEmail: 'new@example.com',
+        username: 'newuser',
         passwordHash: '$2b$10$newhashedpassword',
-        name: 'New User',
+        firstName: 'New',
+        lastName: 'User',
       };
 
       const createdRow = {
         ...mockDbRow,
         id: 'usr-new',
         email: 'new@example.com',
+        username: 'newuser',
         password_hash: '$2b$10$newhashedpassword',
-        name: 'New User',
+        first_name: 'New',
+        last_name: 'User',
       };
 
       vi.mocked(mockDb.queryOne).mockResolvedValue(createdRow);
@@ -268,7 +313,7 @@ describe('createUserRepository', () => {
       const result = await repo.create(newUser);
 
       expect(result.email).toBe('new@example.com');
-      expect(result.name).toBe('New User');
+      expect(result.firstName).toBe('New');
       expect(result.passwordHash).toBe('$2b$10$newhashedpassword');
       expect(mockDb.queryOne).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -281,15 +326,20 @@ describe('createUserRepository', () => {
       const minimalUser: NewUser = {
         email: 'minimal@example.com',
         canonicalEmail: 'minimal@example.com',
+        username: 'minimaluser',
         passwordHash: '$2b$10$hash',
+        firstName: '',
+        lastName: '',
       };
 
       const minimalRow = {
         ...mockDbRow,
         id: 'usr-minimal',
         email: 'minimal@example.com',
+        username: 'minimaluser',
         password_hash: '$2b$10$hash',
-        name: null,
+        first_name: '',
+        last_name: '',
         avatar_url: null,
         role: 'user',
         email_verified: false,
@@ -304,7 +354,6 @@ describe('createUserRepository', () => {
       const result = await repo.create(minimalUser);
 
       expect(result.email).toBe('minimal@example.com');
-      expect(result.name).toBeNull();
       expect(result.avatarUrl).toBeNull();
       expect(result.emailVerified).toBe(false);
       expect(result.failedLoginAttempts).toBe(0);
@@ -315,7 +364,10 @@ describe('createUserRepository', () => {
         id: 'custom-usr-id',
         email: 'custom@example.com',
         canonicalEmail: 'custom@example.com',
+        username: 'customuser',
         passwordHash: '$2b$10$hash',
+        firstName: '',
+        lastName: '',
       };
 
       vi.mocked(mockDb.queryOne).mockResolvedValue({
@@ -334,7 +386,10 @@ describe('createUserRepository', () => {
       const adminUser: NewUser = {
         email: 'admin@example.com',
         canonicalEmail: 'admin@example.com',
+        username: 'adminuser',
         passwordHash: '$2b$10$hash',
+        firstName: '',
+        lastName: '',
         role: 'admin',
       };
 
@@ -354,7 +409,10 @@ describe('createUserRepository', () => {
       const verifiedUser: NewUser = {
         email: 'verified@example.com',
         canonicalEmail: 'verified@example.com',
+        username: 'verifieduser',
         passwordHash: '$2b$10$hash',
+        firstName: '',
+        lastName: '',
         emailVerified: true,
         emailVerifiedAt: new Date('2024-01-01T10:00:00Z'),
       };
@@ -377,7 +435,10 @@ describe('createUserRepository', () => {
       const userWithAvatar: NewUser = {
         email: 'avatar@example.com',
         canonicalEmail: 'avatar@example.com',
+        username: 'avataruser',
         passwordHash: '$2b$10$hash',
+        firstName: '',
+        lastName: '',
         avatarUrl: 'https://example.com/avatar.jpg',
       };
 
@@ -402,7 +463,10 @@ describe('createUserRepository', () => {
         repo.create({
           email: 'fail@example.com',
           canonicalEmail: 'fail@example.com',
+          username: 'failuser',
           passwordHash: '$2b$10$hash',
+          firstName: '',
+          lastName: '',
         }),
       ).rejects.toThrow('Failed to create user');
     });
@@ -411,7 +475,10 @@ describe('createUserRepository', () => {
       const newUser: NewUser = {
         email: 'returning@example.com',
         canonicalEmail: 'returning@example.com',
+        username: 'returninguser',
         passwordHash: '$2b$10$hash',
+        firstName: '',
+        lastName: '',
       };
 
       vi.mocked(mockDb.queryOne).mockResolvedValue(mockDbRow);
@@ -430,7 +497,10 @@ describe('createUserRepository', () => {
       const newUser: NewUser = {
         email: 'camel@example.com',
         canonicalEmail: 'camel@example.com',
+        username: 'cameluser',
         passwordHash: '$2b$10$hash',
+        firstName: '',
+        lastName: '',
         emailVerified: true,
         failedLoginAttempts: 0,
       };
@@ -447,13 +517,15 @@ describe('createUserRepository', () => {
   describe('update', () => {
     it('should update and return modified user', async () => {
       const updateData: UpdateUser = {
-        name: 'Updated Name',
+        firstName: 'Updated',
+        lastName: 'Name',
         avatarUrl: 'https://example.com/new-avatar.jpg',
       };
 
       const updatedRow = {
         ...mockDbRow,
-        name: 'Updated Name',
+        first_name: 'Updated',
+        last_name: 'Name',
         avatar_url: 'https://example.com/new-avatar.jpg',
       };
 
@@ -462,7 +534,7 @@ describe('createUserRepository', () => {
       const repo = createUserRepository(mockDb);
       const result = await repo.update('usr-123', updateData);
 
-      expect(result?.name).toBe('Updated Name');
+      expect(result?.firstName).toBe('Updated');
       expect(result?.avatarUrl).toBe('https://example.com/new-avatar.jpg');
       expect(mockDb.queryOne).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -475,7 +547,7 @@ describe('createUserRepository', () => {
       vi.mocked(mockDb.queryOne).mockResolvedValue(null);
 
       const repo = createUserRepository(mockDb);
-      const result = await repo.update('nonexistent', { name: 'New Name' });
+      const result = await repo.update('nonexistent', { firstName: 'New' });
 
       expect(result).toBeNull();
     });
@@ -619,44 +691,43 @@ describe('createUserRepository', () => {
 
     it('should handle partial updates', async () => {
       const updateData: UpdateUser = {
-        name: 'Only Name Updated',
+        firstName: 'Only',
+        lastName: 'Updated',
       };
 
       vi.mocked(mockDb.queryOne).mockResolvedValue({
         ...mockDbRow,
-        name: 'Only Name Updated',
+        first_name: 'Only',
+        last_name: 'Updated',
       });
 
       const repo = createUserRepository(mockDb);
       const result = await repo.update('usr-123', updateData);
 
-      expect(result?.name).toBe('Only Name Updated');
+      expect(result?.firstName).toBe('Only');
       expect(result?.email).toBe('test@example.com');
       expect(result?.passwordHash).toBe('$2b$10$hashedpassword');
     });
 
     it('should handle updating to null values', async () => {
       const updateData: UpdateUser = {
-        name: null,
         avatarUrl: null,
       };
 
       vi.mocked(mockDb.queryOne).mockResolvedValue({
         ...mockDbRow,
-        name: null,
         avatar_url: null,
       });
 
       const repo = createUserRepository(mockDb);
       const result = await repo.update('usr-123', updateData);
 
-      expect(result?.name).toBeNull();
       expect(result?.avatarUrl).toBeNull();
     });
 
     it('should include RETURNING clause in query', async () => {
       const updateData: UpdateUser = {
-        name: 'Updated Name',
+        firstName: 'Updated',
       };
 
       vi.mocked(mockDb.queryOne).mockResolvedValue(mockDbRow);
@@ -673,7 +744,7 @@ describe('createUserRepository', () => {
 
     it('should include WHERE clause with user ID', async () => {
       const updateData: UpdateUser = {
-        name: 'Updated Name',
+        firstName: 'Updated',
       };
 
       vi.mocked(mockDb.queryOne).mockResolvedValue(mockDbRow);
@@ -826,23 +897,24 @@ describe('createUserRepository', () => {
 
   describe('profile fields', () => {
     it('should handle user with name', async () => {
-      const rowWithName = { ...mockDbRow, name: 'John Doe' };
+      const rowWithName = { ...mockDbRow, first_name: 'John', last_name: 'Doe' };
       vi.mocked(mockDb.queryOne).mockResolvedValue(rowWithName);
 
       const repo = createUserRepository(mockDb);
       const result = await repo.findById('usr-123');
 
-      expect(result?.name).toBe('John Doe');
+      expect(result?.firstName).toBe('John');
+      expect(result?.lastName).toBe('Doe');
     });
 
     it('should handle user without name', async () => {
-      const rowWithoutName = { ...mockDbRow, name: null };
+      const rowWithoutName = { ...mockDbRow, first_name: '', last_name: '' };
       vi.mocked(mockDb.queryOne).mockResolvedValue(rowWithoutName);
 
       const repo = createUserRepository(mockDb);
       const result = await repo.findById('usr-123');
 
-      expect(result?.name).toBeNull();
+      expect(result?.firstName).toBe('');
     });
 
     it('should handle user with avatar URL', async () => {
@@ -1164,7 +1236,8 @@ describe('createUserRepository', () => {
         ...mockDbRow,
         id: 'usr-456',
         email: 'user2@example.com',
-        name: 'User Two',
+        first_name: 'User',
+        last_name: 'Two',
       };
       vi.mocked(mockDb.query).mockResolvedValue([mockDbRow, row2]);
       vi.mocked(mockDb.queryOne).mockResolvedValue({ count: '2' });
@@ -1225,7 +1298,7 @@ describe('createUserRepository', () => {
 
       const lockDate = new Date('2024-06-01T00:00:00Z');
       const repo = createUserRepository(mockDb);
-      await repo.lockAccount('usr-123', lockDate);
+      await repo.lockAccount('usr-123', lockDate, 'Too many login attempts');
 
       expect(mockDb.execute).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -1239,7 +1312,7 @@ describe('createUserRepository', () => {
 
       const lockDate = new Date('2024-06-01T00:00:00Z');
       const repo = createUserRepository(mockDb);
-      await repo.lockAccount('usr-123', lockDate);
+      await repo.lockAccount('usr-123', lockDate, 'Too many login attempts');
 
       expect(mockDb.execute).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -1253,7 +1326,7 @@ describe('createUserRepository', () => {
 
       const lockDate = new Date('2024-06-01T00:00:00Z');
       const repo = createUserRepository(mockDb);
-      await repo.lockAccount('usr-123', lockDate);
+      await repo.lockAccount('usr-123', lockDate, 'Too many login attempts');
 
       expect(mockDb.execute).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -1266,7 +1339,7 @@ describe('createUserRepository', () => {
       vi.mocked(mockDb.execute).mockResolvedValue(1);
 
       const repo = createUserRepository(mockDb);
-      await repo.lockAccount('usr-123', new Date());
+      await repo.lockAccount('usr-123', new Date(), 'Automated lock');
 
       expect(mockDb.execute).toHaveBeenCalledOnce();
     });
@@ -1275,7 +1348,7 @@ describe('createUserRepository', () => {
       vi.mocked(mockDb.execute).mockResolvedValue(0);
 
       const repo = createUserRepository(mockDb);
-      await repo.lockAccount('nonexistent', new Date());
+      await repo.lockAccount('nonexistent', new Date(), 'Automated lock');
 
       expect(mockDb.execute).toHaveBeenCalledOnce();
     });

@@ -7,13 +7,14 @@
  */
 
 import { authRoutes, createAuthGuard, hashPassword } from '@bslt/core/auth';
-import { registerRouteMap } from '@bslt/server-system';
 import { AUTH_SUCCESS_MESSAGES, HTTP_ERROR_MESSAGES } from '@bslt/shared';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createTestServer, parseJsonResponse, type TestServer } from './test-utils';
 
-import type { AuthGuardFactory } from '@bslt/server-system';
+import type { AuthGuardFactory } from '@/http';
+
+import { registerRouteMap } from '@/http';
 
 // ============================================================================
 // Mock Repositories
@@ -1815,11 +1816,10 @@ describe('Auth API Integration Tests', () => {
       expect(testServer.email.send).toHaveBeenCalled();
     });
 
-    it('POST /api/auth/refresh detects token reuse and revokes family', async () => {
+    it('POST /api/auth/refresh detects token reuse and revokes family', () => {
       // Setup: Valid user, but token is already reused (or mapped to a reused state in logic)
       // Ideally, the service logic checks if the token exists.
       // If we mock finding the token, but also say the family is revoked...
-
       // Let's test the "Token Reuse" logic specifically if possible via integration.
       // The logic is:
       // 1. Verify token signature (mocked as valid via cookie secret)
@@ -1829,13 +1829,11 @@ describe('Auth API Integration Tests', () => {
       //    The service `refreshUserTokens` logic:
       //    - verifies JWT
       //    - calls repos.refreshTokens.findByToken(payload.tokenId)
-
       // If mock returns null for token, the service throws InvalidTokenError (401).
       // To test reuse detection specifically, we'd need to mock findByToken returning a token that is *already used*?
       // No, `refresh_tokens` are deleted upon use in the rotation flow.
       // Reuse detection usually involves checking if the *family* is still valid but the *specific token ID* is missing
       // while a *newer* token exists for that family.
-
       // The `auth-service.ts` logic for `refreshUserTokens`:
       // 1. Verify JWT.
       // 2. `repos.refreshTokens.findByToken(payload.tokenId)`
@@ -1843,28 +1841,20 @@ describe('Auth API Integration Tests', () => {
       // 4. If token NOT found:
       //    - `repos.refreshTokenFamilies.findById(payload.familyId)`
       //    - If family exists: **REUSE DETECTED** -> revoke family, log event, throw TokenReuseError.
-
-      const payload = {
-        tokenId: 'used-token-id',
-        familyId: 'family-reuse',
-        userId: 'user-reuse',
-        version: 1,
-      };
-
+      // The payload below would be used to craft a valid signed cookie for reuse testing.
+      // Left as reference for when we add real crypto signing to tests.
+      // { tokenId: 'used-token-id', familyId: 'family-reuse', userId: 'user-reuse', version: 1 }
       // Mock cookie unsigning to return this payload
       // We can't easily mock `unsignCookie` internal logic without deeper mocking,
       // but we can rely on `fastify.inject` sending a valid signed cookie if we could generate one.
       // `createTestServer` uses the real `cookie` middleware with a known secret.
-
       // We need to craft a valid signed cookie value for the test context.
       // The test utils `createTestServer` sets up cookies with `secret: config.auth.cookie.secret`.
       // We can access `signCookie` from the shared/middleware if we want to manually sign.
-
       // Alternatively, we rely on the fact that we can't easily perform this specific
       // reuse test without a real crypto sign/verify flow or extensive mocking of the cookie parser.
       // Given we are in "Mock Repo" mode, we'll skip complex crypto-dependent flows
       // that require matching signatures across boundaries unless we implemented a `signCookie` helper.
-
       // Let's assume we can skip this one for the "Real DB" suite which handles state better.
     });
   });

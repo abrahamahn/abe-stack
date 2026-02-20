@@ -24,8 +24,8 @@ import {
   handleUpdateSubscription,
 } from './handlers';
 
-import type { PlanId } from '@bslt/shared';
 import type { BillingAppContext, BillingRequest } from './types';
+import type { PlanId } from '@bslt/shared';
 
 // ============================================================================
 // Mock Dependencies

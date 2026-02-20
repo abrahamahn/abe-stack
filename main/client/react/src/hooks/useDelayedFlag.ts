@@ -16,11 +16,14 @@ const DEFAULT_DELAY_MS = 150;
 export function useDelayedFlag(active: boolean, delayMs = DEFAULT_DELAY_MS): boolean {
   const [delayed, setDelayed] = useState(false);
 
+  // Reset immediately when deactivated — derived state during render.
+  // Guarded by both conditions so React bails out after one synchronous re-render.
+  if (!active && delayed) {
+    setDelayed(false);
+  }
+
   useEffect(() => {
-    if (!active) {
-      setDelayed(false);
-      return;
-    }
+    if (!active) return;
 
     const timeout = setTimeout(() => {
       setDelayed(true);

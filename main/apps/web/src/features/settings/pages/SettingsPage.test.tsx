@@ -5,9 +5,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { SettingsPage } from './SettingsPage';
 
+import type { User } from '../api';
 import type { UserId } from '@bslt/shared';
 import type { ReactNode } from 'react';
-import type { User } from '../api';
 
 vi.mock('@auth/hooks', () => ({
   useAuth: vi.fn(),

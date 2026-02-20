@@ -7,8 +7,8 @@
  * @module GeoIP
  */
 
-import { IpApiGeoIpProvider } from './ip-api-provider';
-import { NoopGeoIpProvider } from './noop-provider';
+import { IpApiGeoIpProvider } from './ip.api.provider';
+import { NoopGeoIpProvider } from './noop.provider';
 
 import type { GeoIpConfig, GeoIpProvider } from './types';
 

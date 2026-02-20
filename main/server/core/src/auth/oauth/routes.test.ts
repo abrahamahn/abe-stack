@@ -38,8 +38,7 @@ vi.mock('./handlers', () => ({
 
 import { oauthRoutes } from './routes';
 
-import type { FastifyReply, FastifyRequest } from 'fastify';
-import type { RouteDefinition } from '../../../../system/src';
+import type { HttpReply, HttpRequest, RouteDefinition } from '../../../../system/src';
 import type { AppContext } from '../index';
 
 // ============================================================================
@@ -91,13 +90,13 @@ function createMockContext(): AppContext {
 }
 
 /**
- * Create mock FastifyRequest for testing
+ * Create mock HttpRequest for testing
  */
 function createMockRequest(user?: {
   userId: string;
   email: string;
   role: string;
-}): FastifyRequest & {
+}): HttpRequest & {
   user?: { userId: string; email: string; role: string };
   requestInfo: { ipAddress: string; userAgent: string };
 } {
@@ -105,25 +104,42 @@ function createMockRequest(user?: {
     user,
     headers: {},
     query: {},
+    params: {},
+    body: undefined,
+    ip: '127.0.0.1',
+    method: 'GET',
+<<<<<<< HEAD
+    url: '/',
+=======
+    url: '/test',
+>>>>>>> 22aa2927d22407c44f3265bfe62d5e644c3895b5
+    correlationId: 'test-correlation-id',
+    logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
     requestInfo: {
       ipAddress: '127.0.0.1',
       userAgent: 'test-agent',
     },
-  } as FastifyRequest & {
+  } as unknown as HttpRequest & {
     user?: { userId: string; email: string; role: string };
     requestInfo: { ipAddress: string; userAgent: string };
   };
 }
 
 /**
- * Create mock FastifyReply for testing
+ * Create mock HttpReply for testing
  */
-function createMockReply(): FastifyReply {
+function createMockReply(): HttpReply {
   return {
     status: vi.fn().mockReturnThis(),
+<<<<<<< HEAD
+    send: vi.fn(),
+    header: vi.fn().mockReturnThis(),
+=======
     send: vi.fn().mockReturnThis(),
+    header: vi.fn().mockReturnThis(),
     redirect: vi.fn().mockReturnThis(),
-  } as unknown as FastifyReply;
+>>>>>>> 22aa2927d22407c44f3265bfe62d5e644c3895b5
+  } as unknown as HttpReply;
 }
 
 // ============================================================================

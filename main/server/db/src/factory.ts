@@ -12,23 +12,15 @@ import { createRawDb, type RawDb } from './client';
 import { createActivityRepository, type ActivityRepository } from './repositories/activities';
 import { createApiKeyRepository, type ApiKeyRepository } from './repositories/api-keys';
 import {
-  createEmailChangeRevertTokenRepository,
-  createEmailChangeTokenRepository,
-  createEmailVerificationTokenRepository,
+  createAuthTokenRepository,
   createLoginAttemptRepository,
-  createPasswordResetTokenRepository,
-  createRefreshTokenFamilyRepository,
   createRefreshTokenRepository,
   createSecurityEventRepository,
   createTotpBackupCodeRepository,
   createTrustedDeviceRepository,
   createWebauthnCredentialRepository,
-  type EmailChangeRevertTokenRepository,
-  type EmailChangeTokenRepository,
-  type EmailVerificationTokenRepository,
+  type AuthTokenRepository,
   type LoginAttemptRepository,
-  type PasswordResetTokenRepository,
-  type RefreshTokenFamilyRepository,
   type RefreshTokenRepository,
   type SecurityEventRepository,
   type TotpBackupCodeRepository,
@@ -50,14 +42,12 @@ import {
   type SubscriptionRepository,
 } from './repositories/billing';
 import {
-  createConsentLogRepository,
+  createConsentRecordRepository,
   createDataExportRequestRepository,
   createLegalDocumentRepository,
-  createUserAgreementRepository,
-  type ConsentLogRepository,
+  type ConsentRecordRepository,
   type DataExportRequestRepository,
   type LegalDocumentRepository,
-  type UserAgreementRepository,
 } from './repositories/compliance';
 import {
   createFeatureFlagRepository,
@@ -66,10 +56,6 @@ import {
   type TenantFeatureOverrideRepository,
 } from './repositories/features';
 import { createFileRepository, type FileRepository } from './repositories/files';
-import {
-  createMagicLinkTokenRepository,
-  type MagicLinkTokenRepository,
-} from './repositories/magic-link';
 import {
   createUsageMetricRepository,
   createUsageSnapshotRepository,
@@ -116,7 +102,7 @@ import { createUserRepository, type UserRepository } from './repositories/users'
 // ============================================================================
 
 /**
- * Flat 38-key repository container.
+ * Flat 32-key repository container.
  * This is the canonical consumer API.
  */
 export interface Repositories {
@@ -125,19 +111,12 @@ export interface Repositories {
   refreshTokens: RefreshTokenRepository;
 
   // Auth
-  refreshTokenFamilies: RefreshTokenFamilyRepository;
+  authTokens: AuthTokenRepository;
   loginAttempts: LoginAttemptRepository;
-  passwordResetTokens: PasswordResetTokenRepository;
-  emailVerificationTokens: EmailVerificationTokenRepository;
   securityEvents: SecurityEventRepository;
   totpBackupCodes: TotpBackupCodeRepository;
-  emailChangeTokens: EmailChangeTokenRepository;
-  emailChangeRevertTokens: EmailChangeRevertTokenRepository;
   trustedDevices: TrustedDeviceRepository;
   webauthnCredentials: WebauthnCredentialRepository;
-
-  // Magic Link
-  magicLinkTokens: MagicLinkTokenRepository;
 
   // OAuth
   oauthConnections: OAuthConnectionRepository;
@@ -190,8 +169,7 @@ export interface Repositories {
 
   // Compliance
   legalDocuments: LegalDocumentRepository;
-  userAgreements: UserAgreementRepository;
-  consentLogs: ConsentLogRepository;
+  consentRecords: ConsentRecordRepository;
   dataExportRequests: DataExportRequestRepository;
 }
 
@@ -218,19 +196,12 @@ export function createRepositories(raw: RawDb): Repositories {
     refreshTokens: createRefreshTokenRepository(raw),
 
     // Auth
-    refreshTokenFamilies: createRefreshTokenFamilyRepository(raw),
+    authTokens: createAuthTokenRepository(raw),
     loginAttempts: createLoginAttemptRepository(raw),
-    passwordResetTokens: createPasswordResetTokenRepository(raw),
-    emailVerificationTokens: createEmailVerificationTokenRepository(raw),
     securityEvents: createSecurityEventRepository(raw),
     totpBackupCodes: createTotpBackupCodeRepository(raw),
-    emailChangeTokens: createEmailChangeTokenRepository(raw),
-    emailChangeRevertTokens: createEmailChangeRevertTokenRepository(raw),
     trustedDevices: createTrustedDeviceRepository(raw),
     webauthnCredentials: createWebauthnCredentialRepository(raw),
-
-    // Magic Link
-    magicLinkTokens: createMagicLinkTokenRepository(raw),
 
     // OAuth
     oauthConnections: createOAuthConnectionRepository(raw),
@@ -283,8 +254,7 @@ export function createRepositories(raw: RawDb): Repositories {
 
     // Compliance
     legalDocuments: createLegalDocumentRepository(raw),
-    userAgreements: createUserAgreementRepository(raw),
-    consentLogs: createConsentLogRepository(raw),
+    consentRecords: createConsentRecordRepository(raw),
     dataExportRequests: createDataExportRequestRepository(raw),
   };
 }

@@ -1,7 +1,8 @@
 // main/server/system/src/logger/middleware.test.ts
+import { createJobCorrelationId } from '@bslt/shared';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { createJobCorrelationId, createJobLogger, registerLoggingMiddleware } from './middleware';
+import { createJobLogger, registerLoggingMiddleware } from './middleware';
 
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
@@ -31,15 +32,21 @@ function createMockFastify() {
     child: vi.fn().mockReturnThis(),
   };
 
+  const addHookMock = vi.fn((event: keyof HookMap, handler: HookHandler) => {
+    hooks[event].push(handler);
+  });
+
   const instance = {
     log: mockLog,
-    addHook: vi.fn((event: keyof HookMap, handler: HookHandler) => {
-      hooks[event].push(handler);
-    }),
+    addHook: addHookMock,
     hooks,
+    mocks: { addHook: addHookMock },
   };
 
-  return instance as unknown as FastifyInstance & { hooks: typeof hooks };
+  return instance as unknown as FastifyInstance & {
+    hooks: typeof hooks;
+    mocks: { addHook: typeof addHookMock };
+  };
 }
 
 function getHook(server: ReturnType<typeof createMockFastify>, hook: keyof HookMap): HookHandler {
@@ -61,16 +68,21 @@ function createMockRequest(overrides: Partial<FastifyRequest> = {}): FastifyRequ
     correlationId: '',
     requestContext: undefined as unknown,
     logger: undefined as unknown,
+    routeOptions: { url: '/api/test' },
     ...overrides,
   } as unknown as FastifyRequest;
 }
 
-function createMockReply(overrides: Partial<FastifyReply> = {}): FastifyReply {
+function createMockReply(
+  overrides: Partial<FastifyReply> = {},
+): FastifyReply & { mocks: { header: ReturnType<typeof vi.fn> } } {
+  const headerMock = vi.fn().mockReturnThis();
   const reply = {
     statusCode: 200,
     elapsedTime: 50,
-    header: vi.fn().mockReturnThis(),
-  } as unknown as FastifyReply;
+    header: headerMock,
+    mocks: { header: headerMock },
+  } as unknown as FastifyReply & { mocks: { header: ReturnType<typeof vi.fn> } };
 
   return Object.assign(reply, overrides);
 }
@@ -90,10 +102,11 @@ describe('registerLoggingMiddleware', () => {
   test('should register three hooks', () => {
     registerLoggingMiddleware(server as unknown as FastifyInstance);
 
-    expect(server.addHook).toHaveBeenCalledTimes(3);
-    expect(server.addHook).toHaveBeenCalledWith('onRequest', expect.any(Function));
-    expect(server.addHook).toHaveBeenCalledWith('onResponse', expect.any(Function));
-    expect(server.addHook).toHaveBeenCalledWith('onError', expect.any(Function));
+    const { addHook } = server.mocks;
+    expect(addHook).toHaveBeenCalledTimes(3);
+    expect(addHook).toHaveBeenCalledWith('onRequest', expect.any(Function));
+    expect(addHook).toHaveBeenCalledWith('onResponse', expect.any(Function));
+    expect(addHook).toHaveBeenCalledWith('onError', expect.any(Function));
   });
 
   describe('onRequest hook', () => {
@@ -131,7 +144,7 @@ describe('registerLoggingMiddleware', () => {
 
       await getHook(server, 'onRequest')(request, reply);
 
-      expect(reply.header).toHaveBeenCalledWith('x-correlation-id', request.correlationId);
+      expect(reply.mocks.header).toHaveBeenCalledWith('x-correlation-id', request.correlationId);
     });
 
     test('should create requestContext on request', async () => {
@@ -223,7 +236,7 @@ describe('registerLoggingMiddleware', () => {
   });
 
   describe('onError hook', () => {
-    test('should log 5xx errors at error level with stack trace and context', async () => {
+    test('should NOT log — logging is owned by setErrorHandler', async () => {
       registerLoggingMiddleware(server as unknown as FastifyInstance);
 
       const request = createMockRequest({
@@ -234,57 +247,55 @@ describe('registerLoggingMiddleware', () => {
 
       await getHook(server, 'onRequest')(request, reply);
       const loggerErrorSpy = vi.spyOn(request.logger, 'error');
-      await getHook(server, 'onError')(request, reply, error);
-
-      expect(loggerErrorSpy).toHaveBeenCalledWith(error, {
-        method: 'GET',
-        path: '/api/test',
-        statusCode: 500,
-        ip: '127.0.0.1',
-        userAgent: 'TestAgent/1.0',
-      });
-    });
-
-    test('should log 4xx errors at warn level by default with summary only', async () => {
-      registerLoggingMiddleware(server as unknown as FastifyInstance);
-
-      const request = createMockRequest();
-      const reply = createMockReply({ statusCode: 404 });
-      const error = Object.assign(new Error('Not found'), { code: 'NOT_FOUND' });
-
-      await getHook(server, 'onRequest')(request, reply);
       const loggerWarnSpy = vi.spyOn(request.logger, 'warn');
       await getHook(server, 'onError')(request, reply, error);
 
-      expect(loggerWarnSpy).toHaveBeenCalledWith('Client error', {
-        method: 'GET',
-        path: '/api/test',
-        statusCode: 404,
-        code: 'NOT_FOUND',
-        message: 'Not found',
-        correlationId: request.correlationId,
-      });
+      expect(loggerErrorSpy).not.toHaveBeenCalled();
+      expect(loggerWarnSpy).not.toHaveBeenCalled();
     });
 
-    test('should respect clientErrorLevel config for 4xx errors', async () => {
-      registerLoggingMiddleware(server as unknown as FastifyInstance, {
-        clientErrorLevel: 'info',
-        requestContext: true,
-      });
+    test('should call errorTracker.addBreadcrumb for all errors', async () => {
+      registerLoggingMiddleware(server as unknown as FastifyInstance);
 
+      const addBreadcrumb = vi.fn();
+      const captureError = vi.fn();
       const request = createMockRequest();
-      const reply = createMockReply({ statusCode: 400 });
-      const error = new Error('Bad request');
+      (request as unknown as { context: unknown }).context = {
+        errorTracker: { addBreadcrumb, captureError },
+      };
+      const reply = createMockReply({ statusCode: 404 });
+      const error = new Error('Not found');
 
       await getHook(server, 'onRequest')(request, reply);
-      const loggerInfoSpy = vi.spyOn(request.logger, 'info');
       await getHook(server, 'onError')(request, reply, error);
 
-      expect(loggerInfoSpy).toHaveBeenCalledWith(
-        'Client error',
+      expect(addBreadcrumb).toHaveBeenCalledWith(
+        expect.stringContaining('Request error'),
+        expect.objectContaining({ category: 'http', level: 'error' }),
+      );
+      // 4xx should NOT be captured in the error tracker
+      expect(captureError).not.toHaveBeenCalled();
+    });
+
+    test('should call errorTracker.captureError only for 5xx errors', async () => {
+      registerLoggingMiddleware(server as unknown as FastifyInstance);
+
+      const addBreadcrumb = vi.fn();
+      const captureError = vi.fn();
+      const request = createMockRequest();
+      (request as unknown as { context: unknown }).context = {
+        errorTracker: { addBreadcrumb, captureError },
+      };
+      const reply = createMockReply({ statusCode: 500 });
+      const error = new Error('Database down');
+
+      await getHook(server, 'onRequest')(request, reply);
+      await getHook(server, 'onError')(request, reply, error);
+
+      expect(captureError).toHaveBeenCalledWith(
+        error,
         expect.objectContaining({
-          statusCode: 400,
-          message: 'Bad request',
+          tags: expect.objectContaining({ statusCode: '500' }),
         }),
       );
     });

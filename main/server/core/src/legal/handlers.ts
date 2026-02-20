@@ -13,12 +13,12 @@ import { record } from '../audit/service';
 
 import { getCurrentLegalDocuments, getUserAgreements, publishLegalDocument } from './service';
 
+import type { LegalAppContext, LegalRequest } from './types';
 import type {
+  ConsentRecord as DbConsentRecord,
   LegalDocument as DbLegalDocument,
-  UserAgreement as DbUserAgreement,
 } from '../../../db/src';
 import type { AuditRecordParams } from '../audit/types';
-import type { LegalAppContext, LegalRequest } from './types';
 
 // ============================================================================
 // Response Types
@@ -67,19 +67,19 @@ function formatDocument(doc: DbLegalDocument): LegalDocumentResponse {
 }
 
 /**
- * Format a database user agreement record for API response.
+ * Format a database consent record (legal_document type) for API response.
  * Converts Date objects to ISO strings.
  *
- * @param agreement - Database user agreement record
+ * @param agreement - Database consent record of type legal_document
  * @returns Formatted user agreement for API response
  * @complexity O(1)
  */
-function formatAgreement(agreement: DbUserAgreement): UserAgreementResponse {
+function formatAgreement(agreement: DbConsentRecord): UserAgreementResponse {
   return {
     id: agreement.id,
     userId: agreement.userId,
-    documentId: agreement.documentId,
-    agreedAt: agreement.agreedAt.toISOString(),
+    documentId: agreement.documentId ?? '',
+    agreedAt: agreement.createdAt.toISOString(),
     ipAddress: agreement.ipAddress,
   };
 }
@@ -189,7 +189,7 @@ export async function handleGetUserAgreements(
   }
 
   try {
-    const agreements = await getUserAgreements(ctx.repos.userAgreements, user.userId);
+    const agreements = await getUserAgreements(ctx.repos.consentRecords, user.userId);
     return {
       status: HTTP_STATUS.OK,
       body: { agreements: agreements.map(formatAgreement) },

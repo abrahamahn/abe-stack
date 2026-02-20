@@ -22,9 +22,15 @@ export type SubscriptionKey = RecordKey | ListKey;
 // Message types
 export type ClientMessage =
   | { type: 'subscribe'; key: SubscriptionKey }
-  | { type: 'unsubscribe'; key: SubscriptionKey };
+  | { type: 'unsubscribe'; key: SubscriptionKey }
+  | { type: 'sync_request'; lastTimestamp: number; keys: SubscriptionKey[] };
 
-export type ServerMessage = { type: 'update'; key: SubscriptionKey; version: number };
+export type ServerMessage =
+  | { type: 'update'; key: SubscriptionKey; version: number; timestamp?: number }
+  | {
+      type: 'sync_response';
+      messages: Array<{ key: SubscriptionKey; version: number; timestamp: number }>;
+    };
 
 /** Result of parsing a record subscription key */
 export interface ParsedRecordKey {

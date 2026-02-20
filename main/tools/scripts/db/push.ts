@@ -21,14 +21,14 @@ export const STATEMENTS: string[] = [
     username text UNIQUE,
     canonical_email text NOT NULL UNIQUE,
     password_hash text NOT NULL,
-    first_name text,
-    last_name text,
+    first_name text NOT NULL DEFAULT '',
+    last_name text NOT NULL DEFAULT '',
     avatar_url text,
     role text NOT NULL DEFAULT 'user',
     email_verified boolean NOT NULL DEFAULT false,
     email_verified_at timestamptz,
     locked_until timestamptz,
-    failed_login_attempts integer NOT NULL DEFAULT 0,
+    failed_login_attempts integer NOT NULL DEFAULT 0 CHECK (failed_login_attempts >= 0),
     totp_secret text,
     totp_enabled boolean NOT NULL DEFAULT false,
     phone text,
@@ -47,23 +47,34 @@ export const STATEMENTS: string[] = [
   );
   `,
   `
-  CREATE TABLE IF NOT EXISTS refresh_token_families (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    ip_address text,
-    user_agent text,
-    created_at timestamptz NOT NULL DEFAULT now(),
-    revoked_at timestamptz,
-    revoke_reason text
-  );
-  `,
-  `
   CREATE TABLE IF NOT EXISTS refresh_tokens (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    family_id uuid REFERENCES refresh_token_families(id) ON DELETE SET NULL,
+    family_id uuid NOT NULL,
     token text NOT NULL,
     expires_at timestamptz NOT NULL,
+    family_ip_address text,
+    family_user_agent text,
+    family_created_at timestamptz NOT NULL DEFAULT now(),
+    family_revoked_at timestamptz,
+    family_revoke_reason text,
+    created_at timestamptz NOT NULL DEFAULT now()
+  );
+  `,
+  `
+  CREATE TABLE IF NOT EXISTS auth_tokens (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    type text NOT NULL CHECK (type IN (
+      'password_reset','email_verification','email_change','email_change_revert','magic_link'
+    )),
+    user_id uuid REFERENCES users(id) ON DELETE CASCADE,
+    email text,
+    token_hash text NOT NULL,
+    expires_at timestamptz NOT NULL,
+    used_at timestamptz,
+    ip_address text,
+    user_agent text,
+    metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
     created_at timestamptz NOT NULL DEFAULT now()
   );
   `,
@@ -79,26 +90,6 @@ export const STATEMENTS: string[] = [
   );
   `,
   `
-  CREATE TABLE IF NOT EXISTS password_reset_tokens (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    token_hash text NOT NULL,
-    expires_at timestamptz NOT NULL,
-    used_at timestamptz,
-    created_at timestamptz NOT NULL DEFAULT now()
-  );
-  `,
-  `
-  CREATE TABLE IF NOT EXISTS email_verification_tokens (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    token_hash text NOT NULL,
-    expires_at timestamptz NOT NULL,
-    used_at timestamptz,
-    created_at timestamptz NOT NULL DEFAULT now()
-  );
-  `,
-  `
   CREATE TABLE IF NOT EXISTS security_events (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id uuid REFERENCES users(id) ON DELETE SET NULL,
@@ -109,18 +100,6 @@ export const STATEMENTS: string[] = [
     user_agent text,
     metadata jsonb,
     created_at timestamptz NOT NULL DEFAULT now()
-  );
-  `,
-  `
-  CREATE TABLE IF NOT EXISTS magic_link_tokens (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    email text NOT NULL,
-    token_hash text NOT NULL,
-    expires_at timestamptz NOT NULL,
-    used_at timestamptz,
-    created_at timestamptz NOT NULL DEFAULT now(),
-    ip_address text,
-    user_agent text
   );
   `,
   `
@@ -167,29 +146,6 @@ export const STATEMENTS: string[] = [
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     code_hash text NOT NULL,
-    used_at timestamptz,
-    created_at timestamptz NOT NULL DEFAULT now()
-  );
-  `,
-  `
-  CREATE TABLE IF NOT EXISTS email_change_tokens (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    new_email text NOT NULL,
-    token_hash text NOT NULL,
-    expires_at timestamptz NOT NULL,
-    used_at timestamptz,
-    created_at timestamptz NOT NULL DEFAULT now()
-  );
-  `,
-  `
-  CREATE TABLE IF NOT EXISTS email_change_revert_tokens (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    old_email text NOT NULL,
-    new_email text NOT NULL,
-    token_hash text NOT NULL,
-    expires_at timestamptz NOT NULL,
     used_at timestamptz,
     created_at timestamptz NOT NULL DEFAULT now()
   );
@@ -295,7 +251,7 @@ export const STATEMENTS: string[] = [
     name text NOT NULL,
     description text,
     interval text NOT NULL,
-    price_in_cents integer NOT NULL,
+    price_in_cents integer NOT NULL CHECK (price_in_cents >= 0),
     currency text NOT NULL DEFAULT 'usd',
     features jsonb NOT NULL DEFAULT '[]'::jsonb,
     trial_days integer NOT NULL DEFAULT 0,
@@ -318,7 +274,7 @@ export const STATEMENTS: string[] = [
     provider_customer_id text NOT NULL,
     status text NOT NULL,
     current_period_start timestamptz NOT NULL,
-    current_period_end timestamptz NOT NULL,
+    current_period_end timestamptz NOT NULL CHECK (current_period_end > current_period_start),
     cancel_at_period_end boolean NOT NULL DEFAULT false,
     canceled_at timestamptz,
     trial_end timestamptz,
@@ -345,8 +301,8 @@ export const STATEMENTS: string[] = [
     provider text NOT NULL,
     provider_invoice_id text NOT NULL,
     status text NOT NULL,
-    amount_due integer NOT NULL,
-    amount_paid integer NOT NULL DEFAULT 0,
+    amount_due integer NOT NULL CHECK (amount_due >= 0),
+    amount_paid integer NOT NULL DEFAULT 0 CHECK (amount_paid >= 0 AND amount_paid <= amount_due),
     currency text NOT NULL DEFAULT 'usd',
     period_start timestamptz NOT NULL,
     period_end timestamptz NOT NULL,
@@ -495,63 +451,61 @@ export const STATEMENTS: string[] = [
   );
   `,
   `
-  CREATE TABLE IF NOT EXISTS user_agreements (
+  CREATE TABLE IF NOT EXISTS consent_records (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    document_id uuid NOT NULL REFERENCES legal_documents(id) ON DELETE CASCADE,
-    agreed_at timestamptz NOT NULL DEFAULT now(),
-    ip_address text
-  );
-  `,
-  `
-  CREATE TABLE IF NOT EXISTS consent_logs (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    consent_type text NOT NULL,
-    granted boolean NOT NULL,
+    record_type text NOT NULL CHECK (record_type IN ('legal_document','consent_preference')),
+    document_id uuid REFERENCES legal_documents(id) ON DELETE RESTRICT,
+    consent_type text,
+    granted boolean,
     ip_address text,
     user_agent text,
     metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
     created_at timestamptz NOT NULL DEFAULT now()
   );
   `,
+  // Core indexes
   `CREATE INDEX IF NOT EXISTS idx_users_email ON users (email);`,
   `CREATE UNIQUE INDEX IF NOT EXISTS idx_users_canonical_email ON users (canonical_email);`,
   `CREATE INDEX IF NOT EXISTS idx_refresh_tokens_token_expires ON refresh_tokens (token, expires_at);`,
   `CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user ON refresh_tokens (user_id);`,
-  `CREATE INDEX IF NOT EXISTS idx_refresh_token_families_user ON refresh_token_families (user_id);`,
+  `CREATE INDEX IF NOT EXISTS idx_refresh_tokens_family_id ON refresh_tokens (family_id);`,
+  `CREATE INDEX IF NOT EXISTS idx_refresh_tokens_family_active ON refresh_tokens (user_id, family_id) WHERE family_revoked_at IS NULL;`,
+  `CREATE INDEX IF NOT EXISTS idx_auth_tokens_hash ON auth_tokens (token_hash);`,
+  `CREATE INDEX IF NOT EXISTS idx_auth_tokens_user_type ON auth_tokens (user_id, type) WHERE user_id IS NOT NULL;`,
+  `CREATE INDEX IF NOT EXISTS idx_auth_tokens_email_type ON auth_tokens (email, type, created_at DESC) WHERE email IS NOT NULL;`,
+  `CREATE INDEX IF NOT EXISTS idx_auth_tokens_ip_type ON auth_tokens (ip_address, type, created_at DESC) WHERE ip_address IS NOT NULL;`,
+  `CREATE INDEX IF NOT EXISTS idx_auth_tokens_expires_type ON auth_tokens (type, expires_at) WHERE used_at IS NULL;`,
   `CREATE INDEX IF NOT EXISTS idx_login_attempts_email_created ON login_attempts (email, created_at);`,
-  `CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_hash ON password_reset_tokens (token_hash);`,
-  `CREATE INDEX IF NOT EXISTS idx_email_verification_tokens_hash ON email_verification_tokens (token_hash);`,
   `CREATE INDEX IF NOT EXISTS idx_security_events_user ON security_events (user_id);`,
-  `CREATE INDEX IF NOT EXISTS idx_magic_link_tokens_email ON magic_link_tokens (email);`,
   `CREATE INDEX IF NOT EXISTS idx_oauth_connections_user ON oauth_connections (user_id);`,
   `CREATE INDEX IF NOT EXISTS idx_push_subscriptions_user ON push_subscriptions (user_id);`,
   `CREATE UNIQUE INDEX IF NOT EXISTS idx_notification_prefs_user ON notification_preferences (user_id);`,
   `CREATE INDEX IF NOT EXISTS idx_totp_backup_codes_user ON totp_backup_codes (user_id);`,
-  `CREATE INDEX IF NOT EXISTS idx_email_change_tokens_user ON email_change_tokens (user_id);`,
-  `CREATE INDEX IF NOT EXISTS idx_email_change_tokens_hash ON email_change_tokens (token_hash);`,
-  `CREATE INDEX IF NOT EXISTS idx_email_change_revert_tokens_user ON email_change_revert_tokens (user_id);`,
-  `CREATE INDEX IF NOT EXISTS idx_email_change_revert_tokens_hash ON email_change_revert_tokens (token_hash);`,
   `CREATE INDEX IF NOT EXISTS idx_api_keys_user ON api_keys(user_id);`,
   `CREATE INDEX IF NOT EXISTS idx_api_keys_tenant ON api_keys(tenant_id) WHERE tenant_id IS NOT NULL;`,
   `CREATE INDEX IF NOT EXISTS idx_api_keys_prefix ON api_keys(key_prefix);`,
   `CREATE INDEX IF NOT EXISTS idx_data_export_requests_user ON data_export_requests(user_id, created_at DESC);`,
   `CREATE INDEX IF NOT EXISTS idx_data_export_requests_status ON data_export_requests(status);`,
   `CREATE UNIQUE INDEX IF NOT EXISTS idx_invitations_tenant_email ON invitations (tenant_id, email) WHERE status = 'pending';`,
+  `CREATE INDEX IF NOT EXISTS idx_invitations_invited_by ON invitations (invited_by_id);`,
   `CREATE INDEX IF NOT EXISTS idx_notifications_user_created ON notifications (user_id, created_at);`,
   `CREATE INDEX IF NOT EXISTS idx_jobs_status_priority_created ON jobs (status, priority DESC, created_at);`,
   `CREATE INDEX IF NOT EXISTS idx_audit_events_tenant_created ON audit_events (tenant_id, created_at DESC);`,
   `CREATE INDEX IF NOT EXISTS idx_audit_events_resource ON audit_events (resource, resource_id);`,
-  // Tenant domain restrictions (migration 0021)
+  `CREATE INDEX IF NOT EXISTS idx_consent_records_user ON consent_records (user_id, created_at DESC);`,
+  `CREATE INDEX IF NOT EXISTS idx_consent_records_user_consent ON consent_records (user_id, consent_type, created_at DESC) WHERE consent_type IS NOT NULL;`,
+  `CREATE INDEX IF NOT EXISTS idx_consent_records_document ON consent_records (document_id) WHERE document_id IS NOT NULL;`,
+  `CREATE INDEX IF NOT EXISTS idx_consent_records_user_doc ON consent_records (user_id, document_id) WHERE document_id IS NOT NULL;`,
+  // Tenant domain restrictions (0100_tenants.sql)
   `ALTER TABLE tenants ADD COLUMN IF NOT EXISTS allowed_email_domains TEXT[] NOT NULL DEFAULT '{}';`,
-  // SMS verification codes (migration 0023)
+  // SMS verification codes (0001_auth_extensions.sql)
   `
   CREATE TABLE IF NOT EXISTS sms_verification_codes (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     phone text NOT NULL,
-    code text NOT NULL,
+    code_hash text NOT NULL,
     expires_at timestamptz NOT NULL,
     verified boolean NOT NULL DEFAULT false,
     attempts integer NOT NULL DEFAULT 0,
@@ -560,7 +514,7 @@ export const STATEMENTS: string[] = [
   `,
   `CREATE INDEX IF NOT EXISTS idx_sms_verification_codes_user_id ON sms_verification_codes(user_id);`,
   `CREATE INDEX IF NOT EXISTS idx_sms_verification_codes_expires_at ON sms_verification_codes(expires_at);`,
-  // Trusted devices (migration 0025)
+  // Trusted devices (0001_auth_extensions.sql)
   `
   CREATE TABLE IF NOT EXISTS trusted_devices (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -577,6 +531,32 @@ export const STATEMENTS: string[] = [
   );
   `,
   `CREATE INDEX IF NOT EXISTS idx_trusted_devices_user ON trusted_devices(user_id);`,
+  // Performance indexes (0000_users.sql)
+  `CREATE INDEX IF NOT EXISTS idx_users_active ON users(id) WHERE deleted_at IS NULL AND deactivated_at IS NULL;`,
+  `CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user_expires ON refresh_tokens(user_id, expires_at DESC) WHERE expires_at > NOW();`,
+  // Active API keys (0101_api_keys.sql)
+  `CREATE INDEX IF NOT EXISTS idx_api_keys_active ON api_keys(user_id, created_at DESC) WHERE revoked_at IS NULL AND (expires_at IS NULL OR expires_at > NOW());`,
+  // New indexes: 0000_users.sql
+  `CREATE INDEX IF NOT EXISTS idx_users_locked_until ON users(locked_until) WHERE locked_until IS NOT NULL;`,
+  `CREATE INDEX IF NOT EXISTS idx_users_deletion_grace ON users(deletion_grace_period_ends) WHERE deletion_grace_period_ends IS NOT NULL;`,
+  `CREATE INDEX IF NOT EXISTS idx_security_events_type ON security_events(event_type, created_at DESC);`,
+  // New indexes: 0001_auth_extensions.sql
+  `CREATE INDEX IF NOT EXISTS idx_sms_verification_codes_unverified ON sms_verification_codes(user_id, expires_at) WHERE verified = FALSE;`,
+  `CREATE INDEX IF NOT EXISTS idx_trusted_devices_last_seen ON trusted_devices(user_id, last_seen_at DESC);`,
+  `CREATE INDEX IF NOT EXISTS idx_webauthn_cred_last_used ON webauthn_credentials(user_id, last_used_at DESC) WHERE last_used_at IS NOT NULL;`,
+  // New indexes: 0002_sessions.sql
+  `CREATE INDEX IF NOT EXISTS idx_user_sessions_revoked_at ON user_sessions(revoked_at) WHERE revoked_at IS NOT NULL;`,
+  `CREATE INDEX IF NOT EXISTS idx_oauth_connections_expires ON oauth_connections(expires_at) WHERE expires_at IS NOT NULL;`,
+  // New indexes: 0200_billing.sql
+  `CREATE INDEX IF NOT EXISTS idx_plans_active_sorted ON plans(sort_order) WHERE is_active = TRUE;`,
+  `CREATE INDEX IF NOT EXISTS idx_subscriptions_user_status_period ON subscriptions(user_id, status, current_period_end DESC);`,
+  `CREATE INDEX IF NOT EXISTS idx_subscriptions_trial_expiry ON subscriptions(trial_end) WHERE status = 'trialing' AND trial_end IS NOT NULL;`,
+  `CREATE INDEX IF NOT EXISTS idx_subscriptions_plan_status ON subscriptions(plan_id, status);`,
+  `CREATE INDEX IF NOT EXISTS idx_invoices_user_status ON invoices(user_id, status, created_at DESC);`,
+  `CREATE INDEX IF NOT EXISTS idx_payment_methods_user_default ON payment_methods(user_id) WHERE is_default = TRUE;`,
+  `CREATE INDEX IF NOT EXISTS idx_billing_events_type ON billing_events(event_type, created_at DESC);`,
+  // New indexes: 0500_compliance.sql
+  `CREATE INDEX IF NOT EXISTS idx_data_export_requests_expires ON data_export_requests(expires_at) WHERE expires_at IS NOT NULL AND status != 'completed';`,
 ];
 
 /**
@@ -587,7 +567,7 @@ export const STATEMENTS: string[] = [
  */
 export async function pushSchema(): Promise<void> {
   // Load + validate `config/env` files (prefers `.env.local` when present).
-  loadServerEnv();
+  await loadServerEnv();
 
   const connectionString = buildConnectionString();
   const db = createDbClient(connectionString);

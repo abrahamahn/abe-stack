@@ -46,7 +46,7 @@
   "scripts": {
     "build": "[ -d dist ] || rm -f node_modules/.cache/typescript/*.tsbuildinfo && tsc --build && cp -r src/styles dist/",
     "clean": "rm -rf dist node_modules/.cache/typescript/*.tsbuildinfo",
-    "type-check": "tsc --noEmit",
+    "type-check": "tsc -p tsconfig.lint.json",
     "test": "vitest run --reporter=dot --silent=passed-only",
     "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-bslt-ui --report-unused-disable-directives",
     "postbuild": "node --import tsx ../../tools/scripts/build/ensure-js-extensions.ts dist"
@@ -83,6 +83,9 @@
     "react-dom": "^19.2.3"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/react": "^19.2.3",
     "@types/react-dom": "^19.2.3",
     "eslint-plugin-react": "^7.37.5",

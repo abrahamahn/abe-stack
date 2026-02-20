@@ -27,6 +27,8 @@ export { WorkspaceAuditLog } from './WorkspaceAuditLog';
 export type { WorkspaceAuditLogProps } from './WorkspaceAuditLog';
 export { WorkspaceBilling } from './WorkspaceBilling';
 export type { WorkspaceBillingProps } from './WorkspaceBilling';
+export { WorkspaceInvoiceList } from './WorkspaceInvoiceList';
+export type { WorkspaceInvoiceListProps } from './WorkspaceInvoiceList';
 export { WorkspaceDangerZone } from './WorkspaceDangerZone';
 export type { WorkspaceDangerZoneProps } from './WorkspaceDangerZone';
 export { WorkspaceFeatureOverrides } from './WorkspaceFeatureOverrides';

@@ -164,13 +164,13 @@ export function useQuery<TData = unknown, TError = Error>(
     (onStoreChange: () => void) => {
       return cache.subscribe(queryKey, onStoreChange);
     },
-    [cache, queryKeyHash],
+    [cache, queryKey],
   );
 
   // Get current state snapshot
   const getSnapshot = useCallback((): QueryState<TData, TError> | undefined => {
     return cache.getQueryState<TData, TError>(queryKey);
-  }, [cache, queryKeyHash]);
+  }, [cache, queryKey]);
 
   // Use sync external store for React integration
   const state = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
@@ -247,7 +247,7 @@ export function useQuery<TData = unknown, TError = Error>(
     }
   }, [
     enabled,
-    queryKeyHash,
+    queryKey,
     queryFn,
     cache,
     retry,
@@ -256,13 +256,14 @@ export function useQuery<TData = unknown, TError = Error>(
     onSuccess,
     onError,
     onSettled,
+    state,
   ]);
 
   // Manual refetch function
   const refetch = useCallback(async (): Promise<void> => {
     cache.invalidateQuery(queryKey);
     await fetchData();
-  }, [cache, queryKeyHash, fetchData]);
+  }, [cache, queryKey, fetchData]);
 
   // Initial fetch effect
   useEffect(() => {

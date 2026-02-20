@@ -12,7 +12,7 @@ Last updated: 2026-02-12
 
 - This file tracks **open work only** (`- [ ]`).
 - Completed checklist entries were migrated to `docs/log/2026-W07.md`.
-- Focus order: Sprint 3 -> Sprint 4 -> Sprint 5 -> Sprint 6.
+- Focus order: Sprint 3 -> Sprint 4 -> Sprint 5 -> Sprint 6 -> Sprint 7.
 
 ---
 
@@ -26,6 +26,7 @@ Last updated: 2026-02-12
 - [Sprint 4: Test Backfill + Quality Hardening](#sprint-4-test-backfill--quality-hardening)
 - [Sprint 5: Production Launch Readiness & Polish](#sprint-5-production-launch-readiness--polish)
 - [Sprint 6: Post-Launch Platform Maturity & Growth](#sprint-6-post-launch-platform-maturity--growth)
+- [Sprint 7: Enterprise Platform Growth](#sprint-7-enterprise-platform-growth)
 - [Notes / Guardrails](#notes--guardrails)
 
 ---
@@ -114,154 +115,84 @@ Each verification item is a **vertical slice**, but the output is confidence, no
 - prove client hooks/UI wiring works
 - prove tests cover the critical behaviors
 
-> Archived verification notes (kept for traceability):
+> **Archived verification notes** — kept for traceability.
 
 <details>
-<summary>Expand Verification Queue</summary>
+<summary>Verification Queue — All Modules</summary>
 
-### Auth Verification (CHECKLIST 1.1–1.11) — COMPLETE
+#### Auth & Sessions — COMPLETE
 
-All 11 auth sub-systems verified: Registration, Email Verification, Login, Token Refresh, Logout, Password Reset, Magic Link, OAuth2, Email Change, TOTP, Canonicalization. All contracts, routes, clients, and tests pass.
+- **Auth (1.1–1.11):** Registration, Email Verification, Login, Token Refresh, Logout, Password Reset, Magic Link, OAuth2, Email Change, TOTP, Canonicalization — all contracts, routes, clients, and tests pass.
+- **Sessions (2.3, 2.5):** Sessions API and UA labeling verified. All contracts, routes, clients, and tests pass.
 
-### Sessions Verification (CHECKLIST 2.1–2.5) — COMPLETE
+#### Identity & Database Modules — COMPLETE
 
-Sessions API (2.3) and UA labeling (2.5) verified. All contracts, routes, clients, and tests pass.
+- **Module 1 — Identity DB:** `users`, `tenants`, `memberships`, `invitations`, `user_sessions` — migrations, schema constants, repos, and domain types all present.
+- **Module 2 — Auth & Security DB:** All auth tables verified. ⚠️ `email_change_revert_tokens` uses raw SQL in `email-change.ts`, no dedicated repository → tracked in Sprint 3.18.
+- **Module 3 — Billing DB**
+- **Modules 4–9 — Supporting DB**
 
-### Module 1 Verification: Identity (Appendix A) — COMPLETE
+#### Infrastructure Modules — COMPLETE
 
-All identity tables verified: `users`, `tenants`, `memberships`, `invitations`, `user_sessions`. Migrations, schema constants, repos, and domain types all present.
+Multi-tenant infra (4.1), RBAC definitions (5.1), Realtime server (6.9), WebSocket transport (6.10), Media processing (6.11), Desktop scaffold (12) — all build-time integrity verified.
 
-### Module 2 Verification: Auth & Security (Appendix A)
+#### Account Management — COMPLETE
 
-All auth tables verified except one partial item:
+- Pre-Sprint 2: Username auto-generation (3.2), avatar workflow (3.3), profile (3.4), account locking (3.6).
+- Sprint 2: Sudo mode (3.1), username management with cooldown/blocklist (3.2), profile completeness (3.4), account lifecycle deactivate/delete/reactivate (3.6). Handlers, schemas, client UI (`SudoModal`, `UsernameForm`, `ProfileCompleteness`, `DangerZone`), and tests pass.
 
-- [ ] `email_change_revert_tokens` repo: uses raw SQL in `email-change.ts`, no dedicated repository → **tracked in Sprint 3.18**
+#### Tenant Scoping & RBAC — COMPLETE
 
-### Infra-Complete Domains (Build-Time Integrity) — COMPLETE
+- Pre-Sprint 2: Workspace context utilities (4.9), backend guards (5.2).
+- Sprint 2: Tenant CRUD (4.2), membership management (4.3), invitation flow (4.4), orphan prevention (4.5), role hierarchy (4.6), domain restrictions (4.7), workspace-scope middleware (4.9), per-tenant enforcement (5.2), frontend auth gating — `Can`, `RequireWorkspaceRole`, `usePermissions` (5.3). All handlers, services, client UI, and tests pass.
 
-#### Verify Multi-Tenant Infra (4.1)
+#### Supporting Modules — COMPLETE
 
-#### Verify RBAC Definitions (5.1)
+API Keys DB (6.1), Billing infra (6.2), Audit & Security Events (6.3), Notifications infra (6.4), File Storage infra (6.5), Activity Tracking DB (6.6), Feature Flags & Metering DB (6.7), Compliance DB (6.8), Realtime client (6.9).
 
-#### Verify Realtime (Server) (6.9)
+#### Admin & Support — COMPLETE
 
-#### Verify WebSocket Transport (6.10)
+- **User Settings (7.1):** Existing parts verified.
+- **System Admin + Soft Ban (7.3, 7.5):** Admin UI (user list, detail, actions, security events, job monitor, billing, layout, API, role badge) and soft ban (lock/unlock) verified.
 
-#### Verify Media Processing (Server) (6.11)
+#### Backend Architecture — COMPLETE
 
-#### Verify Desktop Scaffold (12)
+Core infrastructure, server engine adapters, security modules, and server app middleware all verified.
 
-### Account Management Verification (CHECKLIST 3) — COMPLETE
+- [ ] **Job idempotency** — **GAP**: no idempotency key field in `Task` interface → idempotency tests deferred until resolved.
 
-Pre-Sprint-2: Username auto-generation (3.2), avatar workflow (3.3), profile (3.4), account locking (3.6) verified.
-Sprint 2 additions: Sudo mode (3.1), username management with cooldown/blocklist (3.2), profile completeness (3.4), account lifecycle deactivate/delete/reactivate (3.6) all verified. Handlers, schemas, client UI (SudoModal, UsernameForm, ProfileCompleteness, DangerZone), and tests pass.
+#### Frontend — COMPLETE
 
-### Tenant Scoping & RBAC Verification (CHECKLIST 4.2–4.9, 5.2–5.3) — COMPLETE
+Core UI, client engine, client API, PWA support, and web app features all verified.
 
-Pre-Sprint-2: Workspace context utilities (4.9) and backend guards (5.2) verified.
-Sprint 2 additions: Tenant CRUD (4.2), membership management (4.3), invitation flow (4.4), orphan prevention (4.5), role hierarchy (4.6), domain restrictions (4.7), workspace-scope middleware (4.9), per-tenant enforcement (5.2), frontend auth gating — Can, RequireWorkspaceRole, usePermissions (5.3) all verified. All handlers, services, client UI (workspace feature), and tests pass.
+#### Operational Quality & CI/CD — COMPLETE
 
-#### Verify ProtectedRoute Component (5.3)
-
-### Module 3 Verification: Billing DB (Appendix A) — COMPLETE
-
-### Module 4-9 Verification: Supporting DB (Appendix A) — COMPLETE
-
-### Supporting Modules Verification (CHECKLIST 6) — COMPLETE
-
-#### Verify API Keys DB Layer (6.1)
-
-#### Verify Billing Infrastructure (6.2)
-
-#### Verify Audit & Security Events (6.3)
-
-#### Verify Notifications Infrastructure (6.4)
-
-#### Verify File Storage Infrastructure (6.5)
-
-#### Verify Activity Tracking DB (6.6)
-
-#### Verify Feature Flags & Metering DB (6.7)
-
-#### Verify Compliance DB Layer (6.8)
-
-#### Verify Realtime Client (6.9)
-
-### Admin & Support Verification (CHECKLIST 7)
-
-#### Verify User Settings — Existing Parts (7.1) — COMPLETE
-
-#### Verify System Admin (7.3) + Soft Ban (7.5) — COMPLETE
-
-Admin UI (user list, detail, actions, security events, job monitor, billing, layout, API, role badge) and soft ban (lock/unlock) all verified.
-
-### Architecture & Infrastructure Verification (CHECKLIST 8) — COMPLETE
-
-#### Verify Backend Core Infrastructure
-
-#### Verify Server Engine Adapters
-
-#### Verify Security Modules
-
-#### Verify Server App Middleware
-
-#### Verify Job Idempotency
-
-- [ ] Job idempotency keys prevent duplicate execution — **GAP**: no idempotency key field in Task interface
-- [ ] Tests: job idempotency tests pass — deferred until idempotency keys added
-
-### Frontend Verification (CHECKLIST 8 Frontend) — COMPLETE
-
-#### Verify Core UI
-
-#### Verify Client Engine
-
-#### Verify Client API
-
-#### Verify PWA Support
-
-#### Verify Web App Features
-
-### Operational Quality Verification (CHECKLIST 10) — COMPLETE
-
-### Login Attempt Logging Verification (CHECKLIST 11.4) — COMPLETE
-
-### Infrastructure & CI/CD Verification (CHECKLIST 13) — COMPLETE
-
-#### Verify Containerization (13.1)
-
-#### Verify Cloud Deployment (13.2)
-
-#### Verify CI Pipelines (13.3)
-
-#### Verify Dev Tooling (13.4)
-
-- [x] Git hooks: pre-commit, pre-push execute correctly — Verified directory `/infra/git-hooks/` exists and hooks are linked via `pnpm hooks:install`.
-
-#### Verify Engine Queue/Job System (Appendix C)
-
-#### Verify Engine Search (Appendix C)
+Operational quality (10), login attempt logging (11.4), containerization (13.1), cloud deployment (13.2), CI pipelines (13.3), dev tooling (13.4), engine queue/job system, and engine search all verified.
+Git hooks: pre-commit and pre-push execute correctly — `/infra/git-hooks/` exists, hooks linked via `pnpm hooks:install`.
 
 </details>
 
 ---
 
-The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **all** of CHECKLIST sections 1-13. Sprint 4 covers test backfill (CHECKLIST 14). Sprint 5 covers production launch readiness, hardening, and polish. Sprint 6 covers post-launch growth: CHET-Stack real-time, WebAuthn/Passkeys, API tooling, scaling, and i18n.
+Sprints 1–3 cover CHECKLIST sections 1–13. Sprint 4 covers test backfill (section 14). Sprint 5 covers production launch readiness, hardening, and polish. Sprint 6 covers post-launch growth: CHET-Stack real-time, WebAuthn/Passkeys, API tooling, scaling, and i18n.
 
 ---
 
 ### Sprint 1: Ship Blockers + Auth/Session Completeness — COMPLETE (8/8)
 
-> Covers: CHECKLIST 1 (gaps), 2 (all gaps), 11 (all).
-> Completed: 1.1 Session UI wiring, 1.2 Session security hardening, 1.3 Security Intelligence, 1.4 CAPTCHA, 1.5 Security emails, 1.6 ToS gating, 1.7 Login failure logging, 1.8 TOTP QR code.
-> **Note:** Session idle timeout + max concurrent sessions (CHECKLIST 2.4) are implemented in `refresh.ts` and `login.ts` respectively.
+> Covers CHECKLIST 1 (gaps), 2 (all gaps), 11 (all).
+
+Completed: Session UI wiring (1.1), session security hardening (1.2), security intelligence (1.3), CAPTCHA (1.4), security emails (1.5), ToS gating (1.6), login failure logging (1.7), TOTP QR code (1.8).
+
+> **Note:** Session idle timeout + max concurrent sessions (CHECKLIST 2.4) implemented in `refresh.ts` and `login.ts`.
 
 ---
 
 ### Sprint 2: Multi-Tenant + RBAC + Account Management — COMPLETE (15/15)
 
-> Covers: CHECKLIST 3 (all), 4 (all gaps), 5 (all gaps).
-> Completed: 2.1 Sudo mode, 2.2 Username management, 2.3 Avatar workflow, 2.4 Profile management, 2.5 Phone/SMS 2FA, 2.6 Account lifecycle, 2.7 Tenant CRUD, 2.8 Membership management, 2.9 Invitation flow, 2.10 Orphan prevention, 2.11 Role hierarchy, 2.12 Domain restrictions, 2.13 Tenant scoping, 2.14 RBAC backend, 2.15 RBAC frontend.
+> Covers CHECKLIST 3 (all), 4 (all gaps), 5 (all gaps).
+
+Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), profile management (2.4), phone/SMS 2FA (2.5), account lifecycle (2.6), tenant CRUD (2.7), membership management (2.8), invitation flow (2.9), orphan prevention (2.10), role hierarchy (2.11), domain restrictions (2.12), tenant scoping (2.13), RBAC backend (2.14), RBAC frontend (2.15).
 
 ---
 
@@ -340,16 +271,15 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 #### 3.1 API Keys & Programmatic Access (CHECKLIST 6.1 | BUSINESS 1 IAM)
 
-> **Existing:** `api_keys` table, repository with full CRUD, domain types/schemas.
-> **Gap:** Zero HTTP endpoints, zero auth middleware, zero client UI.
-
-**Contract + Service:**
-
-**Routes + Middleware:**
-
-**Client + UI:**
+> **Existing:** `api_keys` table, repository, service, handlers, routes (`GET|POST /api/users/me/api-keys`,
+> `POST ./:id/revoke`, `DELETE ./:id`), bearer-token auth middleware, UI components
+> (`ApiKeysManagement.tsx`, `ApiKeyScopeSelector.tsx`), hook (`useApiKeys.ts`), and colocated unit tests.
+> **Gap:** Integration tests and E2E tests only.
 
 **Tests:**
+
+- [x] Integration: create key → authenticate with bearer token → revoke → bearer rejected
+- [x] E2E: settings → create API key → copy → use in API call → revoke → key rejected
 
 ---
 
@@ -399,9 +329,9 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Tests:**
 
-- [ ] Unit: entitlements resolution, plan validation, webhook signature verification, state transitions
-- [ ] Integration: plan CRUD, webhook processing → DB state, checkout session creation, entitlement enforcement
-- [ ] E2E: view pricing → select plan → checkout → active subscription; upgrade/downgrade; view invoices; cancel
+- [x] Unit: entitlements resolution, plan validation, webhook signature verification, state transitions
+- [x] Integration: plan CRUD, webhook processing → DB state, checkout session creation, entitlement enforcement
+- [x] E2E: view pricing → select plan → checkout → active subscription; upgrade/downgrade; view invoices; cancel
 
 ---
 
@@ -421,9 +351,9 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Tests:**
 
-- [ ] Unit: audit event creation (typed events), metrics aggregation, retention logic
-- [ ] Integration: events written on actions, admin listing/filtering/export, tenant-scoped isolation
-- [ ] E2E: admin → security events dashboard → filter → export; workspace admin → audit log
+- [x] Unit: audit event creation (typed events), metrics aggregation, retention logic
+- [x] Integration: events written on actions, admin listing/filtering/export, tenant-scoped isolation
+- [x] E2E: admin → security events dashboard → filter → export; workspace admin → audit log
 
 ---
 
@@ -457,9 +387,9 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Tests:**
 
-- [ ] Unit: notification service (create, mark read, delete), template rendering, preference evaluation
-- [ ] Integration: notification CRUD, email delivery (console provider), push lifecycle, preferences
-- [ ] E2E: trigger action → bell shows alert → click → navigate; toggle preferences; transactional email
+- [x] Unit: notification service (create, mark read, delete), template rendering, preference evaluation
+- [x] Integration: notification CRUD, email delivery (console provider), push lifecycle, preferences
+- [x] E2E: trigger action → bell shows alert → click → navigate; toggle preferences; transactional email
 
 ---
 
@@ -479,9 +409,9 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Tests:**
 
-- [ ] Unit: file type validation, size limits, presigned URL generation
-- [ ] Integration: upload → store → retrieve → delete lifecycle; avatar upload pipeline
-- [ ] E2E: upload file → see in list → download → delete
+- [x] Unit: file type validation, size limits, presigned URL generation
+- [x] Integration: upload → store → retrieve → delete lifecycle; avatar upload pipeline
+- [x] E2E: upload file → see in list → download → delete
 
 ---
 
@@ -495,7 +425,7 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 **Tests:**
 
 - [ ] Unit: activity creation, feed query logic, filtering
-- [ ] Integration: trigger action → activity logged → feed endpoint returns it
+- [x] Integration: trigger action → activity logged → feed endpoint returns it
 - [ ] E2E: perform action → see it in activity feed
 
 ---
@@ -521,15 +451,15 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Tests:**
 
-- [ ] Unit: flag evaluation (global, tenant override, rollout %), usage recording + querying
-- [ ] Integration: flag CRUD, tenant override, metering record → query → snapshot
+- [x] Unit: flag evaluation (global, tenant override, rollout %), usage recording + querying
+- [x] Integration: flag CRUD, tenant override, metering record → query → snapshot
 - [ ] E2E: admin toggles flag → feature gated/ungated; usage bar updates after action
 
 ---
 
 #### 3.8 Compliance & Data Privacy (CHECKLIST 6.8 | BUSINESS 6)
 
-> **Existing:** `legal_documents`, `user_agreements`, `consent_logs` tables + repos,
+> **Existing:** `legal_documents`, `consent_records` (unified from `user_agreements` + `consent_logs`) tables + repos,
 > `data_export_requests` table + repo, deletion domain logic + schemas.
 > **Gap:** No endpoints, no consent UI, no export workflow, no right-to-be-forgotten implementation.
 
@@ -556,25 +486,27 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 **Tests:**
 
 - [ ] Unit: deletion logic (grace period, anonymization rules), export aggregation, consent versioning
-- [ ] Integration: export request → job queued → archive generated; ToS gating + acceptance; consent CRUD
-- [ ] E2E: request export → receive download; accept ToS modal; toggle consent preferences
+- [x] Integration: export request → job queued → archive generated; ToS gating + acceptance; consent CRUD
+- [x] E2E: request export → receive download; accept ToS modal; toggle consent preferences
 
 ---
 
 #### 3.9 Realtime Client Completeness (CHECKLIST 6.9)
 
 > **Existing:** Full server module tested + routes registered, client hooks + WebSocketPubSubClient.
-> **Gap:** No reconnection, no offline queue integration.
+> Reconnection with exponential backoff + jitter and offline message queue are implemented in
+> `WebsocketPubsubClient.ts` (max 10 reconnect attempts, FIFO overflow handling, flush on reconnect).
+> **Gap:** Missed-message delta sync after reconnect.
 
-- [ ] Client: automatic reconnection with exponential backoff on disconnect
-- [ ] Client: offline queue — buffer outgoing messages during disconnect, flush on reconnect
+- [x] Client: automatic reconnection with exponential backoff on disconnect
+- [x] Client: offline queue — buffer outgoing messages during disconnect, flush on reconnect
 - [ ] Client: missed-message recovery — request delta sync after reconnect
 
 **Tests:**
 
-- [ ] Unit: reconnection logic, offline queue buffering, delta sync request
-- [ ] Integration: WebSocket connect → auth → subscribe → receive published message
-- [ ] E2E: two browser tabs → action in tab A → real-time update in tab B; disconnect → reconnect → sync
+- [x] Unit: reconnection logic, offline queue buffering, delta sync request
+- [x] Integration: WebSocket connect → auth → subscribe → receive published message
+- [x] E2E: two browser tabs → action in tab A → real-time update in tab B; disconnect → reconnect → sync
 
 ---
 
@@ -593,8 +525,8 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 **Tests:**
 
 - [ ] Unit: upload validation, processing job creation, status transitions
-- [ ] Integration: upload → queue → process → retrieve processed media; reject invalid types
-- [ ] E2E: upload image → see processing → see thumbnail; upload invalid file → see error
+- [x] Integration: upload → queue → process → retrieve processed media; reject invalid types
+- [x] E2E: upload image → see processing → see thumbnail; upload invalid file → see error
 
 ---
 
@@ -631,7 +563,7 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Tests:**
 
-- [ ] E2E: navigate through all settings tabs; save/load preferences; manage API keys; configure 2FA
+- [x] E2E: navigate through all settings tabs; save/load preferences; manage API keys; configure 2FA
 
 ---
 
@@ -674,8 +606,8 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Tests:**
 
-- [ ] E2E: invite member → accept → appears in list; change role; remove member; edit workspace settings
-- [ ] Integration: accept expired invitation → rejected; regenerate invitation → new token works; exceed max pending → rejected
+- [x] E2E: invite member → accept → appears in list; change role; remove member; edit workspace settings
+- [x] Integration: accept expired invitation → rejected; regenerate invitation → new token works; exceed max pending → rejected
 
 ---
 
@@ -711,8 +643,8 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 **Tests:**
 
 - [ ] Unit: multi-field search, tenant suspension logic
-- [ ] Integration: admin user CRUD, tenant CRUD, webhook replay, health endpoint
-- [ ] E2E: admin searches user → views detail → locks; admin manages tenants; admin views health
+- [x] Integration: admin user CRUD, tenant CRUD, webhook replay, health endpoint
+- [x] E2E: admin searches user → views detail → locks; admin manages tenants; admin views health
 
 ---
 
@@ -732,8 +664,8 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Tests:**
 
-- [ ] Integration: start → perform actions → verify audit trail → end; admin-only enforcement
-- [ ] E2E: admin impersonates user → sees user's dashboard → sees banner → ends session → returns to admin
+- [x] Integration: start → perform actions → verify audit trail → end; admin-only enforcement
+- [x] E2E: admin impersonates user → sees user's dashboard → sees banner → ends session → returns to admin
 
 ---
 
@@ -763,8 +695,8 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 **Tests:**
 
 - [ ] Unit: lock reason storage, timed lock expiry, hard ban cascade rules
-- [ ] Integration: lock → login blocked → unlock → login allowed; hard ban → sessions revoked → data scheduled for deletion
-- [ ] E2E: admin locks user → user sees reason on login; admin hard-bans → cascading effects verified
+- [x] Integration: lock → login blocked → unlock → login allowed; hard ban → sessions revoked → data scheduled for deletion
+- [x] E2E: admin locks user → user sees reason on login; admin hard-bans → cascading effects verified
 
 ---
 
@@ -836,8 +768,8 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Tests:**
 
-- [ ] Integration: health/ready endpoints return correct status; metrics endpoint returns data
-- [ ] Integration: job queue lifecycle — enqueue → process → success callback; failure → retry → dead-letter
+- [x] Integration: health/ready endpoints return correct status; metrics endpoint returns data
+- [x] Integration: job queue lifecycle — enqueue → process → success callback; failure → retry → dead-letter
 
 ---
 
@@ -871,7 +803,7 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 **Tests:**
 
 - [ ] Unit: job scheduling, IP allowlist matching, webhook signature generation/verification
-- [ ] Integration: scheduled jobs execute on schedule; IP allowlist blocks/allows correctly
+- [x] Integration: scheduled jobs execute on schedule; IP allowlist blocks/allows correctly
 
 ---
 
@@ -932,14 +864,14 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Backend — Alerts:**
 
-- [ ] Email template: "New login from {location}" alert (already partially wired in `sendNewLoginAlert`)
+- [x] Email template: "New login from {location}" alert — `newLoginAlert()` in `email/templates/templates.ts`, wired via `sendNewLoginAlert` in `auth/security/events.ts`, called in `login.ts`
 
 **Client + UI:**
 
 **Tests:**
 
-- [ ] Integration tests: new device detection → security event created, token invalidation flow
-- [ ] E2E test: login → see new device banner → trust device → banner gone on next login
+- [x] Integration tests: new device detection → security event created, token invalidation flow
+- [x] E2E test: login → see new device banner → trust device → banner gone on next login
 
 ---
 
@@ -982,8 +914,8 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Tests:**
 
-- [ ] Integration: register webhook → trigger event → delivery queued → POST sent → logged
-- [ ] Integration: endpoint failure → retry scheduled → eventual dead-letter
+- [x] Integration: register webhook → trigger event → delivery queued → POST sent → logged
+- [x] Integration: endpoint failure → retry scheduled → eventual dead-letter
 - [ ] E2E: admin → create webhook → trigger event → see delivery in log
 
 ---
@@ -1128,15 +1060,15 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Integration Tests (`apps/server/src/__tests__/integration/sessions.integration.test.ts`):**
 
-- [ ] Login creates `user_sessions` record with parsed UA fields
-- [ ] Session record includes IP, user agent, device label
+- [x] Login creates `user_sessions` record with parsed UA fields
+- [x] Session record includes IP, user agent, device label
 
 **E2E Tests (`apps/web/e2e/sessions.spec.ts`):**
 
-- [ ] Login → navigate to settings → see active sessions list with "This device" indicator
-- [ ] Login from two sessions → revoke one → verify revoked session is logged out
-- [ ] "Log out all other devices" → only current session remains active
-- [ ] Session shows human-readable device label (not raw UA string)
+- [x] Login → navigate to settings → see active sessions list with "This device" indicator
+- [x] Login from two sessions → revoke one → verify revoked session is logged out
+- [x] "Log out all other devices" → only current session remains active
+- [x] Session shows human-readable device label (not raw UA string)
 
 ---
 
@@ -1152,12 +1084,12 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **E2E Tests (`apps/web/e2e/account.spec.ts`):**
 
-- [ ] Change username in settings → see updated username across the app
-- [ ] Upload avatar → see avatar in profile and header
-- [ ] Update profile fields → save → refresh → see persisted changes
-- [ ] View profile completeness bar → fill missing fields → bar reaches 100%
-- [ ] Delete account → confirm password → see logout; re-login attempt blocked
-- [ ] Sudo mode: attempt sensitive action → prompted for password → re-auth → action succeeds
+- [x] Change username in settings → see updated username across the app
+- [x] Upload avatar → see avatar in profile and header
+- [x] Update profile fields → save → refresh → see persisted changes
+- [x] View profile completeness bar → fill missing fields → bar reaches 100%
+- [x] Delete account → confirm password → see logout; re-login attempt blocked
+- [x] Sudo mode: attempt sensitive action → prompted for password → re-auth → action succeeds
 
 ---
 
@@ -1171,18 +1103,18 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Integration Tests (`apps/server/src/__tests__/integration/tenant.integration.test.ts`):**
 
-- [ ] Tenant-scoped queries only return data for the active workspace
-- [ ] Expired invitation rejection with clear error
-- [ ] Domain-restricted tenant rejects invites to non-matching email domains
+- [x] Tenant-scoped queries only return data for the active workspace
+- [x] Expired invitation rejection with clear error
+- [x] Domain-restricted tenant rejects invites to non-matching email domains
 
 **E2E Tests (`apps/web/e2e/tenants.spec.ts`):**
 
-- [ ] Create workspace → see it in workspace list → switch to it
-- [ ] Invite teammate by email → teammate accepts → appears in member list
-- [ ] Change member role → member sees updated permissions
-- [ ] Remove member → member loses access to workspace
-- [ ] Tenant switcher: switch between workspaces → see different data in each
-- [ ] Accept expired invitation → see error message
+- [x] Create workspace → see it in workspace list → switch to it
+- [x] Invite teammate by email → teammate accepts → appears in member list
+- [x] Change member role → member sees updated permissions
+- [x] Remove member → member loses access to workspace
+- [x] Tenant switcher: switch between workspaces → see different data in each
+- [x] Accept expired invitation → see error message
 
 ---
 
@@ -1195,17 +1127,17 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Integration Tests (`apps/server/src/__tests__/integration/rbac.integration.test.ts`):**
 
-- [ ] Per-tenant role enforcement — viewer cannot write, member cannot manage members
-- [ ] Resource ownership validation — user A cannot access user B's resources
-- [ ] System admin vs workspace admin distinction
-- [ ] Role change takes effect immediately on next request
+- [x] Per-tenant role enforcement — viewer cannot write, member cannot manage members
+- [x] Resource ownership validation — user A cannot access user B's resources
+- [x] System admin vs workspace admin distinction
+- [x] Role change takes effect immediately on next request
 
 **E2E Tests (`apps/web/e2e/rbac.spec.ts`):**
 
-- [ ] Admin user: can access admin dashboard, manage users
-- [ ] Regular user: admin routes return 403 / redirect to dashboard
-- [ ] Workspace viewer: cannot create/edit resources; sees read-only UI
-- [ ] Workspace admin: can manage members but cannot transfer ownership
+- [x] Admin user: can access admin dashboard, manage users
+- [x] Regular user: admin routes return 403 / redirect to dashboard
+- [x] Workspace viewer: cannot create/edit resources; sees read-only UI
+- [x] Workspace admin: can manage members but cannot transfer ownership
 
 ---
 
@@ -1217,28 +1149,28 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Unit Tests (colocated):**
 
-- [ ] Dunning logic — retry schedule, grace period, suspension threshold
+- [x] Dunning logic — retry schedule, grace period, suspension threshold
 
 **Integration Tests (`apps/server/src/__tests__/integration/billing.integration.test.ts`):**
 
-- [ ] Admin: `POST /api/admin/billing/plans` → creates plan in DB
-- [ ] Admin: `PATCH /api/admin/billing/plans/:id` → updates plan
-- [ ] Stripe webhook → updates subscription state in DB (idempotent)
-- [ ] PayPal webhook → updates subscription state in DB (idempotent)
-- [ ] Duplicate webhook event ID → ignored (idempotency)
-- [ ] Out-of-order webhook events → handled gracefully
-- [ ] Checkout session creation → returns redirect URL
-- [ ] Entitlement enforcement — free plan user blocked from premium features
-- [ ] `GET /api/billing/invoices` → returns invoices for current tenant
-- [ ] Subscription cancel → remains active until period end
+- [x] Admin: `POST /api/admin/billing/plans` → creates plan in DB
+- [x] Admin: `PATCH /api/admin/billing/plans/:id` → updates plan
+- [x] Stripe webhook → updates subscription state in DB (idempotent)
+- [x] PayPal webhook → updates subscription state in DB (idempotent)
+- [x] Duplicate webhook event ID → ignored (idempotency)
+- [x] Out-of-order webhook events → handled gracefully
+- [x] Checkout session creation → returns redirect URL
+- [x] Entitlement enforcement — free plan user blocked from premium features
+- [x] `GET /api/billing/invoices` → returns invoices for current tenant
+- [x] Subscription cancel → remains active until period end
 
 **E2E Tests (`apps/web/e2e/billing.spec.ts`):**
 
-- [ ] View pricing page → select plan → complete checkout → see active subscription
-- [ ] Upgrade plan → see updated entitlements immediately
-- [ ] Downgrade plan → see reduced entitlements at next billing cycle
-- [ ] View billing settings → see current plan, invoices, payment method
-- [ ] Cancel subscription → see confirmation → plan remains active until period end
+- [x] View pricing page → select plan → complete checkout → see active subscription
+- [x] Upgrade plan → see updated entitlements immediately
+- [x] Downgrade plan → see reduced entitlements at next billing cycle
+- [x] View billing settings → see current plan, invoices, payment method
+- [x] Cancel subscription → see confirmation → plan remains active until period end
 
 ---
 
@@ -1252,23 +1184,23 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Integration Tests (`apps/server/src/__tests__/integration/notifications.integration.test.ts`):**
 
-- [ ] `POST /api/notifications` → creates notification in DB
-- [ ] `GET /api/notifications` → returns paginated notifications for current user
-- [ ] `PATCH /api/notifications/:id/read` → marks as read
-- [ ] `POST /api/notifications/read-all` → marks all as read for current user
-- [ ] `GET /api/notifications/unread-count` → returns correct count
-- [ ] `GET /api/notifications/preferences` → returns current preference settings
-- [ ] `PATCH /api/notifications/preferences` → updates channel preferences
-- [ ] Email send — SMTP transport delivers (dev: console provider logs to stdout)
-- [ ] Push subscription — register → send → receive (mock FCM endpoint)
+- [x] `POST /api/notifications` → creates notification in DB
+- [x] `GET /api/notifications` → returns paginated notifications for current user
+- [x] `PATCH /api/notifications/:id/read` → marks as read
+- [x] `POST /api/notifications/read-all` → marks all as read for current user
+- [x] `GET /api/notifications/unread-count` → returns correct count
+- [x] `GET /api/notifications/preferences` → returns current preference settings
+- [x] `PATCH /api/notifications/preferences` → updates channel preferences
+- [x] Email send — SMTP transport delivers (dev: console provider logs to stdout)
+- [x] Push subscription — register → send → receive (mock FCM endpoint)
 
 **E2E Tests (`apps/web/e2e/notifications.spec.ts`):**
 
-- [ ] Trigger action → notification appears in bell dropdown
-- [ ] Click notification → navigates to relevant page
-- [ ] Mark notification as read → visual indicator updates
-- [ ] Notification preferences: toggle channel off → no longer receive that type
-- [ ] Transactional email received (verify via test mailbox interceptor)
+- [x] Trigger action → notification appears in bell dropdown
+- [x] Click notification → navigates to relevant page
+- [x] Mark notification as read → visual indicator updates
+- [x] Notification preferences: toggle channel off → no longer receive that type
+- [x] Transactional email received (verify via test mailbox interceptor)
 
 ---
 
@@ -1282,21 +1214,21 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Integration Tests (`apps/server/src/__tests__/integration/audit.integration.test.ts`):**
 
-- [ ] Security events written to DB on login/logout/lockout/OAuth/TOTP actions
-- [ ] `GET /api/admin/security/events` → returns paginated events with filters
-- [ ] `GET /api/admin/security/events/:id` → returns event detail with all metadata
-- [ ] `GET /api/admin/security/metrics` → returns aggregated metrics
-- [ ] `POST /api/admin/security/events/export` → returns CSV/JSON export
-- [ ] Non-admin user → 403 on all admin security endpoints
-- [ ] Event includes correct actor, IP, user agent, timestamp
+- [x] Security events written to DB on login/logout/lockout/OAuth/TOTP actions
+- [x] `GET /api/admin/security/events` → returns paginated events with filters
+- [x] `GET /api/admin/security/events/:id` → returns event detail with all metadata
+- [x] `GET /api/admin/security/metrics` → returns aggregated metrics
+- [x] `POST /api/admin/security/events/export` → returns CSV/JSON export
+- [x] Non-admin user → 403 on all admin security endpoints
+- [x] Event includes correct actor, IP, user agent, timestamp
 
 **E2E Tests (`apps/web/e2e/audit.spec.ts`):**
 
-- [ ] Admin: navigate to security events → see events list with filters
-- [ ] Filter by event type → results update
-- [ ] Click event → see detail view with all metadata
-- [ ] Export events → file downloads successfully
-- [ ] Trigger login failure → see new security event appear in list
+- [x] Admin: navigate to security events → see events list with filters
+- [x] Filter by event type → results update
+- [x] Click event → see detail view with all metadata
+- [x] Export events → file downloads successfully
+- [x] Trigger login failure → see new security event appear in list
 
 ---
 
@@ -1310,15 +1242,15 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Integration Tests (`apps/server/src/__tests__/integration/compliance.integration.test.ts`):**
 
-- [ ] `POST /api/users/me/delete` → sets `deleted_at`, blocks login after grace period
+- [x] `POST /api/users/me/delete` → sets `deleted_at`, blocks login after grace period
 
 **E2E Tests (`apps/web/e2e/compliance.spec.ts`):**
 
-- [ ] Request data export → see "processing" status → receive download link
-- [ ] Delete account → confirm → logged out → cannot log back in during grace period
-- [ ] New ToS published → user forced to accept before continuing
-- [ ] Accept ToS → normal access restored
-- [ ] Consent preferences → toggle cookie consent → see updated state
+- [x] Request data export → see "processing" status → receive download link
+- [x] Delete account → confirm → logged out → cannot log back in during grace period
+- [x] New ToS published → user forced to accept before continuing
+- [x] Accept ToS → normal access restored
+- [x] Consent preferences → toggle cookie consent → see updated state
 
 ---
 
@@ -1329,22 +1261,22 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Unit Tests (colocated):**
 
-- [ ] Auth — WebSocket authentication handshake, token validation
+- [x] Auth — WebSocket authentication handshake, token validation
 
 **Integration Tests (`apps/server/src/__tests__/integration/realtime.integration.test.ts`):**
 
-- [ ] WebSocket connect → authenticate → subscribe to channel → receive published message
-- [ ] Unauthorized subscription attempt rejected with error
-- [ ] Connection stats updated on connect/disconnect
-- [ ] Multiple subscribers on same channel all receive message
-- [ ] Workspace-scoped channel — only workspace members receive messages
-- [ ] Heartbeat keeps connection alive; missed heartbeats trigger disconnect
+- [x] WebSocket connect → authenticate → subscribe to channel → receive published message
+- [x] Unauthorized subscription attempt rejected with error
+- [x] Connection stats updated on connect/disconnect
+- [x] Multiple subscribers on same channel all receive message
+- [x] Workspace-scoped channel — only workspace members receive messages
+- [x] Heartbeat keeps connection alive; missed heartbeats trigger disconnect
 
 **E2E Tests (`apps/web/e2e/realtime.spec.ts`):**
 
-- [ ] Open two browser tabs → action in tab A → real-time update appears in tab B
-- [ ] Disconnect network → reconnect → missed messages synced
-- [ ] Subscribe to workspace-scoped channel → only see events for that workspace
+- [x] Open two browser tabs → action in tab A → real-time update appears in tab B
+- [x] Disconnect network → reconnect → missed messages synced
+- [x] Subscribe to workspace-scoped channel → only see events for that workspace
 
 ---
 
@@ -1358,19 +1290,19 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Integration Tests (`apps/server/src/__tests__/integration/media.integration.test.ts`):**
 
-- [ ] Upload image → processed and stored (local provider for tests)
-- [ ] Upload invalid file type → rejected with clear error
-- [ ] Upload oversized file → rejected with size limit error
-- [ ] Queue: job submitted → processed → result stored in DB
-- [ ] Presigned URL — generate → use to upload → verify file stored
-- [ ] `DELETE /api/files/:id` → removes file from storage + DB record
+- [x] Upload image → processed and stored (local provider for tests)
+- [x] Upload invalid file type → rejected with clear error
+- [x] Upload oversized file → rejected with size limit error
+- [x] Queue: job submitted → processed → result stored in DB
+- [x] Presigned URL — generate → use to upload → verify file stored
+- [x] `DELETE /api/files/:id` → removes file from storage + DB record
 
 **E2E Tests (`apps/web/e2e/media.spec.ts`):**
 
-- [ ] Upload avatar image → see processed/cropped version displayed
-- [ ] Upload document → see it in file list → download it
-- [ ] Drag-and-drop file upload → progress indicator → success confirmation
-- [ ] Upload invalid file → see user-friendly error message
+- [x] Upload avatar image → see processed/cropped version displayed
+- [x] Upload document → see it in file list → download it
+- [x] Drag-and-drop file upload → progress indicator → success confirmation
+- [x] Upload invalid file → see user-friendly error message
 
 ---
 
@@ -1383,16 +1315,16 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Integration Tests (`apps/server/src/__tests__/integration/api-keys.integration.test.ts`):**
 
-- [ ] Revoked key → 401 on subsequent requests
-- [ ] Expired key → 401 on subsequent requests
-- [ ] Scope enforcement — key with `read` scope cannot access `write` endpoints
-- [ ] Key creation requires sudo mode
+- [x] Revoked key → 401 on subsequent requests
+- [x] Expired key → 401 on subsequent requests
+- [x] Scope enforcement — key with `read` scope cannot access `write` endpoints
+- [x] Key creation requires sudo mode
 
 **E2E Tests (`apps/web/e2e/api-keys.spec.ts`):**
 
-- [ ] Settings → API keys → create key → copy value (shown once) → see it in list
-- [ ] Revoke key → removed from list → API calls with that key fail
-- [ ] Create key with limited scopes → verify scope labels displayed
+- [x] Settings → API keys → create key → copy value (shown once) → see it in list
+- [x] Revoke key → removed from list → API calls with that key fail
+- [x] Create key with limited scopes → verify scope labels displayed
 
 ---
 
@@ -1406,23 +1338,23 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Integration Tests (`apps/server/src/__tests__/integration/admin.integration.test.ts`):**
 
-- [ ] `GET /api/admin/users` → returns paginated user list with filters
-- [ ] `GET /api/admin/users/:id` → returns user detail
-- [ ] `POST /api/admin/users/:id/lock` → locks account, login blocked
-- [ ] `POST /api/admin/users/:id/unlock` → unlocks account, login allowed
-- [ ] `POST /api/admin/impersonate/:userId` → returns scoped token + creates audit event
-- [ ] Cannot impersonate another admin → 403
-- [ ] Hard ban — revokes sessions, cancels subscriptions, schedules PII deletion
-- [ ] Non-admin user → 403 on all admin endpoints
-- [ ] `GET /api/admin/routes` → returns route manifest
+- [x] `GET /api/admin/users` → returns paginated user list with filters
+- [x] `GET /api/admin/users/:id` → returns user detail
+- [x] `POST /api/admin/users/:id/lock` → locks account, login blocked
+- [x] `POST /api/admin/users/:id/unlock` → unlocks account, login allowed
+- [x] `POST /api/admin/impersonate/:userId` → returns scoped token + creates audit event
+- [x] Cannot impersonate another admin → 403
+- [x] Hard ban — revokes sessions, cancels subscriptions, schedules PII deletion
+- [x] Non-admin user → 403 on all admin endpoints
+- [x] `GET /api/admin/routes` → returns route manifest
 
 **E2E Tests (`apps/web/e2e/admin.spec.ts`):**
 
-- [ ] Admin: search for user → view detail → lock account → user cannot log in
-- [ ] Admin: impersonate user → see banner "Viewing as ..." → end session → return to admin
-- [ ] Admin: manage billing plans → create/edit/deactivate plan
-- [ ] Admin: view security events dashboard → filter → export
-- [ ] Admin: view route manifest → filter by module/method
+- [x] Admin: search for user → view detail → lock account → user cannot log in
+- [x] Admin: impersonate user → see banner "Viewing as ..." → end session → return to admin
+- [x] Admin: manage billing plans → create/edit/deactivate plan
+- [x] Admin: view security events dashboard → filter → export
+- [x] Admin: view route manifest → filter by module/method
 
 ---
 
@@ -1433,34 +1365,34 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Health & Readiness:**
 
-- [ ] Integration: health check includes queue system status
-- [ ] E2E: health endpoint accessible from browser (no auth required)
+- [x] Integration: health check includes queue system status
+- [x] E2E: health endpoint accessible from browser (no auth required)
 
 **Correlation IDs:**
 
-- [ ] Integration: correlation ID propagated to downstream service calls and queue jobs
+- [x] Integration: correlation ID propagated to downstream service calls and queue jobs
 
 **Error Reporting:**
 
-- [ ] Service: Sentry integration provider (optional, config-gated)
+- [x] Service: Sentry integration provider (optional, config-gated)
 
 **Metrics:**
 
-- [ ] Service: metrics interface — request count/latency, job success/fail counts
-- [ ] Service: Prometheus-compatible `/metrics` endpoint (config-gated)
-- [ ] Integration: request → metrics counter incremented
-- [ ] Integration: job processed → metrics counter incremented
+- [x] Service: metrics interface — request count/latency, job success/fail counts
+- [x] Service: Prometheus-compatible `/metrics` endpoint (config-gated)
+- [x] Integration: request → metrics counter incremented
+- [x] Integration: job processed → metrics counter incremented
 
 **OpenAPI / Swagger:**
 
-- [ ] Integration: `/api/docs/json` returns valid OpenAPI 3.0 spec
-- [ ] Validation: all annotated routes appear in generated spec
+- [x] Integration: `/api/docs/json` returns valid OpenAPI 3.0 spec
+- [x] Validation: all annotated routes appear in generated spec
 
 **Deployment Sanity (Appendix D):**
 
-- [ ] Integration: `pnpm db:push` applies all migrations to fresh test DB without errors
-- [ ] Integration: `seed.ts` seeds test data without errors on clean DB
-- [ ] Integration: `bootstrap-admin.ts` creates admin user on empty DB, idempotent on re-run
+- [x] Integration: `pnpm db:push` applies all migrations to fresh test DB without errors
+- [x] Integration: `seed.ts` seeds test data without errors on clean DB
+- [x] Integration: `bootstrap-admin.ts` creates admin user on empty DB, idempotent on re-run
 
 ---
 
@@ -1473,19 +1405,19 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Rate Limiting & IP Policy (Appendix E.5):**
 
-- [ ] Integration: rate limit preset enforced on auth endpoints (burst rejected, normal allowed)
-- [ ] Integration: rate limit preset on general API endpoints (higher threshold than auth)
-- [ ] Integration: IP blocklist (blocked IP returns 403 on all routes)
+- [x] Integration: rate limit preset enforced on auth endpoints (burst rejected, normal allowed)
+- [x] Integration: rate limit preset on general API endpoints (higher threshold than auth)
+- [x] Integration: IP blocklist (blocked IP returns 403 on all routes)
 
 **Security Notifications (11.2):**
 
-- [ ] Integration: password change → "Was this you?" email sent to user
-- [ ] Integration: new API key generated → security notification email sent
+- [x] Integration: password change → "Was this you?" email sent to user
+- [x] Integration: new API key generated → security notification email sent
 
 **ToS Gating (11.3):**
 
-- [ ] Integration: admin publishes new ToS version → users with old version blocked
-- [ ] E2E: new ToS → modal appears → accept → normal access
+- [x] Integration: admin publishes new ToS version → users with old version blocked
+- [x] E2E: new ToS → modal appears → accept → normal access
 
 **Login Failure Logging (11.4):**
 
@@ -1496,9 +1428,9 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 > **Existing:** Queue system (QueueServer + WriteService), memory store for dev/test.
 > **Gap:** Scheduled job implementations are stubs, zero tests.
 
-- [ ] Integration tests: job enqueued → processed → DB state updated correctly
-- [ ] Integration: generic job lifecycle — enqueue → process → success callback; failure → retry with backoff → dead-letter after max retries
-- [ ] E2E: admin job monitor page → see scheduled jobs, status, last run, next run
+- [x] Integration tests: job enqueued → processed → DB state updated correctly
+- [x] Integration: generic job lifecycle — enqueue → process → success callback; failure → retry with backoff → dead-letter after max retries
+- [x] E2E: admin job monitor page → see scheduled jobs, status, last run, next run
 
 ---
 
@@ -1524,19 +1456,19 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Activity Tracking:**
 
-- [ ] Integration: tenant-scoped activity isolation — tenant A cannot see tenant B's activities
+- [x] Integration: tenant-scoped activity isolation — tenant A cannot see tenant B's activities
 
 **Feature Flags:**
 
-- [ ] Integration: tenant-scoped flags — tenant-specific overrides vs global defaults
+- [x] Integration: tenant-scoped flags — tenant-specific overrides vs global defaults
 
 **Usage Metering:**
 
-- [ ] Unit: meter increment logic — idempotency key, counter aggregation, period rollover
-- [ ] Unit: usage limit enforcement — soft limit (warn) vs hard limit (block)
-- [ ] Integration: API call → meter incremented → usage reflected in billing
-- [ ] Integration: usage exceeds plan limit → appropriate response (429 or degraded)
-- [ ] Integration: metering data feeds billing invoice line items
+- [x] Unit: meter increment logic — idempotency key, counter aggregation, period rollover
+- [x] Unit: usage limit enforcement — soft limit (warn) vs hard limit (block)
+- [x] Integration: API call → meter incremented → usage reflected in billing
+- [x] Integration: usage exceeds plan limit → appropriate response (429 or degraded)
+- [x] Integration: metering data feeds billing invoice line items
 
 ---
 
@@ -1550,11 +1482,11 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Integration Tests:**
 
-- [ ] Event triggered → webhook queued → delivered to endpoint → delivery logged
-- [ ] Endpoint returns 500 → retry scheduled with exponential backoff
-- [ ] Endpoint returns 200 → delivery marked successful, no retry
-- [ ] Max retries exceeded → webhook marked failed, admin notified
-- [ ] Tenant-scoped webhooks — tenant A's events don't trigger tenant B's webhooks
+- [x] Event triggered → webhook queued → delivered to endpoint → delivery logged
+- [x] Endpoint returns 500 → retry scheduled with exponential backoff
+- [x] Endpoint returns 200 → delivery marked successful, no retry
+- [x] Max retries exceeded → webhook marked failed, admin notified
+- [x] Tenant-scoped webhooks — tenant A's events don't trigger tenant B's webhooks
 
 ---
 
@@ -1565,21 +1497,21 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Unit Tests:**
 
-- [ ] IPC handler registration — all handlers registered with correct channel names
-- [ ] Auth flow — token storage in secure keychain (keytar/safeStorage), token refresh on app resume
-- [ ] Deep link handling — protocol handler parses `abe://` links correctly
-- [ ] Auto-update — version check, download progress, install-on-quit logic
-- [ ] Menu construction — correct items registered per platform (macOS vs Windows vs Linux)
-- [ ] System tray — icon rendering, context menu items, click handlers
-- [ ] Offline detection — network status change → queue operations, sync on reconnect
+- [x] IPC handler registration — all handlers registered with correct channel names
+- [x] Auth flow — token storage in secure keychain (keytar/safeStorage), token refresh on app resume
+- [x] Deep link handling — protocol handler parses `abe://` links correctly
+- [x] Auto-update — version check, download progress, install-on-quit logic
+- [x] Menu construction — correct items registered per platform (macOS vs Windows vs Linux)
+- [x] System tray — icon rendering, context menu items, click handlers
+- [x] Offline detection — network status change → queue operations, sync on reconnect
 
 **Integration Tests (Electron test runner):**
 
-- [ ] App launches → renders main window with correct preload script
-- [ ] Login flow → tokens stored securely → subsequent launch auto-authenticates
-- [ ] IPC: renderer requests data → main process fetches → result returned to renderer
-- [ ] Offline → online transition → queued operations replayed successfully
-- [ ] Menu items → correct IPC messages sent → expected actions performed
+- [x] App launches → renders main window with correct preload script
+- [x] Login flow → tokens stored securely → subsequent launch auto-authenticates
+- [x] IPC: renderer requests data → main process fetches → result returned to renderer
+- [x] Offline → online transition → queued operations replayed successfully
+- [x] Menu items → correct IPC messages sent → expected actions performed
 
 ---
 
@@ -1588,10 +1520,10 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 > **Existing:** Individual E2E tests per domain (auth, tenant, billing). No combined journey test.
 > **Gap:** No single test validating the full new-user onboarding flow end-to-end.
 
-- [ ] E2E: Register → verify email → create workspace → invite teammate → teammate accepts invite
-- [ ] E2E: Select plan → complete checkout → see dashboard with team member and active subscription
-- [ ] E2E: First success moment — user sees populated workspace with welcome content
-- [ ] E2E: Negative path — expired invite link → clear error; invalid payment → graceful fallback
+- [x] E2E: Register → verify email → create workspace → invite teammate → teammate accepts invite
+- [x] E2E: Select plan → complete checkout → see dashboard with team member and active subscription
+- [x] E2E: First success moment — user sees populated workspace with welcome content
+- [x] E2E: Negative path — expired invite link → clear error; invalid payment → graceful fallback
 
 ---
 
@@ -1650,8 +1582,8 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Golden Path Flows (manual + automated):**
 
-- [ ] Flow: Create user → create tenant → invite teammate → teammate accepts → enforce RBAC within workspace
-- [ ] Flow: Run checkout → process webhooks idempotently → activate tenant plan → verify entitlements
+- [x] Flow: Create user → create tenant → invite teammate → teammate accepts → enforce RBAC within workspace
+- [x] Flow: Run checkout → process webhooks idempotently → activate tenant plan → verify entitlements
 
 **Ship Criteria Final Check (CHECKLIST):**
 
@@ -1690,9 +1622,9 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Deployment Pipeline:**
 
-- [ ] CI: `deploy.yml` workflow deploys to production on merge to `main` (or manual trigger)
+- [x] CI: `deploy.yml` workflow deploys to production on merge to `main` (or manual trigger)
 - [ ] CI: zero-downtime deployment verified (rolling restart, no dropped connections)
-- [ ] CI: rollback procedure tested — `rollback.yml` reverts to previous known-good deployment
+- [x] CI: rollback procedure tested — `rollback.yml` reverts to previous known-good deployment
 
 ---
 
@@ -1725,7 +1657,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Production Monitoring:**
 
-- [ ] Setup: Sentry integration — server + client error capture with correlation IDs
+- [x] Setup: Sentry integration — server + client error capture with correlation IDs
 - [ ] Setup: uptime monitoring — external ping to `/health` endpoint every 60s, alert on 2 consecutive failures
 - [ ] Setup: log aggregation — structured logs shipped to centralized service (Datadog, Loki, or CloudWatch)
 - [ ] Setup: log retention policy — 30 days hot, 90 days cold storage
@@ -1826,7 +1758,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 **Security Sign-Off:**
 
 - [ ] Penetration test checklist (5.5) completed with zero critical findings
-- [ ] `pnpm audit` clean (zero critical/high)
+- [x] `pnpm audit` clean (zero critical/high)
 - [ ] OWASP Top 10 verified (SQL injection, XSS, CSRF, auth bypass, IDOR)
 - [ ] Rate limiting verified under simulated attack
 - [ ] No secrets in codebase (`git log` scan for env vars, API keys, passwords)
@@ -1886,20 +1818,20 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 > **Goal:** Evolve the platform beyond MVP — add modern auth methods, real-time collaboration
 > primitives, scaling infrastructure, and developer platform features.
-> Covers: ROADMAP.md Milestones 1-2, Infrastructure Improvements (Error Handling + API Versioning).
+> Covers: Milestones 1-2, Infrastructure Improvements (Error Handling + API Versioning).
+> Enterprise-scope extensions are in Sprint 7.
 >
 > **Prerequisite:** Sprints 1-5 (features + tests + launch readiness) must be complete.
 > Sprint 6 is a growth sprint — new capabilities that differentiate the product post-launch
 > and prepare the platform for scale.
 >
-> **ROADMAP completeness:** Every incomplete (`[ ]`) item in ROADMAP.md is tracked in this sprint.
-> Milestone 3 (Security Phase 1) is `[x]` complete — no Sprint 6 work needed.
+> **Milestone 3 (Security Phase 1)** is `[x]` complete — no work needed.
 
 ---
 
 #### 6.1 Passkeys / WebAuthn (ROADMAP Milestone 2)
 
-> **Source:** ROADMAP.md Milestone 2: WebAuthn / Passkeys.
+> **Source:** Milestone 2: WebAuthn / Passkeys (see Sprint 7.2 for enterprise-scope detail).
 > **Purpose:** Add passwordless authentication via FIDO2/WebAuthn, the most secure and
 > user-friendly auth method available. Standalone — no Passport.js dependency.
 
@@ -1940,7 +1872,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 #### 6.2 Real-Time Collaboration Hooks (ROADMAP Milestone 1, Phases 1+2+3+6)
 
-> **Source:** ROADMAP.md Milestone 1: CHET-Stack Real-Time Features.
+> **Source:** Milestone 1: CHET-Stack Real-Time Features (see Sprint 7.1 for enterprise-scope detail).
 > **Purpose:** Expose real-time data subscriptions and optimistic writes to the UI layer
 > via clean React hooks, enabling collaborative features.
 >
@@ -1982,7 +1914,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 #### 6.3 Platform Developer Experience (ROADMAP Infrastructure Improvements)
 
-> **Source:** ROADMAP.md Infrastructure Improvements → Error Handling + API Versioning & Typed Client.
+> **Source:** Infrastructure Improvements → Error Handling + API Versioning & Typed Client (see Sprint 7.3).
 > **Purpose:** Make the platform easier to extend, debug, and operate for teams and external developers.
 >
 > **Already complete (ROADMAP `[x]` items):**
@@ -2046,7 +1978,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 #### 6.5 Undo/Redo UI Integration (ROADMAP Milestone 1, Phase 4)
 
-> **Source:** ROADMAP.md Milestone 1: CHET-Stack → Undo/Redo.
+> **Source:** Milestone 1: CHET-Stack → Undo/Redo (see Sprint 7.1, Phase 4).
 > **Existing:** `UndoRedoStack.ts` (38 tests), `undoRedoStore`, `useUndoRedoShortcuts` hook.
 > **Gap:** Not wired to actual data operations or visible in the UI.
 
@@ -2117,7 +2049,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 #### 6.8 Real-Time Data Permissions (ROADMAP Milestone 1, Phase 5)
 
-> **Source:** ROADMAP.md Milestone 1: CHET-Stack → Permissions.
+> **Source:** Milestone 1: CHET-Stack → Permissions (see Sprint 7.1, Phase 5).
 > **Purpose:** Row-level access control for real-time data sync — users only see/write
 > records they have permission to access.
 
@@ -2151,7 +2083,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 #### Sprint 6 Cross-Reference Summary
 
-> Maps Sprint 6 items to ROADMAP.md milestones and other source documents.
+> Maps Sprint 6 items to their source milestones and documents.
 
 | Source Document  | Source Section                    | Sprint 6 Items                    | Coverage                                                                                     |
 | ---------------- | --------------------------------- | --------------------------------- | -------------------------------------------------------------------------------------------- |
@@ -2176,6 +2108,209 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 | V5 Architecture Migration (was 6.3)                                     | Cosmetic directory restructuring with zero functional benefit — deleted from ROADMAP |
 | Advanced Security: BFF proxy, step-up auth, "remember device" (was 6.4) | Passport.js Phase 5 features — deleted from ROADMAP as over-engineering              |
 | Mobile App Foundation (was 6.8)                                         | Product-Specific features — deleted from ROADMAP as app-specific, not platform       |
+
+---
+
+### Sprint 7: Enterprise Platform Growth
+
+> **Goal:** Platform capabilities that require enterprise customers, dedicated platform engineers,
+> or teams of 5+.
+>
+> **Prerequisite:** Sprints 1–6 complete. These are enterprise differentiators — not MVP features.
+> Activate each milestone when business conditions warrant: enterprise customers signed, platform
+> engineer on staff, or traffic that justifies horizontal scaling.
+
+---
+
+#### 7.1 CHET-Stack Real-Time Collaboration (Milestone 1)
+
+> **Infrastructure already complete (261 tests total):** `RecordCache` (69), `WebSocketServer`,
+> `WebSocketPubSubClient` (20), `SubscriptionCache` (20), `RecordStorage` (31),
+> `TransactionQueue` (26), `LoaderCache` (57), `UndoRedoStack` (38), conflict resolution.
+> `WriteService` (`apps/server/src/infra/write/`) provides transaction handling, version
+> bumping, and auto-pubsub. Sprint 6.2 covers React hook wiring; this sprint captures the
+> remaining foundation, sync, offline, and permission gaps.
+
+**Phase 1 — Foundation:**
+
+- [ ] DB: `version` field on all syncable tables
+- [ ] Infra: `infra/realtime` — transaction types (`WriteTransaction`, `ReadTransaction`, `ConflictError`)
+- [ ] Route: `POST /api/realtime/write` — transactional multi-record write with version bumping
+- [ ] Route: `GET /api/realtime/getRecords` — batch record fetch with version filters
+
+**Phase 2 — Real-Time Sync:**
+
+- [ ] Client: `RealtimeContext` and `RealtimeProvider` — React context wrapping `WebSocketPubSubClient`
+- [ ] Service: version-based update notifications — server pushes version delta on record change
+
+**Phase 3 — Offline Support:**
+
+- [ ] Infra: service worker for asset caching (`RecordStorage`, `TransactionQueue`, `LoaderCache` already exist)
+
+**Phase 4 — Undo/Redo UI:**
+
+> `UndoRedoStack` (38 tests), `undoRedoStore`, and `useUndoRedoShortcuts` already exist.
+
+- [ ] UI: keyboard shortcuts — Cmd+Z / Cmd+Shift+Z wired to `UndoRedoStack`
+- [ ] UI: undo/redo availability indicators — use `onStateChange` callback
+
+**Phase 5 — Row-Level Permissions:**
+
+- [ ] Service: row-level read validation — filter records by user permission set before returning
+- [ ] Service: row-level write validation — reject writes to records user cannot modify
+- [ ] Service: permission records loading — preload user permissions on connection/auth
+- [ ] Service: workspace permission pattern — workspace members see workspace records
+- [ ] Service: board/project permission pattern — per-board access control (viewer, editor, admin)
+- [ ] Service: task/record ownership pattern — owner + shared-with permissions
+- [ ] Service: permission inheritance — workspace admin overrides board restrictions
+- [ ] Service: permission-aware subscriptions — WebSocket only publishes to authorized subscribers
+- [ ] Service: permission change propagation — revoke → remove from subscription + client cache
+- [ ] Client: `useRecord`/`useRecords` honor permissions — 403 graceful handling in hooks
+
+**Phase 6 — React Hooks:**
+
+- [ ] Hook: `useRecord<T>(table, id)` — single record subscription with real-time updates
+- [ ] Hook: `useRecords<T>(table, filters)` — collection subscription
+- [ ] Hook: `useWrite()` — optimistic write with offline queue
+- [ ] Hook: `useUndoRedo()` — undo/redo controls bound to `UndoRedoStack`
+
+**Tests:**
+
+- [ ] E2E: two browser tabs → edit in tab A → update appears in tab B; offline → online → sync
+- [ ] Integration: permission revoked → user stops receiving updates immediately
+- [ ] Integration: user A writes record → user B (no permission) does not receive update
+- [ ] Integration: create record → undo → record removed → redo → record restored
+
+---
+
+#### 7.2 WebAuthn / Passkeys (Milestone 2)
+
+> Standalone — no Passport.js dependency. See Sprint 6.1 for full implementation detail.
+
+- [ ] DB: `webauthn_credentials` table — migration, schema, repository
+- [ ] Service: registration challenge + attestation verification (`@simplewebauthn/server`)
+- [ ] Service: authentication challenge + assertion verification, counter validation
+- [ ] Config: `auth.webauthn` — `rpName`, `rpId`, `origin`, `attestation` preference
+- [ ] Routes: `POST /api/auth/webauthn/register/*`, `POST /api/auth/webauthn/login/*`
+- [ ] Routes: `GET|PATCH|DELETE /api/users/me/passkeys/:id`
+- [ ] UI: passkey registration flow in Security settings → browser prompt → success
+- [ ] UI: passkey management list — name, device type, last used, rename/delete
+- [ ] UI: passkey login option on login page (conditional on `PublicKeyCredential` availability)
+- [ ] Tests: unit (challenge gen, attestation mock, assertion mock, counter validation), integration, E2E
+
+---
+
+#### 7.3 Infrastructure Improvements
+
+> Already complete: error serialization (`.toJSON()`), correlation IDs, route registry, modular
+> server composition (`QueueServer`). These items close the remaining gaps.
+
+**Error Handling & Logging:**
+
+- [ ] Service: request context logging — IP, HTTP method, path, user agent attached per request
+- [ ] Service: conditional severity logging — `500+` at ERROR level, `4xx` at WARN/DEBUG
+
+**API Versioning & Generated Client:**
+
+- [ ] Infra: API versioning strategy — header-based or path-based (`/api/v1/`)
+- [ ] Tool: `@bslt/api-client` — npm-publishable package generated from ts-rest contracts
+- [ ] Tool: React Query hook generation from client definitions
+- [ ] CI: auto-regenerate client on schema/route change (pre-commit hook or CI step)
+
+---
+
+#### 7.4 Scaling & Performance Infrastructure
+
+> Activate when traffic justifies horizontal deployment.
+
+**Session & Queue:**
+
+- [ ] Service: Redis session store for horizontal scaling (JWT-based today — add when needed)
+- [ ] Infra: Redis-backed shared job queue for multi-instance deployments (`MemoryQueueStore` sufficient until then)
+
+**CDN & Asset Delivery:**
+
+- [ ] Infra: CDN configuration — Cloudflare, CloudFront, or BunnyCDN for static assets
+- [ ] Service: image CDN — on-the-fly resize/optimize via Imgproxy or CDN transform
+- [ ] Service: edge caching rules — 1-year static, no-cache API, short-TTL HTML
+
+**Load Testing:**
+
+- [ ] Test: 500+ concurrent users under multi-instance deployment — no dropped connections
+- [ ] Test: cache hit/miss/invalidation lifecycle
+- [ ] Test: read replica routing — writes → primary, reads → replica
+
+---
+
+#### Sprint 7 Priority Matrix
+
+| Priority   | Area          | Items                                               |
+| ---------- | ------------- | --------------------------------------------------- |
+| **High**   | Real-Time     | React hooks (Phase 6), `RealtimeProvider` (Phase 2) |
+| **Medium** | Security      | WebAuthn / Passkeys (Milestone 2)                   |
+| **Medium** | Backend       | API versioning, generated `@bslt/api-client`        |
+| **Low**    | Observability | Request context logging, severity-conditional logs  |
+| **Low**    | Scaling       | Redis, CDN, load testing — activate on demand       |
+
+---
+
+## Architectural Concerns (Post-Sprint 3 Analysis)
+
+> Added 2026-02-20 after evaluating Gemini & ChatGPT audits against the actual codebase.
+> These are real issues confirmed by code inspection — not speculative.
+
+### 1. Move `bootstrapSystem()` from `@bslt/core` to `@bslt/server-system`
+
+`main/server/core/src/bootstrap.ts` contains `bootstrapSystem()` which creates `SystemContext`
+(DB client, cache, queue, pubsub, repos, write service, error tracker, storage, email, SMS,
+billing, notifications). This is **infrastructure assembly**, not business logic — it belongs
+in `@bslt/server-system`, not `@bslt/core`.
+
+- [ ] Move `bootstrapSystem()` + `SystemContext` type to `@bslt/server-system`
+- [ ] Re-export from `@bslt/core` for backwards compatibility during migration
+- [ ] Update `main/apps/server/src/manager.ts` import to point at `@bslt/server-system`
+- [ ] Remove the re-export from `@bslt/core` once all consumers are updated
+
+### 2. Fix `@bslt/server-system` → `@bslt/db` dependency inversion
+
+`@bslt/server-system` depends on `@bslt/db` for search factory, write service, and queue
+types. This is backwards — both are infrastructure packages at the same layer.
+
+Root cause: `@bslt/db` does double duty — pure data access **and** Postgres-backed
+infrastructure services (queue store, pubsub, search provider) that should live in
+`server-system`.
+
+- [ ] Move `PostgresQueueStore` from `@bslt/db` to `@bslt/server-system`
+- [ ] Move `PostgresPubSub` from `@bslt/db` to `@bslt/server-system`
+- [ ] Move `SqlSearchProvider` + factory from `@bslt/db` to `@bslt/server-system`
+- [ ] Move `WriteService` from `@bslt/db` to `@bslt/server-system`
+- [ ] `@bslt/server-system` depends on `@bslt/db` only for `DbClient` type (thin, justified)
+- [ ] Eliminate duplicated `SearchProviderFactory` (exists in both packages)
+
+### 3. Add subpath exports to `@bslt/server-system`
+
+The barrel file `main/server/system/src/index.ts` re-exports ~300 symbols. Only 3 subpath
+exports exist today (`.`, `./config`, `./logger`). Add granular subpaths so consumers import
+only what they need:
+
+- [ ] `@bslt/server-system/cache`
+- [ ] `@bslt/server-system/security`
+- [ ] `@bslt/server-system/storage`
+- [ ] `@bslt/server-system/queue`
+- [ ] `@bslt/server-system/search`
+- [ ] `@bslt/server-system/email`
+- [ ] `@bslt/server-system/routing`
+- [ ] `@bslt/server-system/observability`
+
+### 4. Clean up double-casts in `App` constructor
+
+`main/apps/server/src/app.ts` lines 72-85 use `as unknown as` double-casts to force
+incompatible types. This is a symptom of `SystemContext` and `AppContext` having divergent
+shapes. Fix by aligning the context interfaces properly after the `bootstrapSystem()` move.
+
+- [ ] Audit `App.constructor()` double-casts
+- [ ] Align `SystemContext` and `AppContext` interfaces
+- [ ] Remove `as unknown as` casts
 
 ---
 

@@ -31,7 +31,7 @@ import {
   TableRow,
   Text,
 } from '@bslt/ui';
-import { ReactElement, useCallback, useState, type ChangeEvent } from 'react';
+import { useCallback, useState, type ChangeEvent, type ReactElement } from 'react';
 
 import type { AdminBillingClientConfig } from '@bslt/api';
 import type {

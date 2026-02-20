@@ -14,14 +14,15 @@ import {
   createRouteMap,
   publicRoute,
   type HandlerContext,
+  type HttpReply,
+  type HttpRequest,
   type RouteDefinition,
 } from '../../../../system/src';
 
 import { handleMagicLinkRequest, handleMagicLinkVerify } from './handlers';
 
-import type { MagicLinkRequest, MagicLinkVerifyRequest } from '@bslt/shared';
-import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../types';
+import type { MagicLinkRequest, MagicLinkVerifyRequest } from '@bslt/shared';
 
 /**
  * Narrow HandlerContext to AppContext.
@@ -47,7 +48,7 @@ export const magicLinkRouteEntries: [string, RouteDefinition][] = [
     'auth/magic-link/request',
     publicRoute(
       'POST',
-      async (ctx: HandlerContext, body: unknown, req: FastifyRequest) => {
+      async (ctx: HandlerContext, body: unknown, req: HttpRequest) => {
         return handleMagicLinkRequest(
           asAppContext(ctx),
           body as MagicLinkRequest,
@@ -63,7 +64,7 @@ export const magicLinkRouteEntries: [string, RouteDefinition][] = [
     'auth/magic-link/verify',
     publicRoute(
       'POST',
-      async (ctx: HandlerContext, body: unknown, req: FastifyRequest, reply: FastifyReply) => {
+      async (ctx: HandlerContext, body: unknown, req: HttpRequest, reply: HttpReply) => {
         return handleMagicLinkVerify(
           asAppContext(ctx),
           body as MagicLinkVerifyRequest,

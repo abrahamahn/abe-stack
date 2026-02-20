@@ -31,6 +31,7 @@ const createMockDb = (): RawDb => ({
   healthCheck: vi.fn(),
   close: vi.fn(),
   getClient: vi.fn() as RawDb['getClient'],
+  withSession: vi.fn() as RawDb['withSession'],
 });
 
 // ============================================================================
@@ -121,11 +122,12 @@ describe('createCustomerMappingRepository', () => {
       const repo = createCustomerMappingRepository(mockDb);
       await repo.findByUserIdAndProvider('user-456', 'stripe');
 
-      const call = vi.mocked(mockDb.queryOne).mock.calls[0][0];
-      expect(call.text).toContain('user_id');
-      expect(call.text).toContain('provider');
-      expect(call.values).toContain('user-456');
-      expect(call.values).toContain('stripe');
+      expect(vi.mocked(mockDb.queryOne)).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: expect.stringContaining('user_id'),
+          values: expect.arrayContaining(['user-456', 'stripe']),
+        }),
+      );
     });
 
     it('should handle different user and provider combinations', async () => {
@@ -179,11 +181,12 @@ describe('createCustomerMappingRepository', () => {
       const repo = createCustomerMappingRepository(mockDb);
       await repo.findByProviderCustomerId('stripe', 'cus_stripe123');
 
-      const call = vi.mocked(mockDb.queryOne).mock.calls[0][0];
-      expect(call.text).toContain('provider');
-      expect(call.text).toContain('provider_customer_id');
-      expect(call.values).toContain('stripe');
-      expect(call.values).toContain('cus_stripe123');
+      expect(vi.mocked(mockDb.queryOne)).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: expect.stringContaining('provider_customer_id'),
+          values: expect.arrayContaining(['stripe', 'cus_stripe123']),
+        }),
+      );
     });
 
     it('should differentiate between providers with same-looking IDs', async () => {
@@ -229,7 +232,7 @@ describe('createCustomerMappingRepository', () => {
       const repo = createCustomerMappingRepository(mockDb);
       const result = await repo.findByUserId('user-456');
 
-      expect(result[0].createdAt.getTime()).toBeLessThan(result[1].createdAt.getTime());
+      expect(result[0]?.createdAt.getTime() ?? 0).toBeLessThan(result[1]?.createdAt.getTime() ?? 0);
     });
 
     it('should handle single mapping', async () => {
@@ -275,8 +278,8 @@ describe('createCustomerMappingRepository', () => {
       const repo = createCustomerMappingRepository(mockDb);
       const result = await repo.create(newMapping);
 
-      expect(result?.userId).toBe('user-new');
-      expect(result?.provider).toBe('stripe');
+      expect(result.userId).toBe('user-new');
+      expect(result.provider).toBe('stripe');
       expect(result.providerCustomerId).toBe('cus_new123');
       expect(result.id).toBe('mapping-new');
       expect(result.createdAt).toBeInstanceOf(Date);
@@ -300,7 +303,7 @@ describe('createCustomerMappingRepository', () => {
       const repo = createCustomerMappingRepository(mockDb);
       const result = await repo.create(newMapping);
 
-      expect(result?.provider).toBe('paypal');
+      expect(result.provider).toBe('paypal');
     });
 
     it('should convert camelCase to snake_case for database', async () => {
@@ -315,10 +318,11 @@ describe('createCustomerMappingRepository', () => {
       const repo = createCustomerMappingRepository(mockDb);
       await repo.create(newMapping);
 
-      const call = vi.mocked(mockDb.queryOne).mock.calls[0][0];
-      expect(call.text).toContain('INSERT');
-      expect(call.text).toContain('customer_mappings');
-      expect(call.text).toContain('RETURNING');
+      expect(vi.mocked(mockDb.queryOne)).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: expect.stringMatching(/INSERT.*customer_mappings.*RETURNING/s),
+        }),
+      );
     });
 
     it('should throw error if insert fails', async () => {
@@ -410,10 +414,12 @@ describe('createCustomerMappingRepository', () => {
       const repo = createCustomerMappingRepository(mockDb);
       await repo.delete('mapping-specific');
 
-      const call = vi.mocked(mockDb.execute).mock.calls[0][0];
-      expect(call.text).toContain('WHERE');
-      expect(call.text).toContain('id');
-      expect(call.values).toContain('mapping-specific');
+      expect(vi.mocked(mockDb.execute)).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: expect.stringContaining('WHERE'),
+          values: expect.arrayContaining(['mapping-specific']),
+        }),
+      );
     });
 
     it('should delete from customer_mappings table', async () => {
@@ -422,8 +428,11 @@ describe('createCustomerMappingRepository', () => {
       const repo = createCustomerMappingRepository(mockDb);
       await repo.delete('mapping-123');
 
-      const call = vi.mocked(mockDb.execute).mock.calls[0][0];
-      expect(call.text).toContain('customer_mappings');
+      expect(vi.mocked(mockDb.execute)).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: expect.stringContaining('customer_mappings'),
+        }),
+      );
     });
   });
 
@@ -453,11 +462,12 @@ describe('createCustomerMappingRepository', () => {
       const repo = createCustomerMappingRepository(mockDb);
       await repo.deleteByUserId('user-multi');
 
-      const call = vi.mocked(mockDb.execute).mock.calls[0][0];
-      expect(call.text).toContain('DELETE');
-      expect(call.text).toContain('WHERE');
-      expect(call.text).toContain('user_id');
-      expect(call.values).toContain('user-multi');
+      expect(vi.mocked(mockDb.execute)).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: expect.stringContaining('user_id'),
+          values: expect.arrayContaining(['user-multi']),
+        }),
+      );
     });
 
     it('should delete mappings for all providers', async () => {
@@ -533,7 +543,7 @@ describe('createCustomerMappingRepository', () => {
       const repo = createCustomerMappingRepository(mockDb);
       const result = await repo.getOrCreate('user-stripe', 'stripe', createCustomerId);
 
-      expect(result?.provider).toBe('stripe');
+      expect(result.provider).toBe('stripe');
       expect(result.providerCustomerId).toBe('cus_new_stripe');
     });
 
@@ -550,7 +560,7 @@ describe('createCustomerMappingRepository', () => {
       const repo = createCustomerMappingRepository(mockDb);
       const result = await repo.getOrCreate('user-paypal', 'paypal', createCustomerId);
 
-      expect(result?.provider).toBe('paypal');
+      expect(result.provider).toBe('paypal');
       expect(result.providerCustomerId).toBe('PAYPAL_NEW');
     });
 
@@ -653,8 +663,8 @@ describe('createCustomerMappingRepository', () => {
       const result = await repo.findByUserId('user-456');
 
       expect(result).toHaveLength(3);
-      expect(result[0].id).toBe('map-1');
-      expect(result[2].id).toBe('map-3');
+      expect(result[0]?.id).toBe('map-1');
+      expect(result[2]?.id).toBe('map-3');
     });
 
     it('should handle concurrent getOrCreate calls correctly', async () => {

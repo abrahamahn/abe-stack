@@ -18,6 +18,7 @@ import {
   WORKSPACE_ID_HEADER,
 } from '@bslt/shared';
 
+import type { Repositories } from '../../../../db/src';
 import type {
   AuthContext,
   PolicyAction,
@@ -26,7 +27,6 @@ import type {
   WorkspaceContext,
 } from '@bslt/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import type { Repositories } from '../../../../db/src';
 
 // ============================================================================
 // Types
@@ -209,7 +209,7 @@ export function buildAuthContext(
     .user;
   const workspaceCtx = getRequestWorkspaceContext(request);
 
-  const appRole = user?.role ?? 'user';
+  const appRole = (user?.role ?? 'user') as 'admin' | 'moderator' | 'user';
   const tenantRole: TenantRole | undefined =
     workspaceCtx?.role !== undefined ? (workspaceCtx.role as TenantRole) : undefined;
   const ownerFlag = isOwner !== undefined ? isOwner(request) : undefined;

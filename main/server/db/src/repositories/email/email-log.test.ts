@@ -27,6 +27,7 @@ const createMockDb = (): RawDb =>
     getClient: vi.fn() as RawDb['getClient'],
     queryOne: vi.fn(),
     execute: vi.fn(),
+    withSession: vi.fn() as RawDb['withSession'],
   }) as unknown as RawDb;
 
 // ============================================================================
@@ -96,7 +97,7 @@ describe('createEmailLogRepository', () => {
       const result = await repo.findByUserId('user-001');
 
       expect(result).toHaveLength(1);
-      expect(result[0].userId).toBe('user-001');
+      expect(result[0]?.userId).toBe('user-001');
       expect(mockDb.query).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining('user_id'),
@@ -122,7 +123,7 @@ describe('createEmailLogRepository', () => {
       const result = await repo.findByRecipient('test@example.com');
 
       expect(result).toHaveLength(1);
-      expect(result[0].recipient).toBe('test@example.com');
+      expect(result[0]?.recipient).toBe('test@example.com');
       expect(mockDb.query).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining('recipient'),

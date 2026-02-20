@@ -16,14 +16,14 @@ import {
   createInvoiceRepository,
   createPlanRepository,
   createSubscriptionRepository,
-  type RawDb,
 } from '../../../../db/src';
 
 import { handleStripeWebhook } from './stripe-webhook';
 
+import type { CustomerMapping, Plan, RawDb } from '../../../../db/src';
+import type { WebhookRepositories } from '../types';
 import type { NormalizedWebhookEvent, ServerLogger } from '@bslt/shared';
 import type { StripeProviderConfig as StripeConfig } from '@bslt/shared/config';
-import type { WebhookRepositories } from '../types';
 
 // ============================================================================
 // Mock Dependencies
@@ -641,8 +641,8 @@ describe('handleStripeWebhook', () => {
       vi.mocked(mockRepos.billingEvents.wasProcessed).mockResolvedValue(false);
       vi.mocked(mockRepos.customerMappings.findByProviderCustomerId).mockResolvedValue({
         userId: 'user_1',
-      } as any);
-      vi.mocked(mockRepos.plans.findById).mockResolvedValue({ id: 'plan_1' } as any);
+      } as unknown as CustomerMapping);
+      vi.mocked(mockRepos.plans.findById).mockResolvedValue({ id: 'plan_1' } as unknown as Plan);
 
       await handleStripeWebhook(payload, signature, mockConfig, mockRepos, mockLog);
 

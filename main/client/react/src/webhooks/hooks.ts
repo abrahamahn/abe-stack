@@ -6,7 +6,7 @@
  * Uses useQuery for reads and useMutation for writes.
  */
 
-import { createWebhookClient } from '@bslt/api';
+import { createWebhookClient } from '@bslt/client-engine';
 import { useCallback, useMemo } from 'react';
 
 import { useMutation } from '../query/useMutation';
@@ -16,9 +16,10 @@ import type {
   CreateWebhookRequest,
   UpdateWebhookRequest,
   WebhookClientConfig,
+  WebhookDeliveryItem,
   WebhookItem,
   WebhookWithDeliveries,
-} from '@bslt/api';
+} from '@bslt/client-engine';
 
 // ============================================================================
 // Query Keys
@@ -28,6 +29,7 @@ export const webhookQueryKeys = {
   all: ['webhooks'] as const,
   list: () => [...webhookQueryKeys.all, 'list'] as const,
   detail: (id: string) => [...webhookQueryKeys.all, 'detail', id] as const,
+  deliveries: (webhookId: string) => [...webhookQueryKeys.all, 'deliveries', webhookId] as const,
 } as const;
 
 // ============================================================================
@@ -42,7 +44,7 @@ export interface WebhooksState {
 }
 
 export function useWebhooks(clientConfig: WebhookClientConfig): WebhooksState {
-  const client = useMemo(() => createWebhookClient(clientConfig), [clientConfig.baseUrl]);
+  const client = useMemo(() => createWebhookClient(clientConfig), [clientConfig]);
 
   const query = useQuery({
     queryKey: webhookQueryKeys.list(),
@@ -51,7 +53,7 @@ export function useWebhooks(clientConfig: WebhookClientConfig): WebhooksState {
 
   const handleRefresh = useCallback(async (): Promise<void> => {
     await query.refetch();
-  }, [query.refetch]);
+  }, [query]);
 
   return {
     webhooks: query.data?.webhooks ?? [],
@@ -76,7 +78,7 @@ export function useWebhook(
   clientConfig: WebhookClientConfig,
   id: string | null,
 ): WebhookDetailState {
-  const client = useMemo(() => createWebhookClient(clientConfig), [clientConfig.baseUrl]);
+  const client = useMemo(() => createWebhookClient(clientConfig), [clientConfig]);
 
   const query = useQuery({
     queryKey: webhookQueryKeys.detail(id ?? ''),
@@ -86,7 +88,7 @@ export function useWebhook(
 
   const handleRefresh = useCallback(async (): Promise<void> => {
     await query.refetch();
-  }, [query.refetch]);
+  }, [query]);
 
   return {
     webhook: query.data?.webhook ?? null,
@@ -110,7 +112,7 @@ export function useCreateWebhook(
   clientConfig: WebhookClientConfig,
   options?: { onSuccess?: () => void },
 ): CreateWebhookState {
-  const client = useMemo(() => createWebhookClient(clientConfig), [clientConfig.baseUrl]);
+  const client = useMemo(() => createWebhookClient(clientConfig), [clientConfig]);
 
   const mutation = useMutation({
     mutationFn: (data: CreateWebhookRequest) => client.create(data),
@@ -124,7 +126,7 @@ export function useCreateWebhook(
     async (data: CreateWebhookRequest): Promise<void> => {
       await mutation.mutateAsync(data);
     },
-    [mutation.mutateAsync],
+    [mutation],
   );
 
   return { create: handleCreate, isLoading: mutation.isPending, error: mutation.error ?? null };
@@ -144,7 +146,7 @@ export function useUpdateWebhook(
   clientConfig: WebhookClientConfig,
   options?: { onSuccess?: () => void },
 ): UpdateWebhookState {
-  const client = useMemo(() => createWebhookClient(clientConfig), [clientConfig.baseUrl]);
+  const client = useMemo(() => createWebhookClient(clientConfig), [clientConfig]);
 
   const mutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateWebhookRequest }) =>
@@ -159,7 +161,7 @@ export function useUpdateWebhook(
     async (id: string, data: UpdateWebhookRequest): Promise<void> => {
       await mutation.mutateAsync({ id, data });
     },
-    [mutation.mutateAsync],
+    [mutation],
   );
 
   return { update: handleUpdate, isLoading: mutation.isPending, error: mutation.error ?? null };
@@ -179,7 +181,7 @@ export function useDeleteWebhook(
   clientConfig: WebhookClientConfig,
   options?: { onSuccess?: () => void },
 ): DeleteWebhookState {
-  const client = useMemo(() => createWebhookClient(clientConfig), [clientConfig.baseUrl]);
+  const client = useMemo(() => createWebhookClient(clientConfig), [clientConfig]);
 
   const mutation = useMutation({
     mutationFn: (id: string) => client.remove(id),
@@ -193,7 +195,7 @@ export function useDeleteWebhook(
     async (id: string): Promise<void> => {
       await mutation.mutateAsync(id);
     },
-    [mutation.mutateAsync],
+    [mutation],
   );
 
   return { remove: handleRemove, isLoading: mutation.isPending, error: mutation.error ?? null };
@@ -214,7 +216,7 @@ export function useRotateWebhookSecret(
   clientConfig: WebhookClientConfig,
   options?: { onSuccess?: () => void },
 ): RotateWebhookSecretState {
-  const client = useMemo(() => createWebhookClient(clientConfig), [clientConfig.baseUrl]);
+  const client = useMemo(() => createWebhookClient(clientConfig), [clientConfig]);
 
   const mutation = useMutation({
     mutationFn: (id: string) => client.rotateSecret(id),
@@ -227,7 +229,7 @@ export function useRotateWebhookSecret(
     async (id: string): Promise<void> => {
       await mutation.mutateAsync(id);
     },
-    [mutation.mutateAsync],
+    [mutation],
   );
 
   return {
@@ -235,5 +237,82 @@ export function useRotateWebhookSecret(
     isLoading: mutation.isPending,
     error: mutation.error ?? null,
     newSecret: mutation.data?.webhook.secret ?? null,
+  };
+}
+
+// ============================================================================
+// useWebhookDeliveries
+// ============================================================================
+
+export interface WebhookDeliveriesState {
+  deliveries: WebhookDeliveryItem[];
+  isLoading: boolean;
+  error: Error | null;
+  refresh: () => Promise<void>;
+}
+
+export function useWebhookDeliveries(
+  clientConfig: WebhookClientConfig,
+  webhookId: string | null,
+): WebhookDeliveriesState {
+  const client = useMemo(() => createWebhookClient(clientConfig), [clientConfig]);
+
+  const query = useQuery({
+    queryKey: webhookQueryKeys.deliveries(webhookId ?? ''),
+    queryFn: () => client.listDeliveries(webhookId as string),
+    enabled: webhookId !== null,
+  });
+
+  const handleRefresh = useCallback(async (): Promise<void> => {
+    await query.refetch();
+  }, [query]);
+
+  return {
+    deliveries: query.data?.deliveries ?? [],
+    isLoading: query.isLoading,
+    error: query.error ?? null,
+    refresh: handleRefresh,
+  };
+}
+
+// ============================================================================
+// useReplayDelivery
+// ============================================================================
+
+export interface ReplayDeliveryState {
+  replay: (deliveryId: string) => Promise<void>;
+  isLoading: boolean;
+  error: Error | null;
+}
+
+export function useReplayDelivery(
+  clientConfig: WebhookClientConfig,
+  options?: { onSuccess?: () => void; webhookId?: string },
+): ReplayDeliveryState {
+  const client = useMemo(() => createWebhookClient(clientConfig), [clientConfig]);
+
+  const invalidateKeys = options?.webhookId
+    ? [webhookQueryKeys.deliveries(options.webhookId), webhookQueryKeys.detail(options.webhookId)]
+    : [];
+
+  const mutation = useMutation({
+    mutationFn: (deliveryId: string) => client.replayDelivery(deliveryId),
+    onSuccess: () => {
+      options?.onSuccess?.();
+    },
+    invalidateOnSuccess: invalidateKeys,
+  });
+
+  const handleReplay = useCallback(
+    async (deliveryId: string): Promise<void> => {
+      await mutation.mutateAsync(deliveryId);
+    },
+    [mutation],
+  );
+
+  return {
+    replay: handleReplay,
+    isLoading: mutation.isPending,
+    error: mutation.error ?? null,
   };
 }

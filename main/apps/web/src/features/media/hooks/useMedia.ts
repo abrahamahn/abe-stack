@@ -7,6 +7,7 @@
 
 import { getAccessToken } from '@app/authToken';
 import { useMutation, useQuery } from '@bslt/react';
+import { clientConfig } from '@config';
 import { useEffect } from 'react';
 
 import { createMediaApi } from '../api';
@@ -18,12 +19,10 @@ import type { MediaMetadata, MediaStatusResponse, MediaUploadResponse } from '..
 // ============================================================================
 
 let mediaApi: ReturnType<typeof createMediaApi> | null = null;
-const apiBaseUrl =
-  typeof import.meta.env['VITE_API_URL'] === 'string' ? import.meta.env['VITE_API_URL'] : '';
 
 function getMediaApi(): ReturnType<typeof createMediaApi> {
   mediaApi ??= createMediaApi({
-    baseUrl: apiBaseUrl,
+    baseUrl: clientConfig.apiUrl,
     getToken: getAccessToken,
   });
   return mediaApi;

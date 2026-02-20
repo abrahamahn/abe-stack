@@ -7,6 +7,7 @@
 
 import { getAccessToken } from '@app/authToken';
 import { useMutation, useQuery, useQueryCache } from '@bslt/react';
+import { clientConfig } from '@config';
 
 import {
   createSettingsApi,
@@ -21,12 +22,10 @@ import {
 // ============================================================================
 
 let settingsApi: ReturnType<typeof createSettingsApi> | null = null;
-const apiBaseUrl =
-  typeof import.meta.env['VITE_API_URL'] === 'string' ? import.meta.env['VITE_API_URL'] : '';
 
 function getSettingsApi(): ReturnType<typeof createSettingsApi> {
   settingsApi ??= createSettingsApi({
-    baseUrl: apiBaseUrl,
+    baseUrl: clientConfig.apiUrl,
     getToken: getAccessToken,
   });
   return settingsApi;

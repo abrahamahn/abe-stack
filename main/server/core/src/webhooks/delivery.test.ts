@@ -37,15 +37,10 @@ function createMockRepos(): Repositories {
     memberships: {} as Repositories['memberships'],
     users: {} as Repositories['users'],
     refreshTokens: {} as Repositories['refreshTokens'],
-    refreshTokenFamilies: {} as Repositories['refreshTokenFamilies'],
     loginAttempts: {} as Repositories['loginAttempts'],
-    passwordResetTokens: {} as Repositories['passwordResetTokens'],
-    emailVerificationTokens: {} as Repositories['emailVerificationTokens'],
+    authTokens: {} as Repositories['authTokens'],
     securityEvents: {} as Repositories['securityEvents'],
     totpBackupCodes: {} as Repositories['totpBackupCodes'],
-    emailChangeTokens: {} as Repositories['emailChangeTokens'],
-    emailChangeRevertTokens: {} as Repositories['emailChangeRevertTokens'],
-    magicLinkTokens: {} as Repositories['magicLinkTokens'],
     oauthConnections: {} as Repositories['oauthConnections'],
     apiKeys: {} as Repositories['apiKeys'],
     pushSubscriptions: {} as Repositories['pushSubscriptions'],
@@ -66,8 +61,7 @@ function createMockRepos(): Repositories {
     usageMetrics: {} as Repositories['usageMetrics'],
     usageSnapshots: {} as Repositories['usageSnapshots'],
     legalDocuments: {} as Repositories['legalDocuments'],
-    userAgreements: {} as Repositories['userAgreements'],
-    consentLogs: {} as Repositories['consentLogs'],
+    consentRecords: {} as Repositories['consentRecords'],
     dataExportRequests: {} as Repositories['dataExportRequests'],
     activities: {} as Repositories['activities'],
     webauthnCredentials: {} as Repositories['webauthnCredentials'],
@@ -443,5 +437,266 @@ describe('recordDeliveryResult', () => {
     const updateArg = updateCall?.[1] as Record<string, unknown> | undefined;
     const savedBody = updateArg?.['responseBody'] as string;
     expect(savedBody).toHaveLength(4096);
+  });
+
+  it('endpoint returns 200: delivery marked successful, no retry scheduled', async () => {
+    vi.mocked(repos.webhookDeliveries.findById).mockResolvedValue(baseDelivery);
+    vi.mocked(repos.webhookDeliveries.update).mockResolvedValue({
+      ...baseDelivery,
+      status: 'delivered',
+      responseStatus: 200,
+      responseBody: 'success',
+      attempts: 1,
+      deliveredAt: new Date(),
+      nextRetryAt: null,
+    });
+
+    const result = await recordDeliveryResult(repos, 'del-1', 200, 'success');
+
+    expect(result?.status).toBe('delivered');
+    expect(result?.deliveredAt).toBeDefined();
+
+    // Verify nextRetryAt is explicitly null
+    const updateCall = vi.mocked(repos.webhookDeliveries.update).mock.calls[0];
+    const updateArg = updateCall?.[1] as Record<string, unknown> | undefined;
+    expect(updateArg?.['nextRetryAt']).toBeNull();
+    expect(updateArg?.['status']).toBe('delivered');
+  });
+
+  it('endpoint returns 500: retry scheduled with exponential backoff (attempt 1 = 1 min)', async () => {
+    vi.mocked(repos.webhookDeliveries.findById).mockResolvedValue(baseDelivery);
+    vi.mocked(repos.webhookDeliveries.update).mockResolvedValue({
+      ...baseDelivery,
+      status: 'failed',
+      responseStatus: 500,
+      attempts: 1,
+      nextRetryAt: new Date(Date.now() + 60_000),
+    });
+
+    const beforeCall = Date.now();
+    await recordDeliveryResult(repos, 'del-1', 500, 'server error');
+
+    const updateCall = vi.mocked(repos.webhookDeliveries.update).mock.calls[0];
+    const updateArg = updateCall?.[1] as Record<string, unknown> | undefined;
+
+    // Status should be 'failed' (not dead), since retries remain
+    expect(updateArg?.['status']).toBe('failed');
+    expect(updateArg?.['attempts']).toBe(1);
+
+    // nextRetryAt should be approximately 1 minute in the future
+    const nextRetryAt = updateArg?.['nextRetryAt'] as Date;
+    expect(nextRetryAt).toBeDefined();
+    expect(nextRetryAt).not.toBeNull();
+    const delayMs = nextRetryAt.getTime() - beforeCall;
+    // Allow some tolerance (50ms-70s)
+    expect(delayMs).toBeGreaterThan(50_000);
+    expect(delayMs).toBeLessThan(70_000);
+  });
+
+  it('endpoint returns 500 on attempt 2: retry scheduled with 5 minute delay', async () => {
+    const delivery2 = { ...baseDelivery, attempts: 1 };
+    vi.mocked(repos.webhookDeliveries.findById).mockResolvedValue(delivery2);
+    vi.mocked(repos.webhookDeliveries.update).mockResolvedValue({
+      ...delivery2,
+      status: 'failed',
+      responseStatus: 500,
+      attempts: 2,
+      nextRetryAt: new Date(Date.now() + 5 * 60_000),
+    });
+
+    const beforeCall = Date.now();
+    await recordDeliveryResult(repos, 'del-1', 500, 'still failing');
+
+    const updateCall = vi.mocked(repos.webhookDeliveries.update).mock.calls[0];
+    const updateArg = updateCall?.[1] as Record<string, unknown> | undefined;
+    expect(updateArg?.['status']).toBe('failed');
+    expect(updateArg?.['attempts']).toBe(2);
+
+    const nextRetryAt = updateArg?.['nextRetryAt'] as Date;
+    const delayMs = nextRetryAt.getTime() - beforeCall;
+    // ~5 minutes = 300,000ms, allow tolerance
+    expect(delayMs).toBeGreaterThan(250_000);
+    expect(delayMs).toBeLessThan(350_000);
+  });
+
+  it('max retries exceeded (attempt 5): webhook marked dead, no further retries', async () => {
+    const delivery5 = { ...baseDelivery, attempts: 4 };
+    vi.mocked(repos.webhookDeliveries.findById).mockResolvedValue(delivery5);
+    vi.mocked(repos.webhookDeliveries.update).mockResolvedValue({
+      ...delivery5,
+      status: 'dead',
+      responseStatus: 503,
+      responseBody: 'unavailable',
+      attempts: 5,
+      nextRetryAt: null,
+    });
+
+    const result = await recordDeliveryResult(repos, 'del-1', 503, 'unavailable');
+
+    expect(result?.status).toBe('dead');
+    expect(result?.attempts).toBe(5);
+
+    const updateCall = vi.mocked(repos.webhookDeliveries.update).mock.calls[0];
+    const updateArg = updateCall?.[1] as Record<string, unknown> | undefined;
+    expect(updateArg?.['status']).toBe('dead');
+    expect(updateArg?.['nextRetryAt']).toBeNull();
+  });
+
+  it('marks as delivered for all 2xx status codes', async () => {
+    for (const statusCode of [200, 201, 202, 204]) {
+      vi.clearAllMocks();
+      vi.mocked(repos.webhookDeliveries.findById).mockResolvedValue(baseDelivery);
+      vi.mocked(repos.webhookDeliveries.update).mockResolvedValue({
+        ...baseDelivery,
+        status: 'delivered',
+        responseStatus: statusCode,
+        attempts: 1,
+        deliveredAt: new Date(),
+      });
+
+      await recordDeliveryResult(repos, 'del-1', statusCode, 'ok');
+
+      const updateCall = vi.mocked(repos.webhookDeliveries.update).mock.calls[0];
+      const updateArg = updateCall?.[1] as Record<string, unknown> | undefined;
+      expect(updateArg?.['status']).toBe('delivered');
+    }
+  });
+
+  it('treats non-2xx status codes as failures', async () => {
+    for (const statusCode of [400, 401, 403, 404, 500, 502, 503]) {
+      vi.clearAllMocks();
+      vi.mocked(repos.webhookDeliveries.findById).mockResolvedValue(baseDelivery);
+      vi.mocked(repos.webhookDeliveries.update).mockResolvedValue({
+        ...baseDelivery,
+        status: 'failed',
+        responseStatus: statusCode,
+        attempts: 1,
+        nextRetryAt: new Date(),
+      });
+
+      await recordDeliveryResult(repos, 'del-1', statusCode, 'error');
+
+      const updateCall = vi.mocked(repos.webhookDeliveries.update).mock.calls[0];
+      const updateArg = updateCall?.[1] as Record<string, unknown> | undefined;
+      expect(updateArg?.['status']).toBe('failed');
+    }
+  });
+});
+
+// ============================================================================
+// Tenant-Scoped Webhook Dispatch
+// ============================================================================
+
+describe('tenant-scoped webhook dispatch', () => {
+  let repos: Repositories;
+
+  beforeEach(() => {
+    repos = createMockRepos();
+  });
+
+  it('tenant A events do not trigger tenant B webhooks', async () => {
+    // Webhooks from both tenants subscribe to 'user.created'
+    vi.mocked(repos.webhooks.findActiveByEvent).mockResolvedValue([
+      {
+        id: 'wh-a1',
+        tenantId: 'tenant-a',
+        url: 'https://a.example.com/hook',
+        events: ['user.created'],
+        secret: 'secret-a',
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: 'wh-b1',
+        tenantId: 'tenant-b',
+        url: 'https://b.example.com/hook',
+        events: ['user.created'],
+        secret: 'secret-b',
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ]);
+
+    vi.mocked(repos.webhookDeliveries.create).mockResolvedValue({
+      id: 'del-a1',
+      webhookId: 'wh-a1',
+      eventType: 'user.created',
+      payload: { userId: 'u-a1' },
+      responseStatus: null,
+      responseBody: null,
+      status: 'pending',
+      attempts: 0,
+      nextRetryAt: null,
+      deliveredAt: null,
+      createdAt: new Date(),
+    });
+
+    // Dispatch event for tenant-a
+    const results = await dispatchWebhookEvent(repos, 'tenant-a', 'user.created', {
+      userId: 'u-a1',
+    });
+
+    // Only tenant-a's webhook should have a delivery created
+    expect(results).toHaveLength(1);
+    expect(results[0]?.webhookId).toBe('wh-a1');
+
+    // Delivery should have been created only once (for wh-a1)
+    expect(repos.webhookDeliveries.create).toHaveBeenCalledTimes(1);
+    expect(repos.webhookDeliveries.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        webhookId: 'wh-a1',
+        eventType: 'user.created',
+      }),
+    );
+  });
+
+  it('tenant B events do not trigger tenant A webhooks', async () => {
+    vi.mocked(repos.webhooks.findActiveByEvent).mockResolvedValue([
+      {
+        id: 'wh-a1',
+        tenantId: 'tenant-a',
+        url: 'https://a.example.com/hook',
+        events: ['user.updated'],
+        secret: 'secret-a',
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: 'wh-b1',
+        tenantId: 'tenant-b',
+        url: 'https://b.example.com/hook',
+        events: ['user.updated'],
+        secret: 'secret-b',
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ]);
+
+    vi.mocked(repos.webhookDeliveries.create).mockResolvedValue({
+      id: 'del-b1',
+      webhookId: 'wh-b1',
+      eventType: 'user.updated',
+      payload: { userId: 'u-b1' },
+      responseStatus: null,
+      responseBody: null,
+      status: 'pending',
+      attempts: 0,
+      nextRetryAt: null,
+      deliveredAt: null,
+      createdAt: new Date(),
+    });
+
+    // Dispatch event for tenant-b
+    const results = await dispatchWebhookEvent(repos, 'tenant-b', 'user.updated', {
+      userId: 'u-b1',
+    });
+
+    expect(results).toHaveLength(1);
+    expect(results[0]?.webhookId).toBe('wh-b1');
+    expect(repos.webhookDeliveries.create).toHaveBeenCalledTimes(1);
   });
 });

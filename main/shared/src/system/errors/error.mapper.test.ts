@@ -174,6 +174,37 @@ describe('mapErrorToHttpResponse', () => {
       expect(logger.warn).not.toHaveBeenCalled();
       expect(logger.error).not.toHaveBeenCalled();
     });
+
+    // Sprint 3.15: Lock reason propagation
+    it('includes lockReason in body when present on error', () => {
+      const error = new AccountLockedError({
+        lockReason: 'Violation of Terms of Service',
+        lockedUntil: '2025-06-01T00:00:00.000Z',
+      });
+      const result = mapErrorToHttpResponse(error, logger);
+      expect(result.status).toBe(429);
+      expect(result.body.lockReason).toBe('Violation of Terms of Service');
+      expect(result.body.lockedUntil).toBe('2025-06-01T00:00:00.000Z');
+    });
+
+    it('omits lockReason from body when not present on error', () => {
+      const error = new AccountLockedError();
+      const result = mapErrorToHttpResponse(error, logger);
+      expect(result.body.lockReason).toBeUndefined();
+      expect(result.body.lockedUntil).toBeUndefined();
+    });
+
+    it('includes lockReason from plain object with correct name', () => {
+      const impostor = {
+        name: AUTH_ERROR_NAMES.AccountLockedError,
+        lockReason: 'Admin lock',
+        lockedUntil: '2025-12-31T00:00:00.000Z',
+      };
+      const result = mapErrorToHttpResponse(impostor, logger);
+      expect(result.status).toBe(429);
+      expect(result.body.lockReason).toBe('Admin lock');
+      expect(result.body.lockedUntil).toBe('2025-12-31T00:00:00.000Z');
+    });
   });
 
   // ==========================================================================

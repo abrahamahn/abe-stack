@@ -14,9 +14,9 @@ import { MS_PER_HOUR } from '@bslt/shared';
 
 import { getProviderClient } from './service';
 
-import type { AuthConfig } from '@bslt/shared/config';
-import type { Repositories } from '../../../../db/src';
 import type { OAuthProviderClient } from './types';
+import type { Repositories } from '../../../../db/src';
+import type { AuthConfig } from '@bslt/shared/config';
 
 // ============================================================================
 // Constants

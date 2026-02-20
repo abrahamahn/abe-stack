@@ -6,7 +6,7 @@
  * Each command has an id, label, description, category, action, and search keywords.
  */
 
-import type { NavigateFunction } from '@abe-stack/react/router';
+import type { NavigateFunction } from '@bslt/react/router';
 
 // ============================================================================
 // Types

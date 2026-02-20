@@ -19,10 +19,10 @@ import { useProfileUpdate } from '../hooks';
 
 import { ProfileForm } from './ProfileForm';
 
-import type { UserId } from '@bslt/shared';
-import type { ChangeEvent, ReactNode } from 'react';
 import type { User } from '../api';
 import type { ProfileFormProps } from './ProfileForm';
+import type { UserId } from '@bslt/shared';
+import type { ChangeEvent, ReactNode } from 'react';
 
 // Mock the hooks
 vi.mock('../hooks', () => ({

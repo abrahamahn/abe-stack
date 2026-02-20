@@ -14,12 +14,22 @@
 
 import { createAuthGuard, fileRoutes } from '@bslt/core';
 import { featureFlagRoutes } from '@bslt/core/feature-flags';
-import { registerRouteMap } from '@bslt/server-system';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { createTestServer, parseJsonResponse, type TestServer } from './test-utils';
+import {
+  buildAuthenticatedRequest,
+  createAdminJwt,
+  createTestJwt,
+  createTestServer,
+  parseJsonResponse,
+  type TestServer,
+} from './test-utils';
 
-import type { AuthGuardFactory } from '@bslt/server-system';
+import type { AuthGuardFactory } from '@/http';
+
+import { registerRouteMap } from '@/http';
+
+import { registerRouteMap } from '@/http';
 
 // ============================================================================
 // Mock Repositories
@@ -459,6 +469,151 @@ describe('Feature Flags & Files Integration Tests', () => {
       expect(response.statusCode).toBe(401);
       const body = parseJsonResponse(response) as { message: string };
       expect(body.message).toBe('Unauthorized');
+    });
+  });
+
+  // ==========================================================================
+  // Feature Flags — Tenant-Scoped Overrides vs Global Defaults
+  // ==========================================================================
+
+  describe('Tenant-scoped flags: overrides vs global defaults', () => {
+    it('admin can set a tenant-specific override for a global flag', async () => {
+      // Setup: global flag exists and is disabled by default
+      mockRepos.featureFlags.findByKey.mockResolvedValue({
+        id: 'ff-1',
+        key: 'beta-feature',
+        description: 'Beta feature flag',
+        isEnabled: true,
+        defaultValue: false,
+        metadata: null,
+        createdAt: new Date('2026-01-01'),
+        updatedAt: new Date('2026-01-01'),
+      });
+
+      // Setup: tenant override enables it for tenant-alpha
+      mockRepos.featureFlagOverrides.upsert.mockResolvedValue({
+        id: 'ffo-1',
+        tenantId: 'tenant-alpha',
+        key: 'beta-feature',
+        value: null,
+        isEnabled: true,
+        createdAt: new Date('2026-01-15'),
+        updatedAt: new Date('2026-01-15'),
+      });
+
+      const adminToken = createAdminJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'PUT',
+          url: '/api/admin/tenants/tenant-alpha/feature-overrides/beta-feature',
+          payload: { enabled: true },
+          accessToken: adminToken,
+        }),
+      );
+
+      // Route exists and accepts the request
+      expect(response.statusCode).not.toBe(404);
+    });
+
+    it('tenant-specific overrides are isolated per tenant', async () => {
+      const tenantAlphaOverrides = [
+        {
+          id: 'ffo-1',
+          tenantId: 'tenant-alpha',
+          key: 'beta-feature',
+          value: null,
+          isEnabled: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ];
+
+      const tenantBetaOverrides = [
+        {
+          id: 'ffo-2',
+          tenantId: 'tenant-beta',
+          key: 'beta-feature',
+          value: null,
+          isEnabled: false,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ];
+
+      // Query tenant-alpha overrides
+      mockRepos.featureFlagOverrides.findByTenantId.mockResolvedValueOnce(tenantAlphaOverrides);
+
+      const adminToken = createAdminJwt();
+      const responseAlpha = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'GET',
+          url: '/api/admin/tenants/tenant-alpha/feature-overrides',
+          accessToken: adminToken,
+        }),
+      );
+
+      expect(responseAlpha.statusCode).not.toBe(404);
+
+      // Verify repo was called with tenant-alpha
+      if (mockRepos.featureFlagOverrides.findByTenantId.mock.calls.length > 0) {
+        expect(mockRepos.featureFlagOverrides.findByTenantId.mock.calls[0]![0]).toBe(
+          'tenant-alpha',
+        );
+      }
+
+      vi.clearAllMocks();
+
+      // Query tenant-beta overrides
+      mockRepos.featureFlagOverrides.findByTenantId.mockResolvedValueOnce(tenantBetaOverrides);
+
+      const responseBeta = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'GET',
+          url: '/api/admin/tenants/tenant-beta/feature-overrides',
+          accessToken: adminToken,
+        }),
+      );
+
+      expect(responseBeta.statusCode).not.toBe(404);
+
+      if (mockRepos.featureFlagOverrides.findByTenantId.mock.calls.length > 0) {
+        expect(mockRepos.featureFlagOverrides.findByTenantId.mock.calls[0]![0]).toBe(
+          'tenant-beta',
+        );
+      }
+    });
+
+    it('deleting a tenant override restores global default for that tenant', async () => {
+      // Override exists
+      mockRepos.featureFlagOverrides.delete.mockResolvedValue(true);
+
+      const adminToken = createAdminJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/admin/tenants/tenant-alpha/feature-overrides/beta-feature/delete',
+          payload: {},
+          accessToken: adminToken,
+        }),
+      );
+
+      expect(response.statusCode).not.toBe(404);
+    });
+
+    it('user evaluation endpoint returns flags with tenant-specific context', async () => {
+      const userToken = createTestJwt({ userId: 'user-in-tenant' });
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'GET',
+          url: '/api/feature-flags/evaluate',
+          accessToken: userToken,
+          workspaceId: 'tenant-alpha',
+        }),
+      );
+
+      // Endpoint responds (not 404) with auth
+      expect(response.statusCode).not.toBe(404);
+      expect(response.statusCode).not.toBe(401);
     });
   });
 

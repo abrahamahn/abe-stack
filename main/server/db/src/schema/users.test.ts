@@ -46,6 +46,7 @@ function makeUser(overrides: Partial<User> = {}): User {
     emailVerified: false,
     emailVerifiedAt: null,
     lockedUntil: null,
+    lockReason: null,
     failedLoginAttempts: 0,
     totpSecret: null,
     totpEnabled: false,
@@ -59,6 +60,11 @@ function makeUser(overrides: Partial<User> = {}): User {
     bio: null,
     language: null,
     website: null,
+    lastUsernameChange: null,
+    deactivatedAt: null,
+    deletedAt: null,
+    deletionGracePeriodEnds: null,
+    tokenVersion: 1,
     createdAt: new Date(),
     updatedAt: new Date(),
     version: 1,
@@ -183,6 +189,11 @@ describe('Schema Constants', () => {
         familyId: 'family_id',
         token: 'token',
         expiresAt: 'expires_at',
+        familyIpAddress: 'family_ip_address',
+        familyUserAgent: 'family_user_agent',
+        familyCreatedAt: 'family_created_at',
+        familyRevokedAt: 'family_revoked_at',
+        familyRevokeReason: 'family_revoke_reason',
         createdAt: 'created_at',
       });
     });
@@ -191,6 +202,11 @@ describe('Schema Constants', () => {
       expect(REFRESH_TOKEN_COLUMNS.userId).toBe('user_id');
       expect(REFRESH_TOKEN_COLUMNS.familyId).toBe('family_id');
       expect(REFRESH_TOKEN_COLUMNS.expiresAt).toBe('expires_at');
+      expect(REFRESH_TOKEN_COLUMNS.familyIpAddress).toBe('family_ip_address');
+      expect(REFRESH_TOKEN_COLUMNS.familyUserAgent).toBe('family_user_agent');
+      expect(REFRESH_TOKEN_COLUMNS.familyCreatedAt).toBe('family_created_at');
+      expect(REFRESH_TOKEN_COLUMNS.familyRevokedAt).toBe('family_revoked_at');
+      expect(REFRESH_TOKEN_COLUMNS.familyRevokeReason).toBe('family_revoke_reason');
       expect(REFRESH_TOKEN_COLUMNS.createdAt).toBe('created_at');
     });
 
@@ -201,10 +217,12 @@ describe('Schema Constants', () => {
 
     test('should be a const object (readonly)', () => {
       const keys = Object.keys(REFRESH_TOKEN_COLUMNS);
-      expect(keys).toHaveLength(6);
+      expect(keys).toHaveLength(11);
       expect(keys).toContain('id');
       expect(keys).toContain('userId');
       expect(keys).toContain('familyId');
+      expect(keys).toContain('familyIpAddress');
+      expect(keys).toContain('familyCreatedAt');
     });
 
     test('should have all values as strings', () => {
@@ -228,6 +246,7 @@ describe('User Type Structure', () => {
       const validUser: User = {
         id: 'user_123',
         email: 'test@example.com',
+        canonicalEmail: 'test@example.com',
         username: 'johndoe',
         passwordHash: 'hashed_password',
         firstName: 'John',
@@ -237,6 +256,7 @@ describe('User Type Structure', () => {
         emailVerified: true,
         emailVerifiedAt: new Date('2024-01-01'),
         lockedUntil: null,
+        lockReason: null,
         failedLoginAttempts: 0,
         totpSecret: null,
         totpEnabled: false,
@@ -250,6 +270,11 @@ describe('User Type Structure', () => {
         bio: null,
         language: null,
         website: null,
+        lastUsernameChange: null,
+        deactivatedAt: null,
+        deletedAt: null,
+        deletionGracePeriodEnds: null,
+        tokenVersion: 1,
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date('2024-01-02'),
         version: 1,
@@ -264,6 +289,7 @@ describe('User Type Structure', () => {
       const userWithNulls: User = {
         id: 'user_123',
         email: 'test@example.com',
+        canonicalEmail: 'test@example.com',
         username: 'testuser',
         passwordHash: 'hashed_password',
         firstName: 'Test',
@@ -273,6 +299,7 @@ describe('User Type Structure', () => {
         emailVerified: false,
         emailVerifiedAt: null,
         lockedUntil: null,
+        lockReason: null,
         failedLoginAttempts: 0,
         totpSecret: null,
         totpEnabled: false,
@@ -286,6 +313,11 @@ describe('User Type Structure', () => {
         bio: null,
         language: null,
         website: null,
+        lastUsernameChange: null,
+        deactivatedAt: null,
+        deletedAt: null,
+        deletionGracePeriodEnds: null,
+        tokenVersion: 1,
         createdAt: new Date(),
         updatedAt: new Date(),
         version: 1,
@@ -568,6 +600,11 @@ describe('RefreshToken Type Structure', () => {
         familyId: 'family_789',
         token: 'encrypted_token_value',
         expiresAt: new Date(Date.now() + 86400000), // 24 hours
+        familyIpAddress: '192.168.1.1',
+        familyUserAgent: 'Mozilla/5.0',
+        familyCreatedAt: new Date(),
+        familyRevokedAt: null,
+        familyRevokeReason: null,
         createdAt: new Date(),
       };
 
@@ -575,28 +612,21 @@ describe('RefreshToken Type Structure', () => {
       expect(validToken.userId).toBe('user_456');
       expect(validToken.familyId).toBe('family_789');
       expect(validToken.token).toBe('encrypted_token_value');
-    });
-
-    test('should allow null for familyId', () => {
-      const tokenWithoutFamily: RefreshToken = {
-        id: 'token_123',
-        userId: 'user_456',
-        familyId: null,
-        token: 'encrypted_token_value',
-        expiresAt: new Date(),
-        createdAt: new Date(),
-      };
-
-      expect(tokenWithoutFamily.familyId).toBeNull();
+      expect(validToken.familyRevokedAt).toBeNull();
     });
 
     test('should require all non-nullable fields', () => {
       const token: RefreshToken = {
         id: '1',
         userId: '2',
-        familyId: null,
+        familyId: 'family_abc',
         token: 'token',
         expiresAt: new Date(),
+        familyIpAddress: null,
+        familyUserAgent: null,
+        familyCreatedAt: new Date(),
+        familyRevokedAt: null,
+        familyRevokeReason: null,
         createdAt: new Date(),
       };
 
@@ -605,7 +635,27 @@ describe('RefreshToken Type Structure', () => {
       expect(token).toHaveProperty('familyId');
       expect(token).toHaveProperty('token');
       expect(token).toHaveProperty('expiresAt');
+      expect(token).toHaveProperty('familyCreatedAt');
       expect(token).toHaveProperty('createdAt');
+    });
+
+    test('should support revoked family tokens', () => {
+      const revokedToken: RefreshToken = {
+        id: '1',
+        userId: '2',
+        familyId: 'family_abc',
+        token: 'token',
+        expiresAt: new Date(),
+        familyIpAddress: '10.0.0.1',
+        familyUserAgent: 'Chrome/120',
+        familyCreatedAt: new Date(Date.now() - 86400000),
+        familyRevokedAt: new Date(),
+        familyRevokeReason: 'Token reuse detected',
+        createdAt: new Date(),
+      };
+
+      expect(revokedToken.familyRevokedAt).toBeInstanceOf(Date);
+      expect(revokedToken.familyRevokeReason).toBe('Token reuse detected');
     });
 
     test('should have Date types for timestamp fields', () => {
@@ -614,14 +664,20 @@ describe('RefreshToken Type Structure', () => {
       const token: RefreshToken = {
         id: '1',
         userId: '2',
-        familyId: null,
+        familyId: 'family_xyz',
         token: 'token',
         expiresAt,
+        familyIpAddress: null,
+        familyUserAgent: null,
+        familyCreatedAt: now,
+        familyRevokedAt: null,
+        familyRevokeReason: null,
         createdAt: now,
       };
 
       expect(token.createdAt).toBeInstanceOf(Date);
       expect(token.expiresAt).toBeInstanceOf(Date);
+      expect(token.familyCreatedAt).toBeInstanceOf(Date);
     });
   });
 
@@ -629,11 +685,13 @@ describe('RefreshToken Type Structure', () => {
     test('should accept minimal required fields', () => {
       const minimalToken: NewRefreshToken = {
         userId: 'user_123',
+        familyId: 'family_abc',
         token: 'encrypted_token',
         expiresAt: new Date(Date.now() + 86400000),
       };
 
       expect(minimalToken.userId).toBe('user_123');
+      expect(minimalToken.familyId).toBe('family_abc');
       expect(minimalToken.token).toBe('encrypted_token');
       expect(minimalToken.expiresAt).toBeInstanceOf(Date);
     });
@@ -645,28 +703,36 @@ describe('RefreshToken Type Structure', () => {
         familyId: 'family_456',
         token: 'encrypted_token',
         expiresAt: new Date(Date.now() + 86400000),
+        familyIpAddress: '192.168.1.1',
+        familyUserAgent: 'Mozilla/5.0',
+        familyCreatedAt: new Date(),
         createdAt: new Date(),
       };
 
       expect(fullToken.id).toBe('custom_id');
       expect(fullToken.familyId).toBe('family_456');
+      expect(fullToken.familyIpAddress).toBe('192.168.1.1');
       expect(fullToken.createdAt).toBeInstanceOf(Date);
     });
 
-    test('should allow null for familyId', () => {
-      const tokenWithoutFamily: NewRefreshToken = {
+    test('should accept null for optional family context fields', () => {
+      const tokenNoContext: NewRefreshToken = {
         userId: 'user_123',
-        familyId: null,
+        familyId: 'family_xyz',
         token: 'encrypted_token',
         expiresAt: new Date(),
+        familyIpAddress: null,
+        familyUserAgent: null,
       };
 
-      expect(tokenWithoutFamily.familyId).toBeNull();
+      expect(tokenNoContext.familyIpAddress).toBeNull();
+      expect(tokenNoContext.familyUserAgent).toBeNull();
     });
 
     test('should allow omitting auto-generated fields', () => {
       const token: NewRefreshToken = {
         userId: 'user_123',
+        familyId: 'family_abc',
         token: 'token',
         expiresAt: new Date(),
         // id, createdAt omitted
@@ -680,6 +746,7 @@ describe('RefreshToken Type Structure', () => {
       const customToken: NewRefreshToken = {
         id: 'custom_token_id',
         userId: 'user_123',
+        familyId: 'family_abc',
         token: 'token',
         expiresAt: new Date(),
         createdAt: new Date('2024-01-01'),
@@ -750,9 +817,12 @@ describe('Type Compatibility', () => {
       const newToken: NewRefreshToken = {
         id: '1',
         userId: '2',
-        familyId: null,
+        familyId: 'family_abc',
         token: 'token',
         expiresAt: new Date(),
+        familyIpAddress: null,
+        familyUserAgent: null,
+        familyCreatedAt: new Date(),
         createdAt: new Date(),
       };
 
@@ -761,6 +831,7 @@ describe('Type Compatibility', () => {
 
       expect(token.id).toBe('1');
       expect(token.userId).toBe('2');
+      expect(token.familyId).toBe('family_abc');
     });
   });
 });
@@ -794,9 +865,14 @@ describe('Edge Cases', () => {
       const token: RefreshToken = {
         id: '1',
         userId: '2',
-        familyId: null,
+        familyId: 'family_abc',
         token: 'token',
         expiresAt: farFuture,
+        familyIpAddress: null,
+        familyUserAgent: null,
+        familyCreatedAt: new Date(),
+        familyRevokedAt: null,
+        familyRevokeReason: null,
         createdAt: new Date(),
       };
 
@@ -940,6 +1016,11 @@ describe('Column Mapping Consistency', () => {
       'familyId',
       'token',
       'expiresAt',
+      'familyIpAddress',
+      'familyUserAgent',
+      'familyCreatedAt',
+      'familyRevokedAt',
+      'familyRevokeReason',
       'createdAt',
     ];
 
@@ -996,7 +1077,19 @@ describe('Column Mapping Consistency', () => {
   });
 
   test('REFRESH_TOKEN_COLUMNS should not have any extra fields', () => {
-    const expectedFields = ['id', 'userId', 'familyId', 'token', 'expiresAt', 'createdAt'];
+    const expectedFields = [
+      'id',
+      'userId',
+      'familyId',
+      'token',
+      'expiresAt',
+      'familyIpAddress',
+      'familyUserAgent',
+      'familyCreatedAt',
+      'familyRevokedAt',
+      'familyRevokeReason',
+      'createdAt',
+    ];
 
     const actualFields = Object.keys(REFRESH_TOKEN_COLUMNS);
 

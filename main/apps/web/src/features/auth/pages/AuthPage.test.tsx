@@ -1,5 +1,5 @@
 // main/apps/web/src/features/auth/pages/AuthPage.test.tsx
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock API hooks - useEnabledOAuthProviders and getOAuthLoginUrl are in @bslt/api
@@ -75,13 +75,17 @@ describe('AuthPage', () => {
     expect(screen.getByRole('heading', { name: /welcome back/i })).toBeInTheDocument();
   });
 
-  it('should render register form when mode is register', () => {
+  it('should render register form when mode is register', async () => {
     renderAuthPage('/auth?mode=register');
-    expect(screen.getByRole('heading', { name: /create account/i })).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /create account/i })).toBeInTheDocument();
+    });
   });
 
-  it('should render forgot password form when mode is forgot-password', () => {
+  it('should render forgot password form when mode is forgot-password', async () => {
     renderAuthPage('/auth?mode=forgot-password');
-    expect(screen.getByRole('heading', { name: /reset password/i })).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /reset password/i })).toBeInTheDocument();
+    });
   });
 });

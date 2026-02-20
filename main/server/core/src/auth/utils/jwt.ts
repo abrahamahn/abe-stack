@@ -13,8 +13,8 @@ import crypto from 'node:crypto';
 import { JwtError, sign as jwtSign, verify as jwtVerify } from '../../../../system/src';
 import { MIN_JWT_SECRET_LENGTH, REFRESH_TOKEN_BYTES } from '../types';
 
-import type { AppRole } from '@bslt/shared';
 import type { VerifyOptions } from '../../../../system/src';
+import type { AppRole } from '@bslt/shared';
 
 // ============================================================================
 // Types

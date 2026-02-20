@@ -1,9 +1,9 @@
 // main/server/system/src/observability/factory.test.ts
 import { describe, expect, it } from 'vitest';
 
-import { ConsoleErrorTrackingProvider } from './console-provider';
 import { createErrorTracker } from './factory';
-import { NoopErrorTrackingProvider } from './noop-provider';
+import { NoopErrorTrackingProvider } from './noop.provider';
+import { SentryNodeProvider } from './sentry.provider';
 
 import type { ErrorTrackingConfig } from './types';
 
@@ -28,17 +28,17 @@ describe('createErrorTracker', () => {
     expect(tracker).toBeInstanceOf(NoopErrorTrackingProvider);
   });
 
-  it('should return ConsoleErrorTrackingProvider when DSN is provided', () => {
+  it('should return SentryNodeProvider when DSN is provided', () => {
     const config: ErrorTrackingConfig = {
       dsn: 'https://example.com/sentry',
       environment: 'test',
     };
 
     const tracker = createErrorTracker(config);
-    expect(tracker).toBeInstanceOf(ConsoleErrorTrackingProvider);
+    expect(tracker).toBeInstanceOf(SentryNodeProvider);
   });
 
-  it('should return ConsoleErrorTrackingProvider with full config', () => {
+  it('should return SentryNodeProvider with full config', () => {
     const config: ErrorTrackingConfig = {
       dsn: 'https://public@sentry.io/123',
       environment: 'production',
@@ -47,7 +47,7 @@ describe('createErrorTracker', () => {
     };
 
     const tracker = createErrorTracker(config);
-    expect(tracker).toBeInstanceOf(ConsoleErrorTrackingProvider);
+    expect(tracker).toBeInstanceOf(SentryNodeProvider);
   });
 
   it('should return a working provider that implements the interface', () => {

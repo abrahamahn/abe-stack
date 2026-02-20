@@ -5,8 +5,8 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 import {
   withTransaction,
   type DbClient,
+  type RawDb,
   type RefreshToken,
-  type RefreshTokenFamily,
   type User,
   type UserSession,
 } from '../../../../db/src';
@@ -29,7 +29,7 @@ vi.mock('@bslt/db', async () => {
   const actual = await vi.importActual<typeof import('../../../../db/src')>('@bslt/db');
   return {
     ...actual,
-    withTransaction: vi.fn((db, callback) => callback(db)),
+    withTransaction: vi.fn(<T>(db: RawDb, callback: (tx: RawDb) => Promise<T>) => callback(db)),
   };
 });
 
@@ -39,8 +39,8 @@ function createMockDbClient(): DbClient {
     query: vi.fn(),
     queryOne: vi.fn(),
     execute: vi.fn(),
-    transaction: vi.fn((callback) =>
-      callback({ query: vi.fn(), queryOne: vi.fn(), execute: vi.fn() }),
+    transaction: vi.fn(<T>(callback: (tx: RawDb) => Promise<T>) =>
+      callback({ query: vi.fn(), queryOne: vi.fn(), execute: vi.fn() } as unknown as RawDb),
     ),
   } as unknown as DbClient;
 }
@@ -64,20 +64,14 @@ function createMockRefreshToken(overrides?: Partial<RefreshToken>): RefreshToken
     familyId: 'family-123',
     token: 'mock-token-abc123',
     expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    familyIpAddress: null,
+    familyUserAgent: null,
+    familyCreatedAt: new Date('2024-01-01'),
+    familyRevokedAt: null,
+    familyRevokeReason: null,
     createdAt: new Date(Date.now() - 60000), // 1 minute ago
     ...overrides,
   } as RefreshToken;
-}
-
-function createMockRefreshTokenFamily(overrides?: Partial<RefreshTokenFamily>): RefreshTokenFamily {
-  return {
-    id: 'family-123',
-    userId: 'user-123',
-    revokedAt: null,
-    revokeReason: null,
-    createdAt: new Date('2024-01-01'),
-    ...overrides,
-  } as RefreshTokenFamily;
 }
 
 function createMockUserSession(overrides?: Partial<UserSession>): UserSession {
@@ -103,14 +97,13 @@ describe('Session Binding (User-Agent Validation)', () => {
     const db = createMockDbClient();
     const mockToken = createMockRefreshToken();
     const mockUser = createMockUser();
-    const mockFamily = createMockRefreshTokenFamily();
     const mockSession = createMockUserSession({ userAgent: 'Chrome/100' });
     const newToken = 'new-token-123';
 
     // Sequence of queryOne calls:
-    // 1. storedToken (Optimization 1)
-    // 2-4. Promise.all([user, family, session]) (Optimization 2)
-    // 5. check for recent tokens (Optimization 3) - returns null here
+    // 1. storedToken (Optimization 1) — includes family_revoked_at
+    // 2-3. Promise.all([user, session]) (Optimization 2)
+    // 4. check for recent tokens (Optimization 3) - returns null here
     vi.mocked(db.queryOne)
       .mockResolvedValueOnce({
         // 1. storedToken
@@ -119,10 +112,11 @@ describe('Session Binding (User-Agent Validation)', () => {
         family_id: mockToken.familyId,
         token: mockToken.token,
         expires_at: mockToken.expiresAt,
+        family_revoked_at: null,
         created_at: mockToken.createdAt,
       })
       .mockResolvedValueOnce({
-        // 2. user
+        // 2. user (parallel)
         id: mockUser.id,
         email: mockUser.email,
         role: mockUser.role,
@@ -131,15 +125,7 @@ describe('Session Binding (User-Agent Validation)', () => {
         updated_at: mockUser.updatedAt,
       })
       .mockResolvedValueOnce({
-        // 3. family
-        id: mockFamily.id,
-        user_id: mockFamily.userId,
-        revoked_at: null,
-        revoke_reason: null,
-        created_at: mockFamily.createdAt,
-      })
-      .mockResolvedValueOnce({
-        // 4. session
+        // 3. session (parallel)
         id: mockSession.id,
         user_id: mockSession.userId,
         ip_address: mockSession.ipAddress,
@@ -148,7 +134,7 @@ describe('Session Binding (User-Agent Validation)', () => {
         created_at: mockSession.createdAt,
         revoked_at: mockSession.revokedAt,
       })
-      .mockResolvedValueOnce(null); // 5. recent token
+      .mockResolvedValueOnce(null); // 4. recent token
 
     vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
       const tx = { execute: vi.fn().mockResolvedValue(1) };
@@ -173,7 +159,6 @@ describe('Session Binding (User-Agent Validation)', () => {
     const db = createMockDbClient();
     const mockToken = createMockRefreshToken();
     const mockUser = createMockUser();
-    const mockFamily = createMockRefreshTokenFamily();
     const mockSession = createMockUserSession({ userAgent: 'Chrome/100' });
 
     vi.mocked(db.queryOne)
@@ -184,10 +169,11 @@ describe('Session Binding (User-Agent Validation)', () => {
         family_id: mockToken.familyId,
         token: mockToken.token,
         expires_at: mockToken.expiresAt,
+        family_revoked_at: null,
         created_at: mockToken.createdAt,
       })
       .mockResolvedValueOnce({
-        // 2. user
+        // 2. user (parallel)
         id: mockUser.id,
         email: mockUser.email,
         role: mockUser.role,
@@ -196,15 +182,7 @@ describe('Session Binding (User-Agent Validation)', () => {
         updated_at: mockUser.updatedAt,
       })
       .mockResolvedValueOnce({
-        // 3. family
-        id: mockFamily.id,
-        user_id: mockFamily.userId,
-        revoked_at: null,
-        revoke_reason: null,
-        created_at: mockFamily.createdAt,
-      })
-      .mockResolvedValueOnce({
-        // 4. session
+        // 3. session (parallel)
         id: mockSession.id,
         user_id: mockSession.userId,
         ip_address: mockSession.ipAddress,
@@ -243,7 +221,6 @@ describe('Session Binding (User-Agent Validation)', () => {
     const db = createMockDbClient();
     const mockToken = createMockRefreshToken();
     const mockUser = createMockUser();
-    const mockFamily = createMockRefreshTokenFamily();
     const mockSession = createMockUserSession({ userAgent: null }); // Legacy/Unknown
     const newToken = 'new-token-123';
 
@@ -255,10 +232,11 @@ describe('Session Binding (User-Agent Validation)', () => {
         family_id: mockToken.familyId,
         token: mockToken.token,
         expires_at: mockToken.expiresAt,
+        family_revoked_at: null,
         created_at: mockToken.createdAt,
       })
       .mockResolvedValueOnce({
-        // 2. user
+        // 2. user (parallel)
         id: mockUser.id,
         email: mockUser.email,
         role: mockUser.role,
@@ -267,15 +245,7 @@ describe('Session Binding (User-Agent Validation)', () => {
         updated_at: mockUser.updatedAt,
       })
       .mockResolvedValueOnce({
-        // 3. family
-        id: mockFamily.id,
-        user_id: mockFamily.userId,
-        revoked_at: null,
-        revoke_reason: null,
-        created_at: mockFamily.createdAt,
-      })
-      .mockResolvedValueOnce({
-        // 4. session
+        // 3. session (parallel)
         id: mockSession.id,
         user_id: mockSession.userId,
         ip_address: mockSession.ipAddress,
@@ -284,7 +254,7 @@ describe('Session Binding (User-Agent Validation)', () => {
         created_at: mockSession.createdAt,
         revoked_at: mockSession.revokedAt,
       })
-      .mockResolvedValueOnce(null); // 5. recent token
+      .mockResolvedValueOnce(null); // 4. recent token
 
     vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
       const tx = { execute: vi.fn().mockResolvedValue(1) };

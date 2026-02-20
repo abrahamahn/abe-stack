@@ -90,6 +90,21 @@ export interface InvitationRepository {
    * @returns The updated invitation or null if not found
    */
   update(id: string, data: UpdateInvitation): Promise<Invitation | null>;
+
+  /**
+   * Find pending invitations expiring before a given date.
+   * Used by the invitation reminder service.
+   * @param before - Date threshold
+   * @returns Array of pending invitations expiring before the date
+   */
+  findPendingExpiringBefore(before: Date): Promise<Invitation[]>;
+
+  /**
+   * Update the reminder_sent_at timestamp for an invitation.
+   * @param id - The invitation ID
+   * @param sentAt - When the reminder was sent
+   */
+  updateReminderSentAt(id: string, sentAt: Date): Promise<void>;
 }
 
 // ============================================================================
@@ -184,6 +199,26 @@ export function createInvitationRepository(db: RawDb): InvitationRepository {
         update(INVITATIONS_TABLE).set(snakeData).where(eq('id', id)).returningAll().toSql(),
       );
       return result !== null ? transformInvitation(result) : null;
+    },
+
+    async findPendingExpiringBefore(before: Date): Promise<Invitation[]> {
+      const results = await db.query(
+        select(INVITATIONS_TABLE)
+          .where(and(eq('status', PENDING_STATUS), lt('expires_at', before)))
+          .orderBy('expires_at', 'asc')
+          .toSql(),
+      );
+      return results.map(transformInvitation);
+    },
+
+    async updateReminderSentAt(id: string, sentAt: Date): Promise<void> {
+      await db.queryOne(
+        update(INVITATIONS_TABLE)
+          .set({ reminder_sent_at: sentAt })
+          .where(eq('id', id))
+          .returningAll()
+          .toSql(),
+      );
     },
   };
 }

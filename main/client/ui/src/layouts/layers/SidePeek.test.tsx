@@ -1005,7 +1005,7 @@ describe('SidePeek', () => {
         </SidePeek.Root>,
       );
 
-      // Wait for open animation to start
+      // Wait for open animation to start (mountTimer=0ms, animateTimer=10ms)
       act(() => {
         vi.advanceTimersByTime(10);
       });
@@ -1016,6 +1016,11 @@ describe('SidePeek', () => {
           <SidePeek.Content>Content</SidePeek.Content>
         </SidePeek.Root>,
       );
+
+      // Advance past the slideOutTimer (setTimeout 0ms) so setIsAnimating(false) fires
+      act(() => {
+        vi.advanceTimersByTime(0);
+      });
 
       // Panel should still be in DOM but without --open class (slide-out animation)
       expect(screen.getByRole('dialog')).not.toHaveClass('side-peek--open');

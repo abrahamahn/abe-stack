@@ -19,6 +19,7 @@ import { assertUserActive } from '../middleware';
 import { sendEmailChangedAlert } from '../security';
 import { createErrorMapperLogger } from '../types';
 
+import type { AppContext, RequestWithCookies } from '../types';
 import type {
   ChangeEmailRequest,
   ChangeEmailResponse,
@@ -28,7 +29,6 @@ import type {
   RevertEmailChangeRequest,
   RevertEmailChangeResponse,
 } from '@bslt/shared';
-import type { AppContext, RequestWithCookies } from '../types';
 
 /**
  * Handle email change initiation.

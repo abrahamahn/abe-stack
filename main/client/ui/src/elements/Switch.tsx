@@ -23,7 +23,7 @@ type SwitchProps = Omit<ComponentPropsWithoutRef<'button'>, 'onChange' | 'defaul
  * <Switch checked={enabled} onChange={setEnabled} />
  * ```
  */
-export const Switch = forwardRef<HTMLButtonElement, SwitchProps>((props, ref) => {
+export const Switch = forwardRef<HTMLElement, SwitchProps>((props, ref) => {
   const { checked, defaultChecked, onChange, className = '', type = 'button', ...rest } = props;
 
   const [currentChecked, setChecked] = useControllableState<boolean>({
@@ -36,7 +36,7 @@ export const Switch = forwardRef<HTMLButtonElement, SwitchProps>((props, ref) =>
 
   return (
     <Button
-      ref={ref as any}
+      ref={ref}
       type={type}
       role="switch"
       aria-checked={isChecked}

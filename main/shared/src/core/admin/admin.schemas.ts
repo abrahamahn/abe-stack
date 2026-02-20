@@ -35,7 +35,7 @@ export type UserStatus = (typeof USER_STATUSES)[number];
 export interface AdminUser {
   id: string;
   email: string;
-  username: string;
+  username: string | null;
   firstName: string;
   lastName: string;
   role: AppRole;
@@ -139,7 +139,7 @@ export const adminUserSchema: Schema<AdminUser> = createSchema((data: unknown) =
   return {
     id: uuidSchema.parse(obj['id']),
     email: emailSchema.parse(obj['email']),
-    username: usernameSchema.parse(obj['username']),
+    username: parseNullable(obj['username'], (v) => usernameSchema.parse(v)),
     firstName: parseString(obj['firstName'], 'firstName'),
     lastName: parseString(obj['lastName'], 'lastName'),
     role: appRoleSchema.parse(obj['role']),

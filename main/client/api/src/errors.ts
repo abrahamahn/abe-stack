@@ -28,6 +28,10 @@ export interface ApiErrorBody {
   message?: string;
   code?: string;
   details?: Record<string, unknown>;
+  /** Admin-set reason the account was locked (Sprint 3.15) */
+  lockReason?: string;
+  /** ISO timestamp when the lock expires (Sprint 3.15) */
+  lockedUntil?: string;
 }
 
 /**
@@ -150,8 +154,17 @@ export function createApiError(status: number, body?: ApiErrorBody): AppError {
     case HTTP_STATUS.UNPROCESSABLE_ENTITY:
       return new UnprocessableError(message, code, details);
 
-    case HTTP_STATUS.TOO_MANY_REQUESTS:
-      return new TooManyRequestsError(message);
+    case HTTP_STATUS.TOO_MANY_REQUESTS: {
+      const err = new TooManyRequestsError(message);
+      // Preserve lock metadata from the server response (Sprint 3.15)
+      if (typeof body?.lockReason === 'string') {
+        (err as TooManyRequestsError & { lockReason?: string }).lockReason = body.lockReason;
+      }
+      if (typeof body?.lockedUntil === 'string') {
+        (err as TooManyRequestsError & { lockedUntil?: string }).lockedUntil = body.lockedUntil;
+      }
+      return err;
+    }
 
     default:
       if (status >= HTTP_STATUS.INTERNAL_SERVER_ERROR) {

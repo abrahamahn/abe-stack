@@ -14,8 +14,8 @@ import {
   ToastContainer,
 } from '@bslt/ui';
 
-import type { ReactElement } from 'react';
 import type { ComponentDemo } from '../types';
+import type { ReactElement } from 'react';
 
 export const componentCatalog: Record<string, ComponentDemo> = {
   box: {

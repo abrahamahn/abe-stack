@@ -41,7 +41,7 @@ async function confirm(message: string): Promise<boolean> {
  * @throws {Error} If database connection or operations fail
  */
 export async function reset(): Promise<void> {
-  loadServerEnv();
+  await loadServerEnv();
 
   if (process.env['NODE_ENV'] === 'production') {
     process.stderr.write('\nERROR: Cannot run reset script in production!\n');

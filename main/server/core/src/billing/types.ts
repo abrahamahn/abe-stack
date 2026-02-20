@@ -11,15 +11,6 @@
  */
 
 import type {
-  AuthenticatedUser,
-  BaseContext,
-  BillingService,
-  RequestContext,
-  RequestInfo,
-  ServerLogger,
-} from '@bslt/shared';
-import type { BillingConfig } from '@bslt/shared/config';
-import type {
   AuditEventRepository,
   BillingEventRepository,
   CustomerMappingRepository,
@@ -30,6 +21,15 @@ import type {
   RawDb,
   SubscriptionRepository,
 } from '../../../db/src';
+import type {
+  AuthenticatedUser,
+  BaseContext,
+  BillingService,
+  RequestContext,
+  RequestInfo,
+  ServerLogger,
+} from '@bslt/shared';
+import type { BillingConfig } from '@bslt/shared/config';
 
 // ============================================================================
 // Module Dependencies

@@ -46,9 +46,10 @@ Object.defineProperty(window, 'localStorage', { value: mockLocalStorage });
 function createWrapper(): (props: { children: ReactNode }) => ReactNode {
   const queryCache = new QueryCache();
 
-  return (props: { children: ReactNode }) => {
-    return createElement(QueryCacheProvider, { cache: queryCache, children: props.children });
-  };
+  function Wrapper({ children }: { children: ReactNode }): ReactNode {
+    return createElement(QueryCacheProvider, { cache: queryCache }, children);
+  }
+  return Wrapper;
 }
 
 // ============================================================================

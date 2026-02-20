@@ -153,6 +153,13 @@ export interface AuthConfig {
     path: string;
   };
 
+  /**
+   * Encryption key for stored OAuth access/refresh tokens.
+   * Separate from cookie.secret to allow independent key rotation.
+   * Min 32 chars. Falls back to cookie.secret if not set (backwards-compatible).
+   */
+  oauthTokenEncryptionKey: string;
+
   /** OAuth provider configurations */
   oauth: {
     google?: OAuthProviderConfig;
@@ -289,6 +296,7 @@ export interface AuthEnv {
   RATE_LIMIT_FORGOT_PASSWORD_MAX?: number | undefined;
   RATE_LIMIT_VERIFY_EMAIL_MAX?: number | undefined;
   COOKIE_SECRET?: string | undefined;
+  OAUTH_TOKEN_ENCRYPTION_KEY?: string | undefined;
   TRUST_PROXY?: 'true' | 'false' | undefined;
   TRUSTED_PROXIES?: string | undefined;
   MAX_PROXY_DEPTH?: number | undefined;
@@ -381,6 +389,9 @@ export const AuthEnvSchema: Schema<AuthEnv> = createSchema<AuthEnv>((data: unkno
     ),
     COOKIE_SECRET: parseOptional(obj['COOKIE_SECRET'], (v: unknown) =>
       parseString(v, 'COOKIE_SECRET'),
+    ),
+    OAUTH_TOKEN_ENCRYPTION_KEY: parseOptional(obj['OAUTH_TOKEN_ENCRYPTION_KEY'], (v: unknown) =>
+      parseString(v, 'OAUTH_TOKEN_ENCRYPTION_KEY'),
     ),
     TRUST_PROXY: parseOptional(obj['TRUST_PROXY'], (v: unknown) => trueFalseSchema.parse(v)),
     TRUSTED_PROXIES: parseOptional(obj['TRUSTED_PROXIES'], (v: unknown) =>

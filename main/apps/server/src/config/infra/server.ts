@@ -41,7 +41,7 @@ export function loadServerConfig(env: FullEnv): ServerConfig {
         ? env.VITE_API_URL
         : env.API_BASE_URL !== undefined && env.API_BASE_URL !== ''
           ? env.API_BASE_URL
-          : `http://localhost:${port}`;
+          : `http://localhost:${String(port)}`;
 
   return {
     host: env.HOST !== '' ? env.HOST : '0.0.0.0',

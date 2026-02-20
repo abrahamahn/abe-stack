@@ -24,6 +24,7 @@ import {
 
 import { apiRequest, createRequestFactory } from '../utils';
 
+import type { BaseClientConfig } from '../utils';
 import type {
   DeleteNotificationResponse,
   MarkReadResponse,
@@ -38,7 +39,6 @@ import type {
   UpdatePreferencesRequest,
   VapidKeyResponse,
 } from '@bslt/shared';
-import type { BaseClientConfig } from '../utils';
 export type {
   DeleteNotificationResponse,
   MarkReadResponse,

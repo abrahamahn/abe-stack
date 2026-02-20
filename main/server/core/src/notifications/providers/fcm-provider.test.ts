@@ -10,8 +10,8 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import { FcmProvider, createFcmProvider } from './fcm-provider';
 
-import type { NotificationPayload, PushSendResult, PushSubscription } from '@bslt/shared';
 import type { SubscriptionWithId } from './types';
+import type { NotificationPayload, PushSendResult, PushSubscription } from '@bslt/shared';
 
 // ============================================================================
 // Test Utilities
@@ -219,7 +219,7 @@ describe('FcmProvider', () => {
 
     it('should handle large batch', async () => {
       const subscriptions = Array.from({ length: 100 }, (_, i) =>
-        createSubscriptionWithId(`sub-${i}`),
+        createSubscriptionWithId(`sub-${String(i)}`),
       );
       const payload = createMockPayload();
 

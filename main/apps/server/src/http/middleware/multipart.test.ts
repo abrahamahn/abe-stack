@@ -29,7 +29,7 @@ describe('multipart middleware', () => {
     expect(parsed?.filename).toBe('avatar.jpg');
     expect(parsed?.mimetype).toBe('image/jpeg');
     expect(parsed?.size).toBeGreaterThan(0);
-    expect(parsed?.buffer.toString('latin1')).toContain('abc123-binary-content');
+    expect(Buffer.from(parsed!.buffer).toString('latin1')).toContain('abc123-binary-content');
   });
 
   test('parseMultipartFile returns null when boundary is missing', () => {
@@ -55,8 +55,7 @@ describe('multipart middleware', () => {
 
     registerMultipartFormParser(server);
     expect(parser).not.toBeNull();
-    if (parser === null) throw new Error('Parser was not registered');
-    const multipartParser: MultipartParser = parser;
+    const multipartParser = parser as unknown as MultipartParser;
 
     const body = buildMultipartBody('x-boundary');
     let parsedBody: unknown = null;

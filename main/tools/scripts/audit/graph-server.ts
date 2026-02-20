@@ -16,7 +16,10 @@ const OUT = join(ROOT, '_graphs');
 
 if (!existsSync(OUT)) mkdirSync(OUT, { recursive: true });
 
-const EXCLUDE = String.raw`(__tests__|\.test\.|\.spec\.)`;
+// Exclude test files, compiled dist output, and TypeScript declaration files.
+// Without /dist/ and \.d\.ts, madge follows workspace packages into their
+// compiled output and reports hundreds of false circular dependencies.
+const EXCLUDE = String.raw`(__tests__|\.test\.|\.spec\.|/dist/|\.d\.ts$)`;
 
 const targets = [
   { name: 'server-src', dir: SRC },

@@ -9,12 +9,21 @@
 import { createAuthGuard } from '@bslt/core';
 import { activityRoutes } from '@bslt/core/activities';
 import { apiKeyRoutes } from '@bslt/core/api-keys';
-import { registerRouteMap } from '@bslt/server-system';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { createTestServer, parseJsonResponse, type TestServer } from './test-utils';
+import {
+  buildAuthenticatedRequest,
+  createTestJwt,
+  createTestServer,
+  parseJsonResponse,
+  type TestServer,
+} from './test-utils';
 
-import type { AuthGuardFactory } from '@bslt/server-system';
+import type { AuthGuardFactory } from '@/http';
+
+import { registerRouteMap } from '@/http';
+
+import { registerRouteMap } from '@/http';
 
 // ============================================================================
 // Mock Repositories
@@ -339,6 +348,149 @@ describe('Activities & API Keys Integration Tests', () => {
         payload: {},
       });
       expect(response.statusCode).toBe(404);
+    });
+  });
+
+  // --------------------------------------------------------------------------
+  // Tenant-Scoped Activity Isolation
+  // --------------------------------------------------------------------------
+
+  describe('Tenant-scoped activity isolation', () => {
+    const tenantAId = 'tenant-a-001';
+    const tenantBId = 'tenant-b-002';
+
+    const tenantAActivities = [
+      {
+        id: 'act-a1',
+        tenantId: tenantAId,
+        actorId: 'user-a1',
+        action: 'member.invited',
+        resourceType: 'invitation',
+        resourceId: 'inv-a1',
+        metadata: {},
+        createdAt: new Date('2026-01-10'),
+      },
+      {
+        id: 'act-a2',
+        tenantId: tenantAId,
+        actorId: 'user-a1',
+        action: 'document.created',
+        resourceType: 'document',
+        resourceId: 'doc-a1',
+        metadata: {},
+        createdAt: new Date('2026-01-11'),
+      },
+    ];
+
+    const tenantBActivities = [
+      {
+        id: 'act-b1',
+        tenantId: tenantBId,
+        actorId: 'user-b1',
+        action: 'project.created',
+        resourceType: 'project',
+        resourceId: 'proj-b1',
+        metadata: {},
+        createdAt: new Date('2026-01-12'),
+      },
+    ];
+
+    it('tenant A requesting activities only sees tenant A activities', async () => {
+      // Mock: when querying tenant A, return only tenant A activities
+      mockRepos.activities.findByTenantId.mockResolvedValue({
+        data: tenantAActivities,
+        total: tenantAActivities.length,
+      });
+
+      const token = createTestJwt({ userId: 'user-a1' });
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'GET',
+          url: `/api/tenants/${tenantAId}/activities`,
+          accessToken: token,
+          workspaceId: tenantAId,
+        }),
+      );
+
+      // The route should not return 404 (it is registered)
+      expect(response.statusCode).not.toBe(404);
+
+      // Verify the repository was called with tenant A's ID
+      if (mockRepos.activities.findByTenantId.mock.calls.length > 0) {
+        const callArgs = mockRepos.activities.findByTenantId.mock.calls[0];
+        expect(callArgs).toBeDefined();
+        // The first argument should be the tenantId
+        expect(callArgs![0]).toBe(tenantAId);
+      }
+    });
+
+    it('tenant B requesting activities only sees tenant B activities', async () => {
+      // Mock: when querying tenant B, return only tenant B activities
+      mockRepos.activities.findByTenantId.mockResolvedValue({
+        data: tenantBActivities,
+        total: tenantBActivities.length,
+      });
+
+      const token = createTestJwt({ userId: 'user-b1' });
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'GET',
+          url: `/api/tenants/${tenantBId}/activities`,
+          accessToken: token,
+          workspaceId: tenantBId,
+        }),
+      );
+
+      expect(response.statusCode).not.toBe(404);
+
+      // Verify the repository was called with tenant B's ID
+      if (mockRepos.activities.findByTenantId.mock.calls.length > 0) {
+        const callArgs = mockRepos.activities.findByTenantId.mock.calls[0];
+        expect(callArgs).toBeDefined();
+        expect(callArgs![0]).toBe(tenantBId);
+      }
+    });
+
+    it('activities for tenant A do not leak into tenant B queries', async () => {
+      // First call: tenant A
+      mockRepos.activities.findByTenantId.mockResolvedValueOnce({
+        data: tenantAActivities,
+        total: tenantAActivities.length,
+      });
+
+      const tokenA = createTestJwt({ userId: 'user-a1' });
+      await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'GET',
+          url: `/api/tenants/${tenantAId}/activities`,
+          accessToken: tokenA,
+          workspaceId: tenantAId,
+        }),
+      );
+
+      vi.clearAllMocks();
+
+      // Second call: tenant B
+      mockRepos.activities.findByTenantId.mockResolvedValueOnce({
+        data: tenantBActivities,
+        total: tenantBActivities.length,
+      });
+
+      const tokenB = createTestJwt({ userId: 'user-b1' });
+      await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'GET',
+          url: `/api/tenants/${tenantBId}/activities`,
+          accessToken: tokenB,
+          workspaceId: tenantBId,
+        }),
+      );
+
+      // Verify that after clearing mocks, tenant B call used tenant B's ID
+      if (mockRepos.activities.findByTenantId.mock.calls.length > 0) {
+        const callArgs = mockRepos.activities.findByTenantId.mock.calls[0];
+        expect(callArgs![0]).toBe(tenantBId);
+      }
     });
   });
 

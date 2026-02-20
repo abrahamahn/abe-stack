@@ -7,9 +7,9 @@ import { createAdminApiClient } from '../services/adminApi';
 
 import { useJobsList } from './useJobsList';
 
+import type { AdminApiClient } from '../services/adminApi';
 import type { UseQueryResult } from '@bslt/react';
 import type { JobListResponse } from '@bslt/shared';
-import type { AdminApiClient } from '../services/adminApi';
 
 vi.mock('@bslt/react', () => ({
   useQuery: vi.fn(),

@@ -885,25 +885,21 @@ describe('registerSecurityAudit', () => {
     const logger = registerSecurityAudit(mockServer);
 
     expect(logger).toBeInstanceOf(SecurityAuditLogger);
-    expect(mockServer.decorate).toHaveBeenCalledWith('auditLogger', logger);
-  });
-
-  test('should register onRequest hook to track start time', () => {
-    registerSecurityAudit(mockServer);
-
-    expect(mockServer.addHook).toHaveBeenCalledWith('onRequest', expect.any(Function));
-  });
-
-  test('should register onResponse hook to log suspicious requests', () => {
-    registerSecurityAudit(mockServer);
-
-    expect(mockServer.addHook).toHaveBeenCalledWith('onResponse', expect.any(Function));
+    expect(mockServer.decorate).toHaveBeenCalledWith('audit', logger);
   });
 
   test('should register onClose hook for cleanup', () => {
     registerSecurityAudit(mockServer);
 
     expect(mockServer.addHook).toHaveBeenCalledWith('onClose', expect.any(Function));
+  });
+
+  test('should only register the onClose hook', () => {
+    registerSecurityAudit(mockServer);
+
+    const calls = vi.mocked(mockServer.addHook).mock.calls;
+    expect(calls).toHaveLength(1);
+    expect(calls[0]?.[0]).toBe('onClose');
   });
 
   test('should accept custom configuration', () => {
@@ -918,90 +914,30 @@ describe('registerSecurityAudit', () => {
     expect(logger).toBeInstanceOf(SecurityAuditLogger);
   });
 
-  test('should log suspicious requests on 4xx status codes', async () => {
-    const logger = registerSecurityAudit(mockServer, { enabled: true });
+  test('should call logger.destroy on server close', async () => {
+    const logger = registerSecurityAudit(mockServer, { enabled: true, logPath: './test.log' });
 
     const hooks = getTestHooks(mockServer);
-    const onRequestHandler = hooks['onRequest']?.[0];
-    const onResponseHandler = hooks['onResponse']?.[0];
+    const onCloseHandler = hooks['onClose']?.[0];
 
     const mockRequest = createMockRequest();
-    const mockReply = createMockReply({ statusCode: 401 });
+    await logger.logEvent('auth_failure', mockRequest);
 
-    // Simulate request lifecycle
-    onRequestHandler?.(mockRequest, mockReply, () => {});
-
-    // Wait for async onResponse handler
-    if (onResponseHandler !== undefined) {
-      await Promise.resolve(onResponseHandler(mockRequest, mockReply));
+    // Simulate server close
+    if (onCloseHandler !== undefined) {
+      await Promise.resolve(onCloseHandler({}, () => {}));
     }
 
-    const stats = logger.getStats();
-    expect(stats.totalEvents).toBe(1);
-    expect(stats.eventsByType['suspicious_request']).toBe(1);
+    // Events should be flushed on destroy
+    expect(fs.appendFile).toHaveBeenCalled();
   });
 
-  test('should log suspicious requests on 5xx status codes', async () => {
+  test('should return a SecurityAuditLogger instance with correct initial state', () => {
     const logger = registerSecurityAudit(mockServer, { enabled: true });
-
-    const hooks = getTestHooks(mockServer);
-    const onRequestHandler = hooks['onRequest']?.[0];
-    const onResponseHandler = hooks['onResponse']?.[0];
-
-    const mockRequest = createMockRequest();
-    const mockReply = createMockReply({ statusCode: 500 });
-
-    onRequestHandler?.(mockRequest, mockReply, () => {});
-    if (onResponseHandler !== undefined) {
-      await Promise.resolve(onResponseHandler(mockRequest, mockReply));
-    }
-
-    const stats = logger.getStats();
-    expect(stats.totalEvents).toBe(1);
-  });
-
-  test('should not log successful requests (2xx/3xx)', async () => {
-    const logger = registerSecurityAudit(mockServer, { enabled: true });
-
-    const hooks = getTestHooks(mockServer);
-    const onRequestHandler = hooks['onRequest']?.[0];
-    const onResponseHandler = hooks['onResponse']?.[0];
-
-    const mockRequest = createMockRequest();
-    const mockReply = createMockReply({ statusCode: 200 });
-
-    onRequestHandler?.(mockRequest, mockReply, () => {});
-    if (onResponseHandler !== undefined) {
-      await Promise.resolve(onResponseHandler(mockRequest, mockReply));
-    }
 
     const stats = logger.getStats();
     expect(stats.totalEvents).toBe(0);
-  });
-
-  test('should calculate request duration', async () => {
-    const logger = registerSecurityAudit(mockServer, { enabled: true });
-
-    const hooks = getTestHooks(mockServer);
-    const onRequestHandler = hooks['onRequest']?.[0];
-    const onResponseHandler = hooks['onResponse']?.[0];
-
-    const mockRequest = createMockRequest();
-    const mockReply = createMockReply({ statusCode: 404 });
-
-    onRequestHandler?.(mockRequest, mockReply, () => {});
-
-    // Simulate some processing time
-    await new Promise((resolve) => setTimeout(resolve, 10));
-
-    if (onResponseHandler !== undefined) {
-      await Promise.resolve(onResponseHandler(mockRequest, mockReply));
-    }
-
-    const stats = logger.getStats();
-    const event = stats.recentIncidents[0];
-    expect(event?.details.duration).toBeDefined();
-    expect(event?.details.duration).toBeGreaterThanOrEqual(0);
+    expect(stats.recentIncidents).toEqual([]);
   });
 
   test('should cleanup on server close', async () => {

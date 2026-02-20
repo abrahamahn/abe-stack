@@ -6,10 +6,9 @@ import { createDbFromSql } from '../client';
 describe('RLS Session Client', () => {
   it('should execute SET LOCAL before the query when a session is present', async () => {
     const mockUnsafe = vi.fn().mockResolvedValue([]);
-    const mockBegin = vi.fn().mockImplementation(async (cb) => {
+    const mockBegin = vi.fn().mockImplementation((cb: (tx: unknown) => Promise<unknown>) => {
       const tx = {
         unsafe: mockUnsafe,
-        escapeLiteral: (val: string) => `'${val}'`,
       };
       return cb(tx);
     });
@@ -19,13 +18,13 @@ describe('RLS Session Client', () => {
       begin: mockBegin,
     };
 
-    const sessionClient = createDbFromSql(mockSql as any, {
+    const sessionClient = createDbFromSql(mockSql as never, {
       userId: 'user-123',
       tenantId: 'tenant-456',
       role: 'user',
     });
 
-    await sessionClient.query('SELECT * FROM users', []);
+    await sessionClient.query({ text: 'SELECT * FROM users', values: [] });
 
     // Verify SET LOCAL calls
     expect(mockUnsafe).toHaveBeenCalledWith("SET LOCAL app.user_id = 'user-123'");
@@ -36,11 +35,11 @@ describe('RLS Session Client', () => {
     expect(mockUnsafe).toHaveBeenCalledWith('SELECT * FROM users', expect.any(Array));
 
     // Check order (approximate check via call index)
-    const calls = mockUnsafe.mock.calls;
-    expect(calls[0][0]).toContain('SET LOCAL app.user_id');
-    expect(calls[1][0]).toContain('SET LOCAL app.tenant_id');
-    expect(calls[2][0]).toContain('SET LOCAL app.role');
-    expect(calls[3][0]).toBe('SELECT * FROM users');
+    const calls = mockUnsafe.mock.calls as string[][];
+    expect(calls[0]?.[0]).toContain('SET LOCAL app.user_id');
+    expect(calls[1]?.[0]).toContain('SET LOCAL app.tenant_id');
+    expect(calls[2]?.[0]).toContain('SET LOCAL app.role');
+    expect(calls[3]?.[0]).toBe('SELECT * FROM users');
   });
 
   it('should NOT use a transaction if no session is provided', async () => {
@@ -49,9 +48,9 @@ describe('RLS Session Client', () => {
       unsafe: mockUnsafe,
     };
 
-    const regularClient = createDbFromSql(mockSql as any);
+    const regularClient = createDbFromSql(mockSql as never);
 
-    await regularClient.query('SELECT * FROM users', []);
+    await regularClient.query({ text: 'SELECT * FROM users', values: [] });
 
     expect(mockUnsafe).toHaveBeenCalledTimes(1);
     expect(mockUnsafe).toHaveBeenCalledWith('SELECT * FROM users', []);

@@ -8,7 +8,6 @@
 
 import { adminRoutes } from '@bslt/core/admin';
 import { createAuthGuard } from '@bslt/core/auth';
-import { registerRouteMap } from '@bslt/server-system';
 import { SECURITY_SEVERITIES } from '@bslt/shared';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -21,8 +20,11 @@ import {
   type TestServer,
 } from './test-utils';
 
-import type { AuthGuardFactory, RouteMap as DbRouteMap } from '@bslt/server-system';
+import type { AuthGuardFactory } from '@/http';
+import type { RouteMap as DbRouteMap } from '@bslt/server-system';
 import type { SecurityEventsFilter } from '@bslt/shared';
+
+import { registerRouteMap } from '@/http';
 
 // ============================================================================
 // Mock Repositories
@@ -582,6 +584,301 @@ describe('Audit/Security Events Admin API Integration Tests', () => {
   // Behavioral Tests — Security Export
   // ==========================================================================
 
+  // ==========================================================================
+  // Non-Admin Role Enforcement — All Security Endpoints
+  // ==========================================================================
+
+  describe('non-admin user receives 403 on all admin security endpoints', () => {
+    it('GET /api/admin/security/events/:id returns 403 for non-admin user', async () => {
+      const userJwt = createTestJwt({ role: 'user' });
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'GET',
+          url: '/api/admin/security/events/00000000-0000-0000-0000-000000000001',
+          accessToken: userJwt,
+        }),
+      );
+      expect(response.statusCode).toBe(403);
+    });
+
+    it('POST /api/admin/security/export returns 403 for non-admin user', async () => {
+      const userJwt = createTestJwt({ role: 'user' });
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/admin/security/export',
+          accessToken: userJwt,
+          payload: { format: 'json' },
+        }),
+      );
+      expect(response.statusCode).toBe(403);
+    });
+
+    it('GET /api/admin/audit-events returns 403 for non-admin user', async () => {
+      const userJwt = createTestJwt({ role: 'user' });
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'GET',
+          url: '/api/admin/audit-events',
+          accessToken: userJwt,
+        }),
+      );
+      expect(response.statusCode).toBe(403);
+    });
+  });
+
+  // ==========================================================================
+  // Behavioral Tests — Event Detail Metadata Verification
+  // ==========================================================================
+
+  describe('security event detail with metadata', () => {
+    it('GET /api/admin/security/events/:id returns event with all metadata fields', async () => {
+      const mockEvent = {
+        id: 'se-meta-1',
+        user_id: 'user-42',
+        email: 'actor@example.com',
+        event_type: 'suspicious_login',
+        severity: 'high',
+        ip_address: '203.0.113.50',
+        user_agent: 'Mozilla/5.0 (X11; Linux x86_64)',
+        metadata: JSON.stringify({
+          reason: 'Login from new country',
+          country: 'XX',
+          previousCountry: 'US',
+        }),
+        created_at: new Date('2025-06-15T10:30:00Z'),
+      };
+
+      mockDb.queryOne.mockResolvedValueOnce(mockEvent);
+
+      const adminJwt = createAdminJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'GET',
+          url: '/api/admin/security/events/se-meta-1',
+          accessToken: adminJwt,
+        }),
+      );
+
+      expect(response.statusCode).toBe(200);
+      const body = parseJsonResponse(response) as {
+        id: string;
+        userId: string;
+        email: string;
+        eventType: string;
+        severity: string;
+        ipAddress: string;
+        userAgent: string;
+        metadata: unknown;
+        createdAt: string;
+      };
+      expect(body.id).toBe('se-meta-1');
+      expect(body.userId).toBeDefined();
+      expect(body.email).toBeDefined();
+      expect(body.eventType).toBeDefined();
+      expect(body.severity).toBe('high');
+      expect(body.ipAddress).toBeDefined();
+      expect(body.userAgent).toBeDefined();
+      expect(body.createdAt).toBeDefined();
+    });
+
+    it('event includes correct actor, IP, user agent, timestamp', async () => {
+      const timestamp = new Date('2025-09-01T08:00:00Z');
+      const mockEvent = {
+        id: 'se-actor-1',
+        user_id: 'user-actor-99',
+        email: 'specific-actor@example.com',
+        event_type: 'password_changed',
+        severity: 'medium',
+        ip_address: '198.51.100.42',
+        user_agent: 'Chrome/120.0.0.0',
+        metadata: null,
+        created_at: timestamp,
+      };
+
+      mockDb.queryOne.mockResolvedValueOnce(mockEvent);
+
+      const adminJwt = createAdminJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'GET',
+          url: '/api/admin/security/events/se-actor-1',
+          accessToken: adminJwt,
+        }),
+      );
+
+      expect(response.statusCode).toBe(200);
+      const body = parseJsonResponse(response) as {
+        userId: string;
+        ipAddress: string;
+        userAgent: string;
+        createdAt: string;
+      };
+      // Verify the actor (user_id) is present
+      expect(body.userId).toBe('user-actor-99');
+      // Verify the IP address
+      expect(body.ipAddress).toBe('198.51.100.42');
+      // Verify the user agent
+      expect(body.userAgent).toBe('Chrome/120.0.0.0');
+      // Verify the timestamp is an ISO string
+      expect(body.createdAt).toBe(timestamp.toISOString());
+    });
+  });
+
+  // ==========================================================================
+  // Behavioral Tests — Security Events Written on Auth Actions
+  // ==========================================================================
+
+  describe('security events written to DB on auth actions', () => {
+    it('security events DB calls include event_type, severity, ip_address, user_agent', async () => {
+      // Verify the mock structure supports the full security event shape
+      const mockEvent = {
+        id: 'se-db-1',
+        user_id: 'user-1',
+        email: 'test@example.com',
+        event_type: 'account_locked',
+        severity: 'high',
+        ip_address: '10.0.0.1',
+        user_agent: 'TestAgent/1.0',
+        metadata: JSON.stringify({ failedAttempts: 5 }),
+        created_at: new Date(),
+      };
+      mockDb.query.mockResolvedValueOnce([mockEvent]);
+      mockDb.queryOne.mockResolvedValueOnce({ count: '1' });
+
+      const adminJwt = createAdminJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/admin/security/events',
+          accessToken: adminJwt,
+          payload: { page: 1, limit: 10, filter: { eventType: 'account_locked' } },
+        }),
+      );
+
+      expect(response.statusCode).toBe(200);
+      const body = parseJsonResponse(response) as {
+        data: Array<{
+          eventType: string;
+          severity: string;
+          ipAddress: string;
+          userAgent: string;
+        }>;
+      };
+      expect(body.data).toHaveLength(1);
+      expect(body.data[0]!.eventType).toBe('account_locked');
+      expect(body.data[0]!.severity).toBe('high');
+      expect(body.data[0]!.ipAddress).toBe('10.0.0.1');
+      expect(body.data[0]!.userAgent).toBe('TestAgent/1.0');
+    });
+
+    it('login_failure events are queryable via the admin API', async () => {
+      const mockEvents = [
+        {
+          id: 'se-login-fail-1',
+          user_id: null,
+          email: 'attacker@example.com',
+          event_type: 'login_failure',
+          severity: 'medium',
+          ip_address: '172.16.0.1',
+          user_agent: 'curl/7.88',
+          metadata: null,
+          created_at: new Date(),
+        },
+      ];
+      mockDb.query.mockResolvedValueOnce(mockEvents);
+      mockDb.queryOne.mockResolvedValueOnce({ count: '1' });
+
+      const adminJwt = createAdminJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/admin/security/events',
+          accessToken: adminJwt,
+          payload: { page: 1, limit: 10, filter: { eventType: 'login_failure' } },
+        }),
+      );
+
+      expect(response.statusCode).toBe(200);
+      const body = parseJsonResponse(response) as { data: Array<{ eventType: string }> };
+      expect(body.data[0]!.eventType).toBe('login_failure');
+    });
+
+    it('OAuth login events are queryable via the admin API', async () => {
+      const mockEvents = [
+        {
+          id: 'se-oauth-1',
+          user_id: 'user-oauth-1',
+          email: 'oauth@example.com',
+          event_type: 'oauth_login_success',
+          severity: 'low',
+          ip_address: '192.168.1.50',
+          user_agent: 'Safari/17.0',
+          metadata: JSON.stringify({ provider: 'google', isNewUser: false }),
+          created_at: new Date(),
+        },
+      ];
+      mockDb.query.mockResolvedValueOnce(mockEvents);
+      mockDb.queryOne.mockResolvedValueOnce({ count: '1' });
+
+      const adminJwt = createAdminJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/admin/security/events',
+          accessToken: adminJwt,
+          payload: { page: 1, limit: 10, filter: { eventType: 'oauth_login_success' } },
+        }),
+      );
+
+      expect(response.statusCode).toBe(200);
+      const body = parseJsonResponse(response) as { data: Array<{ eventType: string }> };
+      expect(body.data[0]!.eventType).toBe('oauth_login_success');
+    });
+  });
+
+  // ==========================================================================
+  // Behavioral Tests — Security Metrics With Aggregated Data
+  // ==========================================================================
+
+  describe('security metrics aggregated values', () => {
+    it('GET /api/admin/security/metrics returns lowEvents count', async () => {
+      const mockEvents = [
+        { event_type: 'oauth_login_success', severity: 'low' },
+        { event_type: 'oauth_login_success', severity: 'low' },
+        { event_type: 'login_failure', severity: 'medium' },
+      ];
+
+      mockDb.query.mockResolvedValueOnce(mockEvents);
+
+      const adminJwt = createAdminJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'GET',
+          url: '/api/admin/security/metrics?period=week',
+          accessToken: adminJwt,
+        }),
+      );
+
+      expect(response.statusCode).toBe(200);
+      const body = parseJsonResponse(response) as {
+        totalEvents: number;
+        lowEvents: number;
+        mediumEvents: number;
+        eventsByType: Record<string, number>;
+      };
+      expect(body.totalEvents).toBe(3);
+      expect(body.lowEvents).toBe(2);
+      expect(body.mediumEvents).toBe(1);
+      expect(body.eventsByType).toBeDefined();
+      expect(body.eventsByType['oauth_login_success']).toBe(2);
+    });
+  });
+
+  // ==========================================================================
+  // Behavioral Tests — Security Export
+  // ==========================================================================
+
   describe('security export', () => {
     it('POST /api/admin/security/export returns JSON export', async () => {
       const mockEvents = [
@@ -664,5 +961,433 @@ describe('Audit/Security Events Admin API Integration Tests', () => {
       };
       expect(body.contentType).toBe('text/csv');
     });
+  });
+
+  // ==========================================================================
+  // Adversarial: Boundary — Future dates, negative offset, empty filters
+  // ==========================================================================
+
+  describe('Adversarial: boundary — query with extreme values', () => {
+    it('query events with date in far future (year 9999) returns empty results', async () => {
+      mockDb.query.mockResolvedValueOnce([]);
+      mockDb.queryOne.mockResolvedValueOnce({ count: '0' });
+
+      const adminJwt = createAdminJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/admin/security/events',
+          accessToken: adminJwt,
+          payload: {
+            page: 1,
+            limit: 10,
+            filter: {
+              startDate: '9999-12-31T23:59:59.999Z',
+              endDate: '9999-12-31T23:59:59.999Z',
+            },
+          },
+        }),
+      );
+
+      expect(response.statusCode).toBe(200);
+      const body = parseJsonResponse(response) as { data: unknown[]; total: number };
+      expect(body.data).toHaveLength(0);
+      expect(body.total).toBe(0);
+    });
+
+    it('query events with negative page number is rejected or returns empty', async () => {
+      mockDb.query.mockResolvedValueOnce([]);
+      mockDb.queryOne.mockResolvedValueOnce({ count: '0' });
+
+      const adminJwt = createAdminJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/admin/security/events',
+          accessToken: adminJwt,
+          payload: { page: -1, limit: 10 },
+        }),
+      );
+
+      // Should either reject (400) or normalize to page 1
+      expect(response.statusCode).toBeDefined();
+      expect(response.statusCode).not.toBe(500);
+      if (response.statusCode === 200) {
+        const body = parseJsonResponse(response) as { page: number };
+        expect(body.page).toBeGreaterThanOrEqual(1);
+      }
+    });
+
+    it('query events with zero limit returns empty or is rejected', async () => {
+      mockDb.query.mockResolvedValueOnce([]);
+      mockDb.queryOne.mockResolvedValueOnce({ count: '0' });
+
+      const adminJwt = createAdminJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/admin/security/events',
+          accessToken: adminJwt,
+          payload: { page: 1, limit: 0 },
+        }),
+      );
+
+      expect(response.statusCode).toBeDefined();
+      expect(response.statusCode).not.toBe(500);
+    });
+
+    it('query events with empty type filter string returns results', async () => {
+      mockDb.query.mockResolvedValueOnce([]);
+      mockDb.queryOne.mockResolvedValueOnce({ count: '0' });
+
+      const adminJwt = createAdminJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/admin/security/events',
+          accessToken: adminJwt,
+          payload: { page: 1, limit: 10, filter: { eventType: '' } },
+        }),
+      );
+
+      expect(response.statusCode).toBeDefined();
+      expect(response.statusCode).not.toBe(500);
+    });
+
+    it('query events with MAX_SAFE_INTEGER page number is handled', async () => {
+      mockDb.query.mockResolvedValueOnce([]);
+      mockDb.queryOne.mockResolvedValueOnce({ count: '0' });
+
+      const adminJwt = createAdminJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/admin/security/events',
+          accessToken: adminJwt,
+          payload: { page: Number.MAX_SAFE_INTEGER, limit: 10 },
+        }),
+      );
+
+      expect(response.statusCode).toBeDefined();
+      expect(response.statusCode).not.toBe(500);
+    });
+
+    it('query events with null filter is handled gracefully', async () => {
+      mockDb.query.mockResolvedValueOnce([]);
+      mockDb.queryOne.mockResolvedValueOnce({ count: '0' });
+
+      const adminJwt = createAdminJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/admin/security/events',
+          accessToken: adminJwt,
+          payload: { page: 1, limit: 10, filter: null },
+        }),
+      );
+
+      expect(response.statusCode).toBeDefined();
+      expect(response.statusCode).not.toBe(500);
+    });
+  });
+
+  // ==========================================================================
+  // Adversarial: Boundary — Export with unsupported format, 0 limit
+  // ==========================================================================
+
+  describe('Adversarial: boundary — export edge cases', () => {
+    it('export with unsupported format is rejected', async () => {
+      const adminJwt = createAdminJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/admin/security/export',
+          accessToken: adminJwt,
+          payload: { format: 'xml' },
+        }),
+      );
+
+      // Unsupported format should be rejected
+      expect(response.statusCode).toBeGreaterThanOrEqual(400);
+      expect(response.statusCode).not.toBe(500);
+    });
+
+    it('export with empty format string is rejected', async () => {
+      const adminJwt = createAdminJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/admin/security/export',
+          accessToken: adminJwt,
+          payload: { format: '' },
+        }),
+      );
+
+      expect(response.statusCode).toBeGreaterThanOrEqual(400);
+    });
+
+    it('export with null format is rejected', async () => {
+      const adminJwt = createAdminJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/admin/security/export',
+          accessToken: adminJwt,
+          payload: { format: null },
+        }),
+      );
+
+      expect(response.statusCode).toBeGreaterThanOrEqual(400);
+    });
+
+    it('export with limit 0 returns empty or is rejected', async () => {
+      mockDb.query.mockResolvedValueOnce([]);
+
+      const adminJwt = createAdminJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/admin/security/export',
+          accessToken: adminJwt,
+          payload: { format: 'json', limit: 0 },
+        }),
+      );
+
+      expect(response.statusCode).toBeDefined();
+      expect(response.statusCode).not.toBe(500);
+    });
+
+    it('export with negative limit is rejected', async () => {
+      const adminJwt = createAdminJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/admin/security/export',
+          accessToken: adminJwt,
+          payload: { format: 'json', limit: -100 },
+        }),
+      );
+
+      expect(response.statusCode).toBeDefined();
+      expect(response.statusCode).not.toBe(500);
+    });
+  });
+
+  // ==========================================================================
+  // Adversarial: Layer — DB returning events with null actor_id, malformed timestamps
+  // ==========================================================================
+
+  describe('Adversarial: layer — DB returning malformed event records', () => {
+    it.todo('handles event with null actor_id (user_id) gracefully');
+
+    it.todo('handles event with malformed timestamp string gracefully');
+
+    it.todo('handles event with null metadata field in list query');
+
+    it.todo('handles DB returning empty array for metrics query');
+
+    it.todo('handles DB returning event with all null fields');
+  });
+
+  // ==========================================================================
+  // Adversarial: Idempotency — Double-export same query
+  // ==========================================================================
+
+  describe('Adversarial: idempotency — double-export produces same results', () => {
+    it.todo('two identical JSON exports return consistent results');
+
+    it.todo('two identical CSV exports return consistent results');
+
+    it.todo('two identical event queries return same pagination metadata');
+  });
+
+  // ==========================================================================
+  // Adversarial: "Killer" — Non-admin with forged header, SQL injection
+  // ==========================================================================
+
+  describe('Adversarial: killer tests — forged headers, SQL injection, privilege escalation', () => {
+    it('non-admin user with forged x-admin-id header is still rejected', async () => {
+      const userJwt = createTestJwt({ role: 'user' });
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/admin/security/events',
+          accessToken: userJwt,
+          payload: { page: 1, limit: 10 },
+          headers: {
+            'x-admin-id': 'admin-test-456',
+            'x-role': 'admin',
+            'x-user-role': 'admin',
+          },
+        }),
+      );
+
+      // Should still be 403 -- header forgery must not bypass role enforcement
+      expect(response.statusCode).toBe(403);
+    });
+
+    it('non-admin user with forged authorization-level header cannot access metrics', async () => {
+      const userJwt = createTestJwt({ role: 'user' });
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'GET',
+          url: '/api/admin/security/metrics',
+          accessToken: userJwt,
+          headers: {
+            'x-forwarded-role': 'admin',
+            'x-original-role': 'admin',
+          },
+        }),
+      );
+
+      expect(response.statusCode).toBe(403);
+    });
+
+    it('SQL injection in event type filter is neutralized', async () => {
+      mockDb.query.mockResolvedValueOnce([]);
+      mockDb.queryOne.mockResolvedValueOnce({ count: '0' });
+
+      const adminJwt = createAdminJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/admin/security/events',
+          accessToken: adminJwt,
+          payload: {
+            page: 1,
+            limit: 10,
+            filter: {
+              eventType: "'; DROP TABLE security_events; --",
+            },
+          },
+        }),
+      );
+
+      // Should not crash and should not drop tables
+      expect(response.statusCode).toBeDefined();
+      expect(response.statusCode).not.toBe(500);
+    });
+
+    it('SQL injection in severity filter is neutralized', async () => {
+      mockDb.query.mockResolvedValueOnce([]);
+      mockDb.queryOne.mockResolvedValueOnce({ count: '0' });
+
+      const adminJwt = createAdminJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/admin/security/events',
+          accessToken: adminJwt,
+          payload: {
+            page: 1,
+            limit: 10,
+            filter: {
+              severity: "high' OR '1'='1",
+            },
+          },
+        }),
+      );
+
+      expect(response.statusCode).toBeDefined();
+      expect(response.statusCode).not.toBe(500);
+    });
+
+    it('SQL injection in userId filter is neutralized', async () => {
+      mockDb.query.mockResolvedValueOnce([]);
+      mockDb.queryOne.mockResolvedValueOnce({ count: '0' });
+
+      const adminJwt = createAdminJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/admin/security/events',
+          accessToken: adminJwt,
+          payload: {
+            page: 1,
+            limit: 10,
+            filter: {
+              userId: "' UNION SELECT * FROM users --",
+            },
+          },
+        }),
+      );
+
+      expect(response.statusCode).toBeDefined();
+      expect(response.statusCode).not.toBe(500);
+    });
+
+    it('non-admin user cannot export security events', async () => {
+      const userJwt = createTestJwt({ role: 'user' });
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/admin/security/export',
+          accessToken: userJwt,
+          payload: { format: 'json' },
+        }),
+      );
+
+      expect(response.statusCode).toBe(403);
+    });
+
+    it('non-admin user with forged admin header cannot export', async () => {
+      const userJwt = createTestJwt({ role: 'user' });
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/admin/security/export',
+          accessToken: userJwt,
+          payload: { format: 'json' },
+          headers: {
+            'x-admin-id': 'admin-test-456',
+            'x-override-role': 'admin',
+          },
+        }),
+      );
+
+      expect(response.statusCode).toBe(403);
+    });
+
+    it('prototype pollution in security events filter payload is neutralized', async () => {
+      const adminJwt = createAdminJwt();
+      const response = await testServer.inject({
+        method: 'POST',
+        url: '/api/admin/security/events',
+        headers: {
+          authorization: `Bearer ${adminJwt}`,
+          'content-type': 'application/json',
+        },
+        payload: JSON.stringify({
+          page: 1,
+          limit: 10,
+          filter: { severity: 'high' },
+          '__proto__': { isAdmin: true, polluted: true },
+          'constructor': { prototype: { hacked: true } },
+        }),
+      });
+
+      expect(response.statusCode).not.toBe(500);
+      // Verify prototype was not polluted
+      expect(({} as Record<string, unknown>)['isAdmin']).toBeUndefined();
+      expect(({} as Record<string, unknown>)['polluted']).toBeUndefined();
+      expect(({} as Record<string, unknown>)['hacked']).toBeUndefined();
+    });
+
+    it('unauthenticated request with forged admin headers is rejected', async () => {
+      const response = await testServer.inject({
+        method: 'POST',
+        url: '/api/admin/security/events',
+        headers: {
+          'x-admin-id': 'admin-test-456',
+          'x-role': 'admin',
+          'content-type': 'application/json',
+        },
+        payload: JSON.stringify({ page: 1, limit: 10 }),
+      });
+
+      expect(response.statusCode).toBe(401);
+    });
+
+    it.todo('expired admin JWT is rejected for security events');
   });
 });

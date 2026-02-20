@@ -80,4 +80,4 @@ export {
 
 export { constantTimeCompare, generateSecureId, generateToken, generateUUID } from './crypto';
 
-export { toISODateOnly } from './date';
+export { formatDate, formatDateTime, formatTimeAgo, toISODateOnly } from './date';

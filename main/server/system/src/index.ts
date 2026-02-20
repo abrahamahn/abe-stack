@@ -9,25 +9,34 @@
  */
 
 // ============================================================================
+// Errors
+// ============================================================================
+
+// registerErrorHandler moved to apps/server/src/http/error-handler.ts
+export { replyError, replyOk, sendResult } from './errors';
+
+// ============================================================================
 // Logger
 // ============================================================================
 
+// registerLoggingMiddleware and createJobLogger (Fastify-specific) moved to apps/server/src/middleware/logging.ts
 export {
-  CONSOLE_LOG_LEVELS, createBaseLogger,
+  createBaseLogger,
   createBaseRequestLogger,
   createConsoleLogger,
-  createJobCorrelationId,
-  createJobLogger,
-  createLogger,
   createLogRequestContext,
+  createLogger,
   createRequestLogger,
-  generateCorrelationId,
   getOrCreateCorrelationId,
-  isValidCorrelationId, LOG_LEVELS, registerLoggingMiddleware,
-  shouldLog,
   type BaseLogger,
-  type BaseLoggerType, type ConsoleLoggerConfig, type ConsoleLogLevel, type LogData, type Logger,
-  type LoggerConfig, type LogLevel, type LogRequestContext
+  type BaseLoggerType,
+  type ConsoleLogLevel,
+  type ConsoleLoggerConfig,
+  type LogData,
+  type LogLevel,
+  type LogRequestContext,
+  type Logger,
+  type LoggerConfig,
 } from './logger';
 
 // ============================================================================
@@ -35,13 +44,13 @@ export {
 // ============================================================================
 
 export {
+  MailerClient,
   emailTemplates,
   type AuthEmailTemplates,
   type EmailOptions,
   type EmailResult,
-  type EmailService
-} from './mailer';
-export { MailerClient } from './mailer/client';
+  type EmailService,
+} from './email';
 
 // ============================================================================
 // Cache
@@ -59,20 +68,20 @@ export {
   CacheProviderNotFoundError,
   CacheSerializationError,
   CacheTimeoutError,
-  // Factory
-  createCache,
-  createCacheFromEnv,
-  createMemoryCache,
   // Configuration
   DEFAULT_CACHE_CONFIG,
-  isCacheConnectionError,
-  isCacheError,
-  isCacheTimeoutError,
-  loadCacheConfig,
   // Core LRU
   LRUCache,
   // Providers
   MemoryCacheProvider,
+  // Factory
+  createCache,
+  createCacheFromEnv,
+  createMemoryCache,
+  isCacheConnectionError,
+  isCacheError,
+  isCacheTimeoutError,
+  loadCacheConfig,
   toCacheError,
   // Types
   type BaseCacheConfig,
@@ -91,10 +100,10 @@ export {
   type EvictionCallback,
   type EvictionReason,
   type LRUCacheOptions,
-  type MemoizedFunction,
   type MemoizeOptions,
   type MemoizeStats,
-  type MemoryCacheConfig
+  type MemoizedFunction,
+  type MemoryCacheConfig,
 } from './cache';
 
 // ============================================================================
@@ -109,6 +118,12 @@ export {
   DatabaseEnvSchema,
   EmailEnvSchema,
   EnvSchema,
+  NotificationEnvSchema,
+  PackageManagerEnvSchema,
+  QueueEnvSchema,
+  SearchEnvSchema,
+  ServerEnvSchema,
+  StorageEnvSchema,
   // Parsers
   getBool,
   getInt,
@@ -117,84 +132,85 @@ export {
   // Environment Loading
   initEnv,
   loadServerEnv,
-  NotificationEnvSchema,
-  PackageManagerEnvSchema,
-  QueueEnvSchema,
-  SearchEnvSchema,
-  ServerEnvSchema,
-  StorageEnvSchema,
   validateEnvironment,
-  type FullEnv
+  type FullEnv,
 } from './config';
 
 // ============================================================================
-// Security — Crypto (JWT)
+// Security
 // ============================================================================
 
 export {
-  checkTokenSecret,
-  createJwtRotationHandler,
-  decode,
+  // IP Blocklist / Reputation
+  IpBlocklist,
   JwtError,
+  // Rate Limiting
+  MemoryStore,
+  // Permissions
+  PERMISSION_TYPES,
+  PermissionChecker,
+  RateLimitPresets,
+  RateLimiter,
+  // Token (CSRF)
+  TOKEN_LENGTH,
+  // Upload Scanning
+  UploadScanner,
+  allowed,
+  // Crypto (JWT)
+  checkTokenSecret,
+  createAdminRule,
+  createCustomRule,
+  createDefaultPermissionConfig,
+  createIpBlocklist,
+  createIpBlocklistMiddleware,
+  createJwtRotationHandler,
+  createMemberRule,
+  createOwnerRule,
+  createPermissionChecker,
+  createRateLimiter,
+  createUploadScanner,
+  decode,
+  decryptToken,
+  DEFAULT_BLOCKED_EXTENSIONS,
+  denied,
+  detectMimeFromMagicBytes,
+  detectScriptContent,
+  encryptToken,
+  // Headers
+  generateSecurityHeaders,
+  generateToken,
+  getFileExtension,
+  getProductionSecurityDefaults,
+  getRecordKey,
+  ipv4ToInt,
+  isAllowed,
+  isDenied,
+  isInCidrRange,
+  parseCidr,
+  parseRecordKey,
   sign,
+  signToken,
   signWithRotation,
+  validateCsrfToken,
   verify,
+  verifyToken as verifyCsrfToken,
+  verifyToken,
   verifyWithRotation,
+  type BatchRecordLoader,
+  type CsrfValidationOptions,
+  type CustomRule,
+  type IpBlocklistConfig,
+  type IpPolicyLevel,
+  type IpReputationProvider,
+  type IpReputationResult,
   type JwtErrorCode,
   type JwtHeader,
   type JwtPayload,
   type JwtRotationConfig,
   type JwtRotationHandler,
-  type RotatingJwtOptions,
-  type SignOptions,
-  type VerifyOptions
-} from './security/crypto';
-
-// ============================================================================
-// Security — Token (CSRF)
-// ============================================================================
-
-export {
-  decryptToken,
-  encryptToken,
-  generateToken,
-  signToken,
-  TOKEN_LENGTH,
-  validateCsrfToken,
-  verifyToken as verifyCsrfToken,
-  verifyToken,
-  type CsrfValidationOptions
-} from './security/token';
-
-export {
-  generateSecurityHeaders,
-  getProductionSecurityDefaults,
-  type SecurityHeaderOptions,
-  type SecurityHeaders
-} from './security/headers';
-
-// ============================================================================
-// Security — Permissions
-// ============================================================================
-
-export {
-  allowed,
-  createAdminRule,
-  createCustomRule,
-  createDefaultPermissionConfig,
-  createMemberRule,
-  createOwnerRule,
-  createPermissionChecker,
-  denied,
-  getRecordKey,
-  isAllowed,
-  isDenied,
-  parseRecordKey,
-  PERMISSION_TYPES,
-  PermissionChecker,
-  type BatchRecordLoader,
-  type CustomRule,
   type MembershipRule,
+  type MemoryStoreConfig,
+  type MemoryStoreStats,
   type OwnershipRule,
   type PermissionAllowed,
   type PermissionCheck,
@@ -208,33 +224,37 @@ export {
   type PermissionRuleBase,
   type PermissionRuleType,
   type PermissionType,
+  type RateLimitConfig,
+  type RateLimitInfo,
+  type RateLimiterStats,
   type RecordLoader,
   type RecordPointer,
   type RoleRule,
-  type TablePermissionConfig
-} from './security/permissions';
-
-// ============================================================================
-// Security — Rate Limiting
-// ============================================================================
-
-export {
-  createRateLimiter,
-  MemoryStore,
-  RateLimiter,
-  RateLimitPresets,
-  type MemoryStoreConfig,
-  type MemoryStoreStats,
-  type RateLimitConfig,
-  type RateLimiterStats,
-  type RateLimitInfo
-} from './security/rate-limit';
+  type RotatingJwtOptions,
+  type ScannableFile,
+  type ScannerPlugin,
+  type ScanResult,
+  type SecurityHeaderOptions,
+  type SecurityHeaders,
+  type SignOptions,
+  type TablePermissionConfig,
+  type UploadScannerConfig,
+  type VerifyOptions,
+} from './security';
 
 // ============================================================================
 // Storage
 // ============================================================================
 
+// registerFileServer and FilesConfig moved to apps/server/src/http/file-server.ts
 export {
+  // Providers
+  LocalStorageProvider,
+  S3StorageProvider,
+  // Errors
+  StorageError,
+  StorageNotFoundError,
+  StorageUploadError,
   createFileSignature,
   // URL Signing
   createSignedUrl,
@@ -242,22 +262,19 @@ export {
   createStorage,
   createStorageSignature,
   getDefaultExpiration,
+  isStorageError,
+  isStorageNotFoundError,
   isUrlExpired,
   // Configuration
   loadStorageConfig,
-  // Providers
-  LocalStorageProvider,
   normalizeFilename,
   normalizeStorageFilename,
   normalizeStorageKey,
   parseSignedUrl,
-  // HTTP Server
-  registerFileServer,
-  S3StorageProvider,
+  toStorageError,
   validateStorage,
   verifyFileSignature,
   verifyStorageSignature,
-  type FilesConfig,
   type FileSignatureData,
   // Types
   type LocalStorageConfig,
@@ -266,7 +283,7 @@ export {
   type StorageConfig,
   type StorageProvider,
   type StorageProviderName,
-  type UploadParams
+  type UploadParams,
 } from './storage';
 
 // ============================================================================
@@ -274,15 +291,15 @@ export {
 // ============================================================================
 
 export {
+  MemoryQueueStore,
+  QueueServer,
+  WriteService,
   // Memory Store
   createMemoryQueueStore,
   // Queue Server
   createQueueServer,
   // Write Service
   createWriteService,
-  MemoryQueueStore,
-  QueueServer,
-  WriteService,
   // Write Types
   type AfterWriteHook,
   type BeforeValidateHook,
@@ -308,14 +325,18 @@ export {
   type WriteHooks,
   type WriteOperation,
   type WriteResult,
-  type WriteServiceOptions
+  type WriteServiceOptions,
 } from './queue';
 
 // ============================================================================
 // Search
 // ============================================================================
 
+// Factory (SearchProviderFactory, ProviderOptions, SqlSearchProviderOptions) canonical in @bslt/db
 export {
+  SearchProviderFactory,
+  SearchQueryBuilder,
+  SqlSearchProvider,
   // Query Builder
   createSearchQuery,
   // SQL Provider
@@ -324,12 +345,8 @@ export {
   // Factory
   getSearchProviderFactory,
   resetSearchProviderFactory,
-  SearchProviderFactory,
-  SearchQueryBuilder,
-  SqlSearchProvider,
   // Types
   type ElasticsearchProviderConfig,
-  type ProviderOptions,
   type SearchContext,
   type SearchProviderConfig,
   type SearchProviderFactoryOptions,
@@ -338,8 +355,7 @@ export {
   type SqlColumnMapping,
   type SqlQueryOptions,
   type SqlSearchProviderConfig,
-  type SqlSearchProviderOptions,
-  type SqlTableConfig
+  type SqlTableConfig,
 } from './search';
 
 // ============================================================================
@@ -347,9 +363,12 @@ export {
 // ============================================================================
 
 export {
+  MetricsCollector,
+  checkCacheStatus,
   checkDbStatus,
   checkEmailStatus,
   checkPubSubStatus,
+  checkQueueStatus,
   checkRateLimitStatus,
   checkSchemaStatus,
   checkStorageStatus,
@@ -357,10 +376,11 @@ export {
   getDetailedHealth,
   getMetricsCollector,
   logStartupSummary,
-  MetricsCollector,
   resetMetricsCollector,
+  type DetailedHealthOptions,
+  type HealthContext,
   type MetricsSummary,
-  type SystemContext
+  type SchemaValidatorFn,
 } from './system';
 
 // ============================================================================
@@ -369,13 +389,13 @@ export {
 
 export {
   ConsoleSmsProvider,
-  createSmsProvider,
   TwilioSmsProvider,
+  createSmsProvider,
   type SmsConfig,
   type SmsOptions,
   type SmsProvider,
   type SmsResult,
-  type TwilioConfig
+  type TwilioConfig,
 } from './sms';
 
 // ============================================================================
@@ -383,16 +403,16 @@ export {
 // ============================================================================
 
 export {
-  createGeoIpProvider,
   IpApiGeoIpProvider,
   NoopGeoIpProvider,
+  createGeoIpProvider,
   type GeoIpConfig,
   type GeoIpProvider,
-  type GeoIpResult
+  type GeoIpResult,
 } from './geo-ip';
 
 // ============================================================================
-// Routing (Fastify-specific)
+// Routing
 // ============================================================================
 
 export {
@@ -406,6 +426,8 @@ export {
   type AuthGuardFactory,
   type HandlerContext,
   type HttpMethod,
+  type HttpReply,
+  type HttpRequest,
   type JsonSchemaObject,
   type RouteDefinition,
   type RouteHandler,
@@ -413,9 +435,9 @@ export {
   type RouteOpenApiMeta,
   type RouteRegistryEntry,
   type RouteResult,
-  type RouterOptions,
   type RouteSchema,
-  type ValidationSchema
+  type RouterOptions,
+  type ValidationSchema,
 } from './routing';
 
 // ============================================================================
@@ -423,31 +445,29 @@ export {
 // ============================================================================
 
 export {
+  ConsoleErrorTrackingProvider,
+  NoopErrorTrackingProvider,
   addBreadcrumb,
   captureError,
-  ConsoleErrorTrackingProvider,
   createErrorTracker,
   initSentry,
-  NoopErrorTrackingProvider,
   setUserContext,
   type Breadcrumb,
   type BreadcrumbLevel,
   type ErrorContext,
   type ErrorTrackingConfig,
-  type ErrorTrackingProvider
+  type ErrorTrackingProvider,
 } from './observability';
 
 // ============================================================================
 // Utils
 // ============================================================================
 
-export { isSafePath } from './utils/fs';
 export {
   isPortFree,
   isPortListening,
+  isSafePath,
   pickAvailablePort,
   uniquePorts,
-  waitForPort
-} from './utils/port';
-export { swaggerThemeCss } from './utils/swagger';
-
+  waitForPort,
+} from './utils';

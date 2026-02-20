@@ -8,7 +8,7 @@
  * @module
  */
 
-import { eq, select, insert, update } from '../../builder/index';
+import { and, deleteFrom, eq, lt, ne, select, insert, update } from '../../builder/index';
 import {
   type DataExportRequest,
   type DataExportStatus,
@@ -77,6 +77,14 @@ export interface DataExportRequestRepository {
    * @complexity O(1)
    */
   updateStatus(id: string, status: DataExportStatus): Promise<DataExportRequest | null>;
+
+  /**
+   * Delete expired requests (for daily cleanup task).
+   *
+   * @returns Number of deleted requests
+   * @complexity O(n) where n is number of expired non-completed requests
+   */
+  deleteExpired(): Promise<number>;
 }
 
 // ============================================================================
@@ -170,6 +178,14 @@ export function createDataExportRequestRepository(db: RawDb): DataExportRequestR
           .toSql(),
       );
       return result !== null ? transformRequest(result) : null;
+    },
+
+    async deleteExpired(): Promise<number> {
+      return db.execute(
+        deleteFrom(DATA_EXPORT_REQUESTS_TABLE)
+          .where(and(lt('expires_at', new Date()), ne('status', 'completed')))
+          .toSql(),
+      );
     },
   };
 }

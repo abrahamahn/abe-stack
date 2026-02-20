@@ -34,7 +34,7 @@ vi.mock('../api', () => {
         });
         const data = (await response.json()) as Record<string, unknown>;
         if (!response.ok) {
-          throw new Error((data['message'] as string) ?? 'Upload failed');
+          throw new Error((data['message'] as string | undefined) ?? 'Upload failed');
         }
         return data as unknown as MediaUploadResponse;
       },
@@ -42,7 +42,7 @@ vi.mock('../api', () => {
         const response = await globalThis.fetch(`/api/media/${id}`);
         const data = (await response.json()) as Record<string, unknown>;
         if (!response.ok) {
-          throw new Error((data['message'] as string) ?? 'Get media failed');
+          throw new Error((data['message'] as string | undefined) ?? 'Get media failed');
         }
         return data as unknown as MediaMetadata;
       },
@@ -52,14 +52,14 @@ vi.mock('../api', () => {
         });
         if (!response.ok) {
           const data = (await response.json()) as Record<string, unknown>;
-          throw new Error((data['message'] as string) ?? 'Delete failed');
+          throw new Error((data['message'] as string | undefined) ?? 'Delete failed');
         }
       },
       async getMediaStatus(id: string): Promise<MediaStatusResponse> {
         const response = await globalThis.fetch(`/api/media/${id}/status`);
         const data = (await response.json()) as Record<string, unknown>;
         if (!response.ok) {
-          throw new Error((data['message'] as string) ?? 'Get status failed');
+          throw new Error((data['message'] as string | undefined) ?? 'Get status failed');
         }
         return data as unknown as MediaStatusResponse;
       },

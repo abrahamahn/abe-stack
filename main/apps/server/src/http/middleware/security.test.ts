@@ -13,6 +13,7 @@ import {
   sanitizePrototype,
 } from './security';
 
+import type { SecurityHeaderOptions } from './security';
 import type { FastifyInstance } from 'fastify';
 
 describe('HTTP Security', () => {
@@ -225,7 +226,7 @@ describe('HTTP Security', () => {
           enableCrossOriginEmbedderPolicy: false,
           enableCrossOriginOpenerPolicy: false,
           enableCrossOriginResourcePolicy: false,
-        } as any,
+        } as unknown as SecurityHeaderOptions,
       );
 
       // Should only be called twice for X-Powered-By and Server removal
@@ -237,7 +238,10 @@ describe('HTTP Security', () => {
     test.skip('should set CSP header when enabled', () => {
       const mockReply = { header: vi.fn() };
 
-      applySecurityHeaders(mockReply as never, { enableCSP: true } as any);
+      applySecurityHeaders(
+        mockReply as never,
+        { enableCSP: true } as unknown as SecurityHeaderOptions,
+      );
 
       expect(mockReply.header).toHaveBeenCalledWith(
         'Content-Security-Policy',
@@ -248,7 +252,10 @@ describe('HTTP Security', () => {
     test.skip('should set CSP with nonce when provided', () => {
       const mockReply = { header: vi.fn() };
 
-      applySecurityHeaders(mockReply as never, { enableCSP: true, cspNonce: 'abc123' } as any);
+      applySecurityHeaders(
+        mockReply as never,
+        { enableCSP: true, cspNonce: 'abc123' } as unknown as SecurityHeaderOptions,
+      );
 
       expect(mockReply.header).toHaveBeenCalledWith(
         'Content-Security-Policy',
@@ -259,7 +266,10 @@ describe('HTTP Security', () => {
     test.skip('should set Cross-Origin-Embedder-Policy when enabled', () => {
       const mockReply = { header: vi.fn() };
 
-      applySecurityHeaders(mockReply as never, { enableCrossOriginEmbedderPolicy: true } as any);
+      applySecurityHeaders(
+        mockReply as never,
+        { enableCrossOriginEmbedderPolicy: true } as unknown as SecurityHeaderOptions,
+      );
 
       expect(mockReply.header).toHaveBeenCalledWith('Cross-Origin-Embedder-Policy', 'require-corp');
     });
@@ -267,7 +277,10 @@ describe('HTTP Security', () => {
     test.skip('should set Cross-Origin-Opener-Policy when enabled', () => {
       const mockReply = { header: vi.fn() };
 
-      applySecurityHeaders(mockReply as never, { enableCrossOriginOpenerPolicy: true } as any);
+      applySecurityHeaders(
+        mockReply as never,
+        { enableCrossOriginOpenerPolicy: true } as unknown as SecurityHeaderOptions,
+      );
 
       expect(mockReply.header).toHaveBeenCalledWith('Cross-Origin-Opener-Policy', 'same-origin');
     });
@@ -275,7 +288,10 @@ describe('HTTP Security', () => {
     test.skip('should set Cross-Origin-Resource-Policy when enabled', () => {
       const mockReply = { header: vi.fn() };
 
-      applySecurityHeaders(mockReply as never, { enableCrossOriginResourcePolicy: true } as any);
+      applySecurityHeaders(
+        mockReply as never,
+        { enableCrossOriginResourcePolicy: true } as unknown as SecurityHeaderOptions,
+      );
 
       expect(mockReply.header).toHaveBeenCalledWith('Cross-Origin-Resource-Policy', 'same-origin');
     });

@@ -341,7 +341,7 @@ describe('UserSession Type Structure', () => {
       };
 
       expect(activityUpdate.lastActiveAt).toBeInstanceOf(Date);
-      expect(activityUpdate.lastActiveAt.getTime()).toBeLessThan(Date.now());
+      expect(activityUpdate.lastActiveAt?.getTime()).toBeLessThan(Date.now());
     });
   });
 });

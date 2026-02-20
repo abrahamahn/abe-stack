@@ -23,7 +23,7 @@ interface TestRecord extends Record<string, unknown> {
 function createTestDir(): string {
   const testDir = join(
     tmpdir(),
-    `json-db-test-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    `json-db-test-${String(Date.now())}-${Math.random().toString(36).slice(2)}`,
   );
   mkdirSync(testDir, { recursive: true });
   return testDir;
@@ -277,7 +277,7 @@ describe('JsonDatabase', () => {
       await db.insert('custom_table', { id: '1', data: 'test' });
 
       const data = db.getData();
-      expect(data.custom_table).toHaveLength(1);
+      expect(data['custom_table']).toHaveLength(1);
     });
 
     test('should persist to file when persistOnWrite is true', async () => {

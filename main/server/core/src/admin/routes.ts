@@ -82,8 +82,9 @@ import {
   handleReplayAdminWebhookDelivery,
 } from './webhookHandlers';
 
-import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { AdminAppContext, AdminRequest } from './types';
+import type { HttpReply, HttpRequest } from '../../../system/src';
+
 
 // ============================================================================
 // Admin Route Helper
@@ -101,8 +102,8 @@ function adminProtectedRoute<TBody, TResult>(
   handler: (
     ctx: AdminAppContext,
     body: TBody,
-    request: FastifyRequest,
-    reply: FastifyReply,
+    request: HttpRequest,
+    reply: HttpReply,
   ) => Promise<RouteResult<TResult>>,
   schema?: ValidationSchema<TBody>,
 ): BaseRouteDefinition {
@@ -165,7 +166,7 @@ export const adminRoutes: RouteMap = createRouteMap([
     'admin/impersonate/:userId',
     adminProtectedRoute(
       'POST',
-      async (ctx: AdminAppContext, _body: unknown, req: FastifyRequest, reply: FastifyReply) => {
+      async (ctx: AdminAppContext, _body: unknown, req: HttpRequest, reply: HttpReply) => {
         return handleStartImpersonation(ctx, undefined, req, reply);
       },
       emptyBodySchema,
@@ -184,7 +185,7 @@ export const adminRoutes: RouteMap = createRouteMap([
       async (
         ctx: AdminAppContext,
         body: UnlockAccountRequest,
-        req: FastifyRequest,
+        req: HttpRequest,
       ): Promise<RouteResult<UnlockAccountResponse | { message: string }>> => {
         return handleAdminUnlock(ctx, body, req as unknown as AdminRequest);
       },
@@ -238,7 +239,7 @@ export const adminRoutes: RouteMap = createRouteMap([
     'admin/health',
     adminProtectedRoute<undefined, AdminHealthBody | { message: string }>(
       'GET',
-      async (ctx: AdminAppContext, _body: undefined, req: FastifyRequest) => {
+      async (ctx: AdminAppContext, _body: undefined, req: HttpRequest) => {
         return handleGetAdminHealth(ctx, _body, req as unknown as AdminRequest);
       },
     ),
@@ -283,7 +284,7 @@ export const adminRoutes: RouteMap = createRouteMap([
     'admin/tenants/:id/unsuspend',
     adminProtectedRoute(
       'POST',
-      async (ctx: AdminAppContext, _body: unknown, req: FastifyRequest, reply: FastifyReply) => {
+      async (ctx: AdminAppContext, _body: unknown, req: HttpRequest, reply: HttpReply) => {
         return handleUnsuspendTenant(ctx, undefined, req, reply);
       },
       emptyBodySchema,
@@ -302,7 +303,7 @@ export const adminRoutes: RouteMap = createRouteMap([
       async (
         ctx: AdminAppContext,
         _body: undefined,
-        req: FastifyRequest,
+        req: HttpRequest,
       ): Promise<RouteResult<AdminPlansListResponse | { message: string }>> => {
         return handleAdminListPlans(ctx, _body, req as unknown as AdminRequest);
       },
@@ -317,7 +318,7 @@ export const adminRoutes: RouteMap = createRouteMap([
       async (
         ctx: AdminAppContext,
         body: CreatePlanRequest,
-        req: FastifyRequest,
+        req: HttpRequest,
       ): Promise<RouteResult<AdminPlanResponse | { message: string }>> => {
         return handleAdminCreatePlan(ctx, body, req as unknown as AdminRequest);
       },
@@ -333,7 +334,7 @@ export const adminRoutes: RouteMap = createRouteMap([
       async (
         ctx: AdminAppContext,
         _body: undefined,
-        req: FastifyRequest,
+        req: HttpRequest,
       ): Promise<RouteResult<AdminPlanResponse | { message: string }>> => {
         return handleAdminGetPlan(ctx, _body, req as unknown as AdminRequest, {
           id: (req.params as { id: string }).id,
@@ -350,7 +351,7 @@ export const adminRoutes: RouteMap = createRouteMap([
       async (
         ctx: AdminAppContext,
         body: UpdatePlanRequest,
-        req: FastifyRequest,
+        req: HttpRequest,
       ): Promise<RouteResult<AdminPlanResponse | { message: string }>> => {
         return handleAdminUpdatePlan(ctx, body, req as unknown as AdminRequest, {
           id: (req.params as { id: string }).id,
@@ -368,7 +369,7 @@ export const adminRoutes: RouteMap = createRouteMap([
       async (
         ctx: AdminAppContext,
         _body: unknown,
-        req: FastifyRequest,
+        req: HttpRequest,
       ): Promise<RouteResult<SyncStripeResponse | { message: string }>> => {
         return handleAdminSyncPlanToStripe(ctx, undefined, req as unknown as AdminRequest, {
           id: (req.params as { id: string }).id,
@@ -386,7 +387,7 @@ export const adminRoutes: RouteMap = createRouteMap([
       async (
         ctx: AdminAppContext,
         _body: unknown,
-        req: FastifyRequest,
+        req: HttpRequest,
       ): Promise<RouteResult<SubscriptionActionResponse | { message: string }>> => {
         return handleAdminDeactivatePlan(ctx, undefined, req as unknown as AdminRequest, {
           id: (req.params as { id: string }).id,

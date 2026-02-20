@@ -30,7 +30,7 @@ vi.mock('../api', () => {
         });
         const data = (await response.json()) as Record<string, unknown>;
         if (!response.ok) {
-          throw new Error((data['message'] as string) ?? 'Upload failed');
+          throw new Error((data['message'] as string | undefined) ?? 'Upload failed');
         }
         return data as unknown as MediaUploadResponse;
       },

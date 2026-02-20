@@ -22,9 +22,9 @@ import {
 
 import { generateSecureToken, hashToken, revokeAllUserTokens, verifyPasswordSafe } from './utils';
 
-import type { AuthConfig } from '@bslt/shared/config';
-import type { DbClient, Repositories } from '../../../db/src';
 import type { AuthEmailService, AuthEmailTemplates, AuthLogger } from './types';
+import type { DbClient, Repositories } from '../../../db/src';
+import type { AuthConfig } from '@bslt/shared/config';
 
 // ============================================================================
 // Types
@@ -108,14 +108,15 @@ export async function initiateEmailChange(
   const expiresAt = new Date(Date.now() + AUTH_EXPIRY.EMAIL_CHANGE_HOURS * MS_PER_HOUR);
 
   // Invalidate any existing email change tokens for this user
-  await repos.emailChangeTokens.invalidateForUser(userId);
+  await repos.authTokens.invalidateForUser('email_change', userId);
 
   // Store the token
-  await repos.emailChangeTokens.create({
+  await repos.authTokens.create({
+    type: 'email_change',
     userId,
-    newEmail: normalizedNewEmail,
     tokenHash,
     expiresAt,
+    metadata: { newEmail: normalizedNewEmail },
   });
 
   // 4. Send verification email to new address
@@ -164,7 +165,7 @@ export async function confirmEmailChange(
   const tokenHash = hashToken(token);
 
   // Find token by hash
-  const tokenRecord = await repos.emailChangeTokens.findByTokenHash(tokenHash);
+  const tokenRecord = await repos.authTokens.findByTokenHash('email_change', tokenHash);
 
   if (tokenRecord === null) {
     throw new InvalidTokenError('Invalid or expired token');
@@ -178,7 +179,12 @@ export async function confirmEmailChange(
     throw new InvalidTokenError('Token has expired');
   }
 
-  const canonicalNewEmail = canonicalizeEmail(tokenRecord.newEmail);
+  if (tokenRecord.userId === null) {
+    throw new InvalidTokenError('Invalid or expired token');
+  }
+  const confirmedUserId = tokenRecord.userId;
+  const newEmail = tokenRecord.metadata['newEmail'] as string;
+  const canonicalNewEmail = canonicalizeEmail(newEmail);
 
   // Check the new email is still available
   const existingUser = await repos.users.findByEmail(canonicalNewEmail);
@@ -187,28 +193,28 @@ export async function confirmEmailChange(
   }
 
   // Fetch the user's current email before changing it
-  const user = await repos.users.findById(tokenRecord.userId);
+  const user = await repos.users.findById(confirmedUserId);
   if (user === null) {
     throw new InvalidTokenError('User not found');
   }
   const previousEmail = user.email;
 
   // Update the user's email
-  await repos.users.update(tokenRecord.userId, {
-    email: tokenRecord.newEmail,
+  await repos.users.update(confirmedUserId, {
+    email: newEmail,
     canonicalEmail: canonicalNewEmail,
     updatedAt: new Date(),
   });
 
   // Mark token as used
-  await repos.emailChangeTokens.markAsUsed(tokenRecord.id);
+  await repos.authTokens.markAsUsed(tokenRecord.id);
 
   return {
     success: true,
     message: 'Email address has been updated successfully.',
-    email: tokenRecord.newEmail,
+    email: newEmail,
     previousEmail,
-    userId: tokenRecord.userId,
+    userId: confirmedUserId,
   };
 }
 
@@ -242,15 +248,15 @@ export async function createEmailChangeRevertToken(
   const expiresAt = new Date(Date.now() + AUTH_EXPIRY.EMAIL_CHANGE_REVERT_HOURS * MS_PER_HOUR);
 
   // Invalidate any existing revert tokens for this user
-  await repos.emailChangeRevertTokens.invalidateForUser(userId);
+  await repos.authTokens.invalidateForUser('email_change_revert', userId);
 
   // Store the token
-  await repos.emailChangeRevertTokens.create({
+  await repos.authTokens.create({
+    type: 'email_change_revert',
     userId,
-    oldEmail,
-    newEmail,
     tokenHash,
     expiresAt,
+    metadata: { oldEmail, newEmail },
   });
 
   return plain;
@@ -273,7 +279,7 @@ export async function revertEmailChange(
   const tokenHash = hashToken(token);
 
   // Find token by hash
-  const tokenRecord = await repos.emailChangeRevertTokens.findByTokenHash(tokenHash);
+  const tokenRecord = await repos.authTokens.findByTokenHash('email_change_revert', tokenHash);
 
   if (tokenRecord === null) {
     throw new InvalidTokenError('Invalid or expired token');
@@ -287,33 +293,40 @@ export async function revertEmailChange(
     throw new InvalidTokenError('Token has expired');
   }
 
-  const user = await repos.users.findById(tokenRecord.userId);
+  if (tokenRecord.userId === null) {
+    throw new InvalidTokenError('Invalid or expired token');
+  }
+  const revertUserId = tokenRecord.userId;
+  const oldEmail = tokenRecord.metadata['oldEmail'] as string;
+  const newEmail = tokenRecord.metadata['newEmail'] as string;
+
+  const user = await repos.users.findById(revertUserId);
   if (user === null) {
     throw new InvalidTokenError('User not found');
   }
 
-  if (normalizeEmail(user.email) !== normalizeEmail(tokenRecord.newEmail)) {
+  if (normalizeEmail(user.email) !== normalizeEmail(newEmail)) {
     throw new InvalidTokenError('Email change already reversed or superseded');
   }
 
-  const canonicalOldEmail = canonicalizeEmail(tokenRecord.oldEmail);
+  const canonicalOldEmail = canonicalizeEmail(oldEmail);
   const lockedUntil = new Date('2099-12-31T23:59:59.999Z');
 
   // Revert the user's email and lock the account
-  await repos.users.update(tokenRecord.userId, {
-    email: tokenRecord.oldEmail,
+  await repos.users.update(revertUserId, {
+    email: oldEmail,
     canonicalEmail: canonicalOldEmail,
     lockedUntil,
     updatedAt: new Date(),
   });
 
   // Mark token as used
-  await repos.emailChangeRevertTokens.markAsUsed(tokenRecord.id);
+  await repos.authTokens.markAsUsed(tokenRecord.id);
 
-  await revokeAllUserTokens(db, tokenRecord.userId);
+  await revokeAllUserTokens(db, revertUserId);
 
   return {
     message: 'Email address has been reverted and your account has been locked.',
-    email: tokenRecord.oldEmail,
+    email: oldEmail,
   };
 }

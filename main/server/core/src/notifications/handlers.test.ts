@@ -42,6 +42,7 @@ import {
 } from './handlers';
 import * as service from './service';
 
+import type { NotificationModuleDeps, NotificationRequest } from './types';
 import type {
   NotificationPreferences,
   PreferencesResponse,
@@ -51,7 +52,6 @@ import type {
   UnsubscribeResponse,
   UpdatePreferencesRequest,
 } from '@bslt/shared';
-import type { NotificationModuleDeps, NotificationRequest } from './types';
 
 // ============================================================================
 // Test Helpers

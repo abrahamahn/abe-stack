@@ -10,8 +10,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createIpAllowlistMiddleware } from './ip-allowlist';
 
-import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { IpAllowlistConfig } from './ip-allowlist';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
 // Test Helpers

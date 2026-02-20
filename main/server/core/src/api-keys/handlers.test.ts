@@ -10,8 +10,7 @@ import {
 
 import type { ApiKeyAppContext } from './types';
 import type { ApiKey } from '../../../db/src';
-import type { HandlerContext } from '../../../system/src';
-import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { HandlerContext, HttpReply, HttpRequest } from '../../../system/src';
 
 // ============================================================================
 // Test Helpers
@@ -35,6 +34,7 @@ function createMockContext(): ApiKeyAppContext {
       auditEvents: {
         create: vi.fn(),
         findById: vi.fn(),
+        find: vi.fn(),
         findRecent: vi.fn(),
         findByActorId: vi.fn(),
         findByTenantId: vi.fn(),
@@ -48,6 +48,11 @@ function createMockContext(): ApiKeyAppContext {
       warn: vi.fn(),
       error: vi.fn(),
       debug: vi.fn(),
+    },
+    errorTracker: {
+      captureError: vi.fn(),
+      addBreadcrumb: vi.fn(),
+      setUserContext: vi.fn(),
     },
   };
 }
@@ -74,16 +79,16 @@ function createMockRequest(overrides?: {
   user?: { userId: string };
   params?: Record<string, string>;
   body?: unknown;
-}): FastifyRequest {
+}): HttpRequest {
   return {
     user: overrides?.user,
     params: overrides?.params ?? {},
     body: overrides?.body,
     query: {},
-  } as unknown as FastifyRequest;
+  } as unknown as HttpRequest;
 }
 
-const mockReply = {} as FastifyReply;
+const mockReply = {} as HttpReply;
 
 // ============================================================================
 // handleCreateApiKey

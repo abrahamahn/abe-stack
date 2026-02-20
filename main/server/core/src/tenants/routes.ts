@@ -23,6 +23,7 @@ import {
   createRouteMap,
   protectedRoute,
   type HandlerContext,
+  type HttpRequest,
   type RouteMap,
   type RouteResult,
 } from '../../../system/src';
@@ -46,7 +47,6 @@ import {
   handleUpdateTenant,
 } from './handlers';
 
-import type { FastifyRequest } from 'fastify';
 import type { TenantsModuleDeps, TenantsRequest } from './types';
 
 // ============================================================================
@@ -81,7 +81,7 @@ export const tenantRoutes: RouteMap = createRouteMap([
     'tenants',
     protectedRoute(
       'POST',
-      async (ctx: HandlerContext, body: unknown, req: FastifyRequest): Promise<RouteResult> => {
+      async (ctx: HandlerContext, body: unknown, req: HttpRequest): Promise<RouteResult> => {
         const deps = asTenantsDeps(ctx);
         return handleCreateTenant(
           deps,
@@ -100,7 +100,7 @@ export const tenantRoutes: RouteMap = createRouteMap([
     'tenants/list',
     protectedRoute(
       'GET',
-      async (ctx: HandlerContext, _body: undefined, req: FastifyRequest): Promise<RouteResult> => {
+      async (ctx: HandlerContext, _body: undefined, req: HttpRequest): Promise<RouteResult> => {
         const deps = asTenantsDeps(ctx);
         return handleListTenants(deps, req as unknown as TenantsRequest);
       },
@@ -115,7 +115,7 @@ export const tenantRoutes: RouteMap = createRouteMap([
     'tenants/:id',
     protectedRoute(
       'GET',
-      async (ctx: HandlerContext, _body: undefined, req: FastifyRequest): Promise<RouteResult> => {
+      async (ctx: HandlerContext, _body: undefined, req: HttpRequest): Promise<RouteResult> => {
         const deps = asTenantsDeps(ctx);
         const tenantId = (req.params as { id: string }).id;
         return handleGetTenant(deps, tenantId, req as unknown as TenantsRequest);
@@ -131,7 +131,7 @@ export const tenantRoutes: RouteMap = createRouteMap([
     'tenants/:id/update',
     protectedRoute(
       'POST',
-      async (ctx: HandlerContext, body: unknown, req: FastifyRequest): Promise<RouteResult> => {
+      async (ctx: HandlerContext, body: unknown, req: HttpRequest): Promise<RouteResult> => {
         const deps = asTenantsDeps(ctx);
         const tenantId = (req.params as { id: string }).id;
         return handleUpdateTenant(
@@ -156,7 +156,7 @@ export const tenantRoutes: RouteMap = createRouteMap([
     'tenants/:id/delete',
     protectedRoute(
       'POST',
-      async (ctx: HandlerContext, _body: unknown, req: FastifyRequest): Promise<RouteResult> => {
+      async (ctx: HandlerContext, _body: unknown, req: HttpRequest): Promise<RouteResult> => {
         const deps = asTenantsDeps(ctx);
         const tenantId = (req.params as { id: string }).id;
         return handleDeleteTenant(deps, tenantId, req as unknown as TenantsRequest);
@@ -172,7 +172,7 @@ export const tenantRoutes: RouteMap = createRouteMap([
     'tenants/:id/transfer-ownership',
     protectedRoute(
       'POST',
-      async (ctx: HandlerContext, body: unknown, req: FastifyRequest): Promise<RouteResult> => {
+      async (ctx: HandlerContext, body: unknown, req: HttpRequest): Promise<RouteResult> => {
         const deps = asTenantsDeps(ctx);
         const tenantId = (req.params as { id: string }).id;
         return handleTransferOwnership(
@@ -197,10 +197,10 @@ export const tenantRoutes: RouteMap = createRouteMap([
     'tenants/:id/audit-events',
     protectedRoute(
       'GET',
-      async (ctx: HandlerContext, _body: undefined, req: FastifyRequest): Promise<RouteResult> => {
+      async (ctx: HandlerContext, _body: undefined, req: HttpRequest): Promise<RouteResult> => {
         const deps = asTenantsDeps(ctx);
         const tenantId = (req.params as { id: string }).id;
-        const query = (req.query ?? {}) as Record<string, string | undefined>;
+        const query = req.query as Record<string, string | undefined>;
         return handleListTenantAuditEvents(
           deps,
           tenantId,
@@ -229,7 +229,7 @@ export const tenantRoutes: RouteMap = createRouteMap([
     'tenants/:id/members',
     protectedRoute(
       'GET',
-      async (ctx: HandlerContext, _body: undefined, req: FastifyRequest): Promise<RouteResult> => {
+      async (ctx: HandlerContext, _body: undefined, req: HttpRequest): Promise<RouteResult> => {
         const deps = asTenantsDeps(ctx);
         const tenantId = (req.params as { id: string }).id;
         return handleListMembers(deps, tenantId, req as unknown as TenantsRequest);
@@ -245,7 +245,7 @@ export const tenantRoutes: RouteMap = createRouteMap([
     'tenants/:id/members/add',
     protectedRoute(
       'POST',
-      async (ctx: HandlerContext, body: unknown, req: FastifyRequest): Promise<RouteResult> => {
+      async (ctx: HandlerContext, body: unknown, req: HttpRequest): Promise<RouteResult> => {
         const deps = asTenantsDeps(ctx);
         const tenantId = (req.params as { id: string }).id;
         return handleAddMember(
@@ -266,7 +266,7 @@ export const tenantRoutes: RouteMap = createRouteMap([
     'tenants/:id/members/:userId/role',
     protectedRoute(
       'POST',
-      async (ctx: HandlerContext, body: unknown, req: FastifyRequest): Promise<RouteResult> => {
+      async (ctx: HandlerContext, body: unknown, req: HttpRequest): Promise<RouteResult> => {
         const deps = asTenantsDeps(ctx);
         const params = req.params as { id: string; userId: string };
         return handleUpdateMemberRole(
@@ -288,7 +288,7 @@ export const tenantRoutes: RouteMap = createRouteMap([
     'tenants/:id/members/:userId/remove',
     protectedRoute(
       'POST',
-      async (ctx: HandlerContext, _body: unknown, req: FastifyRequest): Promise<RouteResult> => {
+      async (ctx: HandlerContext, _body: unknown, req: HttpRequest): Promise<RouteResult> => {
         const deps = asTenantsDeps(ctx);
         const params = req.params as { id: string; userId: string };
         return handleRemoveMember(deps, params.id, params.userId, req as unknown as TenantsRequest);
@@ -308,7 +308,7 @@ export const tenantRoutes: RouteMap = createRouteMap([
     'tenants/:id/invitations',
     protectedRoute(
       'POST',
-      async (ctx: HandlerContext, body: unknown, req: FastifyRequest): Promise<RouteResult> => {
+      async (ctx: HandlerContext, body: unknown, req: HttpRequest): Promise<RouteResult> => {
         const deps = asTenantsDeps(ctx);
         const tenantId = (req.params as { id: string }).id;
         return handleCreateInvitation(
@@ -329,7 +329,7 @@ export const tenantRoutes: RouteMap = createRouteMap([
     'tenants/:id/invitations/list',
     protectedRoute(
       'GET',
-      async (ctx: HandlerContext, _body: undefined, req: FastifyRequest): Promise<RouteResult> => {
+      async (ctx: HandlerContext, _body: undefined, req: HttpRequest): Promise<RouteResult> => {
         const deps = asTenantsDeps(ctx);
         const tenantId = (req.params as { id: string }).id;
         return handleListInvitations(deps, tenantId, req as unknown as TenantsRequest);
@@ -345,7 +345,7 @@ export const tenantRoutes: RouteMap = createRouteMap([
     'invitations/:id/accept',
     protectedRoute(
       'POST',
-      async (ctx: HandlerContext, _body: unknown, req: FastifyRequest): Promise<RouteResult> => {
+      async (ctx: HandlerContext, _body: unknown, req: HttpRequest): Promise<RouteResult> => {
         const deps = asTenantsDeps(ctx);
         const invitationId = (req.params as { id: string }).id;
         return handleAcceptInvitation(deps, invitationId, req as unknown as TenantsRequest);
@@ -361,7 +361,7 @@ export const tenantRoutes: RouteMap = createRouteMap([
     'tenants/:id/invitations/:invitationId/revoke',
     protectedRoute(
       'POST',
-      async (ctx: HandlerContext, _body: unknown, req: FastifyRequest): Promise<RouteResult> => {
+      async (ctx: HandlerContext, _body: unknown, req: HttpRequest): Promise<RouteResult> => {
         const deps = asTenantsDeps(ctx);
         const params = req.params as { id: string; invitationId: string };
         return handleRevokeInvitation(
@@ -382,7 +382,7 @@ export const tenantRoutes: RouteMap = createRouteMap([
     'tenants/:id/invitations/:invitationId/resend',
     protectedRoute(
       'POST',
-      async (ctx: HandlerContext, _body: unknown, req: FastifyRequest): Promise<RouteResult> => {
+      async (ctx: HandlerContext, _body: unknown, req: HttpRequest): Promise<RouteResult> => {
         const deps = asTenantsDeps(ctx);
         const params = req.params as { id: string; invitationId: string };
         return handleResendInvitation(
@@ -403,7 +403,7 @@ export const tenantRoutes: RouteMap = createRouteMap([
     'tenants/:id/invitations/:invitationId/regenerate',
     protectedRoute(
       'POST',
-      async (ctx: HandlerContext, _body: unknown, req: FastifyRequest): Promise<RouteResult> => {
+      async (ctx: HandlerContext, _body: unknown, req: HttpRequest): Promise<RouteResult> => {
         const deps = asTenantsDeps(ctx);
         const params = req.params as { id: string; invitationId: string };
         return handleResendInvitation(

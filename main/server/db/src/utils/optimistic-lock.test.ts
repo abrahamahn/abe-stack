@@ -34,6 +34,7 @@ function createMockDb(responses: (Record<string, unknown> | null)[]): RawDb {
     healthCheck: vi.fn(),
     close: vi.fn(),
     getClient: vi.fn(),
+    withSession: vi.fn(),
   } as unknown as RawDb;
 }
 
@@ -41,14 +42,35 @@ function createMockDb(responses: (Record<string, unknown> | null)[]): RawDb {
 const MOCK_USER_ROW: Record<string, unknown> = {
   id: 'user-123',
   email: 'test@example.com',
+  canonical_email: 'test@example.com',
+  username: 'testuser',
   password_hash: 'hashed',
-  name: 'Test User',
+  first_name: 'Test',
+  last_name: 'User',
   avatar_url: null,
   role: 'user',
   email_verified: false,
   email_verified_at: null,
   locked_until: null,
+  lock_reason: null,
   failed_login_attempts: 0,
+  totp_secret: null,
+  totp_enabled: false,
+  phone: null,
+  phone_verified: null,
+  date_of_birth: null,
+  gender: null,
+  city: null,
+  state: null,
+  country: null,
+  bio: null,
+  language: null,
+  website: null,
+  last_username_change: null,
+  deactivated_at: null,
+  deleted_at: null,
+  deletion_grace_period_ends: null,
+  token_version: 1,
   created_at: new Date('2026-01-01'),
   updated_at: new Date('2026-01-02'),
   version: 2,
@@ -98,23 +120,26 @@ describe('updateUserWithVersion', () => {
   test('should return the updated user on success', async () => {
     const db = createMockDb([MOCK_USER_ROW]);
 
-    const result = await updateUserWithVersion(db, 'user-123', { name: 'New Name' }, 1);
+    const result = await updateUserWithVersion(db, 'user-123', { firstName: 'New' }, 1);
 
-    expect(result).toEqual({
-      id: 'user-123',
-      email: 'test@example.com',
-      passwordHash: 'hashed',
-      name: 'Test User',
-      avatarUrl: null,
-      role: 'user',
-      emailVerified: false,
-      emailVerifiedAt: null,
-      lockedUntil: null,
-      failedLoginAttempts: 0,
-      createdAt: new Date('2026-01-01'),
-      updatedAt: new Date('2026-01-02'),
-      version: 2,
-    });
+    expect(result).toEqual(
+      expect.objectContaining({
+        id: 'user-123',
+        email: 'test@example.com',
+        passwordHash: 'hashed',
+        firstName: 'Test',
+        lastName: 'User',
+        avatarUrl: null,
+        role: 'user',
+        emailVerified: false,
+        emailVerifiedAt: null,
+        lockedUntil: null,
+        failedLoginAttempts: 0,
+        createdAt: new Date('2026-01-01'),
+        updatedAt: new Date('2026-01-02'),
+        version: 2,
+      }),
+    );
     expect(db.queryOne).toHaveBeenCalledTimes(1);
   });
 
@@ -123,7 +148,7 @@ describe('updateUserWithVersion', () => {
     // second call (SELECT version) returns current version
     const db = createMockDb([null, { version: 5 }]);
 
-    await expect(updateUserWithVersion(db, 'user-123', { name: 'New Name' }, 1)).rejects.toThrow(
+    await expect(updateUserWithVersion(db, 'user-123', { firstName: 'New' }, 1)).rejects.toThrow(
       OptimisticLockError,
     );
 
@@ -131,7 +156,7 @@ describe('updateUserWithVersion', () => {
       await updateUserWithVersion(
         createMockDb([null, { version: 7 }]),
         'user-123',
-        { name: 'X' },
+        { firstName: 'X' },
         1,
       );
     } catch (error: unknown) {
@@ -147,7 +172,7 @@ describe('updateUserWithVersion', () => {
     // First call (UPDATE) returns null, second call (SELECT version) returns null
     const db = createMockDb([null, null]);
 
-    await expect(updateUserWithVersion(db, 'nonexistent', { name: 'X' }, 1)).rejects.toThrow(
+    await expect(updateUserWithVersion(db, 'nonexistent', { firstName: 'X' }, 1)).rejects.toThrow(
       'Record not found',
     );
     expect(db.queryOne).toHaveBeenCalledTimes(2);
@@ -156,12 +181,12 @@ describe('updateUserWithVersion', () => {
   test('should pass data through toSnakeCase for the update', async () => {
     const db = createMockDb([MOCK_USER_ROW]);
 
-    await updateUserWithVersion(db, 'user-123', { name: 'Updated', email: 'new@test.com' }, 1);
+    await updateUserWithVersion(db, 'user-123', { firstName: 'Updated', email: 'new@test.com' }, 1);
 
     // The first queryOne call is the UPDATE — verify it was called
     expect(db.queryOne).toHaveBeenCalledTimes(1);
     const call = vi.mocked(db.queryOne).mock.calls[0];
-    const queryResult = call[0] as { text: string; values: readonly unknown[] };
+    const queryResult = call?.[0] as { text: string; values: readonly unknown[] };
 
     // The SQL should reference the users table and contain SET with snake_case columns
     expect(queryResult.text).toContain('users');
@@ -172,14 +197,35 @@ describe('updateUserWithVersion', () => {
     const snakeRow: Record<string, unknown> = {
       id: 'user-456',
       email: 'camel@test.com',
+      canonical_email: 'camel@test.com',
+      username: 'cameluser',
       password_hash: 'hash123',
-      name: null,
+      first_name: 'Camel',
+      last_name: 'User',
       avatar_url: 'https://example.com/pic.jpg',
       role: 'admin',
       email_verified: true,
       email_verified_at: new Date('2026-02-01'),
       locked_until: null,
+      lock_reason: null,
       failed_login_attempts: 3,
+      totp_secret: null,
+      totp_enabled: false,
+      phone: null,
+      phone_verified: null,
+      date_of_birth: null,
+      gender: null,
+      city: null,
+      state: null,
+      country: null,
+      bio: null,
+      language: null,
+      website: null,
+      last_username_change: null,
+      deactivated_at: null,
+      deleted_at: null,
+      deletion_grace_period_ends: null,
+      token_version: 1,
       created_at: new Date('2026-01-15'),
       updated_at: new Date('2026-02-05'),
       version: 10,

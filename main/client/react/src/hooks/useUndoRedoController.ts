@@ -1,5 +1,5 @@
 // main/client/react/src/hooks/useUndoRedoController.ts
-import { useCallback, useRef } from 'react';
+import { useCallback, useLayoutEffect, useRef } from 'react';
 
 import { toastStore } from '../stores/toastStore';
 import { useUndoRedoStore } from '../stores/undoRedoStore';
@@ -58,7 +58,9 @@ export function useUndoRedoController(
 ): UseUndoRedoControllerResult {
   const store = useUndoRedoStore();
   const handlerRef = useRef(options?.handler);
-  handlerRef.current = options?.handler;
+  useLayoutEffect(() => {
+    handlerRef.current = options?.handler;
+  });
 
   const canUndo = store.canUndo();
   const canRedo = store.canRedo();

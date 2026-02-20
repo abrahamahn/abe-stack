@@ -8,8 +8,8 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { handleGetMetrics } from './metricsHandler';
 
-import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { AdminAppContext } from './types';
+import type { HttpReply, HttpRequest } from '../../../system/src';
 
 // ============================================================================
 // Mocks
@@ -85,7 +85,7 @@ function createMockRequest(
   overrides: Partial<{ user: { userId: string; role: string } }> = {},
   params: Record<string, string> = {},
   query: Record<string, unknown> = {},
-): FastifyRequest {
+): HttpRequest {
   return {
     cookies: {},
     headers: {},
@@ -94,21 +94,21 @@ function createMockRequest(
     params,
     query,
     ...overrides,
-  } as unknown as FastifyRequest;
+  } as unknown as HttpRequest;
 }
 
-function createUnauthenticatedRequest(): FastifyRequest {
+function createUnauthenticatedRequest(): HttpRequest {
   return {
     cookies: {},
     headers: {},
     requestInfo: { ipAddress: '127.0.0.1', userAgent: 'test' },
     params: {},
     query: {},
-  } as unknown as FastifyRequest;
+  } as unknown as HttpRequest;
 }
 
-function createMockReply(): FastifyReply {
-  return {} as FastifyReply;
+function createMockReply(): HttpReply {
+  return {} as HttpReply;
 }
 
 // ============================================================================

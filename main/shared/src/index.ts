@@ -14,7 +14,7 @@ export type {
   ErrorResponse,
   InferResponseData,
   StatusCode,
-} from './primitives/api';
+} from './primitives';
 
 // Constants
 export {
@@ -54,7 +54,7 @@ export {
   USERNAME_REGEX_LOCAL,
   UUID_REGEX,
   VIDEO_EXTENSIONS,
-} from './primitives/constants';
+} from './primitives';
 
 // Schema
 export {
@@ -63,7 +63,7 @@ export {
   auditEventIdSchema,
   coerceDate,
   coerceNumber,
-  consentLogIdSchema,
+  consentRecordIdSchema,
   createArraySchema,
   createBrandedStringSchema,
   createBrandedUuidSchema,
@@ -96,7 +96,6 @@ export {
   sessionIdSchema,
   subscriptionIdSchema,
   tenantIdSchema,
-  userAgreementIdSchema,
   uuidSchema,
   webhookDeliveryIdSchema,
   webhookIdSchema,
@@ -104,7 +103,7 @@ export {
   type ActivityId,
   type ApiKeyId,
   type AuditEventId,
-  type ConsentLogId,
+  type ConsentRecordId,
   type EmailLogId,
   type EmailTemplateKey,
   type FileId,
@@ -117,14 +116,15 @@ export {
   type OrganizationId,
   type ParseNumberOptions,
   type ParseStringOptions,
+  type PlanId,
   type SafeParseResult,
   type Schema,
   type SessionId,
+  type SubscriptionId,
   type TenantId,
-  type UserAgreementId,
   type WebhookDeliveryId,
   type WebhookId,
-} from './primitives/schema';
+} from './primitives';
 
 // Helpers (consolidated: object, string, async, response, result, crypto)
 export {
@@ -144,6 +144,9 @@ export {
   err,
   escapeHtml,
   formatBytes,
+  formatDate,
+  formatDateTime,
+  formatTimeAgo,
   generateSecureId,
   generateToken,
   generateUUID,
@@ -181,7 +184,7 @@ export {
   type ApiSuccessResponse,
   type KeyMapping,
   type Result,
-} from './primitives/helpers';
+} from './primitives';
 
 // ============================================================================
 // SYSTEM INFRASTRUCTURE
@@ -231,7 +234,7 @@ export {
   type ValidationErrorDetail,
   type ValidationErrorResponse,
   type ValidationIssue,
-} from './system/errors';
+} from './system';
 
 // Constants (consolidated)
 export {
@@ -274,6 +277,7 @@ export {
   MAX_FILENAME_LENGTH,
   MAX_UPLOAD_FILE_SIZE,
   MAX_UPLOAD_TIMEOUT_MS,
+  NOTIFICATION_PAYLOAD_MAX_SIZE,
   PLATFORM_TYPES,
   QUOTAS,
   RATE_LIMIT_WINDOWS,
@@ -295,10 +299,10 @@ export {
   WEBSOCKET_PATH,
   WS_CLOSE_POLICY_VIOLATION,
   type HttpStatusCode,
-} from './system/constants';
+} from './system';
 
 // Environment
-export { baseEnvSchema, getRawEnv, validateEnv, type BaseEnv } from './system/env';
+export { baseEnvSchema, getRawEnv, validateEnv, type BaseEnv } from './system';
 
 // Ports
 export {
@@ -327,7 +331,7 @@ export {
   type StorageBackend,
   type StorageClient,
   type StorageConfig,
-} from './system/ports';
+} from './system';
 
 // HTTP (consolidated: response schemas, cookies, types, csrf, multipart, proxy, request, routes, user agent)
 export {
@@ -371,7 +375,7 @@ export {
   type RouteMap,
   type RouteResult,
   type ValidationSchema,
-} from './system/http';
+} from './system';
 
 // Context
 export {
@@ -387,13 +391,13 @@ export {
   type ReplyContext,
   type RequestContext,
   type RequestInfo,
-} from './system/context';
+} from './system';
 
 // DI
-export type { ModuleDeps, ModuleRegistrationOptions } from './system/di';
+export type { ModuleDeps, ModuleRegistrationOptions } from './system';
 
 // Email types
-export { type EmailProvider, type EmailStatus } from './system/email';
+export { type EmailProvider, type EmailStatus } from './system';
 
 // Files (consolidated: schemas + storage utilities)
 export {
@@ -415,7 +419,7 @@ export {
   type FilesListResponse,
   type FileUploadRequest,
   type FileUploadResponse,
-} from './system/files';
+} from './system';
 
 // Feature flags
 export {
@@ -434,7 +438,7 @@ export {
   type SetTenantFeatureOverrideRequest,
   type TenantFeatureOverride,
   type UpdateFeatureFlagRequest,
-} from './system/feature-flags';
+} from './system';
 
 // Jobs (consolidated)
 export {
@@ -464,7 +468,7 @@ export {
   type JobStatus,
   type QueueStats,
   type UpdateJob,
-} from './system/jobs';
+} from './system';
 
 // API keys
 export {
@@ -486,13 +490,15 @@ export {
   type ListApiKeysResponse,
   type RevokeApiKeyResponse,
   type UpdateApiKey,
-} from './system/api-keys';
+} from './system';
 
 // Webhooks
 export {
   calculateRetryDelay,
   createWebhookDeliverySchema,
   createWebhookSchema,
+  deliveryListResponseSchema,
+  deliveryReplayResponseSchema,
   isDeliveryTerminal,
   matchesEventFilter,
   rotateSecretResponseSchema,
@@ -510,6 +516,8 @@ export {
   webhookWithDeliveriesSchema,
   type CreateWebhook,
   type CreateWebhookDelivery,
+  type DeliveryListResponse,
+  type DeliveryReplayResponse,
   type RotateSecretResponse,
   type UpdateWebhook,
   type UpdateWebhookDelivery,
@@ -518,16 +526,16 @@ export {
   type WebhookDelivery,
   type WebhookDeliveryItem,
   type WebhookDeliveryStatus,
-  type WebhookEventType,
   type WebhookItem,
   type WebhookListResponse,
   type WebhookMutationResponse,
   type WebhookResponse,
+  type WebhookEventType,
   type WebhookWithDeliveries,
-} from './system/webhooks';
+} from './system';
 
 // Native bridge
-export { type NativeBridge } from './system/native';
+export { type NativeBridge } from './system';
 
 // ============================================================================
 // SYSTEM UTILITIES
@@ -565,7 +573,7 @@ export {
   type MemoizeOptions,
   type MemoryCacheConfig,
   type RedisCacheConfig,
-} from './system/cache';
+} from './system';
 
 // Search
 export {
@@ -661,7 +669,7 @@ export {
   type SerializedQuery,
   type SortConfig,
   type UrlSearchParamsInput,
-} from './system/search';
+} from './system';
 
 // Logger
 export {
@@ -684,7 +692,7 @@ export {
   type LoggerConfig,
   type LogLevel,
   type LogRequestContext,
-} from './system/logger';
+} from './system';
 
 // Health
 export {
@@ -720,7 +728,7 @@ export {
   type StartupSummaryOptions,
   type StorageHealthConfig,
   type WebSocketStats,
-} from './system/health';
+} from './system';
 
 // PubSub
 export {
@@ -739,7 +747,7 @@ export {
   type SubscriptionKey,
   type SubscriptionManagerOptions,
   type WebSocket,
-} from './system/pubsub';
+} from './system';
 
 // Realtime
 export {
@@ -782,7 +790,7 @@ export {
   type VersionConflict,
   type VersionedRecord,
   type WriteResponse,
-} from './system/realtime';
+} from './system';
 
 // Media
 export {
@@ -805,7 +813,7 @@ export {
   type SecurityScanResult,
   type UploadConfig,
   type VideoProcessingOptions,
-} from './system/media';
+} from './system';
 
 // Pagination
 export {
@@ -842,7 +850,7 @@ export {
   type PaginationOptions,
   type PaginationParamNames,
   type PaginationParseConfig,
-} from './system/pagination';
+} from './system';
 
 // Security (consolidated: input, sanitization, rate limit)
 export {
@@ -857,10 +865,15 @@ export {
   type SanitizationResult,
   type SQLInjectionDetectionOptions,
   type ValidationOptions,
-} from './system/security';
+} from './system';
 
-// Crypto
-export { addAuthHeader, createTokenStore, tokenStore, type TokenStore } from './system/crypto';
+// Crypto (browser-safe token storage only — import from ./system/crypto/token to avoid bundling jwt.ts)
+export {
+  addAuthHeader,
+  createTokenStore,
+  tokenStore,
+  type TokenStore,
+} from './system/crypto/token';
 
 // Usage metering
 export {
@@ -876,7 +889,7 @@ export {
   type UsageMetricSummary,
   type UsageSnapshot,
   type UsageSummaryResponse,
-} from './system/usage-metering';
+} from './system';
 
 // ============================================================================
 // CORE DOMAIN
@@ -1056,10 +1069,10 @@ export {
   type WebauthnOptionsResponse,
   type WebauthnRegisterVerifyRequest,
   type WebauthnRegisterVerifyResponse,
-} from './core/auth';
+} from './core';
 
 // Field schemas
-export { emailSchema, isoDateTimeSchema, passwordSchema } from './core/schemas';
+export { emailSchema, isoDateTimeSchema, passwordSchema } from './core';
 
 // Transactions
 export {
@@ -1078,7 +1091,7 @@ export {
   type Operation,
   type SetOperation,
   type Transaction,
-} from './core/transactions';
+} from './core';
 
 // Core constants (consolidated)
 export {
@@ -1088,7 +1101,7 @@ export {
   LOGIN_FAILURE_REASON,
   OAUTH_PROVIDERS,
   RETENTION_PERIODS,
-} from './core/constants';
+} from './core';
 
 // Audit log
 export {
@@ -1107,7 +1120,7 @@ export {
   type AuditLogListResponse,
   type AuditSeverity,
   type CreateAuditEvent,
-} from './core/audit-log';
+} from './core';
 
 // Billing (consolidated: schemas + service types)
 export {
@@ -1219,7 +1232,6 @@ export {
   type PaymentMethodType,
   type Plan,
   type PlanFeature,
-  type PlanId,
   type PlanInterval,
   type PlansListResponse,
   type PortalSessionParams,
@@ -1234,28 +1246,23 @@ export {
   type StatusVariant,
   type Subscription,
   type SubscriptionActionResponse,
-  type SubscriptionId,
   type SubscriptionResponse,
   type SubscriptionState,
   type SubscriptionStatus,
   type SyncStripeResponse,
   type UpdatePlanRequest,
   type UpdateSubscriptionRequest,
-} from './core/billing';
+} from './core';
 
 // Compliance
 export {
-  complianceActionResponseSchema,
   CONSENT_TYPES,
-  consentLogSchema,
-  consentPreferencesResponseSchema,
-  createConsentLogSchema,
+  consentRecordSchema,
+  createConsentRecordSchema,
   createDataExportRequestSchema,
   createLegalDocumentSchema,
-  createUserAgreementSchema,
   DATA_EXPORT_STATUSES,
   DATA_EXPORT_TYPES,
-  dataExportRequestedResponseSchema,
   dataExportRequestSchema,
   DOCUMENT_TYPES,
   getEffectiveConsent,
@@ -1264,25 +1271,20 @@ export {
   needsReacceptance,
   updateConsentPreferencesRequestSchema,
   updateLegalDocumentSchema,
-  userAgreementSchema,
-  type ComplianceActionResponse,
-  type ConsentLog,
-  type ConsentPreferencesResponse,
+  type ConsentRecord,
+  type ConsentRecordType,
   type ConsentType,
-  type CreateConsentLog,
+  type CreateConsentRecord,
   type CreateDataExportRequest,
   type CreateLegalDocument,
-  type CreateUserAgreement,
   type DataExportRequest,
-  type DataExportRequestedResponse,
   type DataExportStatus,
   type DataExportType,
   type DocumentType,
   type LegalDocument,
   type UpdateConsentPreferencesRequest,
   type UpdateLegalDocument,
-  type UserAgreement,
-} from './core/compliance';
+} from './core';
 
 // Tenant (consolidated: includes membership)
 export {
@@ -1296,7 +1298,6 @@ export {
   canRemoveMember,
   canRevokeInvite,
   createInvitationSchema,
-  INVITATION_STATUSES,
   createTenantSchema,
   createWorkspaceContext,
   extractEmailDomain,
@@ -1307,18 +1308,14 @@ export {
   getWorkspaceContext,
   hasAtLeastRole,
   hasRequiredWorkspaceRole,
+  INVITATION_STATUSES,
   invitationSchema,
-  invitationsListResponseSchema,
   isEmailDomainAllowed,
   isInviteExpired,
   isSoleOwner,
   isWorkspaceScoped,
-  membershipActionResponseSchema,
   membershipSchema,
-  membersListResponseSchema,
   ROLE_LEVELS,
-  tenantActionResponseSchema,
-  tenantListResponseSchema,
   tenantSchema,
   transferOwnershipSchema,
   updateMembershipRoleSchema,
@@ -1330,20 +1327,15 @@ export {
   type CreateInvitation,
   type CreateTenantInput,
   type Invitation,
-  type InvitationsListResponse,
   type InvitationStatus,
   type MaybeWorkspaceContext,
   type Membership,
-  type MembershipActionResponse,
-  type MembersListResponse,
   type Tenant,
-  type TenantActionResponse,
-  type TenantListResponse,
   type TransferOwnershipInput,
   type UpdateMembershipRole,
   type UpdateTenantInput,
   type WorkspaceContext,
-} from './core/tenant';
+} from './core';
 
 // Notifications
 export {
@@ -1355,7 +1347,6 @@ export {
   InvalidSubscriptionError,
   markReadResponseSchema,
   NOTIFICATION_LEVELS,
-  NOTIFICATION_PAYLOAD_MAX_SIZE,
   NOTIFICATION_TYPES,
   notificationDeleteRequestSchema,
   notificationPreferencesSchema,
@@ -1418,7 +1409,7 @@ export {
   type UnsubscribeResponse,
   type UpdatePreferencesRequest,
   type VapidKeyResponse,
-} from './core/notifications';
+} from './core';
 
 // Users (consolidated)
 export {
@@ -1487,20 +1478,18 @@ export {
   type User,
   type UserId,
   type UserRole,
-} from './core/users';
+} from './core';
 
 // Activities
 export {
-  activitiesListFiltersSchema,
-  ACTOR_TYPES,
   activitySchema,
+  ACTOR_TYPES,
   createActivitySchema,
   getActorTypeTone,
-  type ActivitiesListFilters,
   type Activity,
   type ActorType,
   type CreateActivity,
-} from './core/activities';
+} from './core';
 
 // Admin (consolidated: includes security schemas)
 export {
@@ -1577,7 +1566,156 @@ export {
   type UnlockAccountRequest,
   type UnlockAccountResponse,
   type UserStatus,
-} from './core/admin';
+} from './core';
+
+// ============================================================================
+// CONFIG (env schemas, config types, env helpers)
+// Note: BillingProvider, CacheConfig, LogLevel, QueueConfig,
+//       LocalStorageConfig, S3StorageConfig, StorageConfig, validateEnv,
+//       BILLING_PROVIDERS, SEARCH_DEFAULTS, STORAGE_PROVIDERS, getRawEnv
+//       are excluded — already exported from canonical sources above.
+// ============================================================================
+
+// Auth config
+export {
+  AuthEnvSchema,
+  type Argon2Config,
+  type AuthConfig,
+  type AuthEnv,
+  type AuthStrategy,
+  type JwtRotationConfig,
+  type OAuthProviderConfig,
+  type RateLimitConfig,
+} from './config';
+
+// Base config
+export {
+  BaseEnvSchema,
+  NODE_ENV_VALUES,
+  trueFalseSchema,
+  type JwtEnv,
+  type NodeEnv,
+} from './config';
+
+// Billing config
+export {
+  BillingEnvSchema,
+  type BillingConfig,
+  type BillingPlansConfig,
+  type BillingUrlsConfig,
+  type PayPalProviderConfig,
+  type StripeProviderConfig,
+} from './config';
+
+// Cache config (CacheConfig excluded — conflicts with system/cache)
+export { CacheEnvSchema } from './config';
+
+// Database config
+export {
+  DatabaseEnvSchema,
+  type DatabaseConfig,
+  type DatabaseProvider,
+  type JsonDatabaseConfig,
+  type MongoConfig,
+  type MySqlConfig,
+  type PostgresConfig,
+  type SqliteConfig,
+} from './config';
+
+// Email config
+export { EmailEnvSchema, type EmailConfig, type SmtpConfig } from './config';
+
+// Frontend config
+export { FrontendEnvSchema } from './config';
+
+// Notification config
+export {
+  BrazeSchema,
+  CourierSchema,
+  FcmSchema,
+  KnockSchema,
+  NotificationConfigSchema,
+  NotificationEnvSchema,
+  NotificationProviderSchema,
+  OneSignalSchema,
+  SnsSchema,
+  type BrazeConfig,
+  type CourierConfig,
+  type FcmConfig,
+  type GenericNotificationConfig,
+  type KnockConfig,
+  type NotificationConfig,
+  type NotificationConfigValidated,
+  type NotificationEnv,
+  type NotificationProvider,
+  type NotificationProviderConfig,
+  type NotificationSchemaProvider,
+  type OneSignalConfig,
+  type SnsConfig,
+} from './config';
+
+// Package manager config
+export {
+  PackageManagerEnvSchema,
+  type NpmConfig,
+  type PackageManagerConfig,
+  type PackageManagerProvider,
+  type PnpmConfig,
+  type YarnConfig,
+} from './config';
+
+// Queue config (QueueConfig excluded — conflicts with system/jobs)
+export { QueueEnvSchema, type QueueProvider } from './config';
+
+// Search config
+export {
+  SearchEnvSchema,
+  type ElasticsearchProviderConfig,
+  type ElasticsearchSearchConfig,
+  type SearchConfig,
+  type SqlColumnMapping,
+  type SqlSearchConfig,
+  type SqlSearchProviderConfig,
+  type SqlTableConfig,
+} from './config';
+
+// Server config (LogLevel excluded — conflicts with system/logger)
+export { ServerEnvSchema, type LoggingConfig, type ServerConfig } from './config';
+
+// Storage config (LocalStorageConfig, S3StorageConfig, StorageConfig excluded — conflict with system/ports)
+export { StorageEnvSchema, type StorageConfigBase, type StorageProviderName } from './config';
+
+// Full env validation (validateEnv excluded — conflicts with system/env)
+export { EnvSchema, type AppConfig, type FullEnv } from './config';
+
+// Config constants (BILLING_PROVIDERS, SEARCH_DEFAULTS, STORAGE_PROVIDERS excluded — conflict)
+export {
+  ARGON2_DEFAULTS,
+  AUTH_STRATEGIES,
+  AUTH_VALIDATION,
+  CACHE_DEFAULTS,
+  CACHE_PROVIDERS,
+  COURIER_DEFAULT_API_URL,
+  DATABASE_PROVIDERS,
+  DB_DEFAULTS,
+  ELASTICSEARCH_DEFAULTS,
+  NOTIFICATION_PROVIDERS,
+  PACKAGE_MANAGER_PROVIDERS,
+  QUEUE_DEFAULTS,
+  QUEUE_PROVIDERS,
+  RATE_LIMIT_DEFAULTS,
+  REPEATING_SECRET_PATTERN,
+  S3_DEFAULTS,
+  SERVER_PORT_FALLBACKS,
+  SMTP_DEFAULTS,
+  WEAK_SECRETS,
+} from './config';
+
+// Search schema defaults
+export { DEFAULT_SEARCH_SCHEMAS } from './config';
+
+// Env helpers (getRawEnv excluded — conflicts with system/env)
+export { getBool, getInt, getList, getRequired } from './config';
 
 // ============================================================================
 // API ROUTER & CONTRACTS

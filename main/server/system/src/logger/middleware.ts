@@ -8,18 +8,17 @@
 
 import {
   createLogRequestContext,
-  createJobCorrelationId as createSharedJobCorrelationId,
   createJobLogger as createSharedJobLogger,
   getOrCreateCorrelationId,
-} from '@bslt/shared';
+} from '@bslt/shared/system';
 
-import { getMetricsCollector } from '../system/metrics';
+import { getMetricsCollector } from '../metrics';
 
 import { createRequestLogger } from './logger';
 
-import type { UserRole } from '@bslt/db';
-import type { Logger, LogRequestContext } from '@bslt/shared';
 import type { LoggingConfig } from '@bslt/shared/config';
+import type { UserRole } from '@bslt/shared/core';
+import type { BaseLogger, ErrorTracker, Logger, LogRequestContext } from '@bslt/shared/system';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 
 // Extend Fastify request with our custom properties
@@ -37,21 +36,7 @@ declare module 'fastify' {
 }
 
 /**
- * Interface for the error tracker in the context.
- */
-interface ErrorTracker {
-  addBreadcrumb: (
-    message: string,
-    options: { category?: string; level?: string; data?: Record<string, unknown> },
-  ) => void;
-  captureError: (
-    error: unknown,
-    options: { tags?: Record<string, string>; extra?: Record<string, unknown> },
-  ) => void;
-}
-
-/**
- * Interface for the request with optional context.
+ * Extends FastifyRequest with an optional DI context holding an error tracker.
  */
 type RequestWithContext = FastifyRequest & {
   context?: {
@@ -121,7 +106,7 @@ export function registerLoggingMiddleware(
     const includeContext = loggingConfig?.requestContext !== false;
 
     // Record metrics
-    const routeUrl = (request as any).routeOptions?.url ?? request.url;
+    const routeUrl = request.routeOptions.url ?? request.url;
     metrics.incrementRequestCount(routeUrl, reply.statusCode);
     metrics.recordRequestLatency(routeUrl, duration);
 
@@ -154,70 +139,24 @@ export function registerLoggingMiddleware(
     request.logger.info('Request completed', logData);
   });
 
-  // Log errors with severity-based routing
+  // Forward errors to the error tracker.
+  // Logging is handled exclusively by setErrorHandler to avoid double-logging.
   server.addHook('onError', async (request, reply, error) => {
-    const statusCode = reply.statusCode;
-    const method = request.method;
-    const path = request.url;
-
-    // Add breadcrumb for request error
     const req = request as RequestWithContext;
+
     req.context?.errorTracker?.addBreadcrumb(`Request error: ${request.method} ${request.url}`, {
       category: 'http',
       level: 'error',
-      data: {
-        statusCode,
-        error: error.message,
-      },
+      data: { statusCode: reply.statusCode, error: error.message },
     });
 
-    // Capture error in tracker
-    if (statusCode >= 500) {
+    if (reply.statusCode >= 500) {
       req.context?.errorTracker?.captureError(error, {
-        tags: { method, path, statusCode: String(statusCode) },
+        tags: { method: request.method, path: request.url, statusCode: String(reply.statusCode) },
         extra: { ip: request.ip },
       });
     }
-
-    if (statusCode >= 500) {
-      // 5xx: error level with full error object + request context
-      request.logger.error(error, {
-        method,
-        path,
-        statusCode,
-        ip: request.ip,
-        userAgent: request.headers['user-agent'],
-      });
-    } else {
-      // 4xx: configurable level with summary only (no stack trace)
-      const level = loggingConfig?.clientErrorLevel ?? 'warn';
-      const clientErrorLevel: 'info' | 'warn' | 'error' | 'debug' =
-        level === 'info' || level === 'warn' || level === 'error' || level === 'debug'
-          ? level
-          : 'warn';
-      const code = (error as { code?: string }).code;
-      request.logger[clientErrorLevel]('Client error', {
-        method,
-        path,
-        statusCode,
-        code,
-        message: error.message,
-        correlationId: request.correlationId,
-      });
-    }
   });
-}
-
-/**
- * Generate a new correlation ID for background jobs or events.
- * Prefixes the UUID with the job name for easy identification in logs.
- *
- * @param jobName - The name of the background job
- * @returns A correlation ID in the format "job:{jobName}:{uuid}"
- * @complexity O(1)
- */
-export function createJobCorrelationId(jobName: string): string {
-  return createSharedJobCorrelationId(jobName);
 }
 
 /**
@@ -236,9 +175,6 @@ export function createJobLogger(
   jobName: string,
   jobId?: string,
 ): Logger {
-  return createSharedJobLogger(
-    baseLogger as unknown as import('@bslt/shared').BaseLogger,
-    jobName,
-    jobId,
-  ) as Logger;
+  // FastifyBaseLogger is structurally identical to BaseLogger (both pino-style).
+  return createSharedJobLogger(baseLogger as BaseLogger, jobName, jobId);
 }

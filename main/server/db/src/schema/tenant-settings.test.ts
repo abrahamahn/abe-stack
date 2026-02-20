@@ -34,6 +34,7 @@ describe('Tenant Settings Schema - Columns', () => {
       tenantId: 'tenant_id',
       key: 'key',
       value: 'value',
+      createdAt: 'created_at',
       updatedAt: 'updated_at',
     });
   });
@@ -44,7 +45,7 @@ describe('Tenant Settings Schema - Columns', () => {
   });
 
   test('should have all required columns', () => {
-    const requiredColumns = ['tenantId', 'key', 'value', 'updatedAt'];
+    const requiredColumns = ['tenantId', 'key', 'value', 'createdAt', 'updatedAt'];
     const actualColumns = Object.keys(TENANT_SETTING_COLUMNS);
     expect(actualColumns).toEqual(requiredColumns);
   });
@@ -79,6 +80,7 @@ describe('Tenant Settings Schema - TenantSetting Type', () => {
       tenantId: 'tenant-123',
       key: 'branding.primary_color',
       value: '#FF5733',
+      createdAt: new Date(),
       updatedAt: new Date(),
     };
 
@@ -92,6 +94,7 @@ describe('Tenant Settings Schema - TenantSetting Type', () => {
       tenantId: 'tenant-123',
       key: 'branding.logo_url',
       value: null,
+      createdAt: new Date(),
       updatedAt: new Date(),
     };
 
@@ -103,6 +106,7 @@ describe('Tenant Settings Schema - TenantSetting Type', () => {
       tenantId: 'tenant-123',
       key: 'features.dark_mode',
       value: true,
+      createdAt: new Date(),
       updatedAt: new Date(),
     };
 
@@ -114,6 +118,7 @@ describe('Tenant Settings Schema - TenantSetting Type', () => {
       tenantId: 'tenant-123',
       key: 'limits.max_users',
       value: 100,
+      createdAt: new Date(),
       updatedAt: new Date(),
     };
 
@@ -130,6 +135,7 @@ describe('Tenant Settings Schema - TenantSetting Type', () => {
         secure: true,
         auth: { user: 'admin', pass: '***' },
       },
+      createdAt: new Date(),
       updatedAt: new Date(),
     };
 
@@ -142,6 +148,7 @@ describe('Tenant Settings Schema - TenantSetting Type', () => {
       tenantId: 'tenant-123',
       key: 'integrations.enabled',
       value: ['slack', 'github', 'jira'],
+      createdAt: new Date(),
       updatedAt: new Date(),
     };
 
@@ -163,6 +170,7 @@ describe('Tenant Settings Schema - TenantSetting Type', () => {
         tenantId: 'tenant-123',
         key,
         value: 'test',
+        createdAt: new Date(),
         updatedAt: new Date(),
       };
 
@@ -279,8 +287,11 @@ describe('Tenant Settings Schema - Type Consistency', () => {
     };
 
     const fullSetting: TenantSetting = {
+      tenantId: newSetting.tenantId,
+      key: newSetting.key,
+      value: newSetting.value,
+      createdAt: new Date(),
       updatedAt: new Date(),
-      ...newSetting,
     };
 
     expect(fullSetting.tenantId).toBe(newSetting.tenantId);
@@ -293,6 +304,7 @@ describe('Tenant Settings Schema - Type Consistency', () => {
       tenantId: 'tenant-123',
       key: 'test',
       value: null,
+      createdAt: new Date(),
       updatedAt: new Date(),
     };
 
@@ -302,6 +314,7 @@ describe('Tenant Settings Schema - Type Consistency', () => {
   });
 
   test('Date fields should be consistently named', () => {
+    expect(TENANT_SETTING_COLUMNS.createdAt).toMatch(/_at$/);
     expect(TENANT_SETTING_COLUMNS.updatedAt).toMatch(/_at$/);
   });
 
@@ -323,18 +336,21 @@ describe('Tenant Settings Schema - Integration Scenarios', () => {
         tenantId: 'tenant-123',
         key: 'branding.primary_color',
         value: '#FF5733',
+        createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
         tenantId: 'tenant-123',
         key: 'branding.logo_url',
         value: 'https://cdn.example.com/logos/tenant-123.png',
+        createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
         tenantId: 'tenant-123',
         key: 'branding.app_name',
         value: 'Acme Corp Portal',
+        createdAt: new Date(),
         updatedAt: new Date(),
       },
     ];
@@ -349,6 +365,7 @@ describe('Tenant Settings Schema - Integration Scenarios', () => {
       tenantId: 'tenant-basic',
       key: 'limits.max_users',
       value: 5,
+      createdAt: new Date(),
       updatedAt: new Date(),
     };
 
@@ -356,6 +373,7 @@ describe('Tenant Settings Schema - Integration Scenarios', () => {
       tenantId: 'tenant-enterprise',
       key: 'limits.max_users',
       value: 500,
+      createdAt: new Date(),
       updatedAt: new Date(),
     };
 
@@ -375,6 +393,7 @@ describe('Tenant Settings Schema - Integration Scenarios', () => {
         fromName: 'Acme Corp',
         fromEmail: 'noreply@tenant123.com',
       },
+      createdAt: new Date(),
       updatedAt: new Date(),
     };
 
@@ -387,6 +406,7 @@ describe('Tenant Settings Schema - Integration Scenarios', () => {
       tenantId: 'tenant-123',
       key: 'branding.primary_color',
       value: '#FF5733',
+      createdAt: new Date('2026-01-01'),
       updatedAt: new Date('2026-01-01'),
     };
 
@@ -411,6 +431,7 @@ describe('Tenant Settings Schema - Integration Scenarios', () => {
       tenantId: 'tenant-1',
       key: 'branding.app_name',
       value: 'Alpha Corp',
+      createdAt: new Date(),
       updatedAt: new Date(),
     };
 
@@ -418,6 +439,7 @@ describe('Tenant Settings Schema - Integration Scenarios', () => {
       tenantId: 'tenant-2',
       key: 'branding.app_name',
       value: 'Beta Inc',
+      createdAt: new Date(),
       updatedAt: new Date(),
     };
 
@@ -448,6 +470,7 @@ describe('Tenant Settings Schema - Edge Cases', () => {
           },
         },
       },
+      createdAt: new Date(),
       updatedAt: new Date(),
     };
 
@@ -460,6 +483,7 @@ describe('Tenant Settings Schema - Edge Cases', () => {
       tenantId: 'tenant-123',
       key: 'branding.tagline',
       value: '',
+      createdAt: new Date(),
       updatedAt: new Date(),
     };
 
@@ -471,6 +495,7 @@ describe('Tenant Settings Schema - Edge Cases', () => {
       tenantId: 'tenant-123',
       key: 'limits.grace_period_days',
       value: 0,
+      createdAt: new Date(),
       updatedAt: new Date(),
     };
 
@@ -482,6 +507,7 @@ describe('Tenant Settings Schema - Edge Cases', () => {
       tenantId: 'tenant-123',
       key: 'features.maintenance_mode',
       value: false,
+      createdAt: new Date(),
       updatedAt: new Date(),
     };
 
@@ -489,11 +515,12 @@ describe('Tenant Settings Schema - Edge Cases', () => {
   });
 
   test('should handle large JSONB arrays', () => {
-    const largeArray = Array.from({ length: 100 }, (_, i) => `item-${i}`);
+    const largeArray = Array.from({ length: 100 }, (_, i) => `item-${String(i)}`);
     const setting: TenantSetting = {
       tenantId: 'tenant-123',
       key: 'allowlist.domains',
       value: largeArray,
+      createdAt: new Date(),
       updatedAt: new Date(),
     };
 

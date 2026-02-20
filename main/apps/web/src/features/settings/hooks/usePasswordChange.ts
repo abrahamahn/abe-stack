@@ -7,6 +7,7 @@
 
 import { getAccessToken } from '@app/authToken';
 import { useMutation } from '@bslt/react';
+import { clientConfig } from '@config';
 
 import { createSettingsApi, type ChangePasswordRequest, type ChangePasswordResponse } from '../api';
 
@@ -15,12 +16,10 @@ import { createSettingsApi, type ChangePasswordRequest, type ChangePasswordRespo
 // ============================================================================
 
 let settingsApi: ReturnType<typeof createSettingsApi> | null = null;
-const apiBaseUrl =
-  typeof import.meta.env['VITE_API_URL'] === 'string' ? import.meta.env['VITE_API_URL'] : '';
 
 function getSettingsApi(): ReturnType<typeof createSettingsApi> {
   settingsApi ??= createSettingsApi({
-    baseUrl: apiBaseUrl,
+    baseUrl: clientConfig.apiUrl,
     getToken: getAccessToken,
   });
   return settingsApi;

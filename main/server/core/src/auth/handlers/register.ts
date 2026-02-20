@@ -13,8 +13,8 @@ import { isCaptchaRequired, verifyCaptchaToken } from '../security';
 import { registerUser, type RegisterResult } from '../service';
 import { createErrorMapperLogger } from '../types';
 
-import type { HttpErrorResponse, RegisterRequest } from '@bslt/shared';
 import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../types';
+import type { HttpErrorResponse, RegisterRequest } from '@bslt/shared';
 
 /**
  * Handle new user registration.

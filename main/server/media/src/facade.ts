@@ -28,8 +28,8 @@ import {
 } from './processor';
 import { CustomJobQueue } from './queue';
 
-import type { Logger } from '@bslt/shared';
 import type { ProcessingLimits } from './processor';
+import type { Logger } from '@bslt/shared';
 
 /**
  * Resolved entitlements for media access control.

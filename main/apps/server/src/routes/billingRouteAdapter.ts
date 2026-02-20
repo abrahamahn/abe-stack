@@ -9,11 +9,12 @@ import { billingRoutes } from '@bslt/core/billing';
 
 import type { BillingBaseRouteDefinition } from '@bslt/core/billing';
 import type {
+  HttpReply,
+  HttpRequest,
   RouteDefinition as DbRouteDefinition,
   RouteMap as DbRouteMap,
   HandlerContext,
 } from '@bslt/server-system';
-import type { FastifyReply, FastifyRequest } from 'fastify';
 
 export function buildBillingRouteMap(): DbRouteMap {
   const entries: Array<[string, DbRouteDefinition]> = [];
@@ -24,8 +25,8 @@ export function buildBillingRouteMap(): DbRouteMap {
     const adaptedHandler = async (
       handlerCtx: HandlerContext,
       body: unknown,
-      req: FastifyRequest,
-      reply: FastifyReply,
+      req: HttpRequest,
+      reply: HttpReply,
     ): Promise<unknown> => {
       const result = await billingDef.handler(
         handlerCtx as unknown as import('@bslt/core/billing').BillingAppContext,

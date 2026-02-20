@@ -8,31 +8,19 @@
  * @module handlers/devices
  */
 
-import { HTTP_STATUS, NotFoundError, mapErrorToHttpResponse } from '@bslt/shared';
+import {
+  HTTP_STATUS,
+  NotFoundError,
+  mapErrorToHttpResponse,
+  type DeviceItem,
+  type DeviceListResponse,
+  type TrustDeviceResponse,
+  type HttpErrorResponse,
+} from '@bslt/shared';
 
 import { createErrorMapperLogger } from '../types';
 
-import type { HttpErrorResponse } from '@bslt/shared';
 import type { AppContext, RequestWithCookies } from '../types';
-
-// ============================================================================
-// Response Types
-// ============================================================================
-
-/**
- * Device item returned in list responses
- */
-interface DeviceResponse {
-  id: string;
-  deviceFingerprint: string;
-  label: string | null;
-  ipAddress: string | null;
-  userAgent: string | null;
-  firstSeenAt: string;
-  lastSeenAt: string;
-  trusted: boolean;
-  createdAt: string;
-}
 
 // ============================================================================
 // Handlers
@@ -51,7 +39,7 @@ interface DeviceResponse {
 export async function handleListDevices(
   ctx: AppContext,
   request: RequestWithCookies,
-): Promise<{ status: 200; body: { devices: DeviceResponse[] } } | HttpErrorResponse> {
+): Promise<{ status: 200; body: DeviceListResponse } | HttpErrorResponse> {
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {
@@ -60,7 +48,7 @@ export async function handleListDevices(
 
     const devices = await ctx.repos.trustedDevices.findByUser(userId);
 
-    const deviceResponses: DeviceResponse[] = devices.map((device) => ({
+    const deviceResponses: DeviceItem[] = devices.map((device) => ({
       id: device.id,
       deviceFingerprint: device.deviceFingerprint,
       label: device.label,
@@ -93,7 +81,7 @@ export async function handleTrustDevice(
   ctx: AppContext,
   params: { id: string },
   request: RequestWithCookies,
-): Promise<{ status: 200; body: { device: DeviceResponse } } | HttpErrorResponse> {
+): Promise<{ status: 200; body: TrustDeviceResponse } | HttpErrorResponse> {
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {

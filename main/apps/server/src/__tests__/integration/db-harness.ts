@@ -29,7 +29,7 @@ export interface DbHarness {
  */
 export async function createDbHarness(): Promise<DbHarness> {
   // Load environment to get base connection info
-  loadServerEnv();
+  await loadServerEnv();
 
   const baseConnectionString = buildConnectionString();
   const mainDb = createDbClient(baseConnectionString);
@@ -42,7 +42,9 @@ export async function createDbHarness(): Promise<DbHarness> {
     await mainDb.raw(`CREATE DATABASE ${dbName}`);
     await mainDb.close();
 
-    // 2. Build new connection string
+    // 2. Build connection string for the isolated test database
+    // Replace the database portion of the base URL with the new DB name
+    const testConnectionString = baseConnectionString.replace(/\/[^/?]+(\?|$)/, `/${dbName}$1`);
     const testDb = createDbClient(testConnectionString);
 
     return {
@@ -50,7 +52,11 @@ export async function createDbHarness(): Promise<DbHarness> {
       db: testDb,
       migrate: async () => {
         console.log(`Migrating test database ${dbName}...`);
-        const { STATEMENTS } = await import('../../../../tools/scripts/db/push' as any);
+        // Dynamic import of migration script; path is resolved at runtime
+        // The module is a generated artifact not tracked in TypeScript paths
+        const scriptPath = '../../../../tools/scripts/db/push';
+        const pushScript = (await import(scriptPath)) as { STATEMENTS: string[] };
+        const { STATEMENTS } = pushScript;
         for (const sql of STATEMENTS) {
           try {
             await testDb.raw(sql);

@@ -10,9 +10,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { WriteService, createWriteService, type WriteServiceOptions } from './write-service';
 
-import type { SubscriptionManager } from '@bslt/shared';
 import type { DbClient } from '../client';
-import type { WriteBatch, WriteOperation } from './types';
+import type { BeforeValidateHook, WriteBatch, WriteContext, WriteOperation } from './write-types';
+import type { SubscriptionManager } from '@bslt/shared';
 
 // ============================================================================
 // Mock Modules
@@ -87,14 +87,13 @@ function createMockLogger(): MockLogger {
 /**
  * Create WriteService options with defaults
  */
-function createServiceOptions(overrides: Partial<WriteServiceOptions> = {}): WriteServiceOptions {
-  return {
-    db: createMockDb(),
-    pubsub: createMockPubSub(),
-    log: createMockLogger() as unknown as WriteServiceOptions['log'],
-    hooks: {},
-    ...overrides,
-  };
+function createServiceOptions(): WriteServiceOptions {
+  const opts: WriteServiceOptions = { db: createMockDb() };
+  opts.pubsub = createMockPubSub();
+  const mockLog = createMockLogger() as unknown as import('@bslt/shared').Logger;
+  opts.log = mockLog;
+  opts.hooks = {};
+  return opts;
 }
 
 /**
@@ -391,7 +390,6 @@ describe('WriteService', () => {
     it('should not publish if no pubsub configured', async () => {
       const serviceWithoutPubSub = new WriteService({
         db: mockDb,
-        pubsub: undefined,
       });
 
       vi.mocked(mockDb.raw).mockResolvedValue([]);
@@ -412,12 +410,9 @@ describe('WriteService', () => {
 
   describe('hooks', () => {
     it('should execute beforeValidate hooks', async () => {
-      const beforeValidateHook = vi.fn((op: WriteOperation) =>
-        Promise.resolve({
-          ...op,
-          data: { ...op.data, validated: true },
-        }),
-      );
+      const hookImpl = (op: WriteOperation<Record<string, unknown>>, _ctx: WriteContext) =>
+        Promise.resolve({ ...op, data: { ...op.data, validated: true } });
+      const beforeValidateHook = vi.fn(hookImpl) as unknown as BeforeValidateHook;
 
       const serviceWithHooks = new WriteService({
         db: mockDb,
@@ -470,9 +465,9 @@ describe('WriteService', () => {
     it('should log but not fail if afterWrite hook throws', async () => {
       const failingHook = vi.fn().mockRejectedValue(new Error('Hook failed'));
 
-      const _serviceWithHooks = new WriteService({
+      new WriteService({
         db: mockDb,
-        log: mockLogger as unknown as WriteServiceOptions['log'],
+        log: mockLogger as unknown as import('@bslt/shared').Logger,
         hooks: { afterWrite: [failingHook] },
       });
 

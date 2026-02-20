@@ -7,8 +7,8 @@
  * @module Observability
  */
 
-import { ConsoleErrorTrackingProvider } from './console-provider';
-import { NoopErrorTrackingProvider } from './noop-provider';
+import { NoopErrorTrackingProvider } from './noop.provider';
+import { SentryNodeProvider } from './sentry.provider';
 
 import type { ErrorTrackingConfig, ErrorTrackingProvider } from './types';
 
@@ -16,10 +16,8 @@ import type { ErrorTrackingConfig, ErrorTrackingProvider } from './types';
  * Create an error tracking provider based on the given configuration.
  *
  * - If DSN is null or empty: returns NoopErrorTrackingProvider (zero overhead)
- * - Otherwise: returns ConsoleErrorTrackingProvider (logs to console for development)
- *
- * Future: When Sentry SDK is installed, this factory can return a SentryProvider
- * when a valid DSN is provided.
+ * - If DSN is provided: returns SentryNodeProvider (uses @sentry/node when installed,
+ *   gracefully degrades to no-op when the package is absent)
  *
  * @param config - Error tracking configuration
  * @returns An ErrorTrackingProvider instance
@@ -30,7 +28,7 @@ export function createErrorTracker(config: ErrorTrackingConfig): ErrorTrackingPr
     return new NoopErrorTrackingProvider();
   }
 
-  // For now, return console provider when DSN is present
-  // In the future, this can be replaced with a real Sentry provider
-  return new ConsoleErrorTrackingProvider();
+  // Use the Sentry Node.js provider — gracefully degrades if @sentry/node
+  // is not installed (optional dependency).
+  return new SentryNodeProvider();
 }

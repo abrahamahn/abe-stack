@@ -6,7 +6,6 @@
  * Uses SELECT FOR UPDATE SKIP LOCKED for safe concurrent dequeue.
  */
 
-import type { DbClient } from '@bslt/db';
 import type {
   JobDetails,
   JobListOptions,
@@ -18,6 +17,7 @@ import type {
   TaskError,
   TaskResult,
 } from './types/queue-types';
+import type { DbClient } from '@bslt/db';
 
 // ============================================================================
 // SQL Result Types

@@ -48,11 +48,6 @@ export {
   vapidKeyResponseSchema,
 } from './notifications.push.schemas';
 
-// --- NOTIFICATION_PAYLOAD_MAX_SIZE (canonical: system/constants) ---
-import { NOTIFICATION_PAYLOAD_MAX_SIZE } from '../../system/constants';
-
-export { NOTIFICATION_PAYLOAD_MAX_SIZE };
-
 // --- notifications.errors ---
 export {
   InvalidPreferencesError,

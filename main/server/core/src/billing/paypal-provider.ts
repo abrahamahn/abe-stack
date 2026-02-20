@@ -10,6 +10,7 @@ import { createHmac } from 'node:crypto';
 
 import { MS_PER_DAY } from '@bslt/shared';
 
+import type { SubscriptionStatus } from '../../../db/src';
 import type {
   BillingService,
   CheckoutParams,
@@ -26,7 +27,6 @@ import type {
   SetupIntentResult,
 } from '@bslt/shared';
 import type { PayPalProviderConfig as PayPalConfig } from '@bslt/shared/config';
-import type { SubscriptionStatus } from '../../../db/src';
 
 // ============================================================================
 // PayPal API Types
@@ -280,11 +280,11 @@ export class PayPalProvider implements BillingService {
     };
   }
 
-  async createPortalSession(_params: PortalSessionParams): Promise<PortalSessionResult> {
+  createPortalSession(_params: PortalSessionParams): Promise<PortalSessionResult> {
     // PayPal manages subscription through their own UI
     // Users can view/manage subscriptions in their PayPal account dashboard
     // We can't programmatically create a portal session like Stripe
-    throw new Error('Customer portal not supported for PayPal provider');
+    return Promise.reject(new Error('Customer portal not supported for PayPal provider'));
   }
 
   async cancelSubscription(subscriptionId: string, immediately = false): Promise<void> {

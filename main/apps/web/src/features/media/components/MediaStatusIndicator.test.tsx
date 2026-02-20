@@ -28,7 +28,7 @@ vi.mock('../api', () => {
         const response = await globalThis.fetch(`/api/media/${id}/status`);
         const data = (await response.json()) as Record<string, unknown>;
         if (!response.ok) {
-          throw new Error((data['message'] as string) ?? 'Get status failed');
+          throw new Error((data['message'] as string | undefined) ?? 'Get status failed');
         }
         return data as unknown as MediaStatusResponse;
       },

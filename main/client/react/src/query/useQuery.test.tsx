@@ -26,8 +26,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { QueryCacheProvider } from './QueryCacheProvider';
 import { useQuery } from './useQuery';
 
-import type { ReactNode } from 'react';
 import type { UseQueryOptions } from './useQuery';
+import type { ReactNode } from 'react';
 
 // ============================================================================
 // Test Setup

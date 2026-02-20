@@ -12,7 +12,7 @@
  *
  * @complexity O(n) - all tests run in linear time
  */
-import { afterEach, beforeEach, describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // ============================================================================
 // Mock Types and Interfaces
@@ -353,9 +353,7 @@ describe('Service Worker (sw.js)', () => {
       },
       addEventListener: vi.fn((event: string, handler: (e: Event) => void) => {
         const listeners = eventListeners[event as keyof EventListenersMap];
-        if (listeners !== undefined) {
-          listeners.push(handler as never);
-        }
+        listeners.push(handler as never);
       }),
       skipWaiting: vi.fn(() => Promise.resolve()),
       clients: {
@@ -823,7 +821,7 @@ describe('Service Worker (sw.js)', () => {
         };
 
         // Simulate message handler
-        if (event.data?.type === 'SKIP_WAITING') {
+        if (event.data.type === 'SKIP_WAITING') {
           await mockSelf.skipWaiting();
         }
 
@@ -839,7 +837,7 @@ describe('Service Worker (sw.js)', () => {
         const CACHE_VERSION = 'v1';
 
         // Simulate message handler
-        if (event.data?.type === 'GET_VERSION' && event.ports[0] !== undefined) {
+        if (event.data.type === 'GET_VERSION' && event.ports[0] !== undefined) {
           event.ports[0].postMessage({ version: CACHE_VERSION });
         }
 
@@ -883,7 +881,7 @@ describe('Service Worker (sw.js)', () => {
   describe('Push Notifications', () => {
     describe('push event', () => {
       it('should display notification with JSON payload', async () => {
-        const payload = {
+        const payload: NotificationPayload = {
           title: 'Test Notification',
           body: 'Test message',
           icon: '/icon.png',
@@ -895,7 +893,7 @@ describe('Service Worker (sw.js)', () => {
         // Simulate push handler
         const pushPromise = (async () => {
           const { title, ...options } = payload;
-          await mockSelf.registration.showNotification(title, {
+          await mockSelf.registration.showNotification(title ?? '', {
             body: options.body,
             icon: options.icon ?? '/icons/logo192.png',
             data: options.data,
@@ -930,9 +928,7 @@ describe('Service Worker (sw.js)', () => {
           }
 
           await mockSelf.registration.showNotification(
-            payload.title !== null && payload.title !== undefined && payload.title !== ''
-              ? payload.title
-              : 'Notification',
+            payload.title !== undefined && payload.title !== '' ? payload.title : 'Notification',
             {
               body: payload.body,
             },
@@ -1016,7 +1012,7 @@ describe('Service Worker (sw.js)', () => {
         const event = new MockPushEvent(null);
 
         // Should return early
-        if (event.data === null || event.data === undefined) {
+        if (event.data === null) {
           expect(event.data).toBeNull();
           return;
         }
@@ -1091,9 +1087,7 @@ describe('Service Worker (sw.js)', () => {
               ? (notification.data as Record<string, string>)
               : {};
           const targetUrl =
-            data['url'] !== null && data['url'] !== undefined && data['url'] !== ''
-              ? data['url']
-              : '/';
+            data['url'] !== undefined && data['url'] !== '' ? data['url'] : '/';
 
           // No existing window, open new one
           const fullUrl = targetUrl.startsWith('http')
@@ -1125,9 +1119,7 @@ describe('Service Worker (sw.js)', () => {
               ? (notification.data as Record<string, string>)
               : {};
           const targetUrl =
-            data['url'] !== null && data['url'] !== undefined && data['url'] !== ''
-              ? data['url']
-              : '/';
+            data['url'] !== undefined && data['url'] !== '' ? data['url'] : '/';
 
           const windowClients = await mockSelf.clients.matchAll({
             type: 'window',
@@ -1173,9 +1165,7 @@ describe('Service Worker (sw.js)', () => {
               ? (notification.data as Record<string, string>)
               : {};
           const targetUrl =
-            data['url'] !== null && data['url'] !== undefined && data['url'] !== ''
-              ? data['url']
-              : '/';
+            data['url'] !== undefined && data['url'] !== '' ? data['url'] : '/';
 
           const windowClients = await mockSelf.clients.matchAll({
             type: 'window',
@@ -1218,22 +1208,13 @@ describe('Service Worker (sw.js)', () => {
             url?: string;
             actions?: Array<{ action: string; title: string; url?: string }>;
           };
-          const dataObj = data ?? ({ url: undefined, actions: undefined } as typeof data);
           const action = event.action;
           let targetUrl =
-            dataObj.url !== null && dataObj.url !== undefined && dataObj.url !== ''
-              ? dataObj.url
-              : '/';
+            data.url !== undefined && data.url !== '' ? data.url : '/';
 
           // Check for action-specific URL
-          if (
-            action !== null &&
-            action !== undefined &&
-            action !== '' &&
-            dataObj.actions !== null &&
-            dataObj.actions !== undefined
-          ) {
-            const clickedAction = dataObj.actions.find((a) => a.action === action);
+          if (action !== '' && data.actions !== undefined) {
+            const clickedAction = data.actions.find((a) => a.action === action);
             if (clickedAction?.url !== undefined && clickedAction.url !== '') {
               targetUrl = clickedAction.url;
             }
@@ -1262,9 +1243,7 @@ describe('Service Worker (sw.js)', () => {
               ? (notification.data as Record<string, string>)
               : {};
           const targetUrl =
-            data['url'] !== null && data['url'] !== undefined && data['url'] !== ''
-              ? data['url']
-              : '/';
+            data['url'] !== undefined && data['url'] !== '' ? data['url'] : '/';
 
           const fullUrl = targetUrl.startsWith('http')
             ? targetUrl
@@ -1290,9 +1269,7 @@ describe('Service Worker (sw.js)', () => {
               ? (notification.data as Record<string, string>)
               : {};
           const targetUrl =
-            data['url'] !== null && data['url'] !== undefined && data['url'] !== ''
-              ? data['url']
-              : '/';
+            data['url'] !== undefined && data['url'] !== '' ? data['url'] : '/';
 
           await mockSelf.clients.openWindow(mockSelf.location.origin + targetUrl);
         })();

@@ -65,6 +65,7 @@ export {
   endImpersonation,
   ImpersonationForbiddenError,
   ImpersonationRateLimitError,
+  resetRateLimitStore,
   startImpersonation,
   validateImpersonationToken,
   type ImpersonationAuditLogger,

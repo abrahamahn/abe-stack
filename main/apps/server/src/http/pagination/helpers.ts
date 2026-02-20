@@ -7,8 +7,8 @@
 import { applyCursorPagination, applyOffsetPagination } from '@bslt/db';
 import { createPaginatedResult } from '@bslt/shared';
 
-import type { CursorPaginatedResult, PaginatedResult, PaginationOptions } from '@bslt/shared';
 import type { PaginationHelpers } from './types';
+import type { CursorPaginatedResult, PaginatedResult, PaginationOptions } from '@bslt/shared';
 
 /**
  * Create pagination helper functions

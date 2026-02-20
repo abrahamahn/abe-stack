@@ -216,6 +216,8 @@ export interface EmailOptions {
   cc?: string[];
   bcc?: string[];
   attachments?: Attachment[];
+  /** Additional RFC-compliant headers (e.g., List-Unsubscribe) */
+  headers?: Record<string, string>;
 }
 
 /**

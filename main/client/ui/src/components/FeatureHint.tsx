@@ -101,8 +101,8 @@ export const FeatureHint = ({
       aria-live="polite"
       style={{
         position: 'fixed',
-        top: `${position.top}px`,
-        left: `${position.left}px`,
+        top: `${String(position.top)}px`,
+        left: `${String(position.left)}px`,
         visibility: position.ready ? 'visible' : 'hidden',
       }}
     >

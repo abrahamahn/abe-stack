@@ -1,5 +1,5 @@
 // main/client/react/src/hooks/useLocalStorage.ts
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 /**
  * Persist state to localStorage with SSR safety.
@@ -15,7 +15,9 @@ export function useLocalStorage<T>(
 ): [T, (value: T | ((prev: T) => T)) => void] {
   const canUseStorage = typeof window !== 'undefined';
   const initialValueRef = useRef(initialValue);
-  initialValueRef.current = initialValue;
+  useLayoutEffect(() => {
+    initialValueRef.current = initialValue;
+  });
 
   const [storedValue, setStoredValue] = useState<T>(() => {
     if (!canUseStorage) return initialValue;

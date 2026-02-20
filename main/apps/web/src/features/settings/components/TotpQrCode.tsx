@@ -29,8 +29,9 @@ interface TotpQrCodeProps {
 // ============================================================================
 
 // Reed-Solomon GF(256) primitive polynomial: x^8 + x^4 + x^3 + x^2 + 1
-const GF_EXP: number[] = new Array<number>(512);
-const GF_LOG: number[] = new Array<number>(256);
+// Use Uint8Array for typed numeric arrays — avoids noUncheckedIndexedAccess issue
+const GF_EXP = new Uint8Array(512);
+const GF_LOG = new Uint8Array(256);
 
 function initGaloisField(): void {
   let x = 1;
@@ -41,7 +42,7 @@ function initGaloisField(): void {
     if (x >= 256) x ^= 0x11d;
   }
   for (let i = 255; i < 512; i++) {
-    GF_EXP[i] = GF_EXP[i - 255]!;
+    GF_EXP[i] = GF_EXP[i - 255] ?? 0;
   }
 }
 
@@ -49,32 +50,34 @@ initGaloisField();
 
 function gfMul(a: number, b: number): number {
   if (a === 0 || b === 0) return 0;
-  return GF_EXP[(GF_LOG[a]! + GF_LOG[b]!) % 255]!;
+  const logA = GF_LOG[a] ?? 0;
+  const logB = GF_LOG[b] ?? 0;
+  return GF_EXP[(logA + logB) % 255] ?? 0;
 }
 
-function rsGeneratorPoly(nsym: number): number[] {
-  let g = [1];
+function rsGeneratorPoly(nsym: number): Uint8Array {
+  let g = new Uint8Array([1]);
   for (let i = 0; i < nsym; i++) {
-    const next: number[] = new Array<number>(g.length + 1).fill(0);
-    const factor = GF_EXP[i]!;
+    const next = new Uint8Array(g.length + 1);
+    const factor = GF_EXP[i] ?? 0;
     for (let j = 0; j < g.length; j++) {
-      next[j] = (next[j]! ^ g[j]!) >>> 0;
-      next[j + 1] = (next[j + 1]! ^ gfMul(g[j]!, factor)) >>> 0;
+      next[j] = ((next[j] ?? 0) ^ (g[j] ?? 0)) >>> 0;
+      next[j + 1] = ((next[j + 1] ?? 0) ^ gfMul(g[j] ?? 0, factor)) >>> 0;
     }
     g = next;
   }
   return g;
 }
 
-function rsEncode(data: number[], nsym: number): number[] {
+function rsEncode(data: Uint8Array, nsym: number): Uint8Array {
   const gen = rsGeneratorPoly(nsym);
-  const out = new Array<number>(data.length + nsym).fill(0);
-  for (let i = 0; i < data.length; i++) out[i] = data[i]!;
+  const out = new Uint8Array(data.length + nsym);
+  out.set(data);
   for (let i = 0; i < data.length; i++) {
-    const coef = out[i]!;
+    const coef = out[i] ?? 0;
     if (coef !== 0) {
       for (let j = 0; j < gen.length; j++) {
-        out[i + j] = (out[i + j]! ^ gfMul(gen[j]!, coef)) >>> 0;
+        out[i + j] = ((out[i + j] ?? 0) ^ gfMul(gen[j] ?? 0, coef)) >>> 0;
       }
     }
   }
@@ -98,7 +101,8 @@ const VERSION_PARAMS: Record<number, [number, number, number]> = {
 
 function selectVersion(dataLen: number): number {
   for (let v = 1; v <= 10; v++) {
-    const params = VERSION_PARAMS[v]!;
+    const params = VERSION_PARAMS[v];
+    if (params === undefined) continue;
     // Byte mode: 4 bits mode + 8/16 bits length + data + 4 bits terminator
     const lengthBits = v <= 9 ? 8 : 16;
     const available = params[1] * 8 - 4 - lengthBits;
@@ -132,29 +136,34 @@ function createQrMatrix(data: string): boolean[][] | null {
 
     while (bits.length % 8 !== 0) bits.push(0);
 
-    const codewords: number[] = [];
+    const codewords = new Uint8Array(dataCw);
+    let cwIdx = 0;
     for (let i = 0; i < bits.length; i += 8) {
       let byte = 0;
       for (let j = 0; j < 8; j++) byte = (byte << 1) | (bits[i + j] ?? 0);
-      codewords.push(byte);
+      if (cwIdx < dataCw) codewords[cwIdx++] = byte;
     }
 
     // Pad to fill data codewords
     const padBytes = [0xec, 0x11];
     let padIdx = 0;
-    while (codewords.length < dataCw) {
-      codewords.push(padBytes[padIdx % 2]!);
+    while (cwIdx < dataCw) {
+      codewords[cwIdx++] = padBytes[padIdx % 2] ?? 0;
       padIdx++;
     }
 
     // Generate EC codewords
     const ecBytes = rsEncode(codewords, ecCw);
-    const allCodewords = [...codewords, ...ecBytes];
+    const allCodewords = new Uint8Array(codewords.length + ecBytes.length);
+    allCodewords.set(codewords);
+    allCodewords.set(ecBytes, codewords.length);
 
-    // Build matrix
-    const matrix: (boolean | null)[][] = Array.from({ length: size }, () =>
-      new Array<boolean | null>(size).fill(null),
-    );
+    // Build matrix using a flat array for safe indexed access
+    const matrixFlat = new Array<boolean | null>(size * size).fill(null);
+    const matrixGet = (r: number, c: number): boolean | null => matrixFlat[r * size + c] ?? null;
+    const matrixSet = (r: number, c: number, val: boolean): void => {
+      matrixFlat[r * size + c] = val;
+    };
 
     // Place finder patterns
     const placeFinderPattern = (row: number, col: number): void => {
@@ -167,7 +176,7 @@ function createQrMatrix(data: string): boolean[][] | null {
             (r >= 0 && r <= 6 && (c === 0 || c === 6)) ||
             (c >= 0 && c <= 6 && (r === 0 || r === 6)) ||
             (r >= 2 && r <= 4 && c >= 2 && c <= 4);
-          matrix[mr]![mc] = isBlack;
+          matrixSet(mr, mc, isBlack);
         }
       }
     };
@@ -178,12 +187,12 @@ function createQrMatrix(data: string): boolean[][] | null {
 
     // Timing patterns
     for (let i = 8; i < size - 8; i++) {
-      matrix[6]![i] = i % 2 === 0;
-      matrix[i]![6] = i % 2 === 0;
+      matrixSet(6, i, i % 2 === 0);
+      matrixSet(i, 6, i % 2 === 0);
     }
 
     // Dark module
-    matrix[size - 8]![8] = true;
+    matrixSet(size - 8, 8, true);
 
     // Alignment patterns (version >= 2)
     if (version >= 2) {
@@ -192,12 +201,12 @@ function createQrMatrix(data: string): boolean[][] | null {
 
       for (const ar of alignPos) {
         for (const ac of alignPos) {
-          if (matrix[ar]?.[ac] !== null && matrix[ar]?.[ac] !== undefined) continue;
+          if (matrixGet(ar, ac) !== null) continue;
           for (let r = -2; r <= 2; r++) {
             for (let c = -2; c <= 2; c++) {
               const isBlack = Math.abs(r) === 2 || Math.abs(c) === 2 || (r === 0 && c === 0);
               if (ar + r >= 0 && ar + r < size && ac + c >= 0 && ac + c < size) {
-                matrix[ar + r]![ac + c] = isBlack;
+                matrixSet(ar + r, ac + c, isBlack);
               }
             }
           }
@@ -207,12 +216,12 @@ function createQrMatrix(data: string): boolean[][] | null {
 
     // Reserve format info areas
     for (let i = 0; i < 8; i++) {
-      if (matrix[8]![i] === null) matrix[8]![i] = false;
-      if (matrix[i]![8] === null) matrix[i]![8] = false;
-      if (matrix[8]![size - 1 - i] === null) matrix[8]![size - 1 - i] = false;
-      if (matrix[size - 1 - i]![8] === null) matrix[size - 1 - i]![8] = false;
+      if (matrixGet(8, i) === null) matrixSet(8, i, false);
+      if (matrixGet(i, 8) === null) matrixSet(i, 8, false);
+      if (matrixGet(8, size - 1 - i) === null) matrixSet(8, size - 1 - i, false);
+      if (matrixGet(size - 1 - i, 8) === null) matrixSet(size - 1 - i, 8, false);
     }
-    if (matrix[8]![8] === null) matrix[8]![8] = false;
+    if (matrixGet(8, 8) === null) matrixSet(8, 8, false);
 
     // Place data bits (upward/downward columns, right to left)
     let bitIdx = 0;
@@ -233,8 +242,8 @@ function createQrMatrix(data: string): boolean[][] | null {
         for (const dc of [0, -1]) {
           const c = col + dc;
           if (c < 0 || c >= size) continue;
-          if (matrix[row]![c] !== null) continue;
-          matrix[row]![c] = bitIdx < allBits.length ? allBits[bitIdx]! === 1 : false;
+          if (matrixGet(row, c) !== null) continue;
+          matrixSet(row, c, bitIdx < allBits.length ? (allBits[bitIdx] ?? 0) === 1 : false);
           bitIdx++;
         }
       }
@@ -251,7 +260,7 @@ function createQrMatrix(data: string): boolean[][] | null {
 
     for (let r = 0; r < size; r++) {
       for (let c = 0; c < size; c++) {
-        const val = matrix[r]![c] ?? false;
+        const val = matrixGet(r, c) ?? false;
         const isMask = (r + c) % 2 === 0;
         // Only mask data/ec modules (not function patterns)
         const isFunction =
@@ -260,7 +269,10 @@ function createQrMatrix(data: string): boolean[][] | null {
           (r >= size - 8 && c < 9) ||
           r === 6 ||
           c === 6;
-        result[r]![c] = isFunction ? val : val !== isMask;
+        const row = result[r];
+        if (row !== undefined) {
+          row[c] = isFunction ? val : val !== isMask;
+        }
       }
     }
 
@@ -270,36 +282,35 @@ function createQrMatrix(data: string): boolean[][] | null {
       formatBits.push(((FORMAT_INFO_MASK0 >> i) & 1) === 1);
     }
 
+    const setBit = (r: number, c: number, fIdx: number): void => {
+      const row = result[r];
+      if (row !== undefined) {
+        row[c] = formatBits[fIdx] ?? false;
+      }
+    };
+
     // Horizontal format info
     let fIdx = 0;
     for (let c = 0; c <= 7; c++) {
       if (c === 6) continue;
-      result[8]![c] = formatBits[fIdx]!;
-      fIdx++;
+      setBit(8, c, fIdx++);
     }
-    result[8]![7] = formatBits[fIdx]!;
-    fIdx++;
-    result[8]![8] = formatBits[fIdx]!;
-    fIdx++;
+    setBit(8, 7, fIdx++);
+    setBit(8, 8, fIdx++);
     for (let c = size - 7; c < size; c++) {
-      result[8]![c] = formatBits[fIdx]!;
-      fIdx++;
+      setBit(8, c, fIdx++);
     }
 
     // Vertical format info
     fIdx = 0;
     for (let r = 0; r <= 7; r++) {
       if (r === 6) continue;
-      result[r]![8] = formatBits[fIdx]!;
-      fIdx++;
+      setBit(r, 8, fIdx++);
     }
-    result[7]![8] = formatBits[fIdx]!;
-    fIdx++;
-    result[8]![8] = formatBits[fIdx]!;
-    fIdx++;
+    setBit(7, 8, fIdx++);
+    setBit(8, 8, fIdx++);
     for (let r = size - 7; r < size; r++) {
-      result[r]![8] = formatBits[fIdx]!;
-      fIdx++;
+      setBit(r, 8, fIdx++);
     }
 
     return result;
@@ -326,13 +337,17 @@ export function TotpQrCode({ url, size = 200 }: TotpQrCodeProps): ReactElement {
 
     const ctx = canvas.getContext('2d');
     if (ctx === null) {
-      setRenderError(true);
+      queueMicrotask(() => {
+        setRenderError(true);
+      });
       return;
     }
 
     const matrix = createQrMatrix(url);
     if (matrix === null) {
-      setRenderError(true);
+      queueMicrotask(() => {
+        setRenderError(true);
+      });
       return;
     }
 
@@ -343,11 +358,11 @@ export function TotpQrCode({ url, size = 200 }: TotpQrCodeProps): ReactElement {
     canvas.width = actualSize;
     canvas.height = actualSize;
 
-    // White background
+    // White background — canvas requires literal colors
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, actualSize, actualSize);
 
-    // Draw modules
+    // Draw modules — canvas requires literal colors
     ctx.fillStyle = '#000000';
     for (let row = 0; row < moduleCount; row++) {
       for (let col = 0; col < moduleCount; col++) {
@@ -357,7 +372,9 @@ export function TotpQrCode({ url, size = 200 }: TotpQrCodeProps): ReactElement {
       }
     }
 
-    setRenderError(false);
+    queueMicrotask(() => {
+      setRenderError(false);
+    });
   }, [url, size]);
 
   if (renderError) {

@@ -10,14 +10,30 @@ import { createAdminClient } from '@bslt/api';
 import type { AdminClient, AdminClientConfig } from '@bslt/api';
 
 export type {
+  AdminErrorLogEntry,
+  AdminErrorLogResponse,
+  AdminHealthResponse,
+  AdminMetricsResponse,
   AdminTenantDetailLocal,
-  AdminTenantLocal, AuditEventLocal,
+  AdminTenantLocal,
+  AdminWebhookDeliveryListResponse,
+  AdminWebhookDeliveryLocal,
+  AdminWebhookListResponse,
+  AdminWebhookLocal,
+  AdminWebhookReplayResponse,
+  AssignTenantPlanRequest,
+  AssignTenantPlanResponse,
+  AuditEventLocal,
   AuditEventsFilterLocal,
   AuditEventsResponseLocal,
   CreateFeatureFlagRequest,
   FeatureFlagDeleteResponse,
   FeatureFlagListResponse,
   FeatureFlagLocal,
+  FeatureFlagOverrideDeleteResponse,
+  FeatureFlagOverrideListResponse,
+  FeatureFlagOverrideLocal,
+  FeatureFlagOverrideResponse,
   FeatureFlagResponse,
   JobActionResponseLocal,
   JobDetailsLocal,
@@ -32,8 +48,10 @@ export type {
   SecurityEventsListRequestLocal,
   SecurityEventsListResponseLocal,
   SecurityMetricsLocal,
+  ServiceStatus,
+  SetFeatureFlagOverrideRequest,
   TenantListResponse,
-  UpdateFeatureFlagRequest
+  UpdateFeatureFlagRequest,
 } from '@bslt/api/admin/client';
 
 export type AdminApiConfig = AdminClientConfig;
@@ -44,6 +62,8 @@ export function createAdminApiClient(config: AdminApiConfig): AdminApiClient {
 }
 
 export type {
+  AdminHardBanRequest,
+  AdminHardBanResponse,
   AdminLockUserRequest,
   AdminLockUserResponse,
   AdminUpdateUserRequest,
@@ -51,6 +71,5 @@ export type {
   AdminUser,
   AdminUserListFilters,
   AdminUserListResponse,
-  UnlockAccountRequest
+  UnlockAccountRequest,
 } from '@bslt/shared';
-

@@ -21,6 +21,7 @@ function createMockExportRepo(): DataExportRequestRepository {
     findByUserId: vi.fn(),
     update: vi.fn(),
     updateStatus: vi.fn(),
+    deleteExpired: vi.fn(),
   };
 }
 
@@ -51,6 +52,11 @@ function createMockCtx(overrides?: {
       warn: vi.fn(),
       error: vi.fn(),
       debug: vi.fn(),
+    },
+    errorTracker: {
+      captureError: vi.fn(),
+      addBreadcrumb: vi.fn(),
+      setUserContext: vi.fn(),
     },
   };
 }

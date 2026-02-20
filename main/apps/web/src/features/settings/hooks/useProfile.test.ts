@@ -16,8 +16,8 @@ import { createSettingsApi } from '../api';
 
 import { useProfileUpdate } from './useProfile';
 
-import type { UserId } from '@bslt/shared';
 import type { UpdateProfileRequest, User } from '../api';
+import type { UserId } from '@bslt/shared';
 
 // ============================================================================
 // Mocks
@@ -34,9 +34,10 @@ vi.mock('../api', () => ({
 const mockUpdateProfile = vi.fn();
 
 const createWrapper = (cache: QueryCache): ((props: { children: ReactNode }) => ReactElement) => {
-  return ({ children }: { children: ReactNode }): ReactElement => {
-    return createElement(QueryCacheProvider, { cache: cache, children }, children);
-  };
+  function Wrapper({ children }: { children: ReactNode }): ReactElement {
+    return createElement(QueryCacheProvider, { cache }, children);
+  }
+  return Wrapper;
 };
 
 const mockUser: User = {

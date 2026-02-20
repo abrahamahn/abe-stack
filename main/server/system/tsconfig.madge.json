@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "../../..",
+    "paths": {
+      "@/*": ["main/server/system/src/*"],
+      "@bslt/shared": ["main/shared/src/index.ts"],
+      "@bslt/shared/system": ["main/shared/src/system/index.ts"],
+      "@bslt/shared/config": ["main/shared/src/config/index.ts"],
+      "@bslt/db": ["main/server/db/src/index.ts"],
+      "@bslt/server-system": ["main/server/system/src/index.ts"]
+    }
+  }
+}

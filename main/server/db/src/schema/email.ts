@@ -4,7 +4,7 @@
  *
  * Explicit TypeScript interfaces for email_templates and email_log tables.
  * Manages transactional email templates and delivery tracking.
- * Maps to migration 0014_email.sql.
+ * Maps to migration 0301_email.sql.
  *
  * @remarks email_log is append-only — no UpdateEmailLog type exists.
  */
@@ -35,7 +35,7 @@ export const EMAIL_LOG_TABLE = 'email_log';
  * Email template record (SELECT result).
  * Uses TEXT primary key (e.g., "auth.welcome", "billing.invoice").
  *
- * @see 0014_email.sql — key format: `^[a-z][a-z0-9_.]+$`, max 100 chars
+ * @see 0301_email.sql — key format: `^[a-z][a-z0-9_.]+$`, max 100 chars
  */
 export interface EmailTemplate {
   key: string;
@@ -90,7 +90,7 @@ export interface UpdateEmailTemplate {
  * Email delivery log record (SELECT result).
  * Append-only — no UpdateEmailLog type.
  *
- * @see 0014_email.sql
+ * @see 0301_email.sql
  */
 export interface EmailLog {
   id: string;

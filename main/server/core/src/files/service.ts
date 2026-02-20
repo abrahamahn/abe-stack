@@ -20,8 +20,8 @@ import {
 
 import { DEFAULT_ALLOWED_MIME_TYPES, DEFAULT_MAX_FILE_SIZE } from './types';
 
-import type { FileRecord, FileRepository, NewFileRecord } from '../../../db/src';
 import type { FileMetadata, FileStorageProvider, FileUploadOptions } from './types';
+import type { FileRecord, FileRepository, NewFileRecord } from '../../../db/src';
 
 // ============================================================================
 // Constants

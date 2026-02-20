@@ -7,16 +7,12 @@
  */
 
 // Components
-export { OnboardingWizard, type OnboardingWizardProps } from './components/OnboardingWizard';
+export { OnboardingWizard } from './components';
+export type { OnboardingWizardProps } from './components';
 
 // Hooks
-export {
-  TOTAL_STEPS,
-  useOnboarding,
-  type OnboardingFormData,
-  type OnboardingStep,
-  type UseOnboardingResult,
-} from './hooks/useOnboarding';
+export { TOTAL_STEPS, useOnboarding } from './hooks';
+export type { OnboardingFormData, OnboardingStep, UseOnboardingResult } from './hooks';
 
 // Pages
-export { OnboardingPage } from './pages/OnboardingPage';
+export { OnboardingPage } from './pages';

@@ -12,13 +12,12 @@ import { record } from '../audit/service';
 
 import { createApiKey, deleteApiKey, listApiKeys, revokeApiKey } from './service';
 
-import type { AuthenticatedUser } from '@bslt/shared';
-import type { FastifyReply, FastifyRequest } from 'fastify';
-import type { ApiKey as DbApiKey } from '../../../db/src';
-import type { HandlerContext } from '../../../system/src';
-import type { AuditRecordParams } from '../audit/types';
 import type { CreateApiKeyParams } from './service';
 import type { ApiKeyAppContext } from './types';
+import type { ApiKey as DbApiKey } from '../../../db/src';
+import type { HandlerContext, HttpReply, HttpRequest } from '../../../system/src';
+import type { AuditRecordParams } from '../audit/types';
+import type { AuthenticatedUser } from '@bslt/shared';
 
 // ============================================================================
 // Response Types
@@ -89,8 +88,8 @@ function toApiKeyResponse(key: DbApiKey): ApiKeyResponse {
  * @returns Authenticated user or undefined
  * @complexity O(1)
  */
-function getUser(request: FastifyRequest): AuthenticatedUser | undefined {
-  return (request as FastifyRequest & { user?: AuthenticatedUser }).user;
+function getUser(request: HttpRequest): AuthenticatedUser | undefined {
+  return (request as HttpRequest & { user?: AuthenticatedUser }).user;
 }
 
 /**
@@ -126,8 +125,8 @@ function tryAudit(ctx: ApiKeyAppContext, params: AuditRecordParams): void {
 export async function handleCreateApiKey(
   ctx: HandlerContext,
   body: unknown,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<
   | { status: 201; body: { apiKey: ApiKeyResponse; plaintext: string } }
   | { status: 400; body: { message: string } }
@@ -201,8 +200,8 @@ export async function handleCreateApiKey(
 export async function handleListApiKeys(
   ctx: HandlerContext,
   _body: unknown,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<
   | { status: 200; body: { apiKeys: ApiKeyResponse[] } }
   | { status: 401; body: { message: string } }
@@ -246,8 +245,8 @@ export async function handleListApiKeys(
 export async function handleRevokeApiKey(
   ctx: HandlerContext,
   _body: unknown,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<
   | { status: 200; body: { apiKey: ApiKeyResponse } }
   | { status: 400; body: { message: string } }
@@ -315,8 +314,8 @@ export async function handleRevokeApiKey(
 export async function handleDeleteApiKey(
   ctx: HandlerContext,
   _body: unknown,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<
   | { status: 200; body: { message: string } }
   | { status: 401; body: { message: string } }

@@ -44,7 +44,7 @@ vi.mock('postgres', () => {
 });
 
 describe('PostgresPubSub', () => {
-  let pubsub: PostgresPubSub;
+  let pubsub: PostgresPubSub | undefined;
   let onMessageMock: ReturnType<typeof vi.fn>;
   let onErrorMock: ReturnType<typeof vi.fn>;
 
@@ -143,7 +143,7 @@ describe('PostgresPubSub', () => {
       const key = SubKeys.record('users', '123');
       const version = 1;
 
-      await expect(pubsub.publish(key, version)).resolves.not.toThrow();
+      await expect(pubsub!.publish(key, version)).resolves.not.toThrow();
     });
 
     it('should throw if not started', async () => {
@@ -157,10 +157,10 @@ describe('PostgresPubSub', () => {
       const key = SubKeys.record('users', '123');
       const version = 1;
 
-      await pubsub.publish(key, version);
+      await pubsub!.publish(key, version);
 
       // The message should contain the instance ID
-      expect(pubsub.id).toBeTruthy();
+      expect(pubsub!.id).toBeTruthy();
     });
   });
 

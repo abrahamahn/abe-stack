@@ -10,11 +10,11 @@
 
 import { ConflictError, NotFoundError } from '@bslt/shared';
 
+import type { DataExportRepositories, UserDataExport } from './types';
 import type {
   DataExportRequestRepository,
   DataExportRequest as DbDataExportRequest,
 } from '../../../db/src';
-import type { DataExportRepositories, UserDataExport } from './types';
 
 // ============================================================================
 // Data Export Operations
@@ -246,11 +246,11 @@ async function aggregateConsentHistory(
   repos: DataExportRepositories,
   userId: string,
 ): Promise<UserDataExport['consentHistory']> {
-  if (repos.consentLogs === undefined) return undefined;
-  const logs = await repos.consentLogs.findByUserId(userId);
+  if (repos.consentRecords === undefined) return undefined;
+  const logs = await repos.consentRecords.findConsentsByUserId(userId);
   return logs.map((c) => ({
-    consentType: c.consentType,
-    granted: c.granted,
+    consentType: c.consentType ?? '',
+    granted: c.granted ?? false,
     createdAt: c.createdAt.toISOString(),
   }));
 }

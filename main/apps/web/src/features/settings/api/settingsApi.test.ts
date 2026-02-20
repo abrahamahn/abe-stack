@@ -16,6 +16,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createSettingsApi } from './settingsApi';
 
+import type { SettingsApiConfig } from './settingsApi';
 import type {
   AvatarDeleteResponse,
   AvatarUploadResponse,
@@ -29,7 +30,6 @@ import type {
   User,
   UserId,
 } from '@bslt/shared';
-import type { SettingsApiConfig } from './settingsApi';
 
 describe('createSettingsApi', () => {
   let mockFetch: ReturnType<typeof vi.fn>;
@@ -96,7 +96,7 @@ describe('createSettingsApi', () => {
       await api.listSessions();
 
       const headers = mockFetch.mock.calls[0]?.[1]?.headers as Headers;
-      expect(headers?.has('Authorization')).toBe(false);
+      expect(headers.has('Authorization')).toBe(false);
     });
   });
 
@@ -153,8 +153,8 @@ describe('createSettingsApi', () => {
       await api.updateProfile(request);
 
       const headers = mockFetch.mock.calls[0]?.[1]?.headers as Headers;
-      expect(headers?.get('Authorization')).toBe('Bearer test-token-123');
-      expect(headers?.get('Content-Type')).toBe('application/json');
+      expect(headers.get('Authorization')).toBe('Bearer test-token-123');
+      expect(headers.get('Content-Type')).toBe('application/json');
     });
 
     it('should handle profile update errors', async () => {
@@ -322,7 +322,7 @@ describe('createSettingsApi', () => {
 
       const headers = mockFetch.mock.calls[0]?.[1]?.headers as Headers;
       // Content-Type should not be set (browser will add with boundary)
-      expect(headers?.has('Content-Type')).toBe(false);
+      expect(headers.has('Content-Type')).toBe(false);
     });
 
     it('should include authorization header for avatar upload', async () => {
@@ -333,7 +333,7 @@ describe('createSettingsApi', () => {
       await api.uploadAvatar(mockFile);
 
       const headers = mockFetch.mock.calls[0]?.[1]?.headers as Headers;
-      expect(headers?.get('Authorization')).toBe('Bearer test-token-123');
+      expect(headers.get('Authorization')).toBe('Bearer test-token-123');
     });
 
     it('should handle invalid file type', async () => {
@@ -461,7 +461,7 @@ describe('createSettingsApi', () => {
       await api.listSessions();
 
       const headers = mockFetch.mock.calls[0]?.[1]?.headers as Headers;
-      expect(headers?.get('Authorization')).toBe('Bearer test-token-123');
+      expect(headers.get('Authorization')).toBe('Bearer test-token-123');
     });
   });
 
@@ -664,7 +664,7 @@ describe('createSettingsApi', () => {
       await api.listSessions();
 
       const headers = mockFetch.mock.calls[0]?.[1]?.headers as Headers;
-      expect(headers?.get('Authorization')).toBe('Bearer valid-token-456');
+      expect(headers.get('Authorization')).toBe('Bearer valid-token-456');
     });
 
     it('should not include Authorization header when token is null', async () => {
@@ -675,7 +675,7 @@ describe('createSettingsApi', () => {
       await api.listSessions();
 
       const headers = mockFetch.mock.calls[0]?.[1]?.headers as Headers;
-      expect(headers?.has('Authorization')).toBe(false);
+      expect(headers.has('Authorization')).toBe(false);
     });
 
     it('should not include Authorization header when token is empty string', async () => {
@@ -686,7 +686,7 @@ describe('createSettingsApi', () => {
       await api.listSessions();
 
       const headers = mockFetch.mock.calls[0]?.[1]?.headers as Headers;
-      expect(headers?.has('Authorization')).toBe(false);
+      expect(headers.has('Authorization')).toBe(false);
     });
 
     it('should not include Authorization header when token is undefined', async () => {
@@ -697,7 +697,7 @@ describe('createSettingsApi', () => {
       await api.listSessions();
 
       const headers = mockFetch.mock.calls[0]?.[1]?.headers as Headers;
-      expect(headers?.has('Authorization')).toBe(false);
+      expect(headers.has('Authorization')).toBe(false);
     });
   });
 
@@ -720,10 +720,10 @@ describe('createSettingsApi', () => {
         { length: 1000 },
         (_, i) =>
           ({
-            id: `session-${i}`,
+            id: `session-${String(i)}`,
             userId: 'user-123',
-            device: `Device ${i}`,
-            ipAddress: `192.168.1.${i % 255}`,
+            device: `Device ${String(i)}`,
+            ipAddress: `192.168.1.${String(i % 255)}`,
             createdAt: new Date().toISOString(),
             lastActivityAt: new Date().toISOString(),
             isCurrent: i === 0,
@@ -775,7 +775,7 @@ describe('createSettingsApi', () => {
       await api.updateProfile(request);
 
       const headers = mockFetch.mock.calls[0]?.[1]?.headers as Headers;
-      expect(headers?.get('Content-Type')).toBe('application/json');
+      expect(headers.get('Content-Type')).toBe('application/json');
     });
   });
 });

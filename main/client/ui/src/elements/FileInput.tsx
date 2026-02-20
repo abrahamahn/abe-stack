@@ -1,5 +1,5 @@
 // main/client/ui/src/elements/FileInput.tsx
-import { forwardRef, type ComponentPropsWithoutRef } from 'react';
+import { forwardRef, useId, type ComponentPropsWithoutRef } from 'react';
 
 import { Text } from './Text';
 
@@ -50,7 +50,8 @@ FileInputRoot.displayName = 'FileInput';
  */
 const FileInputField = forwardRef<HTMLInputElement, FileInputFieldProps>((props, ref) => {
   const { label, hideLabel, description, error, className, id, type = 'file', ...rest } = props;
-  const inputId = id ?? `file-input-${Math.random().toString(36).slice(2, 7)}`;
+  const generatedId = useId();
+  const inputId = id ?? `file-input-${generatedId}`;
   const descId = description != null && description !== '' ? `${inputId}-desc` : undefined;
   const errorId = error != null && error !== '' ? `${inputId}-err` : undefined;
 

@@ -6,13 +6,13 @@
  * This is a placeholder until actual Elasticsearch integration is implemented.
  */
 
-import { FILTER_OPERATORS } from '@bslt/shared';
+import { FILTER_OPERATORS, LOGICAL_OPERATORS } from '@bslt/shared';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { createElasticsearchProvider, ElasticsearchProvider } from './elasticsearch-provider';
 
-import type { FacetedSearchQuery, SearchQuery } from '@bslt/shared';
 import type { ElasticsearchProviderConfig } from './types';
+import type { FacetedSearchQuery, SearchQuery } from '@bslt/shared';
 
 // ============================================================================
 // Test Utilities
@@ -361,7 +361,7 @@ describe('ElasticsearchProvider', () => {
 
   describe('edge cases', () => {
     it('should handle empty search query', async () => {
-      const query = createSearchQuery({ filters: [] });
+      const query = createSearchQuery({ filters: undefined });
 
       await expect(provider.search(query)).rejects.toMatchObject({
         name: 'SearchProviderUnavailableError',
@@ -369,11 +369,14 @@ describe('ElasticsearchProvider', () => {
     });
 
     it('should handle complex search query with filters', async () => {
-      const query = createSearchQuery({
-        filters: [
-          { field: 'status', operator: FILTER_OPERATORS.EQ, value: 'active' },
-          { field: 'price', operator: FILTER_OPERATORS.GT, value: 100 },
-        ],
+      const query = createSearchQuery<Record<string, unknown>>({
+        filters: {
+          operator: LOGICAL_OPERATORS.AND,
+          conditions: [
+            { field: 'status', operator: FILTER_OPERATORS.EQ, value: 'active' },
+            { field: 'price', operator: FILTER_OPERATORS.GT, value: 100 },
+          ],
+        },
       });
 
       await expect(provider.search(query)).rejects.toMatchObject({
@@ -382,8 +385,8 @@ describe('ElasticsearchProvider', () => {
     });
 
     it('should handle search query with sort', async () => {
-      const query = createSearchQuery({
-        sort: [{ field: 'createdAt', direction: 'desc' }],
+      const query = createSearchQuery<Record<string, unknown>>({
+        sort: [{ field: 'createdAt', order: 'desc' }],
       });
 
       await expect(provider.search(query)).rejects.toMatchObject({

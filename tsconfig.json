@@ -14,7 +14,9 @@
       "@bslt/api": ["./main/client/api/src/index.ts"],
       "@bslt/api/*": ["./main/client/api/src/*"],
       "@bslt/ui": ["./main/client/ui/src/index.ts"],
-      "@bslt/ui/*": ["./main/client/ui/src/*"]
+      "@bslt/ui/*": ["./main/client/ui/src/*"],
+      "@hooks": ["./main/client/react/src/hooks"],
+      "@hooks/*": ["./main/client/react/src/hooks/*"]
     }
   },
   "exclude": ["node_modules", "dist", "build", "coverage"],

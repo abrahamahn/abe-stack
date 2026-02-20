@@ -7,7 +7,10 @@
 
 import { createCsrfRequestClient } from '../utils';
 
+import type { BaseClientConfig } from '../utils';
 import type {
+  AdminHardBanRequest,
+  AdminHardBanResponse,
   AdminLockUserRequest,
   AdminLockUserResponse,
   AdminUpdateUserRequest,
@@ -18,7 +21,6 @@ import type {
   JobStatus,
   UnlockAccountRequest,
 } from '@bslt/shared';
-import type { BaseClientConfig } from '../utils';
 
 export interface JobDetailsLocal {
   id: string;
@@ -231,6 +233,148 @@ export interface AuditEventsResponseLocal {
   events: AuditEventLocal[];
 }
 
+// ============================================================================
+// Webhook Admin Types
+// ============================================================================
+
+export interface AdminWebhookLocal {
+  id: string;
+  tenantId: string | null;
+  url: string;
+  events: string[];
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminWebhookListResponse {
+  webhooks: AdminWebhookLocal[];
+}
+
+export interface AdminWebhookDeliveryLocal {
+  id: string;
+  webhookId: string;
+  eventType: string;
+  status: string;
+  attempts: number;
+  responseStatus: number | null;
+  nextRetryAt: string | null;
+  deliveredAt: string | null;
+  createdAt: string;
+}
+
+export interface AdminWebhookDeliveryListResponse {
+  deliveries: AdminWebhookDeliveryLocal[];
+}
+
+export interface AdminWebhookReplayResponse {
+  success: boolean;
+  deliveryId?: string;
+  message?: string;
+}
+
+// ============================================================================
+// Health Types
+// ============================================================================
+
+export type ServiceStatus = 'up' | 'down' | 'unknown';
+
+export interface AdminHealthResponse {
+  status: 'healthy' | 'degraded' | 'down';
+  services: {
+    database: ServiceStatus;
+    cache: ServiceStatus;
+    queue: ServiceStatus;
+    storage: ServiceStatus;
+    email: ServiceStatus;
+  };
+}
+
+// ============================================================================
+// Metrics Types
+// ============================================================================
+
+export interface AdminMetricsResponse {
+  metrics: {
+    totalRequests: number;
+    avgResponseTime: number;
+    errorRate: number;
+    activeConnections: number;
+    requestsPerSecond: number;
+    p95ResponseTime: number;
+    p99ResponseTime: number;
+  };
+  queue: {
+    pending: number;
+    failed: number;
+  } | null;
+}
+
+// ============================================================================
+// Feature Flag Override Types
+// ============================================================================
+
+export interface FeatureFlagOverrideLocal {
+  flagKey: string;
+  tenantId: string;
+  tenantName?: string;
+  value: unknown;
+  isEnabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface FeatureFlagOverrideListResponse {
+  overrides: FeatureFlagOverrideLocal[];
+}
+
+export interface SetFeatureFlagOverrideRequest {
+  tenantId: string;
+  isEnabled: boolean;
+  value?: unknown;
+}
+
+export interface FeatureFlagOverrideResponse {
+  override: FeatureFlagOverrideLocal;
+}
+
+export interface FeatureFlagOverrideDeleteResponse {
+  success: boolean;
+  message: string;
+}
+
+// ============================================================================
+// Error Log Types
+// ============================================================================
+
+export interface AdminErrorLogEntry {
+  id: string;
+  message: string;
+  stack: string | null;
+  severity: 'error' | 'critical' | 'warning';
+  source: string;
+  occurredAt: string;
+  metadata: Record<string, unknown>;
+}
+
+export interface AdminErrorLogResponse {
+  errors: AdminErrorLogEntry[];
+  total: number;
+}
+
+// ============================================================================
+// Plan Assignment Types
+// ============================================================================
+
+export interface AssignTenantPlanRequest {
+  planId: string;
+}
+
+export interface AssignTenantPlanResponse {
+  success: boolean;
+  message: string;
+}
+
 export type AdminClientConfig = BaseClientConfig;
 
 export interface AdminClient {
@@ -239,6 +383,11 @@ export interface AdminClient {
   updateUser: (userId: string, data: AdminUpdateUserRequest) => Promise<AdminUpdateUserResponse>;
   lockUser: (userId: string, data: AdminLockUserRequest) => Promise<AdminLockUserResponse>;
   unlockUser: (userId: string, data: UnlockAccountRequest) => Promise<AdminLockUserResponse>;
+  hardBanUser: (
+    userId: string,
+    data: AdminHardBanRequest,
+    sudoToken: string,
+  ) => Promise<AdminHardBanResponse>;
   listTenants: () => Promise<TenantListResponse>;
   getTenant: (tenantId: string) => Promise<AdminTenantDetailLocal>;
   suspendTenant: (tenantId: string, reason: string) => Promise<void>;
@@ -262,6 +411,36 @@ export interface AdminClient {
   createFeatureFlag: (data: CreateFeatureFlagRequest) => Promise<FeatureFlagResponse>;
   updateFeatureFlag: (key: string, data: UpdateFeatureFlagRequest) => Promise<FeatureFlagResponse>;
   deleteFeatureFlag: (key: string) => Promise<FeatureFlagDeleteResponse>;
+  // Webhook admin methods
+  listWebhooks: (tenantId?: string) => Promise<AdminWebhookListResponse>;
+  listWebhookDeliveries: (
+    webhookId: string,
+    status?: string,
+  ) => Promise<AdminWebhookDeliveryListResponse>;
+  replayWebhookDelivery: (
+    webhookId: string,
+    deliveryId: string,
+  ) => Promise<AdminWebhookReplayResponse>;
+  // Health & metrics
+  getHealth: () => Promise<AdminHealthResponse>;
+  getMetrics: () => Promise<AdminMetricsResponse>;
+  // Feature flag overrides
+  listFeatureFlagOverrides: (flagKey: string) => Promise<FeatureFlagOverrideListResponse>;
+  setFeatureFlagOverride: (
+    flagKey: string,
+    data: SetFeatureFlagOverrideRequest,
+  ) => Promise<FeatureFlagOverrideResponse>;
+  deleteFeatureFlagOverride: (
+    flagKey: string,
+    tenantId: string,
+  ) => Promise<FeatureFlagOverrideDeleteResponse>;
+  // Error logs
+  getErrorLog: (limit?: number) => Promise<AdminErrorLogResponse>;
+  // Tenant plan assignment
+  assignTenantPlan: (
+    tenantId: string,
+    data: AssignTenantPlanRequest,
+  ) => Promise<AssignTenantPlanResponse>;
 }
 
 export function createAdminClient(config: AdminClientConfig): AdminClient {
@@ -309,6 +488,20 @@ export function createAdminClient(config: AdminClientConfig): AdminClient {
       return request<AdminLockUserResponse>(`/admin/users/${userId}/unlock`, {
         method: 'POST',
         body: JSON.stringify(data),
+      });
+    },
+
+    async hardBanUser(
+      userId: string,
+      data: AdminHardBanRequest,
+      sudoToken: string,
+    ): Promise<AdminHardBanResponse> {
+      return request<AdminHardBanResponse>(`/admin/users/${userId}/hard-ban`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+          'x-sudo-token': sudoToken,
+        },
       });
     },
 
@@ -415,20 +608,115 @@ export function createAdminClient(config: AdminClientConfig): AdminClient {
       });
     },
 
-    listTenants(): Promise<TenantListResponse> {
-      return Promise.reject(new Error('Tenant management API not implemented yet'));
+    async listTenants(): Promise<TenantListResponse> {
+      return request<TenantListResponse>('/admin/tenants');
     },
 
-    getTenant(_tenantId: string): Promise<AdminTenantDetailLocal> {
-      return Promise.reject(new Error('Tenant management API not implemented yet'));
+    async getTenant(tenantId: string): Promise<AdminTenantDetailLocal> {
+      return request<AdminTenantDetailLocal>(`/admin/tenants/${tenantId}`);
     },
 
-    suspendTenant(_tenantId: string, _reason: string): Promise<void> {
-      return Promise.reject(new Error('Tenant management API not implemented yet'));
+    async suspendTenant(tenantId: string, reason: string): Promise<void> {
+      await request<unknown>(`/admin/tenants/${tenantId}/suspend`, {
+        method: 'POST',
+        body: JSON.stringify({ reason }),
+      });
     },
 
-    unsuspendTenant(_tenantId: string): Promise<void> {
-      return Promise.reject(new Error('Tenant management API not implemented yet'));
+    async unsuspendTenant(tenantId: string): Promise<void> {
+      await request<unknown>(`/admin/tenants/${tenantId}/unsuspend`, {
+        method: 'POST',
+        body: JSON.stringify({}),
+      });
+    },
+
+    // Webhook admin methods
+    async listWebhooks(tenantId?: string): Promise<AdminWebhookListResponse> {
+      const params = new URLSearchParams();
+      if (tenantId !== undefined) params.set('tenantId', tenantId);
+      const queryString = params.toString();
+      const path = queryString !== '' ? `/admin/webhooks?${queryString}` : '/admin/webhooks';
+      return request<AdminWebhookListResponse>(path);
+    },
+
+    async listWebhookDeliveries(
+      webhookId: string,
+      status?: string,
+    ): Promise<AdminWebhookDeliveryListResponse> {
+      const params = new URLSearchParams();
+      if (status !== undefined) params.set('status', status);
+      const queryString = params.toString();
+      const path =
+        queryString !== ''
+          ? `/admin/webhooks/${webhookId}/deliveries?${queryString}`
+          : `/admin/webhooks/${webhookId}/deliveries`;
+      return request<AdminWebhookDeliveryListResponse>(path);
+    },
+
+    async replayWebhookDelivery(
+      webhookId: string,
+      deliveryId: string,
+    ): Promise<AdminWebhookReplayResponse> {
+      return request<AdminWebhookReplayResponse>(
+        `/admin/webhooks/${webhookId}/deliveries/${deliveryId}/replay`,
+        { method: 'POST' },
+      );
+    },
+
+    // Health & metrics
+    async getHealth(): Promise<AdminHealthResponse> {
+      return request<AdminHealthResponse>('/admin/health');
+    },
+
+    async getMetrics(): Promise<AdminMetricsResponse> {
+      return request<AdminMetricsResponse>('/admin/metrics');
+    },
+
+    // Feature flag overrides
+    async listFeatureFlagOverrides(flagKey: string): Promise<FeatureFlagOverrideListResponse> {
+      return request<FeatureFlagOverrideListResponse>(`/admin/feature-flags/${flagKey}/overrides`);
+    },
+
+    async setFeatureFlagOverride(
+      flagKey: string,
+      data: SetFeatureFlagOverrideRequest,
+    ): Promise<FeatureFlagOverrideResponse> {
+      return request<FeatureFlagOverrideResponse>(`/admin/feature-flags/${flagKey}/overrides`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+
+    async deleteFeatureFlagOverride(
+      flagKey: string,
+      tenantId: string,
+    ): Promise<FeatureFlagOverrideDeleteResponse> {
+      return request<FeatureFlagOverrideDeleteResponse>(
+        `/admin/feature-flags/${flagKey}/overrides/${tenantId}/delete`,
+        {
+          method: 'POST',
+        },
+      );
+    },
+
+    // Error logs
+    async getErrorLog(limit?: number): Promise<AdminErrorLogResponse> {
+      const params = new URLSearchParams();
+      if (limit !== undefined) params.set('limit', String(limit));
+      const queryString = params.toString();
+      const path = queryString !== '' ? `/admin/errors?${queryString}` : '/admin/errors';
+      return request<AdminErrorLogResponse>(path);
+    },
+
+    // Tenant plan assignment
+    async assignTenantPlan(
+      tenantId: string,
+      data: AssignTenantPlanRequest,
+    ): Promise<AssignTenantPlanResponse> {
+      return request<AssignTenantPlanResponse>(`/admin/tenants/${tenantId}/assign-plan`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
     },
   };
 }

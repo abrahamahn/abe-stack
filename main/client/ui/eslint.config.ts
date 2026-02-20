@@ -25,4 +25,12 @@ export default [
       'react/display-name': 'off', // UI library components often use forwardRef
     },
   },
+  // Test files in the UI library legitimately use raw <button> elements to verify
+  // focus management, keyboard interactions, and ARIA semantics of composed components.
+  {
+    files: ['**/*.{spec,test}.{ts,tsx}', '**/__tests__/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-syntax': 'off',
+    },
+  },
 ] satisfies Linter.Config[];

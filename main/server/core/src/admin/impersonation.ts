@@ -16,8 +16,8 @@ import { AUTH_EXPIRY, ForbiddenError, QUOTAS, TooManyRequestsError } from '@bslt
 
 import { sign as jwtSign, verify as jwtVerify } from '../../../system/src';
 
-import type { AdminUser, AppRole } from '@bslt/shared';
 import type { UserRepository } from '../../../db/src';
+import type { AdminUser, AppRole } from '@bslt/shared';
 
 // ============================================================================
 // Constants
@@ -162,7 +162,7 @@ export function resetRateLimitStore(): void {
 function toAdminUser(user: {
   id: string;
   email: string;
-  username: string;
+  username: string | null;
   firstName: string;
   lastName: string;
   role: AppRole;

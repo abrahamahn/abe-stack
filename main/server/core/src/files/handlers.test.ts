@@ -12,11 +12,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { handleDeleteFile, handleDownloadFile, handleGetFile, handleUploadFile } from './handlers';
 
-import type { AuthenticatedUser, Logger } from '@bslt/shared';
-import type { FastifyReply, FastifyRequest } from 'fastify';
-import type { FileRepository } from '../../../db/src';
-import type { HandlerContext } from '../../../system/src';
 import type { FileStorageProvider } from './types';
+import type { FileRepository } from '../../../db/src';
+import type { HandlerContext, HttpReply, HttpRequest } from '../../../system/src';
+import type { AuthenticatedUser, Logger } from '@bslt/shared';
 
 // ============================================================================
 // Mock Setup
@@ -82,21 +81,18 @@ function createMockCtx(): HandlerContext {
   } as unknown as HandlerContext;
 }
 
-function createMockRequest(
-  user?: AuthenticatedUser,
-  params?: Record<string, string>,
-): FastifyRequest {
+function createMockRequest(user?: AuthenticatedUser, params?: Record<string, string>): HttpRequest {
   return {
     user,
     params: params ?? {},
     query: {},
     headers: {},
     body: null,
-  } as unknown as FastifyRequest;
+  } as unknown as HttpRequest;
 }
 
-function createMockReply(): FastifyReply {
-  return {} as FastifyReply;
+function createMockReply(): HttpReply {
+  return {} as HttpReply;
 }
 
 const testUser: AuthenticatedUser = {
@@ -124,7 +120,7 @@ const testFileMetadata = {
 // ============================================================================
 
 let ctx: HandlerContext;
-let reply: FastifyReply;
+let reply: HttpReply;
 
 beforeEach(() => {
   ctx = createMockCtx();

@@ -12,7 +12,10 @@
 import { HTTP_STATUS, isAppError } from '@bslt/shared';
 
 import { getPreferences, subscribe, unsubscribe, updatePreferences } from './service';
+import { UNSUBSCRIBE_CATEGORIES, unsubscribeUser, validateUnsubscribeToken } from './unsubscribe';
 
+import type { NotificationModuleDeps, NotificationRequest } from './types';
+import type { UnsubscribeCategory } from './unsubscribe';
 import type {
   BaseMarkAsReadRequest,
   Notification,
@@ -24,7 +27,6 @@ import type {
   UpdatePreferencesRequest,
   VapidKeyResponse,
 } from '@bslt/shared';
-import type { NotificationModuleDeps, NotificationRequest } from './types';
 
 // ============================================================================
 // Type Definitions
@@ -535,6 +537,130 @@ export async function handleDeleteNotification(
     return {
       status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
       body: { message: 'Failed to delete notification' },
+    };
+  }
+}
+
+// ============================================================================
+// Email Unsubscribe Handler (Public — no auth required)
+// ============================================================================
+
+/**
+ * Handle one-click email unsubscribe via token.
+ *
+ * GET /api/email/unsubscribe/:token?uid=...&cat=...
+ *
+ * Validates the HMAC token against the user ID and category,
+ * then records the unsubscribe preference.
+ *
+ * Returns an HTML page confirming the unsubscribe (user-facing).
+ *
+ * @param ctx - Notification module dependencies
+ * @param _body - Unused
+ * @param req - HTTP request with path params and query string
+ * @returns HandlerResult with confirmation HTML or error
+ * @complexity O(1)
+ */
+export async function handleEmailUnsubscribe(
+  ctx: NotificationModuleDeps,
+  _body: unknown,
+  req: NotificationRequest,
+): Promise<HandlerResult<{ message: string; html?: string }>> {
+  try {
+    // Extract params and query from the request
+    const params = (req as unknown as { params?: Record<string, string> }).params ?? {};
+    const reqUrl = (req as unknown as { url?: string }).url ?? '';
+    const query =
+      (req as unknown as { query?: Record<string, string> }).query ??
+      Object.fromEntries(new URL(reqUrl, 'http://localhost').searchParams);
+
+    const token = params['token'] ?? '';
+    const userId = query['uid'] ?? '';
+    const category = query['cat'] ?? '';
+
+    // Validate inputs
+    if (token === '' || userId === '' || category === '') {
+      return {
+        status: HTTP_STATUS.BAD_REQUEST,
+        body: { message: 'Missing required parameters: token, uid, cat' },
+      };
+    }
+
+    // Validate category
+    if (!UNSUBSCRIBE_CATEGORIES.includes(category as UnsubscribeCategory)) {
+      return {
+        status: HTTP_STATUS.BAD_REQUEST,
+        body: { message: `Invalid category: ${category}` },
+      };
+    }
+
+    // Get the app secret for token validation
+    const config = (ctx as unknown as { config?: { auth?: { jwt?: { secret?: string } } } }).config;
+    const secret = config?.auth?.jwt?.secret ?? '';
+    if (secret === '') {
+      ctx.log.error(
+        { handler: 'handleEmailUnsubscribe' },
+        'App secret not available for token validation',
+      );
+      return {
+        status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+        body: { message: 'Configuration error' },
+      };
+    }
+
+    // Validate the HMAC token
+    const valid = validateUnsubscribeToken(token, userId, category as UnsubscribeCategory, secret);
+    if (!valid) {
+      return {
+        status: HTTP_STATUS.BAD_REQUEST,
+        body: { message: 'Invalid or expired unsubscribe link' },
+      };
+    }
+
+    // Record the unsubscribe preference
+    await unsubscribeUser(ctx.db, userId, category as UnsubscribeCategory);
+
+    ctx.log.info(
+      { handler: 'handleEmailUnsubscribe', userId, category },
+      'User unsubscribed from email category',
+    );
+
+    const categoryLabel = category === 'all' ? 'all non-essential' : category;
+    const confirmHtml = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unsubscribed</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background-color: #f4f5f7; color: #333; }
+    .card { background: white; padding: 48px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); text-align: center; max-width: 480px; }
+    h1 { font-size: 24px; margin-bottom: 16px; }
+    p { color: #4b5563; line-height: 1.6; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Unsubscribed</h1>
+    <p>You have been unsubscribed from <strong>${categoryLabel}</strong> emails.</p>
+    <p>You will continue to receive transactional and security emails.</p>
+  </div>
+</body>
+</html>`.trim();
+
+    return {
+      status: HTTP_STATUS.OK,
+      body: { message: `Unsubscribed from ${categoryLabel} emails`, html: confirmHtml },
+    };
+  } catch (error) {
+    ctx.log.error(
+      { err: error as Error, handler: 'handleEmailUnsubscribe' },
+      'Failed to process email unsubscribe',
+    );
+    return {
+      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      body: { message: 'Failed to process unsubscribe request' },
     };
   }
 }

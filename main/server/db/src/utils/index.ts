@@ -20,5 +20,14 @@ export {
   isOptimisticLockError,
   updateUserWithVersion,
 } from './optimistic-lock';
-export * from './pagination';
+export {
+  applyOffsetPagination,
+  applyCursorPagination,
+  buildCursorCondition,
+  buildCursorResult,
+  combineConditions,
+  type CountResult,
+  type CursorPaginationQueryBuilder,
+  type OffsetPaginationQueryBuilder,
+} from './pagination';
 export { isInTransaction, withTransaction } from './transaction';

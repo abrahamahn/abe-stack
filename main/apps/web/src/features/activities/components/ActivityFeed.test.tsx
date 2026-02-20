@@ -10,8 +10,8 @@ import { useActivities } from '../hooks/useActivities';
 
 import { ActivityFeed } from './ActivityFeed';
 
-import type { ReactNode } from 'react';
 import type { ActivityLocal } from '../api/activitiesApi';
+import type { ReactNode } from 'react';
 
 // Mock hooks
 vi.mock('../hooks/useActivities', () => ({
@@ -180,8 +180,8 @@ describe('ActivityFeed', () => {
 
       render(<ActivityFeed />);
 
-      expect(screen.getByText('1h ago')).toBeInTheDocument();
-      expect(screen.getByText('1d ago')).toBeInTheDocument();
+      expect(screen.getByText('1 hour ago')).toBeInTheDocument();
+      expect(screen.getByText('yesterday')).toBeInTheDocument();
     });
 
     it('should pass limit to hook', () => {

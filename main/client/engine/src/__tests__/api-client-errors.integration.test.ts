@@ -383,17 +383,16 @@ describe('API Client Error Handling Integration', () => {
     it('should return data on success', async () => {
       const responseData = {
         user: createValidUserResponse(),
-        token: 'token123',
       };
 
       mockFetch.mockResolvedValue(createMockResponse(200, responseData));
 
       const result = await client.login({ identifier: 'test@test.com', password: 'password' });
 
-      if ('token' in result) {
-        expect(result.token).toBe('token123');
+      if ('user' in result) {
+        expect(result.user.email).toBe('test@test.com');
       } else {
-        throw new Error('Expected token response');
+        throw new Error('Expected BFF login response');
       }
     });
   });

@@ -25,6 +25,7 @@ const createMockDb = (): RawDb => ({
   healthCheck: vi.fn(),
   close: vi.fn(),
   getClient: vi.fn() as RawDb['getClient'],
+  withSession: vi.fn() as RawDb['withSession'],
 });
 
 // ============================================================================

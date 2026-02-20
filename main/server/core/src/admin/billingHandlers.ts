@@ -14,7 +14,6 @@ import {
   type AdminPlanResponse,
   type AdminPlansListResponse,
   type CreatePlanRequest,
-  type PlanFeature,
   type SubscriptionActionResponse,
   type SyncStripeResponse,
   type UpdatePlanRequest
@@ -32,8 +31,8 @@ import {
   type AdminBillingRepositories,
 } from './billingService';
 
-import type { Plan as DbPlan } from '../../../db/src';
 import type { AdminAppContext, AdminRequest } from './types';
+import type { Plan as DbPlan } from '../../../db/src';
 
 // ============================================================================
 // Helper Functions
@@ -54,7 +53,7 @@ function formatAdminPlan(plan: DbPlan): AdminPlan {
     interval: plan.interval,
     priceInCents: plan.priceInCents,
     currency: plan.currency,
-    features: plan.features as PlanFeature[],
+    features: plan.features,
     trialDays: plan.trialDays,
     isActive: plan.isActive,
     sortOrder: plan.sortOrder,

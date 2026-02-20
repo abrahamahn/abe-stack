@@ -12,8 +12,8 @@ import { HTTP_STATUS, mapErrorToHttpResponse } from '@bslt/shared';
 import { createErrorMapperLogger } from '../types';
 import { clearRefreshTokenCookie, revokeAllUserTokens } from '../utils';
 
-import type { HttpErrorResponse } from '@bslt/shared';
 import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../types';
+import type { HttpErrorResponse } from '@bslt/shared';
 
 /**
  * Handle logout from all devices.

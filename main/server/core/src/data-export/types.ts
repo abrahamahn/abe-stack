@@ -7,13 +7,13 @@
  * implementations, keeping the package framework-agnostic.
  */
 
-import type { BaseContext, Logger, RequestContext } from '@bslt/shared';
 import type {
   AuditEventRepository,
   DataExportRequestRepository,
   Repositories,
   UserRepository,
 } from '../../../db/src';
+import type { BaseContext, Logger, RequestContext } from '@bslt/shared';
 
 // ============================================================================
 // Handler Context Types
@@ -58,7 +58,7 @@ export type DataExportRepositories = Pick<Repositories, 'dataExportRequests' | '
       | 'files'
       | 'notifications'
       | 'userSessions'
-      | 'consentLogs'
+      | 'consentRecords'
     >
   >;
 
@@ -76,7 +76,7 @@ export interface UserDataExport {
     readonly email: string;
     readonly firstName: string;
     readonly lastName: string;
-    readonly username: string;
+    readonly username: string | null;
     readonly role: string;
     readonly createdAt: string;
   };

@@ -10,8 +10,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { registerScheduledTasks, stopScheduledTasks } from './service';
 
-import type { ServerLogger } from '@bslt/shared';
 import type { Repositories } from '../../../db/src';
+import type { ServerLogger } from '@bslt/shared';
 
 // ============================================================================
 // Helpers
@@ -22,8 +22,8 @@ function createMockRepos(): Repositories {
     loginAttempts: {
       deleteOlderThan: vi.fn().mockResolvedValue(5),
     },
-    magicLinkTokens: {
-      deleteExpired: vi.fn().mockResolvedValue(3),
+    authTokens: {
+      deleteExpired: vi.fn().mockResolvedValue(0),
     },
     pushSubscriptions: {
       deleteExpired: vi.fn().mockResolvedValue(2),
@@ -33,6 +33,12 @@ function createMockRepos(): Repositories {
     },
     auditEvents: {
       deleteOlderThan: vi.fn().mockResolvedValue(50),
+    },
+    billingEvents: {
+      deleteOlderThan: vi.fn().mockResolvedValue(0),
+    },
+    dataExportRequests: {
+      deleteExpired: vi.fn().mockResolvedValue(0),
     },
     invitations: {
       findExpiredPending: vi.fn().mockResolvedValue([]),
@@ -85,7 +91,7 @@ describe('registerScheduledTasks', () => {
     registerScheduledTasks(repos, log);
 
     // Should log registration
-    expect(log.info).toHaveBeenCalledWith({ taskCount: 7 }, 'Scheduled tasks registered');
+    expect(log.info).toHaveBeenCalledWith({ taskCount: 12 }, 'Scheduled tasks registered');
   });
 
   it('should start executing tasks immediately', () => {
@@ -128,6 +134,6 @@ describe('stopScheduledTasks', () => {
     // Should be able to register again
     registerScheduledTasks(repos, log);
 
-    expect(log.info).toHaveBeenCalledWith({ taskCount: 7 }, 'Scheduled tasks registered');
+    expect(log.info).toHaveBeenCalledWith({ taskCount: 12 }, 'Scheduled tasks registered');
   });
 });

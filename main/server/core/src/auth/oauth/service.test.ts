@@ -16,15 +16,16 @@ import {
   unlinkOAuthAccount,
 } from './service';
 
-import type { AuthConfig } from '@bslt/shared/config';
+import type { OAuthProviderClient, OAuthTokenResponse, OAuthUserInfo } from './types';
 import type {
   DbClient,
   OAuthConnectionRepository,
+  RawDb,
   RefreshTokenRepository,
   Repositories,
   UserRepository,
 } from '../../../../db/src';
-import type { OAuthProviderClient, OAuthTokenResponse, OAuthUserInfo } from './types';
+import type { AuthConfig } from '@bslt/shared/config';
 
 // Mock the crypto module for consistent state generation in tests
 vi.mock('node:crypto', async () => {
@@ -52,7 +53,7 @@ vi.mock('../utils', () => ({
     Promise.resolve(email.split('@')[0]),
   ),
   splitFullName: vi.fn((name: string | null) => {
-    if (name === null || name === undefined) return { firstName: 'User', lastName: '' };
+    if (name === null) return { firstName: 'User', lastName: '' };
     const parts = name.trim().split(/\s+/);
     return { firstName: parts[0] ?? 'User', lastName: parts.slice(1).join(' ') };
   }),
@@ -65,9 +66,7 @@ vi.mock('@bslt/db', async () => {
   const actual = await vi.importActual<typeof import('../../../../db/src')>('@bslt/db');
   return {
     ...actual,
-    withTransaction: vi.fn((db, callback) => {
-      return Promise.resolve(callback(db));
-    }),
+    withTransaction: vi.fn(<T>(db: RawDb, callback: (tx: RawDb) => Promise<T>) => callback(db)),
     insert: vi.fn(() => ({
       values: vi.fn(() => ({
         returningAll: vi.fn(() => ({
@@ -76,7 +75,7 @@ vi.mock('@bslt/db', async () => {
         toSql: vi.fn(() => 'INSERT SQL'),
       })),
     })),
-    toCamelCase: vi.fn((data) => data),
+    toCamelCase: vi.fn(<T>(data: T) => data),
   };
 });
 
@@ -115,12 +114,10 @@ describe('OAuth Service', () => {
         deleteByUserIdAndProvider: vi.fn(),
       } as unknown as OAuthConnectionRepository,
       refreshTokens: {} as RefreshTokenRepository,
-      refreshTokenFamilies: {} as Repositories['refreshTokenFamilies'],
       loginAttempts: {} as Repositories['loginAttempts'],
-      passwordResetTokens: {} as Repositories['passwordResetTokens'],
-      emailVerificationTokens: {} as Repositories['emailVerificationTokens'],
+      authTokens: {} as Repositories['authTokens'],
       securityEvents: {} as Repositories['securityEvents'],
-      magicLinkTokens: {} as Repositories['magicLinkTokens'],
+      totpBackupCodes: {} as Repositories['totpBackupCodes'],
       pushSubscriptions: {} as Repositories['pushSubscriptions'],
       notificationPreferences: {} as Repositories['notificationPreferences'],
       plans: {} as Repositories['plans'],
@@ -143,11 +140,7 @@ describe('OAuth Service', () => {
       usageMetrics: {} as Repositories['usageMetrics'],
       usageSnapshots: {} as Repositories['usageSnapshots'],
       legalDocuments: {} as Repositories['legalDocuments'],
-      userAgreements: {} as Repositories['userAgreements'],
-      consentLogs: {} as Repositories['consentLogs'],
-      totpBackupCodes: {} as Repositories['totpBackupCodes'],
-      emailChangeTokens: {} as Repositories['emailChangeTokens'],
-      emailChangeRevertTokens: {} as Repositories['emailChangeRevertTokens'],
+      consentRecords: {} as Repositories['consentRecords'],
       apiKeys: {} as Repositories['apiKeys'],
       dataExportRequests: {} as Repositories['dataExportRequests'],
       activities: {} as Repositories['activities'],
@@ -176,6 +169,7 @@ describe('OAuth Service', () => {
         sameSite: 'lax',
         path: '/',
       },
+      oauthTokenEncryptionKey: 'oauth-token-encryption-key-32-ch!',
       oauth: {
         google: {
           clientId: 'google-client-id',

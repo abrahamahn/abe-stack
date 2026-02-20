@@ -4,7 +4,7 @@ export {
   getRegisteredRoutes,
   registerRoute,
   type RouteRegistryEntry,
-} from './route-registry';
+} from './route.registry';
 export {
   createRouteMap,
   protectedRoute,
@@ -24,3 +24,4 @@ export {
   type RouterOptions,
   type ValidationSchema,
 } from './routing';
+export { type HttpReply, type HttpRequest } from './http.types';

@@ -1,8 +1,6 @@
 // main/client/ui/src/layouts/layers/Overlay.tsx
 import {
   forwardRef,
-  useEffect,
-  useState,
   type ComponentPropsWithoutRef,
   type ReactElement,
 } from 'react';
@@ -31,16 +29,8 @@ const OverlayRenderFn = (
   ref: React.Ref<HTMLDivElement>,
 ): ReactElement | null => {
   const { open, className = '', onClick, ...rest } = props;
-  const [mounted, setMounted] = useState(false);
-
-  useEffect((): (() => void) => {
-    setMounted(true);
-    return (): void => {
-      setMounted(false);
-    };
-  }, []);
-
-  if (!open || !mounted) return null;
+  // Portals require the DOM — guard synchronously since this is a client-only component.
+  if (!open || typeof document === 'undefined') return null;
 
   return createPortal(
     <div ref={ref} className={`overlay ${className}`.trim()} onClick={onClick} {...rest} />,

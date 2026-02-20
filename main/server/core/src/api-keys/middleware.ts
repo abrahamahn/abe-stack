@@ -19,8 +19,8 @@ import { createHash, timingSafeEqual } from 'node:crypto';
 
 import { HTTP_STATUS, extractBearerToken } from '@bslt/shared';
 
-import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { ApiKeyRepository } from '../../../db/src';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
 // Types
@@ -128,7 +128,7 @@ export function createApiKeyAuthMiddleware(options: ApiKeyAuthMiddlewareOptions)
 
     // Also attach a user-like object so downstream handlers
     // that read `request.user` can work transparently
-    (request as any).user = {
+    (request as ApiKeyAuthenticatedRequest & { user?: { userId: string; role: string } }).user = {
       userId: apiKey.userId,
       role: 'user', // Default role for API key access
     };

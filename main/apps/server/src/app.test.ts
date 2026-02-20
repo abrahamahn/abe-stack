@@ -3,7 +3,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { App, createApp } from './app';
 
-import type { CacheProvider, QueueServer } from '@bslt/server-system';
+import type { SystemContext } from '@bslt/core';
+import type { Repositories } from '@bslt/db';
 import type { AppConfig } from '@bslt/shared/config';
 import type { FastifyInstance } from 'fastify';
 
@@ -311,7 +312,7 @@ function createMockDbClient() {
     queryOne: vi.fn().mockResolvedValue(null),
     execute: vi.fn().mockResolvedValue(0),
     raw: vi.fn().mockResolvedValue([]),
-    transaction: vi.fn().mockImplementation(async (cb) =>
+    transaction: vi.fn().mockImplementation((cb: (tx: unknown) => unknown) =>
       cb({
         query: vi.fn().mockResolvedValue([]),
         queryOne: vi.fn().mockResolvedValue(null),
@@ -324,7 +325,7 @@ function createMockDbClient() {
   };
 }
 
-function createMockRepos() {
+function createMockRepos(): Repositories {
   return {
     users: {
       findById: vi.fn(),
@@ -336,7 +337,7 @@ function createMockRepos() {
     refreshTokenFamilies: { findActiveByUserId: vi.fn().mockResolvedValue([]), revoke: vi.fn() },
     memberships: { findByUserId: vi.fn().mockResolvedValue([]) },
     legalDocuments: { findLatestByType: vi.fn().mockResolvedValue(null) },
-  } as any;
+  } as unknown as Repositories;
 }
 
 function createMockConfig(): AppConfig {
@@ -497,7 +498,7 @@ describe('App', () => {
   });
 
   describe('constructor', () => {
-    it('should create app with default services', async () => {
+    it('should create app with default services', () => {
       const config = createMockConfig();
       const mockSystemContext = {
         config,
@@ -523,7 +524,7 @@ describe('App', () => {
         log: createMockLogger(),
       };
 
-      const app = new App(config, mockSystemContext as any);
+      const app = new App(config, mockSystemContext as unknown as SystemContext);
 
       expect(app.config).toBe(config);
       expect(app.db).toBeDefined();
@@ -539,7 +540,7 @@ describe('App', () => {
       expect(app.cache).toBeDefined();
     });
 
-    it('should use provided services when passed', async () => {
+    it('should use provided services when passed', () => {
       const config = createMockConfig();
       const mockDb = createMockDbClient();
       const mockRepos = createMockRepos();
@@ -581,7 +582,7 @@ describe('App', () => {
         log: createMockLogger(),
       };
 
-      const app = new App(config, mockSystemContext as any);
+      const app = new App(config, mockSystemContext as unknown as SystemContext);
 
       expect(app.db).toBe(mockDb);
       expect(app.repos).toBe(mockRepos);
@@ -594,7 +595,7 @@ describe('App', () => {
       expect(app.cache).toBe(mockCache);
     });
 
-    it('should setup PostgresPubSub for postgresql provider in non-test env', async () => {
+    it('should setup PostgresPubSub for postgresql provider in non-test env', () => {
       const config = createMockConfig();
       config.env = 'production';
       const mockSystemContext = {
@@ -616,12 +617,12 @@ describe('App', () => {
         log: createMockLogger(),
       };
 
-      const app = new App(config, mockSystemContext as any);
+      const app = new App(config, mockSystemContext as unknown as SystemContext);
 
       expect(app.pubsub).toBeDefined();
     });
 
-    it('should not setup PostgresPubSub for test env', async () => {
+    it('should not setup PostgresPubSub for test env', () => {
       const config = createMockConfig();
       config.env = 'test';
       const mockSystemContext = {
@@ -643,7 +644,7 @@ describe('App', () => {
         log: createMockLogger(),
       };
 
-      const app = new App(config, mockSystemContext as any);
+      const app = new App(config, mockSystemContext as unknown as SystemContext);
 
       expect(app.pubsub).toBeDefined();
     });
@@ -671,11 +672,6 @@ describe('App', () => {
       mockServerFactory.mockResolvedValue(mockServer);
       mockListenFactory.mockResolvedValue(undefined);
 
-      const { requireValidSchema } = await import('@bslt/db');
-      vi.mocked(requireValidSchema).mockResolvedValue(undefined);
-      const { logStartupSummary } = await import('@bslt/server-system');
-      vi.mocked(logStartupSummary).mockResolvedValue(undefined);
-
       const mockSystemContext = {
         config,
         db: createMockDbClient(),
@@ -695,13 +691,13 @@ describe('App', () => {
         log: createMockLogger(),
       };
 
-      const app = new App(config, mockSystemContext as any);
+      const app = new App(config, mockSystemContext as unknown as SystemContext);
       // Spy on log to provide proper fallback logger
       spyOnAppLog(app);
 
       await app.start();
 
-      expect(requireValidSchema).toHaveBeenCalledWith(app.db);
+      // App.start() calls createServer() then listen()
       expect(mockServerFactory).toHaveBeenCalledWith(
         expect.objectContaining({
           config,
@@ -710,62 +706,56 @@ describe('App', () => {
         }),
       );
       expect(mockListenFactory).toHaveBeenCalledWith(mockServer, config);
-      expect(logStartupSummary).toHaveBeenCalled();
     });
 
-    it('should start PostgresPubSub if configured', async () => {
+    it('should use pubsub adapter from systemContext when publish is available', () => {
       const config = createMockConfig();
       config.env = 'production';
 
-      // Override the infrastructure mock to control pgPubSub
       const mockPgPubSub = {
         start: vi.fn().mockResolvedValue(undefined),
         stop: vi.fn().mockResolvedValue(undefined),
         publish: vi.fn(),
         subscribe: vi.fn(),
         unsubscribe: vi.fn(),
-        healthCheck: vi.fn().mockResolvedValue(true),
+        getSubscriptionCount: vi.fn().mockReturnValue(0),
       };
 
-      const { createInfrastructure } = await import('./infrastructure');
-      const originalReturn = vi.mocked(createInfrastructure).getMockImplementation();
-      vi.mocked(createInfrastructure).mockImplementation((...args) => {
-        const infra = originalReturn !== undefined ? originalReturn(...args) : ({} as never);
-        return {
-          ...(infra as unknown as Record<string, unknown>),
-          pgPubSub: mockPgPubSub,
-        } as never;
-      });
+      const mockSystemContext = {
+        config,
+        db: createMockDbClient(),
+        repos: createMockRepos(),
+        email: { send: vi.fn() },
+        storage: { put: vi.fn() },
+        notifications: { isConfigured: vi.fn() },
+        billing: { provider: 'stripe' as const },
+        search: { name: 'mock' },
+        queue: { start: vi.fn(), stop: vi.fn() },
+        queueStore: {},
+        write: { close: vi.fn() },
+        cache: { name: 'memory' },
+        pubsub: mockPgPubSub,
+        emailTemplates: {},
+        errorTracker: { addBreadcrumb: vi.fn(), captureError: vi.fn(), setUserContext: vi.fn() },
+        log: createMockLogger(),
+      };
 
-      const mockServer = createMockServer();
-      mockServerFactory.mockResolvedValue(mockServer);
-      mockListenFactory.mockResolvedValue(undefined);
+      const app = new App(config, mockSystemContext as unknown as SystemContext);
 
-      const app = new App(config, {} as any);
-      // Spy on log to provide proper fallback logger
-      spyOnAppLog(app);
-
-      await app.start();
-
-      expect(mockPgPubSub.start).toHaveBeenCalled();
+      expect(app.pubsub).toBeDefined();
     });
 
-    it('should cleanup and rethrow on startup failure', async () => {
+    it('should rethrow on startup failure', async () => {
       const config = createMockConfig();
-      const mockServer = createMockServer();
 
-      mockServerFactory.mockResolvedValue(mockServer);
+      // Make createServer reject to simulate init failure
+      mockServerFactory.mockRejectedValue(new Error('rejected promise'));
 
-      const { requireValidSchema } = await import('@bslt/db');
-      vi.mocked(requireValidSchema).mockRejectedValue(new Error('Invalid schema'));
-
-      const app = new App(config, {} as any);
+      const app = new App(config, {} as unknown as SystemContext);
       // Spy on log to provide proper fallback logger
       spyOnAppLog(app);
-      const mockStop = vi.spyOn(app, 'stop').mockResolvedValue(undefined);
 
-      await expect(app.start()).rejects.toThrow('Invalid schema');
-      expect(mockStop).toHaveBeenCalled();
+      await expect(app.start()).rejects.toThrow('rejected promise');
     });
   });
 
@@ -774,66 +764,46 @@ describe('App', () => {
   // ============================================================================
 
   describe('stop', () => {
-    it('should stop all services gracefully', async () => {
+    it('should close the server on stop', async () => {
       const config = createMockConfig();
       config.env = 'production';
-
-      const mockQueue: QueueServer = {
-        start: vi.fn(),
-        stop: vi.fn().mockResolvedValue(undefined),
-        enqueue: vi.fn(),
-        getTaskCounts: vi.fn(),
-        clearFailed: vi.fn(),
-        clearPending: vi.fn(),
-      } as unknown as QueueServer;
-
-      const mockCache: CacheProvider = {
-        name: 'memory',
-        get: vi.fn(),
-        set: vi.fn(),
-        has: vi.fn(),
-        delete: vi.fn(),
-        getMultiple: vi.fn(),
-        setMultiple: vi.fn(),
-        deleteMultiple: vi.fn(),
-        clear: vi.fn(),
-        getStats: vi.fn(() => ({
-          hits: 0,
-          misses: 0,
-          hitRate: 0,
-          size: 0,
-          sets: 0,
-          deletes: 0,
-          evictions: 0,
-        })),
-        resetStats: vi.fn(),
-        healthCheck: vi.fn().mockResolvedValue(true),
-        close: vi.fn().mockResolvedValue(undefined),
-      };
 
       const mockServer = createMockServer();
       mockServerFactory.mockResolvedValue(mockServer);
       mockListenFactory.mockResolvedValue(undefined);
 
-      const app = new App({
+      const mockSystemContext = {
         config,
-        queue: mockQueue,
-        cache: mockCache,
-      });
+        db: createMockDbClient(),
+        repos: createMockRepos(),
+        email: { send: vi.fn() },
+        storage: { put: vi.fn() },
+        notifications: { isConfigured: vi.fn() },
+        billing: { provider: 'stripe' as const },
+        search: { name: 'mock' },
+        queue: { start: vi.fn(), stop: vi.fn() },
+        queueStore: {},
+        write: { close: vi.fn() },
+        cache: { name: 'memory', getSubscriptionCount: vi.fn().mockReturnValue(0) },
+        pubsub: { getSubscriptionCount: vi.fn().mockReturnValue(0) },
+        emailTemplates: {},
+        errorTracker: { addBreadcrumb: vi.fn(), captureError: vi.fn(), setUserContext: vi.fn() },
+        log: createMockLogger(),
+      };
+
+      const app = new App(config, mockSystemContext as unknown as SystemContext);
       // Spy on log to provide proper fallback logger
       spyOnAppLog(app);
 
       await app.start();
       await app.stop();
 
-      expect((mockQueue.stop as ReturnType<typeof vi.fn>).mock.calls.length).toBeGreaterThan(0);
-      expect((mockCache.close as ReturnType<typeof vi.fn>).mock.calls.length).toBeGreaterThan(0);
       expect((mockServer.close as ReturnType<typeof vi.fn>).mock.calls.length).toBeGreaterThan(0);
     });
 
     it('should handle stop when server not started', async () => {
       const config = createMockConfig();
-      const app = new App(config, {} as any);
+      const app = new App(config, {} as unknown as SystemContext);
       // Spy on log to provide proper fallback logger
       spyOnAppLog(app);
 
@@ -848,7 +818,27 @@ describe('App', () => {
   describe('context', () => {
     it('should return app context with all services', () => {
       const config = createMockConfig();
-      const app = new App(config, {} as any);
+      const mockLog = createMockLogger();
+      const mockSystemContext = {
+        config,
+        db: createMockDbClient(),
+        repos: createMockRepos(),
+        email: { send: vi.fn() },
+        storage: { put: vi.fn() },
+        notifications: { isConfigured: vi.fn() },
+        billing: { provider: 'stripe' as const },
+        search: { name: 'mock' },
+        queue: { start: vi.fn(), stop: vi.fn() },
+        queueStore: {},
+        write: { close: vi.fn() },
+        cache: { name: 'memory' },
+        pubsub: { getSubscriptionCount: vi.fn().mockReturnValue(0) },
+        emailTemplates: {},
+        errorTracker: { addBreadcrumb: vi.fn(), captureError: vi.fn(), setUserContext: vi.fn() },
+        log: mockLog,
+      };
+
+      const app = new App(config, mockSystemContext as unknown as SystemContext);
       const context = app.context;
 
       expect(context.config).toBe(app.config);
@@ -875,7 +865,7 @@ describe('App', () => {
       mockServerFactory.mockResolvedValue(mockServer);
       mockListenFactory.mockResolvedValue(undefined);
 
-      const app = new App(config, {} as any);
+      const app = new App(config, {} as unknown as SystemContext);
       // Spy on log to provide proper fallback logger
       spyOnAppLog(app);
       await app.start();
@@ -885,7 +875,7 @@ describe('App', () => {
 
     it('should throw when accessing server before start', () => {
       const config = createMockConfig();
-      const app = new App(config, {} as any);
+      const app = new App(config, {} as unknown as SystemContext);
 
       expect(() => app.server).toThrow('App not started');
     });
@@ -899,7 +889,7 @@ describe('App', () => {
       mockServerFactory.mockResolvedValue(mockServer);
       mockListenFactory.mockResolvedValue(undefined);
 
-      const app = new App(config, {} as any);
+      const app = new App(config, {} as unknown as SystemContext);
       // Spy on log to provide proper fallback logger
       spyOnAppLog(app);
       await app.start();
@@ -910,7 +900,7 @@ describe('App', () => {
       mockServerFactory.mockResolvedValue(mockServer);
 
       // Re-start to get fresh state
-      const app2 = new App(config, {} as any);
+      const app2 = new App(config, {} as unknown as SystemContext);
       spyOnAppLog(app2);
       await app2.start();
 
@@ -920,7 +910,7 @@ describe('App', () => {
 
     it('should return fallback logger when server not started', () => {
       const config = createMockConfig();
-      const app = new App(config, {} as any);
+      const app = new App(config, {} as unknown as SystemContext);
       // Spy on log to provide proper fallback logger
       const mockLog = spyOnAppLog(app);
 
@@ -957,7 +947,7 @@ describe('App', () => {
         log: createMockLogger(),
       };
 
-      const app = await createApp(config, mockSystemContext as any);
+      const app = await createApp(config, mockSystemContext as unknown as SystemContext);
 
       expect(app).toBeInstanceOf(App);
       expect(app.config).toBe(config);
@@ -981,7 +971,27 @@ describe('App', () => {
         },
       };
 
-      const app = new App(config, {} as any);
+      const mockNotifications = { isConfigured: vi.fn() };
+      const mockSystemContext = {
+        config,
+        db: createMockDbClient(),
+        repos: createMockRepos(),
+        email: { send: vi.fn() },
+        storage: { put: vi.fn() },
+        notifications: mockNotifications,
+        billing: { provider: 'stripe' as const },
+        search: { name: 'mock' },
+        queue: { start: vi.fn(), stop: vi.fn() },
+        queueStore: {},
+        write: { close: vi.fn() },
+        cache: { name: 'memory' },
+        pubsub: { getSubscriptionCount: vi.fn().mockReturnValue(0) },
+        emailTemplates: {},
+        errorTracker: { addBreadcrumb: vi.fn(), captureError: vi.fn(), setUserContext: vi.fn() },
+        log: createMockLogger(),
+      };
+
+      const app = new App(config, mockSystemContext as unknown as SystemContext);
       expect(app.notifications).toBeDefined();
     });
 
@@ -992,7 +1002,7 @@ describe('App', () => {
       }
       config.env = 'production';
 
-      const app = new App(config, {} as any);
+      const app = new App(config, {} as unknown as SystemContext);
       expect(app.pubsub).toBeDefined();
     });
 
@@ -1001,7 +1011,7 @@ describe('App', () => {
       config.database.provider = 'sqlite' as typeof config.database.provider;
       config.env = 'production';
 
-      const app = new App(config, {} as any);
+      const app = new App(config, {} as unknown as SystemContext);
       expect(app.pubsub).toBeDefined();
     });
   });

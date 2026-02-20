@@ -1,7 +1,7 @@
 // main/client/react/src/providers/OptimizedProvider.test.tsx
 /** @vitest-environment jsdom */
 import { act, render, renderHook, screen } from '@testing-library/react';
-import { useState } from 'react';
+import react, { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import {
@@ -61,11 +61,11 @@ describe('createMemoizedContext', () => {
 
   it('memoizes the context value', () => {
     const { Provider, useContextValue } = createMemoizedContext<{ value: string }>();
-    const renderCount = { current: 0 };
+    const onRender = vi.fn();
 
     const TestComponent = (): ReactElement => {
       useContextValue();
-      renderCount.current++;
+      onRender();
       return <div>Test</div>;
     };
 
@@ -75,7 +75,7 @@ describe('createMemoizedContext', () => {
       </Provider>,
     );
 
-    expect(renderCount.current).toBe(1);
+    expect(onRender).toHaveBeenCalledTimes(1);
 
     // Rerender with same value reference
     const sameValue = { value: 'test' };
@@ -86,7 +86,7 @@ describe('createMemoizedContext', () => {
     );
 
     // Component should still rerender when parent rerenders
-    expect(renderCount.current).toBe(2);
+    expect(onRender).toHaveBeenCalledTimes(2);
   });
 });
 
@@ -191,13 +191,7 @@ describe('createReducerContext', () => {
       return (
         <div>
           <span data-testid="count">{state.count}</span>
-          <button
-            onClick={() => {
-              dispatch({ type: 'INCREMENT' });
-            }}
-          >
-            Increment
-          </button>
+          {react.createElement('button', { onClick: () => { dispatch({ type: 'INCREMENT' }); } }, 'Increment')}
         </div>
       );
     };
@@ -219,22 +213,8 @@ describe('createReducerContext', () => {
       return (
         <div>
           <span data-testid="count">{state.count}</span>
-          <button
-            data-testid="increment"
-            onClick={() => {
-              dispatch({ type: 'INCREMENT' });
-            }}
-          >
-            Increment
-          </button>
-          <button
-            data-testid="decrement"
-            onClick={() => {
-              dispatch({ type: 'DECREMENT' });
-            }}
-          >
-            Decrement
-          </button>
+          {react.createElement('button', { 'data-testid': 'increment', onClick: () => { dispatch({ type: 'INCREMENT' }); } }, 'Increment')}
+          {react.createElement('button', { 'data-testid': 'decrement', onClick: () => { dispatch({ type: 'DECREMENT' }); } }, 'Decrement')}
         </div>
       );
     };
@@ -289,14 +269,7 @@ describe('createReducerContext', () => {
       return (
         <div>
           <span data-testid="count">{count}</span>
-          <button
-            data-testid="set"
-            onClick={() => {
-              dispatch({ type: 'SET', payload: 42 });
-            }}
-          >
-            Set to 42
-          </button>
+          {react.createElement('button', { 'data-testid': 'set', onClick: () => { dispatch({ type: 'SET', payload: 42 }); } }, 'Set to 42')}
         </div>
       );
     };
@@ -362,7 +335,7 @@ describe('createLazyContext', () => {
   it('reinitializes when deps change', () => {
     const { Provider, useContextValue } = createLazyContext<{ data: string }>();
     let initCount = 0;
-    const initializer = vi.fn(() => ({ data: `init-${++initCount}` }));
+    const initializer = vi.fn(() => { initCount++; return { data: `init-${String(initCount)}` }; });
 
     const TestComponent = (): ReactElement => {
       const ctx = useContextValue();
@@ -426,14 +399,7 @@ describe('createSubscriptionContext', () => {
         <div>
           <span data-testid="data">{data ?? 'no-data'}</span>
           <span data-testid="loading">{isLoading ? 'loading' : 'loaded'}</span>
-          <button
-            data-testid="subscribe"
-            onClick={() => {
-              subscribe(() => {});
-            }}
-          >
-            Subscribe
-          </button>
+          {react.createElement('button', { 'data-testid': 'subscribe', onClick: () => { subscribe(() => {}); } }, 'Subscribe')}
         </div>
       );
     };
@@ -466,14 +432,7 @@ describe('createSubscriptionContext', () => {
         <div>
           <span data-testid="data">{localData ?? data ?? 'no-data'}</span>
           <span data-testid="loading">{isLoading ? 'loading' : 'loaded'}</span>
-          <button
-            data-testid="subscribe"
-            onClick={() => {
-              subscribe(setLocalData);
-            }}
-          >
-            Subscribe
-          </button>
+          {react.createElement('button', { 'data-testid': 'subscribe', onClick: () => { subscribe(setLocalData); } }, 'Subscribe')}
         </div>
       );
     };
@@ -535,14 +494,7 @@ describe('createSubscriptionContext', () => {
       return (
         <div>
           <span data-testid="error">{error?.message ?? 'no-error'}</span>
-          <button
-            data-testid="subscribe"
-            onClick={() => {
-              subscribe(() => {});
-            }}
-          >
-            Subscribe
-          </button>
+          {react.createElement('button', { 'data-testid': 'subscribe', onClick: () => { subscribe(() => {}); } }, 'Subscribe')}
         </div>
       );
     };
@@ -577,11 +529,11 @@ describe('Memoized', () => {
   });
 
   it('is memoized with shallow comparison', () => {
-    const renderCount = { current: 0 };
+    const onRender = vi.fn();
 
     const Child = (): ReactElement => {
-      renderCount.current++;
-      return <span>Render count: {renderCount.current}</span>;
+      onRender();
+      return <span>Child content</span>;
     };
 
     const { rerender } = render(
@@ -590,7 +542,7 @@ describe('Memoized', () => {
       </Memoized>,
     );
 
-    expect(renderCount.current).toBe(1);
+    expect(onRender).toHaveBeenCalledTimes(1);
 
     // Rerender with same children reference
     rerender(
@@ -601,7 +553,7 @@ describe('Memoized', () => {
 
     // Memoized uses shallow comparison on children prop
     // Since <Child /> creates a new React element each time, it will re-render
-    expect(renderCount.current).toBeGreaterThanOrEqual(1);
+    expect(onRender.mock.calls.length).toBeGreaterThanOrEqual(1);
   });
 });
 

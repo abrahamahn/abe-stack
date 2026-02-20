@@ -25,6 +25,7 @@ const createMockDb = (): RawDb => ({
   getClient: vi.fn() as RawDb['getClient'],
   queryOne: vi.fn(),
   execute: vi.fn(),
+  withSession: vi.fn() as RawDb['withSession'],
 });
 
 // ============================================================================
@@ -37,11 +38,10 @@ const mockInvitation = {
   email: 'user@example.com',
   role: 'member',
   status: 'pending',
-  token: 'token-abc123',
+  invited_by_id: 'usr-admin',
   expires_at: new Date('2024-12-31'),
-  invited_by: 'usr-admin',
+  accepted_at: null,
   created_at: new Date('2024-01-01'),
-  updated_at: new Date('2024-01-01'),
 };
 
 // ============================================================================
@@ -65,9 +65,8 @@ describe('createInvitationRepository', () => {
         tenantId: 'tenant-123',
         email: 'user@example.com',
         role: 'member',
-        token: 'token-abc123',
+        invitedById: 'usr-admin',
         expiresAt: new Date('2024-12-31'),
-        invitedBy: 'usr-admin',
       });
 
       expect(result.id).toBe('inv-123');
@@ -92,9 +91,8 @@ describe('createInvitationRepository', () => {
           tenantId: 'tenant-123',
           email: 'user@example.com',
           role: 'member',
-          token: 'token-abc123',
+          invitedById: 'usr-admin',
           expiresAt: new Date('2024-12-31'),
-          invitedBy: 'usr-admin',
         }),
       ).rejects.toThrow('Failed to create invitation');
     });
@@ -111,9 +109,8 @@ describe('createInvitationRepository', () => {
         tenantId: 'tenant-123',
         email: 'admin@example.com',
         role: 'admin',
-        token: 'token-abc123',
+        invitedById: 'usr-owner',
         expiresAt: new Date('2024-12-31'),
-        invitedBy: 'usr-owner',
       });
 
       expect(result.role).toBe('admin');
@@ -127,9 +124,8 @@ describe('createInvitationRepository', () => {
         tenantId: 'tenant-123',
         email: 'user@example.com',
         role: 'member',
-        token: 'token-abc123',
+        invitedById: 'usr-admin',
         expiresAt: new Date('2024-12-31'),
-        invitedBy: 'usr-admin',
       });
 
       expect(result.status).toBe('pending');
@@ -143,9 +139,8 @@ describe('createInvitationRepository', () => {
         tenantId: 'tenant-123',
         email: 'user@example.com',
         role: 'member',
-        token: 'token-abc123',
+        invitedById: 'usr-admin',
         expiresAt: new Date('2024-12-31'),
-        invitedBy: 'usr-admin',
       });
 
       expect(mockDb.queryOne).toHaveBeenCalledWith(
@@ -168,9 +163,8 @@ describe('createInvitationRepository', () => {
         tenantId: 'tenant-123',
         email: 'user@example.com',
         role: 'member',
-        token: 'token-abc123',
+        invitedById: 'usr-admin',
         expiresAt: futureDate,
-        invitedBy: 'usr-admin',
       });
 
       expect(result.expiresAt).toEqual(futureDate);
@@ -230,7 +224,7 @@ describe('createInvitationRepository', () => {
     });
 
     it('should return invitations with different statuses', async () => {
-      const statuses = ['pending', 'accepted', 'rejected', 'expired'];
+      const statuses = ['pending', 'accepted', 'revoked', 'expired'];
 
       for (const status of statuses) {
         vi.mocked(mockDb.queryOne).mockResolvedValue({
@@ -263,8 +257,8 @@ describe('createInvitationRepository', () => {
       const result = await repo.findByTenantId('tenant-123');
 
       expect(result).toHaveLength(2);
-      expect(result[0].tenantId).toBe('tenant-123');
-      expect(result[1].tenantId).toBe('tenant-123');
+      expect(result[0]?.tenantId).toBe('tenant-123');
+      expect(result[1]?.tenantId).toBe('tenant-123');
       expect(mockDb.query).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining('tenant_id'),
@@ -302,7 +296,7 @@ describe('createInvitationRepository', () => {
       const mixedStatusInvitations = [
         { ...mockInvitation, id: 'inv-1', status: 'pending' },
         { ...mockInvitation, id: 'inv-2', status: 'accepted' },
-        { ...mockInvitation, id: 'inv-3', status: 'rejected' },
+        { ...mockInvitation, id: 'inv-3', status: 'revoked' },
         { ...mockInvitation, id: 'inv-4', status: 'expired' },
       ];
       vi.mocked(mockDb.query).mockResolvedValue(mixedStatusInvitations);
@@ -311,14 +305,14 @@ describe('createInvitationRepository', () => {
       const result = await repo.findByTenantId('tenant-123');
 
       expect(result).toHaveLength(4);
-      expect(result.map((i) => i.status)).toEqual(['pending', 'accepted', 'rejected', 'expired']);
+      expect(result.map((i) => i.status)).toEqual(['pending', 'accepted', 'revoked', 'expired']);
     });
 
     it('should handle multiple pending invitations', async () => {
       const pendingInvitations = Array.from({ length: 5 }, (_, i) => ({
         ...mockInvitation,
-        id: `inv-${i}`,
-        email: `user${i}@example.com`,
+        id: `inv-${String(i)}`,
+        email: `user${String(i)}@example.com`,
         status: 'pending',
       }));
       vi.mocked(mockDb.query).mockResolvedValue(pendingInvitations);
@@ -433,8 +427,8 @@ describe('createInvitationRepository', () => {
       const result = await repo.findPendingByEmail('user@example.com');
 
       expect(result).toHaveLength(2);
-      expect(result[0].email).toBe('user@example.com');
-      expect(result[1].email).toBe('user@example.com');
+      expect(result[0]?.email).toBe('user@example.com');
+      expect(result[1]?.email).toBe('user@example.com');
       expect(result.every((i) => i.status === 'pending')).toBe(true);
       expect(mockDb.query).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -486,8 +480,8 @@ describe('createInvitationRepository', () => {
     it('should handle multiple pending invitations from different tenants', async () => {
       const multiTenantInvitations = Array.from({ length: 3 }, (_, i) => ({
         ...mockInvitation,
-        id: `inv-${i}`,
-        tenant_id: `tenant-${i}`,
+        id: `inv-${String(i)}`,
+        tenant_id: `tenant-${String(i)}`,
         status: 'pending',
       }));
       vi.mocked(mockDb.query).mockResolvedValue(multiTenantInvitations);
@@ -519,7 +513,7 @@ describe('createInvitationRepository', () => {
       const updatedInvitation = {
         ...mockInvitation,
         status: 'accepted',
-        updated_at: new Date('2024-01-02'),
+        accepted_at: new Date('2024-01-02'),
       };
       vi.mocked(mockDb.queryOne).mockResolvedValue(updatedInvitation);
 
@@ -557,17 +551,17 @@ describe('createInvitationRepository', () => {
       expect(result?.status).toBe('accepted');
     });
 
-    it('should handle status update to rejected', async () => {
-      const rejectedInvitation = {
+    it('should handle status update to revoked', async () => {
+      const revokedInvitation = {
         ...mockInvitation,
-        status: 'rejected',
+        status: 'revoked',
       };
-      vi.mocked(mockDb.queryOne).mockResolvedValue(rejectedInvitation);
+      vi.mocked(mockDb.queryOne).mockResolvedValue(revokedInvitation);
 
       const repo = createInvitationRepository(mockDb);
-      const result = await repo.update('inv-123', { status: 'rejected' });
+      const result = await repo.update('inv-123', { status: 'revoked' });
 
-      expect(result?.status).toBe('rejected');
+      expect(result?.status).toBe('revoked');
     });
 
     it('should handle status update to expired', async () => {
@@ -615,7 +609,6 @@ describe('createInvitationRepository', () => {
       const updatedInvitation = {
         ...mockInvitation,
         status: 'accepted',
-        updated_at: new Date('2024-01-02'),
       };
       vi.mocked(mockDb.queryOne).mockResolvedValue(updatedInvitation);
 
@@ -636,12 +629,11 @@ describe('createInvitationRepository', () => {
       const result = await repo.findById('inv-123');
 
       expect(result).toHaveProperty('tenantId');
-      expect(result).toHaveProperty('invitedBy');
+      expect(result).toHaveProperty('invitedById');
       expect(result).toHaveProperty('expiresAt');
       expect(result).toHaveProperty('createdAt');
-      expect(result).toHaveProperty('updatedAt');
       expect(result).not.toHaveProperty('tenant_id');
-      expect(result).not.toHaveProperty('invited_by');
+      expect(result).not.toHaveProperty('invited_by_id');
     });
 
     it('should handle timestamp fields', async () => {
@@ -649,7 +641,6 @@ describe('createInvitationRepository', () => {
       const invitationWithTimestamps = {
         ...mockInvitation,
         created_at: now,
-        updated_at: now,
         expires_at: new Date('2024-12-31'),
       };
       vi.mocked(mockDb.queryOne).mockResolvedValue(invitationWithTimestamps);
@@ -658,7 +649,6 @@ describe('createInvitationRepository', () => {
       const result = await repo.findById('inv-123');
 
       expect(result?.createdAt).toEqual(now);
-      expect(result?.updatedAt).toEqual(now);
       expect(result?.expiresAt).toEqual(new Date('2024-12-31'));
     });
 
@@ -679,20 +669,6 @@ describe('createInvitationRepository', () => {
 
         expect(result?.email).toBe(email);
       }
-    });
-
-    it('should handle very long token strings', async () => {
-      const longToken = 'A'.repeat(500);
-      const invitationWithLongToken = {
-        ...mockInvitation,
-        token: longToken,
-      };
-      vi.mocked(mockDb.queryOne).mockResolvedValue(invitationWithLongToken);
-
-      const repo = createInvitationRepository(mockDb);
-      const result = await repo.findById('inv-123');
-
-      expect(result?.token).toBe(longToken);
     });
 
     it('should handle past expiration dates', async () => {
@@ -728,8 +704,8 @@ describe('createInvitationRepository', () => {
     it('should handle multiple pending invitations for same email', async () => {
       const multipleInvitations = Array.from({ length: 5 }, (_, i) => ({
         ...mockInvitation,
-        id: `inv-${i}`,
-        tenant_id: `tenant-${i}`,
+        id: `inv-${String(i)}`,
+        tenant_id: `tenant-${String(i)}`,
       }));
       vi.mocked(mockDb.query).mockResolvedValue(multipleInvitations);
 
@@ -741,30 +717,30 @@ describe('createInvitationRepository', () => {
     });
 
     it('should handle invitation lifecycle transitions', async () => {
-      const transitions = ['pending', 'accepted', 'rejected', 'expired'];
+      const transitions = ['pending', 'accepted', 'revoked', 'expired'];
 
       for (const status of transitions) {
         const invitation = { ...mockInvitation, status };
         vi.mocked(mockDb.queryOne).mockResolvedValue(invitation);
 
         const repo = createInvitationRepository(mockDb);
-        const result = await repo.update('inv-123', { status });
+        const result = await repo.update('inv-123', { status: status as 'pending' | 'accepted' | 'revoked' | 'expired' });
 
         expect(result?.status).toBe(status);
       }
     });
 
-    it('should handle invitations with null invited_by', async () => {
-      const systemInvitation = {
+    it('should handle invitations with null accepted_at', async () => {
+      const pendingInvitation = {
         ...mockInvitation,
-        invited_by: null,
+        accepted_at: null,
       };
-      vi.mocked(mockDb.queryOne).mockResolvedValue(systemInvitation);
+      vi.mocked(mockDb.queryOne).mockResolvedValue(pendingInvitation);
 
       const repo = createInvitationRepository(mockDb);
       const result = await repo.findById('inv-123');
 
-      expect(result?.invitedBy).toBeNull();
+      expect(result?.acceptedAt).toBeNull();
     });
   });
 });

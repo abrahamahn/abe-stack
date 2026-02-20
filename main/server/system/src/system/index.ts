@@ -1,15 +1,19 @@
 // main/server/system/src/system/index.ts
 
 export {
+  checkCacheStatus,
   checkDbStatus,
   checkEmailStatus,
   checkPubSubStatus,
+  checkQueueStatus,
   checkRateLimitStatus,
   checkSchemaStatus,
   checkStorageStatus,
   checkWebSocketStatus,
   getDetailedHealth,
   logStartupSummary,
+  type DetailedHealthOptions,
+  type SchemaValidatorFn,
 } from './health';
 
 export {
@@ -17,6 +21,6 @@ export {
   MetricsCollector,
   resetMetricsCollector,
   type MetricsSummary,
-} from './metrics';
+} from '../metrics';
 
-export type { SystemContext } from './types';
+export type { HealthContext } from './types';

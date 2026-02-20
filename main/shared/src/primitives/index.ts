@@ -70,7 +70,7 @@ export {
   activityIdSchema,
   apiKeyIdSchema,
   auditEventIdSchema,
-  consentLogIdSchema,
+  consentRecordIdSchema,
   emailLogIdSchema,
   emailTemplateKeySchema,
   fileIdSchema,
@@ -87,14 +87,13 @@ export {
   sessionIdSchema,
   subscriptionIdSchema,
   tenantIdSchema,
-  userAgreementIdSchema,
   userIdSchema,
   webhookDeliveryIdSchema,
   webhookIdSchema,
   type ActivityId,
   type ApiKeyId,
   type AuditEventId,
-  type ConsentLogId,
+  type ConsentRecordId,
   type EmailLogId,
   type EmailTemplateKey,
   type FileId,
@@ -109,7 +108,6 @@ export {
   type SubscriptionId,
   type TenantId,
   type UserId,
-  type UserAgreementId,
   type WebhookDeliveryId,
   type WebhookId,
 } from './schema';
@@ -251,4 +249,4 @@ export {
 export { constantTimeCompare, generateSecureId, generateToken, generateUUID } from './helpers';
 
 // --- date ---
-export { toISODateOnly } from './helpers';
+export { formatDate, formatDateTime, formatTimeAgo, toISODateOnly } from './helpers';

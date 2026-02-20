@@ -4,7 +4,7 @@
  *
  * TypeScript interfaces for the api_keys table.
  * Provides programmatic API access for integrations.
- * Maps to migration 0010_api_keys.sql.
+ * Maps to migration 0101_api_keys.sql.
  */
 
 // ============================================================================
@@ -21,7 +21,7 @@ export const API_KEYS_TABLE = 'api_keys';
  * API key record (SELECT result).
  * Stores hashed API keys with optional tenant scoping.
  *
- * @see 0010_api_keys.sql
+ * @see 0101_api_keys.sql
  */
 export interface ApiKey {
   id: string;

@@ -24,7 +24,7 @@ export interface AppTopLayoutProps {
   /** Current user info (identifier for display) */
   user: {
     email?: string;
-    username?: string;
+    username?: string | null;
     firstName?: string;
     lastName?: string;
     id?: string;

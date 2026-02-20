@@ -16,6 +16,9 @@ declare module 'fastify' {
   interface FastifyRequest {
     rawBody?: Buffer;
   }
+  interface FastifyContextConfig {
+    rawBody?: boolean;
+  }
 }
 
 export function registerBillingWebhookRoutes(app: FastifyInstance, ctx: AppContext): void {

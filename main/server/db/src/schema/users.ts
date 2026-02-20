@@ -5,8 +5,7 @@
  * Explicit TypeScript interfaces for users and refresh_tokens tables.
  * These replace Drizzle's inferred types with explicit definitions.
  *
- * @see 0000_init.sql - Original users table
- * @see 0012_user_profile.sql - Profile expansion (username, firstName/lastName, profile fields)
+ * @see 0000_users.sql
  */
 
 import type { UserRole } from '@bslt/shared';
@@ -31,13 +30,13 @@ export const REFRESH_TOKENS_TABLE = 'refresh_tokens';
 /**
  * User record from database (SELECT result).
  *
- * @see 0012_user_profile.sql for profile expansion fields
+ * @see 0000_users.sql
  */
 export interface User {
   id: string;
   email: string;
   canonicalEmail: string;
-  username: string;
+  username: string | null;
   passwordHash: string;
   firstName: string;
   lastName: string;
@@ -78,7 +77,7 @@ export interface NewUser {
   id?: string;
   email: string;
   canonicalEmail: string;
-  username: string;
+  username?: string | null;
   passwordHash: string;
   firstName: string;
   lastName: string;
@@ -118,7 +117,7 @@ export interface NewUser {
 export interface UpdateUser {
   email?: string;
   canonicalEmail?: string;
-  username?: string;
+  username?: string | null;
   passwordHash?: string;
   firstName?: string;
   lastName?: string;
@@ -155,14 +154,26 @@ export interface UpdateUser {
 // ============================================================================
 
 /**
- * Refresh token record from database (SELECT result)
+ * Refresh token record from database (SELECT result).
+ * Family metadata is denormalized per row (no separate refresh_token_families table).
  */
 export interface RefreshToken {
   id: string;
   userId: string;
-  familyId: string | null;
+  /** UUID grouping key — plain UUID, not a FK. All tokens in one rotation chain share this. */
+  familyId: string;
   token: string;
   expiresAt: Date;
+  /** IP address captured when the family was first created */
+  familyIpAddress: string | null;
+  /** User agent captured when the family was first created */
+  familyUserAgent: string | null;
+  /** When the family was first created */
+  familyCreatedAt: Date;
+  /** When the family was revoked (null = active) */
+  familyRevokedAt: Date | null;
+  /** Why the family was revoked */
+  familyRevokeReason: string | null;
   createdAt: Date;
 }
 
@@ -172,10 +183,28 @@ export interface RefreshToken {
 export interface NewRefreshToken {
   id?: string;
   userId: string;
-  familyId?: string | null;
+  familyId: string;
   token: string;
   expiresAt: Date;
+  familyIpAddress?: string | null;
+  familyUserAgent?: string | null;
+  familyCreatedAt?: Date;
   createdAt?: Date;
+}
+
+/**
+ * Projection for family-level queries (DISTINCT ON family_id).
+ * Used for session management — one row per active family.
+ */
+export interface RefreshTokenFamilyView {
+  familyId: string;
+  userId: string;
+  ipAddress: string | null;
+  userAgent: string | null;
+  familyCreatedAt: Date;
+  familyRevokedAt: Date | null;
+  familyRevokeReason: string | null;
+  latestExpiresAt: Date;
 }
 
 // ============================================================================
@@ -224,7 +253,7 @@ export const USER_COLUMNS = {
 } as const;
 
 /**
- * Column mappings for refresh_tokens table
+ * Column mappings for refresh_tokens table (includes denormalized family fields)
  */
 export const REFRESH_TOKEN_COLUMNS = {
   id: 'id',
@@ -232,5 +261,10 @@ export const REFRESH_TOKEN_COLUMNS = {
   familyId: 'family_id',
   token: 'token',
   expiresAt: 'expires_at',
+  familyIpAddress: 'family_ip_address',
+  familyUserAgent: 'family_user_agent',
+  familyCreatedAt: 'family_created_at',
+  familyRevokedAt: 'family_revoked_at',
+  familyRevokeReason: 'family_revoke_reason',
   createdAt: 'created_at',
 } as const;

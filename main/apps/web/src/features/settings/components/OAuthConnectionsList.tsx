@@ -9,7 +9,9 @@ import { getAccessToken } from '@app/authToken';
 import { useEnabledOAuthProviders, useOAuthConnections } from '@bslt/react';
 import { Alert, Button, Card, Skeleton, Text } from '@bslt/ui';
 import { CardAsyncState } from '@bslt/ui/components/CardAsyncState';
+import { clientConfig as appClientConfig } from '@config';
 import { useMemo, useState, type ReactElement } from 'react';
+
 
 import type { ApiClientConfig } from '@bslt/api';
 
@@ -49,16 +51,14 @@ const providerInfo: Record<OAuthProviderLocal, { name: string; icon: string }> =
 
 export const OAuthConnectionsList = ({ onSuccess }: OAuthConnectionsListProps): ReactElement => {
   const [unlinkError, setUnlinkError] = useState<string | null>(null);
-  const apiBaseUrl =
-    typeof import.meta.env['VITE_API_URL'] === 'string' ? import.meta.env['VITE_API_URL'] : '';
 
   // API client config
-  const clientConfig = useMemo<ApiClientConfig>(
+  const apiConfig = useMemo<ApiClientConfig>(
     () => ({
-      baseUrl: apiBaseUrl,
+      baseUrl: appClientConfig.apiUrl,
       getToken: getAccessToken,
     }),
-    [apiBaseUrl],
+    [],
   );
 
   // Hooks
@@ -66,7 +66,7 @@ export const OAuthConnectionsList = ({ onSuccess }: OAuthConnectionsListProps): 
     providers: enabledProviders,
     isLoading: isLoadingProviders,
     error: providersError,
-  } = useEnabledOAuthProviders(clientConfig);
+  } = useEnabledOAuthProviders(apiConfig);
 
   const {
     connections,
@@ -75,10 +75,10 @@ export const OAuthConnectionsList = ({ onSuccess }: OAuthConnectionsListProps): 
     error: connectionsError,
     unlink,
     getLinkUrl,
-  } = useOAuthConnections(clientConfig);
+  } = useOAuthConnections(apiConfig);
 
   const handleConnect = (provider: OAuthProviderLocal): void => {
-    window.location.href = getLinkUrl(provider);
+    window.location.assign(getLinkUrl(provider));
   };
 
   const handleDisconnect = async (provider: OAuthProviderLocal): Promise<void> => {

@@ -25,8 +25,8 @@ import {
 
 import { useTenants } from '../hooks';
 
-import type { JSX } from 'react';
 import type { AdminTenantLocal } from '../services/adminApi';
+import type { JSX } from 'react';
 
 export const TenantListPage = (): JSX.Element => {
   const { tenants, total, isLoading, error, refresh } = useTenants();

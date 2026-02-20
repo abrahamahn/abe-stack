@@ -17,8 +17,8 @@ import {
   TopbarLayout,
 } from '@bslt/ui';
 
-import type { ReactElement } from 'react';
 import type { ComponentDemo } from '../types';
+import type { ReactElement } from 'react';
 
 export const layoutCatalog: Record<string, ComponentDemo> = {
   container: {

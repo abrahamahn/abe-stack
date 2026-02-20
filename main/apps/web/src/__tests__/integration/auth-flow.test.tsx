@@ -16,8 +16,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { LoginPage, RegisterPage } from '../../features/auth';
 import { createMockEnvironment, mockUser, renderWithProviders } from '../utils';
 
-import type { ReactElement } from 'react';
 import type { AuthService } from '../../features/auth';
+import type { ReactElement } from 'react';
 
 // Helper component to capture and display current location for testing
 const LocationDisplay = (): ReactElement => {

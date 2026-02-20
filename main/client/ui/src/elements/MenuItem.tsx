@@ -15,10 +15,10 @@ type MenuItemProps = ComponentPropsWithoutRef<'button'>;
  * <MenuItem onClick={handleEdit}>Edit</MenuItem>
  * ```
  */
-export const MenuItem = forwardRef<HTMLButtonElement, MenuItemProps>((props, ref) => {
+export const MenuItem = forwardRef<HTMLElement, MenuItemProps>((props, ref) => {
   const { className = '', type = 'button', ...rest } = props;
   return (
-    <Button ref={ref as any} type={type} className={`menu-item ${className}`.trim()} {...rest} />
+    <Button ref={ref} type={type} className={`menu-item ${className}`.trim()} {...rest} />
   );
 });
 

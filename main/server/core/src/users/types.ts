@@ -13,6 +13,7 @@
 
 import { ERROR_MESSAGES as SHARED_ERRORS } from '@bslt/shared';
 
+import type { DbClient, Repositories } from '../../../db/src';
 import type {
   BaseContext,
   CacheProvider,
@@ -22,7 +23,6 @@ import type {
 } from '@bslt/shared';
 import type { Argon2Config } from '@bslt/shared/config';
 import type { StorageService } from '@bslt/shared/system';
-import type { DbClient, Repositories } from '../../../db/src';
 
 // ============================================================================
 // Auth Config Subset

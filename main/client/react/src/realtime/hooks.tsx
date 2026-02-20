@@ -330,8 +330,10 @@ export function useIsPendingWrite(table: string, id: string): boolean {
   const [isPending, setIsPending] = useState(false);
 
   useEffect(() => {
-    // Initial check
-    setIsPending(transactionQueue.isPendingWrite({ table, id }));
+    // Initial check — deferred to avoid synchronous setState in effect
+    const initialCheckId = setTimeout(() => {
+      setIsPending(transactionQueue.isPendingWrite({ table, id }));
+    }, 0);
 
     // Subscribe to changes
     const unsubscribe = transactionQueue.subscribeIsPendingWrite(
@@ -341,7 +343,10 @@ export function useIsPendingWrite(table: string, id: string): boolean {
       },
     );
 
-    return unsubscribe;
+    return (): void => {
+      clearTimeout(initialCheckId);
+      unsubscribe();
+    };
   }, [transactionQueue, table, id]);
 
   return isPending;

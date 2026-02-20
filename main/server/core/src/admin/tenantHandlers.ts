@@ -16,14 +16,14 @@ import {
   unsuspendTenant,
 } from './tenantService';
 
-import type { AdminSuspendTenantRequest } from '@bslt/shared';
-import type { FastifyReply, FastifyRequest } from 'fastify';
 import type {
   AdminTenantDetail,
   AdminTenantListResponse,
   TenantSuspendResult,
 } from './tenantService';
 import type { AdminAppContext } from './types';
+import type { HttpReply, HttpRequest } from '../../../system/src';
+import type { AdminSuspendTenantRequest } from '@bslt/shared';
 
 const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));
@@ -38,8 +38,8 @@ const toError = (error: unknown): Error =>
 export async function handleListAllTenants(
   ctx: AdminAppContext,
   _body: undefined,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<{ status: number; body: AdminTenantListResponse | { message: string } }> {
   const user = (request as { user?: { userId: string; role: string } }).user;
   if (user === undefined) {
@@ -47,7 +47,7 @@ export async function handleListAllTenants(
   }
 
   try {
-    const query = (request.query ?? {}) as Record<string, unknown>;
+    const query = request.query as Record<string, unknown>;
 
     const limit =
       query['limit'] !== undefined && query['limit'] !== null ? Number(query['limit']) : 20;
@@ -79,8 +79,8 @@ export async function handleListAllTenants(
 export async function handleGetTenantDetail(
   ctx: AdminAppContext,
   _body: undefined,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<{ status: number; body: AdminTenantDetail | { message: string } }> {
   const user = (request as { user?: { userId: string; role: string } }).user;
   if (user === undefined) {
@@ -120,8 +120,8 @@ export async function handleGetTenantDetail(
 export async function handleSuspendTenant(
   ctx: AdminAppContext,
   body: AdminSuspendTenantRequest,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<{ status: number; body: TenantSuspendResult | { message: string } }> {
   const user = (request as { user?: { userId: string; role: string } }).user;
   if (user === undefined) {
@@ -161,8 +161,8 @@ export async function handleSuspendTenant(
 export async function handleUnsuspendTenant(
   ctx: AdminAppContext,
   _body: undefined,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<{ status: number; body: TenantSuspendResult | { message: string } }> {
   const user = (request as { user?: { userId: string; role: string } }).user;
   if (user === undefined) {

@@ -20,18 +20,23 @@ export {
   listUserSessions,
   revokeAllSessions,
   revokeSession,
-  type UserSession
+  type UserSession,
 } from './handlers';
 
 // Profile & avatar service functions
 export {
+  cacheBustAvatarUrl,
   changePassword,
   deleteAvatar,
+  getAvatarFallbackUrl,
   getAvatarUrl,
+  getGravatarUrl,
+  getInitialsAvatarUrl,
   updateProfile,
   uploadAvatar,
   type ProfileUser,
-  type UpdateProfileData
+  type StorageProvider,
+  type UpdateProfileData,
 } from './handlers';
 
 // Service (business logic)
@@ -43,21 +48,29 @@ export type {
   UsersAuthConfig,
   UsersModuleDeps,
   UsersRequest,
-  UsersRequestInfo
+  UsersRequestInfo,
 } from './types';
 
 export { ERROR_MESSAGES } from './types';
 
-// Data hygiene (soft-delete enforcement + hard-delete)
+// Data hygiene (soft-delete enforcement + hard-delete + Sprint 3.16)
 export {
   ANONYMIZED_EMAIL_PATTERN,
+  anonymizeUserPII,
+  cleanupUserFiles,
+  ensureForeignKeySafety,
   filterDeletedUsers,
+  filterSoftDeletedFromResults,
+  getAnonymizedActorLabel,
   hardDeleteAnonymizedUsers,
   isUserDeleted,
-  type HardDeleteResult
+  type AnonymizeUserResult,
+  type FileCleanupResult,
+  type ForeignKeySafetyResult,
+  type HardDeleteResult,
+  type PaginatedUsersResult,
 } from './data-hygiene';
 
 // Background crons
 export { anonymizeExpiredUsers, type AnonymizeResult } from './pii-anonymization';
 export { cleanupUnverifiedUsers, type CleanupResult } from './unverified-cleanup';
-

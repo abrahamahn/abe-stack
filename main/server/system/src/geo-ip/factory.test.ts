@@ -2,8 +2,8 @@
 import { describe, expect, it } from 'vitest';
 
 import { createGeoIpProvider } from './factory';
-import { IpApiGeoIpProvider } from './ip-api-provider';
-import { NoopGeoIpProvider } from './noop-provider';
+import { IpApiGeoIpProvider } from './ip.api.provider';
+import { NoopGeoIpProvider } from './noop.provider';
 
 describe('createGeoIpProvider', () => {
   it('creates NoopGeoIpProvider for noop config', () => {

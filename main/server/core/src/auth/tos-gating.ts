@@ -13,8 +13,9 @@
 
 import { HTTP_STATUS } from '@bslt/shared';
 
-import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { Repositories } from '../../../db/src';
+import type { AppRole } from '@bslt/shared';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
 // Constants
@@ -38,7 +39,7 @@ const TOS_REQUIRED_CODE = 'TOS_ACCEPTANCE_REQUIRED';
  * ToS gating runs AFTER auth, so `user` is guaranteed to exist.
  */
 interface AuthenticatedRequest extends FastifyRequest {
-  user?: { userId: string; email: string; role: any };
+  user?: { userId: string; email: string; role: AppRole };
 }
 
 /**
@@ -83,7 +84,7 @@ export async function checkTosAcceptance(
   }
 
   // Check if the user has agreed to this specific document
-  const agreement = await repos.userAgreements.findByUserAndDocument(userId, latestTos.id);
+  const agreement = await repos.consentRecords.findAgreementByUserAndDocument(userId, latestTos.id);
 
   return {
     accepted: agreement !== null,
@@ -111,13 +112,13 @@ export async function acceptTos(
   documentId: string,
   ipAddress?: string,
 ): Promise<{ agreedAt: Date }> {
-  const agreement = await repos.userAgreements.create({
+  const agreement = await repos.consentRecords.recordAgreement({
     userId,
     documentId,
     ipAddress: ipAddress ?? null,
   });
 
-  return { agreedAt: agreement.agreedAt };
+  return { agreedAt: agreement.createdAt };
 }
 
 // ============================================================================

@@ -43,9 +43,9 @@ const ParamsDisplay = (): ReactElement => {
 };
 
 function createWrapper(initialPath = '/'): (props: { children: ReactNode }) => ReactElement {
-  return ({ children }: { children: ReactNode }): ReactElement => (
-    <MemoryRouter initialEntries={[initialPath]}>{children}</MemoryRouter>
-  );
+  return function Wrapper({ children }: { children: ReactNode }): ReactElement {
+    return <MemoryRouter initialEntries={[initialPath]}>{children}</MemoryRouter>;
+  };
 }
 
 describe('Route', () => {

@@ -18,10 +18,10 @@ type OAuthButtonProps = ComponentPropsWithoutRef<'button'>;
  * </OAuthButton>
  * ```
  */
-export const OAuthButton = forwardRef<HTMLButtonElement, OAuthButtonProps>((props, ref) => {
+export const OAuthButton = forwardRef<HTMLElement, OAuthButtonProps>((props, ref) => {
   const { className = '', type = 'button', ...rest } = props;
   return (
-    <Button ref={ref as any} type={type} className={`oauth-button ${className}`.trim()} {...rest} />
+    <Button ref={ref} type={type} className={`oauth-button ${className}`.trim()} {...rest} />
   );
 });
 

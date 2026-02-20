@@ -393,7 +393,7 @@ export function useInfiniteSearch<T = Record<string, unknown>>(
     return infiniteResult.data.pages.flatMap((page: CursorSearchResult<T>) =>
       page.data.map((item: SearchResultItem<T>) => item.item),
     );
-  }, [infiniteResult.data?.pages]);
+  }, [infiniteResult]);
 
   // Update query (resets pagination)
   const setQuery = useCallback(

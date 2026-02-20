@@ -15,8 +15,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { QueryCacheProvider } from './QueryCacheProvider';
 import { useMutation } from './useMutation';
 
-import type { ReactNode } from 'react';
 import type { UseMutationOptions } from './useMutation';
+import type { ReactNode } from 'react';
 
 // ============================================================================
 // Test Utilities
@@ -87,7 +87,7 @@ describe('useMutation - Basic Functionality', () => {
       const c = activeCaches.pop();
       c?.destroy();
     }
-    cache?.destroy();
+    cache.destroy();
     // Give time for async cleanup
     await new Promise((resolve) => setTimeout(resolve, 10));
   });
@@ -231,7 +231,7 @@ describe('useMutation - mutate vs mutateAsync', () => {
     while (activeCaches.length > 0) {
       activeCaches.pop()?.destroy();
     }
-    cache?.destroy();
+    cache.destroy();
     await new Promise((resolve) => setTimeout(resolve, 10));
   });
 
@@ -323,7 +323,7 @@ describe('useMutation - Lifecycle Callbacks', () => {
     while (activeCaches.length > 0) {
       activeCaches.pop()?.destroy();
     }
-    cache?.destroy();
+    cache.destroy();
     await new Promise((resolve) => setTimeout(resolve, 10));
   });
 
@@ -505,7 +505,7 @@ describe('useMutation - Retry Logic', () => {
     while (activeCaches.length > 0) {
       activeCaches.pop()?.destroy();
     }
-    cache?.destroy();
+    cache.destroy();
     await new Promise((resolve) => setTimeout(resolve, 10));
   });
 
@@ -660,7 +660,7 @@ describe('useMutation - Cache Invalidation', () => {
     while (activeCaches.length > 0) {
       activeCaches.pop()?.destroy();
     }
-    cache?.destroy();
+    cache.destroy();
     await new Promise((resolve) => setTimeout(resolve, 10));
   });
 
@@ -755,7 +755,7 @@ describe('useMutation - Race Conditions', () => {
     while (activeCaches.length > 0) {
       activeCaches.pop()?.destroy();
     }
-    cache?.destroy();
+    cache.destroy();
     await new Promise((resolve) => setTimeout(resolve, 10));
   });
 
@@ -880,7 +880,7 @@ describe('useMutation - Edge Cases', () => {
     while (activeCaches.length > 0) {
       activeCaches.pop()?.destroy();
     }
-    cache?.destroy();
+    cache.destroy();
     await new Promise((resolve) => setTimeout(resolve, 10));
   });
 
@@ -1028,7 +1028,7 @@ describe('useMutation - Options Updates', () => {
       const c = activeCaches.pop();
       c?.destroy();
     }
-    cache?.destroy();
+    cache.destroy();
     // Give time for async cleanup
     await new Promise((resolve) => setTimeout(resolve, 10));
   });

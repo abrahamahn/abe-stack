@@ -73,10 +73,10 @@ function createUndoRedoSystem(): UndoRedoSystem {
       for (let i = 0; i < ops.length; i++) {
         const op = ops[i];
         const prevValue = previousValues[i];
-        if (op !== null && op !== undefined && prevValue !== undefined) {
+        if (op !== undefined && prevValue !== undefined) {
           // op.table is 'user' | 'post' which are valid TestTables keys
           const existing = cache.get(op.table as 'user' | 'post', op.id);
-          if (existing !== null && existing !== undefined) {
+          if (existing !== undefined) {
             cache.set(
               op.table as 'user' | 'post',
               op.id,
@@ -93,7 +93,7 @@ function createUndoRedoSystem(): UndoRedoSystem {
       for (const op of ops) {
         // op.table is 'user' | 'post' which are valid TestTables keys
         const existing = cache.get(op.table as 'user' | 'post', op.id);
-        if (existing !== null && existing !== undefined) {
+        if (existing !== undefined) {
           cache.set(
             op.table as 'user' | 'post',
             op.id,
@@ -122,7 +122,7 @@ function createUndoRedoSystem(): UndoRedoSystem {
     for (const op of operations) {
       const existing = cache.get(op.table, op.id) as Record<string, unknown> | undefined;
 
-      if (existing !== null && existing !== undefined) {
+      if (existing !== undefined) {
         const prevValue: Record<string, unknown> = {};
         for (const key of Object.keys(op.updates)) {
           prevValue[key] = existing[key];
@@ -619,9 +619,9 @@ describe('UndoRedoStack with Operations Integration', () => {
           for (let i = 0; i < ops.length; i++) {
             const op = ops[i];
             const prevValue = previousValues[i];
-            if (op !== null && op !== undefined && prevValue !== undefined) {
+            if (op !== undefined && prevValue !== undefined) {
               const existing = testCache.get(op.table as 'user' | 'post', op.id);
-              if (existing !== null && existing !== undefined) {
+              if (existing !== undefined) {
                 testCache.set(
                   op.table as 'user' | 'post',
                   op.id,
@@ -648,14 +648,18 @@ describe('UndoRedoStack with Operations Integration', () => {
         testCache.set(
           'user',
           'u1',
-          { id: 'u1', version: 1, name: `Update ${i}`, email: 'a@test.com', bio: '' },
+          { id: 'u1', version: 1, name: `Update ${i.toString()}`, email: 'a@test.com', bio: '' },
           { force: true },
         );
         testUndoStack.push({
           operations: [
-            { table: 'user', id: 'u1', updates: { name: `Update ${i}` } as Partial<User> },
+            {
+              table: 'user',
+              id: 'u1',
+              updates: { name: `Update ${i.toString()}` } as Partial<User>,
+            },
           ],
-          previousValues: [{ name: i === 1 ? 'Original' : `Update ${i - 1}` }],
+          previousValues: [{ name: i === 1 ? 'Original' : `Update ${(i - 1).toString()}` }],
         });
       }
 

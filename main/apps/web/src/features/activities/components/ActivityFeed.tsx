@@ -10,8 +10,8 @@ import { Alert, Badge, EmptyState, Skeleton, Text } from '@bslt/ui';
 
 import { useActivities } from '../hooks/useActivities';
 
-import type { ReactElement } from 'react';
 import type { ActivityLocal } from '../api/activitiesApi';
+import type { ReactElement } from 'react';
 
 // ============================================================================
 // Types

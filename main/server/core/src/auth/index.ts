@@ -263,6 +263,15 @@ export {
 
 export { createRequireSudo, isCaptchaRequired, verifyCaptchaToken, verifyTurnstileToken } from './security';
 
+// Device fingerprinting
+export {
+  generateDeviceFingerprint,
+  isKnownDevice,
+  isTrustedDevice,
+  recordDeviceAccess,
+  logNewDeviceLogin,
+} from './security';
+
 export type {
   AuthEndpoint,
   AuthRateLimitConfig,

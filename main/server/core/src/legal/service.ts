@@ -9,11 +9,11 @@
  */
 
 import type {
+  ConsentRecord as DbConsentRecord,
+  ConsentRecordRepository,
   LegalDocument as DbLegalDocument,
-  UserAgreement as DbUserAgreement,
   LegalDocumentRepository,
   NewLegalDocument,
-  UserAgreementRepository,
 } from '../../../db/src';
 
 // ============================================================================
@@ -36,16 +36,16 @@ export async function getCurrentLegalDocuments(
 /**
  * Get all agreements for a user.
  *
- * @param userAgreements - User agreement repository
+ * @param consentRecords - Consent record repository
  * @param userId - User identifier
  * @returns Array of agreements, most recent first
  * @complexity O(n) where n is the number of agreements
  */
 export async function getUserAgreements(
-  userAgreements: UserAgreementRepository,
+  consentRecords: ConsentRecordRepository,
   userId: string,
-): Promise<DbUserAgreement[]> {
-  return userAgreements.findByUserId(userId);
+): Promise<DbConsentRecord[]> {
+  return consentRecords.findAgreementsByUserId(userId);
 }
 
 /**

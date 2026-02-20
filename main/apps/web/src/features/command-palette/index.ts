@@ -7,16 +7,12 @@
  */
 
 // Components
-export { CommandPalette } from './components/CommandPalette';
+export { CommandPalette } from './components';
 
 // Hooks
-export { useCommandPalette, type UseCommandPaletteResult } from './hooks/useCommandPalette';
+export { useCommandPalette } from './hooks';
+export type { UseCommandPaletteResult } from './hooks';
 
 // Data
-export {
-  createCommands,
-  filterCommands,
-  type Command,
-  type CommandCategory,
-  type CommandDependencies,
-} from './data/commands';
+export { createCommands, filterCommands } from './data';
+export type { Command, CommandCategory, CommandDependencies } from './data';

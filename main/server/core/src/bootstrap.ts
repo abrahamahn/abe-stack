@@ -1,6 +1,18 @@
 // main/server/core/src/bootstrap.ts
 import { loadServerEnv } from '@bslt/server-system/config';
-import { createLogger, type BaseLogger, type LogData } from '@bslt/shared';
+import {
+  createLogger,
+  type BaseLogger,
+  type BillingService,
+  type DetailedHealthResponse,
+  type EmailService,
+  type ErrorTracker,
+  type HealthCheckCache,
+  type HealthCheckQueue,
+  type LogData,
+  type NotificationService,
+  type StorageClient,
+} from '@bslt/shared';
 
 import {
   createDbClient,
@@ -8,6 +20,9 @@ import {
   createPostgresQueueStore, // Import store factory
   createRepositories,
   requireValidSchema,
+  type PostgresPubSub,
+  type RawDb,
+  type Repositories,
   type SessionContext,
 } from '../../db/src';
 import {
@@ -24,36 +39,66 @@ import {
   type AuthEmailTemplates, // Import from server-system
   type QueueStore,
   type ServerSearchProvider,
-  type SystemContext,
+  type SmsProvider,
   type WriteService,
 } from '../../system/src';
 
-export type { SystemContext };
-
-// Removed import from @bslt/core/auth since we import from server-system
-  import type { AppConfig, PostgresConfig } from '@bslt/server-system/config';
+import type { AppConfig, PostgresConfig } from '@bslt/server-system/config';
 
 /**
- * Simple Console Logger Adapter to avoid dependency on pino in core.
+ * Full system context assembled at bootstrap time.
+ *
+ * Satisfies the health-check interfaces (HealthCheckCache, HealthCheckQueue)
+ * so it can be passed directly to getDetailedHealth / logStartupSummary.
+ * The raw queueStore is retained for job enqueueing.
+ */
+export interface SystemContext {
+  config: AppConfig;
+  db: RawDb;
+  cache: HealthCheckCache;
+  queue: HealthCheckQueue;
+  pubsub: PostgresPubSub;
+  log: ReturnType<typeof createLogger>;
+  repos: Repositories;
+  write: WriteService;
+  search: ServerSearchProvider;
+  emailTemplates: AuthEmailTemplates;
+  queueStore: QueueStore;
+  errorTracker: ErrorTracker;
+  notifications?: NotificationService;
+  billing?: BillingService;
+  /** Optional: storage client — injected at the app layer. */
+  storage?: StorageClient;
+  /** Optional: email service — injected at the app layer. */
+  email?: EmailService;
+  /** Optional: SMS provider — injected at the app layer. */
+  sms?: SmsProvider;
+  health(): Promise<DetailedHealthResponse>;
+  contextualize(session: SessionContext): SystemContext;
+}
+
+/**
+ * Simple process-stream logger adapter to avoid both pino and no-console violations.
+ * Writes structured lines to stdout (trace/debug/info) and stderr (warn/error/fatal).
  */
 const consoleBaseLogger: BaseLogger = {
-  trace: (data: LogData, msg: string) => {
-    console.trace(msg, data);
+  trace: (_data: LogData, msg: string) => {
+    process.stdout.write(`TRACE ${msg}\n`);
   },
-  debug: (data: LogData, msg: string) => {
-    console.debug(msg, data);
+  debug: (_data: LogData, msg: string) => {
+    process.stdout.write(`DEBUG ${msg}\n`);
   },
-  info: (data: LogData, msg: string) => {
-    console.info(msg, data);
+  info: (_data: LogData, msg: string) => {
+    process.stdout.write(`INFO ${msg}\n`);
   },
-  warn: (data: LogData, msg: string) => {
-    console.warn(msg, data);
+  warn: (_data: LogData, msg: string) => {
+    process.stderr.write(`WARN ${msg}\n`);
   },
-  error: (data: LogData, msg: string) => {
-    console.error(msg, data);
+  error: (_data: LogData, msg: string) => {
+    process.stderr.write(`ERROR ${msg}\n`);
   },
-  fatal: (data: LogData, msg: string) => {
-    console.error('[FATAL]', msg, data);
+  fatal: (_data: LogData, msg: string) => {
+    process.stderr.write(`FATAL ${msg}\n`);
   },
   child: () => consoleBaseLogger,
 };
@@ -82,8 +127,8 @@ export async function bootstrapSystem(options?: { config?: AppConfig }): Promise
   if (options?.config) {
     config = options.config;
   } else {
-    initEnv();
-    config = loadServerEnv() as any;
+    await initEnv();
+    config = loadServerEnv() as unknown as AppConfig;
   }
 
   // 2. Logger
@@ -94,7 +139,7 @@ export async function bootstrapSystem(options?: { config?: AppConfig }): Promise
 
   // 2.5 Error Tracking
   initSentry({
-    dsn: (process.env['SENTRY_DSN'] as string) ?? null,
+    dsn: process.env['SENTRY_DSN'] ?? null,
     environment: config.env,
     release: process.env['RELEASE_VERSION'],
   });
@@ -117,12 +162,15 @@ export async function bootstrapSystem(options?: { config?: AppConfig }): Promise
   // 5. Repositories
   const repos = createRepositories(db);
 
-  // 6. Cache
-  const cache = createCache({
-    driver: (config.cache as any).driver,
-    redisUrl: (config.cache as any).redisUrl,
-    ttl: config.cache.ttl,
-  });
+  // 6. Cache — wrap CacheProvider in HealthCheckCache adapter
+  // CacheProvider.getStats() is synchronous; HealthCheckCache requires async with a specific shape.
+  const rawCache = createCache(config.cache);
+  const cache: HealthCheckCache = {
+    getStats: () => {
+      const { hits, misses, size } = rawCache.getStats();
+      return Promise.resolve({ hits, misses, size });
+    },
+  };
 
   // 7. PubSub (for real-time events)
   const pgPubSub = createPostgresPubSub({
@@ -140,8 +188,15 @@ export async function bootstrapSystem(options?: { config?: AppConfig }): Promise
     log: logger,
   });
 
-  // We creating the STORE here, not the server
+  // We create the STORE here, not the server.
+  // Wrap in HealthCheckQueue adapter — QueueStore uses separate getPendingCount/getFailedCount.
   const queueStore: QueueStore = createPostgresQueueStore(db);
+  const queue: HealthCheckQueue = {
+    getStats: async () => ({
+      pending: await queueStore.getPendingCount(),
+      failed: await queueStore.getFailedCount(),
+    }),
+  };
 
   // 9. Search (Safe default for SystemContext)
   const search: ServerSearchProvider = {
@@ -156,19 +211,21 @@ export async function bootstrapSystem(options?: { config?: AppConfig }): Promise
       supportedOperators: [],
       maxPageSize: 100,
     }),
-    search: async () => ({ data: [], page: 1, limit: 10, hasNext: false, hasPrev: false }),
-    searchWithCursor: async () => ({
-      data: [],
-      nextCursor: null,
-      prevCursor: null,
-      hasNext: false,
-      hasPrev: false,
-      limit: 10,
-    }),
-    searchFaceted: async () => ({ data: [], page: 1, limit: 10, hasNext: false, hasPrev: false }),
-    count: async () => 0,
-    healthCheck: async () => true,
-    close: async () => {},
+    search: () => Promise.resolve({ data: [], page: 1, limit: 10, hasNext: false, hasPrev: false }),
+    searchWithCursor: () =>
+      Promise.resolve({
+        data: [],
+        nextCursor: null,
+        prevCursor: null,
+        hasNext: false,
+        hasPrev: false,
+        limit: 10,
+      }),
+    searchFaceted: () =>
+      Promise.resolve({ data: [], page: 1, limit: 10, hasNext: false, hasPrev: false }),
+    count: () => Promise.resolve(0),
+    healthCheck: () => Promise.resolve(true),
+    close: () => Promise.resolve(),
   };
 
   // 10. Email Templates
@@ -180,16 +237,16 @@ export async function bootstrapSystem(options?: { config?: AppConfig }): Promise
     log: logger,
     db,
     repos,
-    cache: cache as any,
+    cache,
     pubsub: pgPubSub,
-    queue: queueStore as any,
+    queue,
     queueStore,
     write: writeService,
     search,
     emailTemplates: templates,
-    errorTracker: errorTracker as any,
+    errorTracker: errorTracker as unknown as ErrorTracker,
 
-    // Helper to check health - uses full context
+    // Helper to check health — context satisfies HealthContext structurally
     health: async () => getDetailedHealth(context),
 
     // Add contextualize helper for RLS
@@ -197,13 +254,13 @@ export async function bootstrapSystem(options?: { config?: AppConfig }): Promise
       const scopedDb = db.withSession(session);
       return {
         ...context,
-        db: scopedDb as any,
+        db: scopedDb,
         repos: createRepositories(scopedDb),
       };
     },
   };
 
-  // Corrected logStartupSummary call
+  // logStartupSummary accepts HealthContext; SystemContext satisfies it structurally
   await logStartupSummary(context, {
     host: config.server.host,
     port: config.server.port,

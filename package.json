@@ -59,12 +59,14 @@
     "graph:shared": "node --import tsx main/tools/scripts/audit/graph-shared.ts",
     "graph:server": "node --import tsx main/tools/scripts/audit/graph-server.ts",
     "graph:server-system": "node --import tsx main/tools/scripts/audit/graph-server-system.ts",
+    "graph:server-system:full": "node --import tsx main/tools/scripts/audit/graph-server-system-full.ts",
+    "graph:db": "node --import tsx main/tools/scripts/audit/graph-db.ts",
     "line-count": "node --import tsx main/tools/scripts/audit/line-count.ts"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
       "prettier --config config/.prettierrc --ignore-path config/.prettierignore --cache --cache-location node_modules/.cache/prettier/.cache --write",
-      "eslint --cache --cache-location node_modules/.cache/eslint/.cache --fix --max-warnings=0 --no-warn-ignored --ignore-pattern config/playwright.config.ts --ignore-pattern main/apps/storybook/**"
+      "eslint --cache --cache-location node_modules/.cache/eslint/.cache --max-warnings=0 --no-warn-ignored --ignore-pattern config/playwright.config.ts --ignore-pattern main/apps/storybook/**"
     ],
     "*.{json,css,md,yml,yaml}": [
       "prettier --config config/.prettierrc --ignore-path config/.prettierignore --cache --cache-location node_modules/.cache/prettier/.cache --write"
@@ -95,7 +97,8 @@
   },
   "pnpm": {
     "overrides": {
-      "esbuild": "^0.25.12"
+      "esbuild": "^0.25.12",
+      "minimatch": "^10.2.1"
     },
     "onlyBuiltDependencies": [
       "argon2",

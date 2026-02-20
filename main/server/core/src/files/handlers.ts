@@ -10,10 +10,9 @@ import { HTTP_STATUS } from '@bslt/shared';
 
 import { deleteFile, getDownloadUrl, getFileMetadata, uploadFile } from './service';
 
-import type { AuthenticatedUser } from '@bslt/shared';
-import type { FastifyReply, FastifyRequest } from 'fastify';
-import type { HandlerContext } from '../../../system/src';
 import type { FileAppContext, FileMetadata, FileStorageProvider } from './types';
+import type { HandlerContext, HttpReply, HttpRequest } from '../../../system/src';
+import type { AuthenticatedUser } from '@bslt/shared';
 
 // ============================================================================
 // Helpers
@@ -38,8 +37,8 @@ function asAppContext(ctx: HandlerContext): FileAppContext {
  * @returns Authenticated user or undefined
  * @complexity O(1)
  */
-function getUser(request: FastifyRequest): AuthenticatedUser | undefined {
-  return (request as FastifyRequest & { user?: AuthenticatedUser }).user;
+function getUser(request: HttpRequest): AuthenticatedUser | undefined {
+  return (request as HttpRequest & { user?: AuthenticatedUser }).user;
 }
 
 /**
@@ -95,8 +94,8 @@ function handleError(
 export async function handleUploadFile(
   ctx: HandlerContext,
   body: unknown,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<
   | { status: 201; body: { file: FileMetadata } }
   | { status: 400 | 401 | 403 | 404 | 500; body: { message: string } }
@@ -158,8 +157,8 @@ export async function handleUploadFile(
 export async function handleGetFile(
   ctx: HandlerContext,
   _body: unknown,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<
   | { status: 200; body: { file: FileMetadata } }
   | { status: 400 | 401 | 403 | 404 | 500; body: { message: string } }
@@ -213,8 +212,8 @@ export async function handleGetFile(
 export async function handleDeleteFile(
   ctx: HandlerContext,
   _body: unknown,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<
   | { status: 200; body: { success: true; message: string } }
   | { status: 400 | 401 | 403 | 404 | 500; body: { message: string } }
@@ -262,8 +261,8 @@ export async function handleDeleteFile(
 export async function handleDownloadFile(
   ctx: HandlerContext,
   _body: unknown,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<
   | { status: 200; body: { url: string } }
   | { status: 400 | 401 | 403 | 404 | 500; body: { message: string } }

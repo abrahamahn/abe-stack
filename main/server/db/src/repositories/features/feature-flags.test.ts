@@ -25,6 +25,7 @@ const createMockDb = (): RawDb => ({
   getClient: vi.fn() as RawDb['getClient'],
   queryOne: vi.fn(),
   execute: vi.fn(),
+  withSession: vi.fn() as RawDb['withSession'],
 });
 
 // ============================================================================
@@ -33,10 +34,10 @@ const createMockDb = (): RawDb => ({
 
 const mockFeatureFlag = {
   key: 'billing.seat_based',
-  name: 'Seat-Based Billing',
   description: 'Enable seat-based billing for organizations',
   is_enabled: true,
-  value: JSON.stringify({ maxSeats: 100 }),
+  default_value: JSON.stringify({ maxSeats: 100 }),
+  metadata: {},
   created_at: new Date('2024-01-01'),
   updated_at: new Date('2024-01-01'),
 };
@@ -60,14 +61,13 @@ describe('createFeatureFlagRepository', () => {
       const repo = createFeatureFlagRepository(mockDb);
       const result = await repo.create({
         key: 'billing.seat_based',
-        name: 'Seat-Based Billing',
         description: 'Enable seat-based billing for organizations',
         isEnabled: true,
-        value: { maxSeats: 100 },
+        defaultValue: { maxSeats: 100 },
       });
 
       expect(result.key).toBe('billing.seat_based');
-      expect(result.name).toBe('Seat-Based Billing');
+      expect(result.description).toBe('Enable seat-based billing for organizations');
       expect(result.isEnabled).toBe(true);
       expect(mockDb.queryOne).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -84,7 +84,6 @@ describe('createFeatureFlagRepository', () => {
       await expect(
         repo.create({
           key: 'test.flag',
-          name: 'Test Flag',
           isEnabled: false,
         }),
       ).rejects.toThrow('Failed to create feature flag');
@@ -100,7 +99,6 @@ describe('createFeatureFlagRepository', () => {
       const repo = createFeatureFlagRepository(mockDb);
       const result = await repo.create({
         key: 'billing.seat_based',
-        name: 'Seat-Based Billing',
         isEnabled: true,
       });
 
@@ -110,18 +108,17 @@ describe('createFeatureFlagRepository', () => {
     it('should handle optional value field', async () => {
       const flagWithoutValue = {
         ...mockFeatureFlag,
-        value: null,
+        default_value: null,
       };
       vi.mocked(mockDb.queryOne).mockResolvedValue(flagWithoutValue);
 
       const repo = createFeatureFlagRepository(mockDb);
       const result = await repo.create({
         key: 'billing.seat_based',
-        name: 'Seat-Based Billing',
         isEnabled: true,
       });
 
-      expect(result.value).toBeNull();
+      expect(result.defaultValue).toBeNull();
     });
 
     it('should default isEnabled to false', async () => {
@@ -134,7 +131,6 @@ describe('createFeatureFlagRepository', () => {
       const repo = createFeatureFlagRepository(mockDb);
       const result = await repo.create({
         key: 'billing.seat_based',
-        name: 'Seat-Based Billing',
         isEnabled: false,
       });
 
@@ -151,19 +147,18 @@ describe('createFeatureFlagRepository', () => {
       };
       const flagWithComplexValue = {
         ...mockFeatureFlag,
-        value: JSON.stringify(complexValue),
+        default_value: JSON.stringify(complexValue),
       };
       vi.mocked(mockDb.queryOne).mockResolvedValue(flagWithComplexValue);
 
       const repo = createFeatureFlagRepository(mockDb);
       const result = await repo.create({
         key: 'billing.seat_based',
-        name: 'Seat-Based Billing',
         isEnabled: true,
-        value: complexValue,
+        defaultValue: complexValue,
       });
 
-      expect(result.value).toEqual(JSON.stringify(complexValue));
+      expect(result.defaultValue).toEqual(JSON.stringify(complexValue));
     });
   });
 
@@ -222,14 +217,14 @@ describe('createFeatureFlagRepository', () => {
     it('should handle flags with null value', async () => {
       const flagWithNullValue = {
         ...mockFeatureFlag,
-        value: null,
+        default_value: null,
       };
       vi.mocked(mockDb.queryOne).mockResolvedValue(flagWithNullValue);
 
       const repo = createFeatureFlagRepository(mockDb);
       const result = await repo.findByKey('billing.seat_based');
 
-      expect(result?.value).toBeNull();
+      expect(result?.defaultValue).toBeNull();
     });
   });
 
@@ -240,13 +235,13 @@ describe('createFeatureFlagRepository', () => {
         {
           ...mockFeatureFlag,
           key: 'auth.two_factor',
-          name: 'Two Factor Auth',
+          description: 'Two Factor Auth',
           is_enabled: false,
         },
         {
           ...mockFeatureFlag,
           key: 'search.elasticsearch',
-          name: 'Elasticsearch',
+          description: 'Elasticsearch',
           is_enabled: true,
         },
       ];
@@ -256,9 +251,9 @@ describe('createFeatureFlagRepository', () => {
       const result = await repo.findAll();
 
       expect(result).toHaveLength(3);
-      expect(result[0].key).toBe('billing.seat_based');
-      expect(result[1].key).toBe('auth.two_factor');
-      expect(result[2].key).toBe('search.elasticsearch');
+      expect(result[0]?.key).toBe('billing.seat_based');
+      expect(result[1]?.key).toBe('auth.two_factor');
+      expect(result[2]?.key).toBe('search.elasticsearch');
       expect(mockDb.query).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining('SELECT'),
@@ -371,19 +366,19 @@ describe('createFeatureFlagRepository', () => {
       const updatedFlag = {
         ...mockFeatureFlag,
         is_enabled: false,
-        name: 'Updated Billing',
+        description: 'Updated Billing',
       };
       vi.mocked(mockDb.queryOne).mockResolvedValue(updatedFlag);
 
       const repo = createFeatureFlagRepository(mockDb);
       const result = await repo.update('billing.seat_based', {
         isEnabled: false,
-        name: 'Updated Billing',
+        description: 'Updated Billing',
       });
 
       expect(result).toBeDefined();
       expect(result?.isEnabled).toBe(false);
-      expect(result?.name).toBe('Updated Billing');
+      expect(result?.description).toBe('Updated Billing');
       expect(mockDb.queryOne).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining('UPDATE'),
@@ -415,22 +410,22 @@ describe('createFeatureFlagRepository', () => {
       });
 
       expect(result?.isEnabled).toBe(false);
-      expect(result?.name).toBe('Seat-Based Billing');
+      expect(result?.description).toBe('Enable seat-based billing for organizations');
     });
 
-    it('should update only name field', async () => {
+    it('should update only description field', async () => {
       const updatedFlag = {
         ...mockFeatureFlag,
-        name: 'New Name',
+        description: 'New description',
       };
       vi.mocked(mockDb.queryOne).mockResolvedValue(updatedFlag);
 
       const repo = createFeatureFlagRepository(mockDb);
       const result = await repo.update('billing.seat_based', {
-        name: 'New Name',
+        description: 'New description',
       });
 
-      expect(result?.name).toBe('New Name');
+      expect(result?.description).toBe('New description');
       expect(result?.isEnabled).toBe(true);
     });
 
@@ -449,44 +444,41 @@ describe('createFeatureFlagRepository', () => {
       expect(result?.description).toBe('New description');
     });
 
-    it('should update value field', async () => {
+    it('should update defaultValue field', async () => {
       const newValue = { maxSeats: 200 };
       const updatedFlag = {
         ...mockFeatureFlag,
-        value: JSON.stringify(newValue),
+        default_value: JSON.stringify(newValue),
       };
       vi.mocked(mockDb.queryOne).mockResolvedValue(updatedFlag);
 
       const repo = createFeatureFlagRepository(mockDb);
       const result = await repo.update('billing.seat_based', {
-        value: newValue,
+        defaultValue: newValue,
       });
 
-      expect(result?.value).toEqual(JSON.stringify(newValue));
+      expect(result?.defaultValue).toEqual(JSON.stringify(newValue));
     });
 
     it('should update multiple fields at once', async () => {
       const updatedFlag = {
         ...mockFeatureFlag,
-        name: 'Updated Name',
         description: 'Updated description',
         is_enabled: false,
-        value: JSON.stringify({ updated: true }),
+        default_value: JSON.stringify({ updated: true }),
       };
       vi.mocked(mockDb.queryOne).mockResolvedValue(updatedFlag);
 
       const repo = createFeatureFlagRepository(mockDb);
       const result = await repo.update('billing.seat_based', {
-        name: 'Updated Name',
         description: 'Updated description',
         isEnabled: false,
-        value: { updated: true },
+        defaultValue: { updated: true },
       });
 
-      expect(result?.name).toBe('Updated Name');
       expect(result?.description).toBe('Updated description');
       expect(result?.isEnabled).toBe(false);
-      expect(result?.value).toEqual(JSON.stringify({ updated: true }));
+      expect(result?.defaultValue).toEqual(JSON.stringify({ updated: true }));
     });
   });
 
@@ -574,7 +566,7 @@ describe('createFeatureFlagRepository', () => {
       const minimalFlag = {
         ...mockFeatureFlag,
         description: null,
-        value: null,
+        default_value: null,
       };
       vi.mocked(mockDb.queryOne).mockResolvedValue(minimalFlag);
 
@@ -582,7 +574,7 @@ describe('createFeatureFlagRepository', () => {
       const result = await repo.findByKey('billing.seat_based');
 
       expect(result?.description).toBeNull();
-      expect(result?.value).toBeNull();
+      expect(result?.defaultValue).toBeNull();
     });
 
     it('should handle timestamps correctly', async () => {
@@ -603,14 +595,14 @@ describe('createFeatureFlagRepository', () => {
     it('should handle empty string values', async () => {
       const flagWithEmptyValue = {
         ...mockFeatureFlag,
-        value: '',
+        default_value: '',
       };
       vi.mocked(mockDb.queryOne).mockResolvedValue(flagWithEmptyValue);
 
       const repo = createFeatureFlagRepository(mockDb);
       const result = await repo.findByKey('billing.seat_based');
 
-      expect(result?.value).toBe('');
+      expect(result?.defaultValue).toBe('');
     });
 
     it('should handle different key formats', async () => {
@@ -637,7 +629,7 @@ describe('createFeatureFlagRepository', () => {
       };
       const updatedFlag2 = {
         ...mockFeatureFlag,
-        name: 'Concurrent Update',
+        description: 'Concurrent Update',
         updated_at: new Date('2024-02-02'),
       };
 
@@ -647,10 +639,10 @@ describe('createFeatureFlagRepository', () => {
 
       const repo = createFeatureFlagRepository(mockDb);
       const result1 = await repo.update('billing.seat_based', { isEnabled: false });
-      const result2 = await repo.update('billing.seat_based', { name: 'Concurrent Update' });
+      const result2 = await repo.update('billing.seat_based', { description: 'Concurrent Update' });
 
       expect(result1?.isEnabled).toBe(false);
-      expect(result2?.name).toBe('Concurrent Update');
+      expect(result2?.description).toBe('Concurrent Update');
     });
   });
 });

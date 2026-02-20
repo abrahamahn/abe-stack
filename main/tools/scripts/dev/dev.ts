@@ -176,7 +176,7 @@ async function ensurePostgres(): Promise<void> {
   }
 }
 
-function runEnvPreflight(filters: string[]): void {
+async function runEnvPreflight(filters: string[]): Promise<void> {
   // Only validate server env when the server might run.
   // `pnpm dev web` should be able to start without a fully configured backend.
   if (filters.length > 0 && !filters.includes('server')) return;
@@ -185,7 +185,7 @@ function runEnvPreflight(filters: string[]): void {
   process.env['NODE_ENV'] ??= 'development';
 
   logLine('env', 'Validating environment files');
-  loadServerEnv(); // Exits process on failure with a clear error message.
+  await loadServerEnv(); // Exits process on failure with a clear error message.
   logLine('env', 'Environment OK', 'ok');
 }
 
@@ -342,7 +342,7 @@ async function main(): Promise<void> {
     logLine('dev', `Filter: ${filters.map((f) => `@bslt/${f}`).join(', ')}`);
   }
 
-  runEnvPreflight(filters);
+  await runEnvPreflight(filters);
 
   // Ensure PostgreSQL is running (skip when server is not included)
   if (needsServer) {

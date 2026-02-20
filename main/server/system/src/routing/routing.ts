@@ -1,21 +1,23 @@
 // main/server/system/src/routing/routing.ts
 /**
- * Fastify Route Registration
+ * Route Definitions & Registration
  *
- * Generic router pattern for registering route maps into Fastify.
- * Handles three schema formats:
- * - ValidationSchema (safeParse): validated in the handler wrapper
- * - FastifySchema (properties): registered with Fastify for native validation
- * - No schema: body passed through unvalidated
+ * Framework-agnostic route map helpers. Defines the handler contract
+ * using abstract HttpRequest/HttpReply interfaces.
+ *
+ * Also provides `registerRouteMap` which bridges RouteMap definitions
+ * into a Fastify instance.
  *
  * @module routing
  */
 
-import { HTTP_STATUS } from '@bslt/shared';
+import { HTTP_STATUS } from '@bslt/shared/system';
 
-import { registerRoute } from './route-registry';
+import { registerRoute } from './route.registry';
 
-import type { BaseContext } from '@bslt/shared';
+import type { HttpReply, HttpRequest } from './http.types';
+import type { HttpMethod } from './types';
+import type { BaseContext } from '@bslt/shared/system';
 import type {
   FastifyInstance,
   FastifyReply,
@@ -39,11 +41,11 @@ export type RouteResult<T = unknown> = T;
 export type RouteHandler<Body = unknown, Response = unknown> = (
   ctx: HandlerContext,
   body: Body,
-  req: FastifyRequest,
-  reply: FastifyReply,
+  req: HttpRequest,
+  reply: HttpReply,
 ) => Promise<RouteResult<Response>> | RouteResult<Response>;
 
-export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+export type { HttpMethod } from './types';
 
 /**
  * Validation schema interface compatible with `@bslt/shared` Schema<T>.
@@ -57,8 +59,12 @@ export interface ValidationSchema {
   safeParse: (data: unknown) => { success: boolean; data?: unknown; error?: unknown };
 }
 
-/** Union type for all accepted schema formats */
-export type RouteSchema = FastifySchema | ValidationSchema;
+/**
+ * Union type for all accepted schema formats.
+ * ValidationSchema: validated via safeParse in the handler wrapper.
+ * Record<string, unknown>: a raw JSON Schema object for framework-native validation.
+ */
+export type RouteSchema = ValidationSchema | Record<string, unknown>;
 
 /** JSON Schema object for OpenAPI route metadata */
 export interface JsonSchemaObject {
@@ -164,6 +170,10 @@ export function protectedRoute<Body = unknown, Response = unknown>(
   };
 }
 
+// ============================================================================
+// Route Registration (Fastify adapter)
+// ============================================================================
+
 export type AuthGuardFactory = (secret: string, ...allowedRoles: string[]) => preHandlerHookHandler;
 
 export interface RouterOptions {
@@ -176,22 +186,15 @@ export interface RouterOptions {
 
 /**
  * Detect whether a schema supports `safeParse` (ValidationSchema).
- * Used to validate request bodies before passing to handlers.
- *
- * @param s - Route schema to check
- * @returns True if the schema has a callable safeParse method
  * @complexity O(1)
  */
-function hasSafeParse(s: RouteSchema): s is ValidationSchema {
-  if (typeof s !== 'object' || !('safeParse' in s)) return false;
-  const obj = s as unknown as Record<string, unknown>;
-  return typeof obj['safeParse'] === 'function';
+function hasSafeParse(s: unknown): s is ValidationSchema {
+  if (typeof s !== 'object' || s === null || !('safeParse' in s)) return false;
+  return typeof (s as Record<string, unknown>)['safeParse'] === 'function';
 }
 
 /**
  * Derive the logical module name from a route path.
- *
- * Strips the prefix and takes the first path segment.
  * Example: "/api/auth/login" with prefix "/api" -> "auth"
  */
 function deriveModule(fullPath: string, prefix: string): string {
@@ -200,16 +203,25 @@ function deriveModule(fullPath: string, prefix: string): string {
 }
 
 /**
+ * Adapt a FastifyRequest to the abstract HttpRequest interface.
+ */
+function adaptRequest(req: FastifyRequest): HttpRequest {
+  return req as unknown as HttpRequest;
+}
+
+/**
+ * Adapt a FastifyReply to the abstract HttpReply interface.
+ */
+function adaptReply(reply: FastifyReply): HttpReply {
+  return reply as unknown as HttpReply;
+}
+
+/**
  * Register all routes from a RouteMap into a Fastify instance.
- *
- * Handles three schema formats:
- * - ValidationSchema (safeParse): validated in the handler wrapper
- * - FastifySchema (properties): registered with Fastify for native validation
- * - No schema: body passed through unvalidated
  *
  * @param app - Fastify instance to register routes with
  * @param ctx - Handler context providing db, repos, log, etc.
- * @param routes - RouteMap of path → RouteDefinition entries
+ * @param routes - RouteMap of path -> RouteDefinition entries
  * @param options - Router options with prefix, jwtSecret, authGuardFactory
  * @complexity O(n) where n is the number of routes in the map
  */
@@ -240,7 +252,7 @@ export function registerRouteMap(
           body = parseResult.data;
         }
 
-        const result = await route.handler(ctx, body, req, reply);
+        const result = await route.handler(ctx, body, adaptRequest(req), adaptReply(reply));
 
         // Handle { status, body } response pattern used by module handlers
         if (
@@ -260,9 +272,7 @@ export function registerRouteMap(
       },
     };
 
-    // Determine auth requirements.  Engine RouteDefinition uses `isPublic` + `roles`.
-    // Shared BaseRouteDefinition uses `auth` ('user' | 'admin' | undefined).
-    // Support both formats so shared routes work without manual adaptation.
+    // Determine auth requirements
     const sharedAuth = (route as unknown as { auth?: string }).auth;
     const isPublic = route.isPublic;
     const roles = route.roles ?? (sharedAuth !== undefined ? [sharedAuth] : []);

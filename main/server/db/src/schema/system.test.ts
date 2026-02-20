@@ -1407,6 +1407,9 @@ describe('System Schema - Type Consistency', () => {
 
     const fullJob: Job = {
       id: 'job-123',
+      type: newJob.type,
+      payload: newJob.payload ?? {},
+      priority: newJob.priority ?? 0,
       status: 'pending',
       attempts: 0,
       maxAttempts: 3,
@@ -1416,8 +1419,6 @@ describe('System Schema - Type Consistency', () => {
       startedAt: null,
       completedAt: null,
       createdAt: new Date(),
-      payload: {},
-      ...newJob,
     };
 
     expect(fullJob.type).toBe(newJob.type);
@@ -1623,7 +1624,7 @@ describe('System Schema - Edge Cases', () => {
         eventType: 'test.event',
         payload: {},
         responseStatus: statusCode,
-        responseBody: `Response for ${statusCode}`,
+        responseBody: `Response for ${String(statusCode)}`,
         status: statusCode >= 200 && statusCode < 300 ? 'delivered' : 'failed',
         attempts: 1,
         nextRetryAt: null,

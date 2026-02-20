@@ -26,6 +26,7 @@ const createMockDb = (): RawDb =>
     getClient: vi.fn() as RawDb['getClient'],
     queryOne: vi.fn(),
     execute: vi.fn(),
+    withSession: vi.fn() as RawDb['withSession'],
   }) as unknown as RawDb;
 
 // ============================================================================
@@ -206,10 +207,10 @@ describe('createApiKeyRepository', () => {
       const result = await repo.findByUserId('usr-123');
 
       expect(result).toHaveLength(2);
-      expect(result[0].id).toBe('key-123');
-      expect(result[0].userId).toBe('usr-123');
-      expect(result[1].id).toBe('key-456');
-      expect(result[1].userId).toBe('usr-123');
+      expect(result[0]?.id).toBe('key-123');
+      expect(result[0]?.userId).toBe('usr-123');
+      expect(result[1]?.id).toBe('key-456');
+      expect(result[1]?.userId).toBe('usr-123');
       expect(mockDb.query).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining('SELECT'),
@@ -253,10 +254,10 @@ describe('createApiKeyRepository', () => {
       const result = await repo.findByTenantId('ten-456');
 
       expect(result).toHaveLength(2);
-      expect(result[0].id).toBe('key-123');
-      expect(result[0].tenantId).toBe('ten-456');
-      expect(result[1].id).toBe('key-789');
-      expect(result[1].tenantId).toBe('ten-456');
+      expect(result[0]?.id).toBe('key-123');
+      expect(result[0]?.tenantId).toBe('ten-456');
+      expect(result[1]?.id).toBe('key-789');
+      expect(result[1]?.tenantId).toBe('ten-456');
       expect(mockDb.query).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining('SELECT'),

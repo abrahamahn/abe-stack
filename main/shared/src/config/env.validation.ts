@@ -81,18 +81,24 @@ function validateProductionGuards(env: FullEnv): void {
     const hasSqlite = env.SQLITE_FILE_PATH !== undefined && env.SQLITE_FILE_PATH !== '';
     const hasMongo =
       env.MONGODB_CONNECTION_STRING !== undefined && env.MONGODB_CONNECTION_STRING !== '';
-    const hasJson = env.JSON_DB_PATH !== undefined && env.JSON_DB_PATH !== '';
 
-    if (!hasPostgres && !hasSqlite && !hasMongo && !hasJson) {
+    if (!hasPostgres && !hasSqlite && !hasMongo) {
       throw new Error('Production requires a valid database configuration (URL or host/user/pass)');
     }
   }
 
   if (isProd) {
-    const weakSecrets = ['secret', 'password', 'changeme', 'jwt_secret', 'dev', 'prod', 'test'];
-    if (weakSecrets.includes(env.JWT_SECRET.toLowerCase()) || env.JWT_SECRET.length < 32) {
+    const weakPatterns = [
+      'secret', 'password', 'changeme', 'change_me', 'jwt_secret',
+      'dev', 'prod', 'test', 'example', 'placeholder',
+    ];
+    const lc = env.JWT_SECRET.toLowerCase();
+    const isWeak =
+      weakPatterns.some((p) => lc === p || lc.includes('change_me') || lc.includes('changeme')) ||
+      env.JWT_SECRET.length < 32;
+    if (isWeak) {
       throw new Error(
-        'Security Risk: JWT_SECRET must be at least 32 characters and not a common word in production',
+        'Security Risk: JWT_SECRET must be at least 32 characters and not a placeholder in production',
       );
     }
   }

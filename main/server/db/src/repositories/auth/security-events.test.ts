@@ -26,6 +26,7 @@ const createMockDb = (): RawDb =>
     getClient: vi.fn() as RawDb['getClient'],
     queryOne: vi.fn(),
     execute: vi.fn(),
+    withSession: vi.fn() as RawDb['withSession'],
   }) as unknown as RawDb;
 
 // ============================================================================
@@ -123,10 +124,10 @@ describe('createSecurityEventRepository', () => {
       const result = await repo.findByUserId('usr-123', 10);
 
       expect(result).toHaveLength(2);
-      expect(result[0].userId).toBe('usr-123');
-      expect(result[0].eventType).toBe('login_success');
-      expect(result[1].eventType).toBe('password_changed');
-      expect(result[1].severity).toBe('medium');
+      expect(result[0]?.userId).toBe('usr-123');
+      expect(result[0]?.eventType).toBe('login_success');
+      expect(result[1]?.eventType).toBe('password_changed');
+      expect(result[1]?.severity).toBe('medium');
       expect(mockDb.query).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining('SELECT'),
@@ -193,10 +194,10 @@ describe('createSecurityEventRepository', () => {
       const result = await repo.findRecent(10);
 
       expect(result).toHaveLength(2);
-      expect(result[0].userId).toBe('usr-123');
-      expect(result[0].eventType).toBe('login_success');
-      expect(result[1].userId).toBe('usr-456');
-      expect(result[1].eventType).toBe('login_failed');
+      expect(result[0]?.userId).toBe('usr-123');
+      expect(result[0]?.eventType).toBe('login_success');
+      expect(result[1]?.userId).toBe('usr-456');
+      expect(result[1]?.eventType).toBe('login_failed');
       expect(mockDb.query).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining('SELECT'),

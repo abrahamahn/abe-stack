@@ -19,7 +19,7 @@ import { ServerManager } from '@/manager';
  * Bootstraps the application.
  */
 async function main(): Promise<void> {
-  const manager = new ServerManager(loadConfig(process.env));
+  const manager = new ServerManager(await loadConfig());
   await manager.start();
 }
 

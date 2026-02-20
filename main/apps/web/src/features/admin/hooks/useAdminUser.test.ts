@@ -6,8 +6,8 @@ import { createAdminApiClient } from '../services/adminApi';
 
 import { useAdminUser } from './useAdminUser';
 
-import type { AdminUser } from '@bslt/shared';
 import type { AdminApiClient } from '../services/adminApi';
+import type { AdminUser } from '@bslt/shared';
 
 vi.mock('../services/adminApi', () => ({
   createAdminApiClient: vi.fn(),
@@ -83,14 +83,12 @@ describe('useAdminUser', () => {
 
       const { result } = renderHook(() => useAdminUser('user-123'));
 
-      expect(result.current.isLoading).toBe(true);
-
       await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
+        expect(result.current.user).toEqual(mockUser);
       });
 
       expect(mockGetUser).toHaveBeenCalledWith('user-123');
-      expect(result.current.user).toEqual(mockUser);
+      expect(result.current.isLoading).toBe(false);
       expect(result.current.error).toBeNull();
     });
 
@@ -144,7 +142,9 @@ describe('useAdminUser', () => {
 
       rerender({ userId: null });
 
-      expect(result.current.user).toBeNull();
+      await waitFor(() => {
+        expect(result.current.user).toBeNull();
+      });
       expect(result.current.isLoading).toBe(false);
       expect(result.current.error).toBeNull();
     });
@@ -158,10 +158,10 @@ describe('useAdminUser', () => {
       const { result } = renderHook(() => useAdminUser('user-123'));
 
       await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
+        expect(result.current.error).toBe(errorMessage);
       });
 
-      expect(result.current.error).toBe(errorMessage);
+      expect(result.current.isLoading).toBe(false);
       expect(result.current.user).toBeNull();
     });
 
@@ -171,10 +171,10 @@ describe('useAdminUser', () => {
       const { result } = renderHook(() => useAdminUser('user-123'));
 
       await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
+        expect(result.current.error).toBe('Failed to load user');
       });
 
-      expect(result.current.error).toBe('Failed to load user');
+      expect(result.current.isLoading).toBe(false);
       expect(result.current.user).toBeNull();
     });
   });
@@ -284,14 +284,16 @@ describe('useAdminUser', () => {
   });
 
   describe('edge cases', () => {
-    it('should handle loading state during fetch', () => {
+    it('should handle loading state during fetch', async () => {
       mockGetUser.mockImplementation(
         () => new Promise(() => {}), // Never resolves
       );
 
       const { result } = renderHook(() => useAdminUser('user-123'));
 
-      expect(result.current.isLoading).toBe(true);
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(true);
+      });
       expect(result.current.user).toBeNull();
     });
 

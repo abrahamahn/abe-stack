@@ -15,6 +15,7 @@
 import {
   acceptTosRequestSchema,
   changeEmailRequestSchema,
+  changePasswordRequestSchema,
   confirmEmailChangeRequestSchema,
   emailVerificationRequestSchema,
   emptyBodySchema,
@@ -34,6 +35,7 @@ import {
   verifyPhoneRequestSchema,
   type AcceptTosRequest,
   type ChangeEmailRequest,
+  type ChangePasswordRequest,
   type ConfirmEmailChangeRequest,
   type EmailVerificationRequest,
   type ForgotPasswordRequest,
@@ -57,6 +59,8 @@ import {
   protectedRoute,
   publicRoute,
   type HandlerContext,
+  type HttpReply,
+  type HttpRequest,
   type RouteDefinition,
   type RouteSchema,
 } from '../../../system/src';
@@ -93,11 +97,11 @@ import {
   handleVerifyPhone,
   handleVerifySmsCode,
 } from './handlers';
+import { handleChangePassword } from '../users/handlers';
 import { magicLinkRouteEntries } from './magic-link';
 import { oauthRouteEntries } from './oauth';
 import { webauthnRouteEntries } from './webauthn';
 
-import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { AppContext, ReplyWithCookies, RequestWithCookies } from './types';
 
 /**
@@ -130,7 +134,7 @@ const coreAuthEntries: [string, RouteDefinition][] = [
     'auth/register',
     publicRoute(
       'POST',
-      async (ctx: HandlerContext, body: unknown, req: FastifyRequest, reply: FastifyReply) => {
+      async (ctx: HandlerContext, body: unknown, req: HttpRequest, reply: HttpReply) => {
         return handleRegister(
           asAppContext(ctx),
           body as RegisterRequest,
@@ -147,7 +151,7 @@ const coreAuthEntries: [string, RouteDefinition][] = [
     'auth/login',
     publicRoute(
       'POST',
-      async (ctx: HandlerContext, body: unknown, req: FastifyRequest, reply: FastifyReply) => {
+      async (ctx: HandlerContext, body: unknown, req: HttpRequest, reply: HttpReply) => {
         return handleLogin(
           asAppContext(ctx),
           body as LoginRequest,
@@ -164,7 +168,7 @@ const coreAuthEntries: [string, RouteDefinition][] = [
     'auth/refresh',
     publicRoute(
       'POST',
-      async (ctx: HandlerContext, _body: unknown, req: FastifyRequest, reply: FastifyReply) => {
+      async (ctx: HandlerContext, _body: unknown, req: HttpRequest, reply: HttpReply) => {
         return handleRefresh(
           asAppContext(ctx),
           req as unknown as RequestWithCookies,
@@ -180,7 +184,7 @@ const coreAuthEntries: [string, RouteDefinition][] = [
     'auth/logout',
     publicRoute(
       'POST',
-      async (ctx: HandlerContext, _body: unknown, req: FastifyRequest, reply: FastifyReply) => {
+      async (ctx: HandlerContext, _body: unknown, req: HttpRequest, reply: HttpReply) => {
         return handleLogout(
           asAppContext(ctx),
           req as unknown as RequestWithCookies,
@@ -196,7 +200,7 @@ const coreAuthEntries: [string, RouteDefinition][] = [
     'auth/logout-all',
     protectedRoute(
       'POST',
-      async (ctx: HandlerContext, _body: unknown, req: FastifyRequest, reply: FastifyReply) => {
+      async (ctx: HandlerContext, _body: unknown, req: HttpRequest, reply: HttpReply) => {
         return handleLogoutAll(
           asAppContext(ctx),
           req as unknown as RequestWithCookies,
@@ -213,7 +217,7 @@ const coreAuthEntries: [string, RouteDefinition][] = [
     'auth/forgot-password',
     publicRoute(
       'POST',
-      async (ctx: HandlerContext, body: unknown, req: FastifyRequest) => {
+      async (ctx: HandlerContext, body: unknown, req: HttpRequest) => {
         return handleForgotPassword(
           asAppContext(ctx),
           body as ForgotPasswordRequest,
@@ -229,7 +233,7 @@ const coreAuthEntries: [string, RouteDefinition][] = [
     'auth/reset-password',
     publicRoute(
       'POST',
-      async (ctx: HandlerContext, body: unknown, req: FastifyRequest) => {
+      async (ctx: HandlerContext, body: unknown, req: HttpRequest) => {
         return handleResetPassword(
           asAppContext(ctx),
           body as ResetPasswordRequest,
@@ -245,7 +249,7 @@ const coreAuthEntries: [string, RouteDefinition][] = [
     'auth/set-password',
     protectedRoute(
       'POST',
-      async (ctx: HandlerContext, body: unknown, req: FastifyRequest) => {
+      async (ctx: HandlerContext, body: unknown, req: HttpRequest) => {
         return handleSetPassword(
           asAppContext(ctx),
           body as SetPasswordRequest,
@@ -262,7 +266,7 @@ const coreAuthEntries: [string, RouteDefinition][] = [
     'auth/verify-email',
     publicRoute(
       'POST',
-      async (ctx: HandlerContext, body: unknown, _req: FastifyRequest, reply: FastifyReply) => {
+      async (ctx: HandlerContext, body: unknown, _req: HttpRequest, reply: HttpReply) => {
         return handleVerifyEmail(
           asAppContext(ctx),
           body as EmailVerificationRequest,
@@ -291,7 +295,7 @@ const coreAuthEntries: [string, RouteDefinition][] = [
     'auth/totp/setup',
     protectedRoute(
       'POST',
-      async (ctx: HandlerContext, _body: unknown, req: FastifyRequest) => {
+      async (ctx: HandlerContext, _body: unknown, req: HttpRequest) => {
         return handleTotpSetup(asAppContext(ctx), undefined, req as unknown as RequestWithCookies);
       },
       [],
@@ -304,7 +308,7 @@ const coreAuthEntries: [string, RouteDefinition][] = [
     'auth/totp/enable',
     protectedRoute(
       'POST',
-      async (ctx: HandlerContext, body: unknown, req: FastifyRequest) => {
+      async (ctx: HandlerContext, body: unknown, req: HttpRequest) => {
         return handleTotpEnable(
           asAppContext(ctx),
           body as TotpVerifyRequest,
@@ -321,7 +325,7 @@ const coreAuthEntries: [string, RouteDefinition][] = [
     'auth/totp/disable',
     protectedRoute(
       'POST',
-      async (ctx: HandlerContext, body: unknown, req: FastifyRequest) => {
+      async (ctx: HandlerContext, body: unknown, req: HttpRequest) => {
         return handleTotpDisable(
           asAppContext(ctx),
           body as TotpVerifyRequest,
@@ -338,7 +342,7 @@ const coreAuthEntries: [string, RouteDefinition][] = [
     'auth/totp/status',
     protectedRoute(
       'GET',
-      async (ctx: HandlerContext, _body: unknown, req: FastifyRequest) => {
+      async (ctx: HandlerContext, _body: unknown, req: HttpRequest) => {
         return handleTotpStatus(asAppContext(ctx), undefined, req as unknown as RequestWithCookies);
       },
       [],
@@ -351,7 +355,7 @@ const coreAuthEntries: [string, RouteDefinition][] = [
     'auth/totp/verify-login',
     publicRoute(
       'POST',
-      async (ctx: HandlerContext, body: unknown, _req: FastifyRequest, reply: FastifyReply) => {
+      async (ctx: HandlerContext, body: unknown, _req: HttpRequest, reply: HttpReply) => {
         return handleTotpLoginVerify(
           asAppContext(ctx),
           body as TotpLoginVerifyRequest,
@@ -369,7 +373,7 @@ const coreAuthEntries: [string, RouteDefinition][] = [
     'auth/tos/status',
     protectedRoute(
       'GET',
-      async (ctx: HandlerContext, _body: unknown, req: FastifyRequest) => {
+      async (ctx: HandlerContext, _body: unknown, req: HttpRequest) => {
         return handleTosStatus(asAppContext(ctx), undefined, req as unknown as RequestWithCookies);
       },
       [],
@@ -382,7 +386,7 @@ const coreAuthEntries: [string, RouteDefinition][] = [
     'auth/tos/accept',
     protectedRoute(
       'POST',
-      async (ctx: HandlerContext, body: unknown, req: FastifyRequest) => {
+      async (ctx: HandlerContext, body: unknown, req: HttpRequest) => {
         return handleAcceptTos(
           asAppContext(ctx),
           body as AcceptTosRequest,
@@ -400,7 +404,7 @@ const coreAuthEntries: [string, RouteDefinition][] = [
     'auth/sudo',
     protectedRoute(
       'POST',
-      async (ctx: HandlerContext, body: unknown, req: FastifyRequest) => {
+      async (ctx: HandlerContext, body: unknown, req: HttpRequest) => {
         return handleSudoElevate(
           asAppContext(ctx),
           body as SudoRequest,
@@ -418,7 +422,7 @@ const coreAuthEntries: [string, RouteDefinition][] = [
     'auth/change-email',
     protectedRoute(
       'POST',
-      async (ctx: HandlerContext, body: unknown, req: FastifyRequest) => {
+      async (ctx: HandlerContext, body: unknown, req: HttpRequest) => {
         return handleChangeEmail(
           asAppContext(ctx),
           body as ChangeEmailRequest,
@@ -435,7 +439,7 @@ const coreAuthEntries: [string, RouteDefinition][] = [
     'auth/change-email/confirm',
     publicRoute(
       'POST',
-      async (ctx: HandlerContext, body: unknown, req: FastifyRequest) => {
+      async (ctx: HandlerContext, body: unknown, req: HttpRequest) => {
         return handleConfirmEmailChange(
           asAppContext(ctx),
           body as ConfirmEmailChangeRequest,
@@ -464,7 +468,7 @@ const coreAuthEntries: [string, RouteDefinition][] = [
     'users/me/devices',
     protectedRoute(
       'GET',
-      async (ctx: HandlerContext, _body: unknown, req: FastifyRequest) => {
+      async (ctx: HandlerContext, _body: unknown, req: HttpRequest) => {
         return handleListDevices(asAppContext(ctx), req as unknown as RequestWithCookies);
       },
       [],
@@ -477,7 +481,7 @@ const coreAuthEntries: [string, RouteDefinition][] = [
     'users/me/devices/:id/trust',
     protectedRoute(
       'POST',
-      async (ctx: HandlerContext, _body: unknown, req: FastifyRequest) => {
+      async (ctx: HandlerContext, _body: unknown, req: HttpRequest) => {
         const params = (req as unknown as { params: { id: string } }).params;
         return handleTrustDevice(asAppContext(ctx), params, req as unknown as RequestWithCookies);
       },
@@ -491,7 +495,7 @@ const coreAuthEntries: [string, RouteDefinition][] = [
     'users/me/devices/:id',
     protectedRoute(
       'DELETE',
-      async (ctx: HandlerContext, _body: unknown, req: FastifyRequest) => {
+      async (ctx: HandlerContext, _body: unknown, req: HttpRequest) => {
         const params = (req as unknown as { params: { id: string } }).params;
         return handleRevokeDevice(asAppContext(ctx), params, req as unknown as RequestWithCookies);
       },
@@ -506,7 +510,7 @@ const coreAuthEntries: [string, RouteDefinition][] = [
     'users/me/phone',
     protectedRoute(
       'POST',
-      async (ctx: HandlerContext, body: unknown, req: FastifyRequest) => {
+      async (ctx: HandlerContext, body: unknown, req: HttpRequest) => {
         return handleSetPhone(
           asAppContext(ctx),
           body as SetPhoneRequest,
@@ -523,7 +527,7 @@ const coreAuthEntries: [string, RouteDefinition][] = [
     'users/me/phone/verify',
     protectedRoute(
       'POST',
-      async (ctx: HandlerContext, body: unknown, req: FastifyRequest) => {
+      async (ctx: HandlerContext, body: unknown, req: HttpRequest) => {
         return handleVerifyPhone(
           asAppContext(ctx),
           body as VerifyPhoneRequest,
@@ -540,7 +544,7 @@ const coreAuthEntries: [string, RouteDefinition][] = [
     'users/me/phone/delete',
     protectedRoute(
       'DELETE',
-      async (ctx: HandlerContext, _body: unknown, req: FastifyRequest) => {
+      async (ctx: HandlerContext, _body: unknown, req: HttpRequest) => {
         return handleRemovePhone(asAppContext(ctx), req as unknown as RequestWithCookies);
       },
       'user',
@@ -554,7 +558,7 @@ const coreAuthEntries: [string, RouteDefinition][] = [
     'auth/invalidate-sessions',
     protectedRoute(
       'POST',
-      async (ctx: HandlerContext, _body: unknown, req: FastifyRequest, reply: FastifyReply) => {
+      async (ctx: HandlerContext, _body: unknown, req: HttpRequest, reply: HttpReply) => {
         return handleInvalidateSessions(
           asAppContext(ctx),
           req as unknown as RequestWithCookies,
@@ -567,12 +571,26 @@ const coreAuthEntries: [string, RouteDefinition][] = [
     ),
   ],
 
+  // Password change (authenticated)
+  [
+    'auth/password/change',
+    protectedRoute(
+      'POST',
+      async (ctx: HandlerContext, body: unknown, req: HttpRequest) => {
+        return handleChangePassword(ctx, body as ChangePasswordRequest, req);
+      },
+      'user',
+      changePasswordRequestSchema,
+      { summary: 'Change password', tags: ['Auth'] },
+    ),
+  ],
+
   // SMS 2FA challenge routes (during login flow)
   [
     'auth/sms/send',
     publicRoute(
       'POST',
-      async (ctx: HandlerContext, body: unknown, req: FastifyRequest) => {
+      async (ctx: HandlerContext, body: unknown, req: HttpRequest) => {
         return handleSendSmsCode(
           asAppContext(ctx),
           body as SmsChallengeRequest,
@@ -588,7 +606,7 @@ const coreAuthEntries: [string, RouteDefinition][] = [
     'auth/sms/verify',
     publicRoute(
       'POST',
-      async (ctx: HandlerContext, body: unknown, req: FastifyRequest, reply: FastifyReply) => {
+      async (ctx: HandlerContext, body: unknown, req: HttpRequest, reply: HttpReply) => {
         return handleVerifySmsCode(
           asAppContext(ctx),
           body as SmsVerifyRequest,

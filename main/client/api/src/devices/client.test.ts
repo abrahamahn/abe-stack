@@ -19,7 +19,7 @@ vi.mock('@bslt/shared', async () => {
   const actual = await vi.importActual<typeof import('@bslt/shared')>('@bslt/shared');
   return {
     ...actual,
-    addAuthHeader: vi.fn((headers: Headers, token: string | null) => {
+    addAuthHeader: vi.fn((headers: Headers, token: string | null | undefined) => {
       if (token !== null && token !== undefined && token !== '') {
         headers.set('Authorization', `Bearer ${token}`);
       }

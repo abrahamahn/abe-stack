@@ -9,13 +9,13 @@ import { QueryCacheProvider } from '../query/QueryCacheProvider';
 
 import { useOffsetPaginatedQuery, usePaginatedQuery } from './usePaginatedQuery';
 
-import type { ReactElement, ReactNode } from 'react';
 import type {
   UseOffsetPaginatedQueryOptions,
   UseOffsetPaginatedQueryResult,
   UsePaginatedQueryOptions,
   UsePaginatedQueryResult,
 } from './usePaginatedQuery';
+import type { ReactElement, ReactNode } from 'react';
 const createWrapper = () => {
   const queryCache = new QueryCache({
     defaultStaleTime: 0,
@@ -218,7 +218,7 @@ describe('usePaginatedQuery', () => {
       const queryFn = vi.fn().mockImplementation(() => {
         callCount++;
         return Promise.resolve({
-          data: [{ id: `item-${callCount}` }],
+          data: [{ id: `item-${callCount.toString()}` }],
           nextCursor: callCount === 1 ? 'cursor-2' : null,
           hasNext: callCount === 1,
           limit: 10,

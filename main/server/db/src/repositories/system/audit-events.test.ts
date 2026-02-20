@@ -26,6 +26,7 @@ const createMockDb = (): RawDb => ({
   getClient: vi.fn() as RawDb['getClient'],
   queryOne: vi.fn(),
   execute: vi.fn(),
+  withSession: vi.fn() as RawDb['withSession'],
 });
 
 // ============================================================================
@@ -239,7 +240,7 @@ describe('createAuditEventRepository', () => {
     it('should respect custom limit', async () => {
       const events = Array.from({ length: 50 }, (_, i) => ({
         ...mockAuditEvent,
-        id: `ae-${i}`,
+        id: `ae-${String(i)}`,
       }));
       vi.mocked(mockDb.query).mockResolvedValue(events);
 
@@ -277,8 +278,8 @@ describe('createAuditEventRepository', () => {
       const result = await repo.findByActorId('usr-123');
 
       expect(result).toHaveLength(2);
-      expect(result[0].actorId).toBe('usr-123');
-      expect(result[1].actorId).toBe('usr-123');
+      expect(result[0]?.actorId).toBe('usr-123');
+      expect(result[1]?.actorId).toBe('usr-123');
       expect(mockDb.query).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining('actor_id'),
@@ -298,7 +299,7 @@ describe('createAuditEventRepository', () => {
     it('should respect custom limit', async () => {
       const events = Array.from({ length: 25 }, (_, i) => ({
         ...mockAuditEvent,
-        id: `ae-${i}`,
+        id: `ae-${String(i)}`,
       }));
       vi.mocked(mockDb.query).mockResolvedValue(events);
 
@@ -331,8 +332,8 @@ describe('createAuditEventRepository', () => {
       const result = await repo.findByTenantId('tenant-123');
 
       expect(result).toHaveLength(2);
-      expect(result[0].tenantId).toBe('tenant-123');
-      expect(result[1].tenantId).toBe('tenant-123');
+      expect(result[0]?.tenantId).toBe('tenant-123');
+      expect(result[1]?.tenantId).toBe('tenant-123');
       expect(mockDb.query).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining('tenant_id'),
@@ -352,7 +353,7 @@ describe('createAuditEventRepository', () => {
     it('should respect custom limit', async () => {
       const events = Array.from({ length: 75 }, (_, i) => ({
         ...mockAuditEvent,
-        id: `ae-${i}`,
+        id: `ae-${String(i)}`,
       }));
       vi.mocked(mockDb.query).mockResolvedValue(events);
 
@@ -386,8 +387,8 @@ describe('createAuditEventRepository', () => {
       const result = await repo.findByAction('user.created');
 
       expect(result).toHaveLength(2);
-      expect(result[0].action).toBe('user.created');
-      expect(result[1].action).toBe('user.created');
+      expect(result[0]?.action).toBe('user.created');
+      expect(result[1]?.action).toBe('user.created');
       expect(mockDb.query).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining('action'),
@@ -407,7 +408,7 @@ describe('createAuditEventRepository', () => {
     it('should respect custom limit', async () => {
       const events = Array.from({ length: 10 }, (_, i) => ({
         ...mockAuditEvent,
-        id: `ae-${i}`,
+        id: `ae-${String(i)}`,
       }));
       vi.mocked(mockDb.query).mockResolvedValue(events);
 
@@ -432,7 +433,7 @@ describe('createAuditEventRepository', () => {
         const repo = createAuditEventRepository(mockDb);
         const result = await repo.findByAction(action);
 
-        expect(result[0].action).toBe(action);
+        expect(result[0]?.action).toBe(action);
       }
     });
   });
@@ -446,10 +447,10 @@ describe('createAuditEventRepository', () => {
       const result = await repo.findByResource('user', 'usr-456');
 
       expect(result).toHaveLength(2);
-      expect(result[0].resource).toBe('user');
-      expect(result[0].resourceId).toBe('usr-456');
-      expect(result[1].resource).toBe('user');
-      expect(result[1].resourceId).toBe('usr-456');
+      expect(result[0]?.resource).toBe('user');
+      expect(result[0]?.resourceId).toBe('usr-456');
+      expect(result[1]?.resource).toBe('user');
+      expect(result[1]?.resourceId).toBe('usr-456');
       expect(mockDb.query).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining('resource'),
@@ -469,7 +470,7 @@ describe('createAuditEventRepository', () => {
     it('should respect custom limit', async () => {
       const events = Array.from({ length: 30 }, (_, i) => ({
         ...mockAuditEvent,
-        id: `ae-${i}`,
+        id: `ae-${String(i)}`,
       }));
       vi.mocked(mockDb.query).mockResolvedValue(events);
 
@@ -498,8 +499,8 @@ describe('createAuditEventRepository', () => {
         const repo = createAuditEventRepository(mockDb);
         const result = await repo.findByResource(resource.type, resource.id);
 
-        expect(result[0].resource).toBe(resource.type);
-        expect(result[0].resourceId).toBe(resource.id);
+        expect(result[0]?.resource).toBe(resource.type);
+        expect(result[0]?.resourceId).toBe(resource.id);
       }
     });
 
@@ -535,7 +536,7 @@ describe('createAuditEventRepository', () => {
       const largeMetadata = {
         request: { headers: { 'user-agent': 'Mozilla/5.0' }, body: { data: 'large payload' } },
         response: { status: 200, body: { result: 'success' } },
-        trace: Array.from({ length: 100 }, (_, i) => `step-${i}`),
+        trace: Array.from({ length: 100 }, (_, i) => `step-${String(i)}`),
       };
       const eventWithLargeMetadata = {
         ...mockAuditEvent,
@@ -560,7 +561,7 @@ describe('createAuditEventRepository', () => {
       const repo = createAuditEventRepository(mockDb);
       const result = await repo.findByAction(longAction);
 
-      expect(result[0].action).toBe(longAction);
+      expect(result[0]?.action).toBe(longAction);
     });
 
     it('should handle IPv6 addresses', async () => {

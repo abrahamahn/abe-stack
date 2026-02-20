@@ -8,7 +8,8 @@
 import { getAccessToken } from '@app/authToken';
 import { useQueryCache } from '@bslt/react';
 import { useUndoableMutation } from '@bslt/react/hooks';
-import { useRef } from 'react';
+import { clientConfig } from '@config';
+import { useEffect, useRef } from 'react';
 
 import { createSettingsApi, type UpdateProfileRequest, type User } from '../api';
 
@@ -17,12 +18,10 @@ import { createSettingsApi, type UpdateProfileRequest, type User } from '../api'
 // ============================================================================
 
 let settingsApi: ReturnType<typeof createSettingsApi> | null = null;
-const apiBaseUrl =
-  typeof import.meta.env['VITE_API_URL'] === 'string' ? import.meta.env['VITE_API_URL'] : '';
 
 function getSettingsApi(): ReturnType<typeof createSettingsApi> {
   settingsApi ??= createSettingsApi({
-    baseUrl: apiBaseUrl,
+    baseUrl: clientConfig.apiUrl,
     getToken: getAccessToken,
   });
   return settingsApi;
@@ -53,9 +52,11 @@ export function useProfileUpdate(options?: UseProfileUpdateOptions): UseProfileU
   const profileRef = useRef<Record<string, unknown>>({});
 
   // Keep snapshot ref in sync with provided profile data
-  if (options?.currentProfile !== undefined) {
-    profileRef.current = options.currentProfile;
-  }
+  useEffect(() => {
+    if (options?.currentProfile !== undefined) {
+      profileRef.current = options.currentProfile;
+    }
+  });
 
   const mutation = useUndoableMutation<User, Error, UpdateProfileRequest>({
     mutationFn: async (data): Promise<User> => {

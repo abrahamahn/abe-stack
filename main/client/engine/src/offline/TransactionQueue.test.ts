@@ -128,7 +128,7 @@ describe('TransactionQueue', () => {
   });
 
   afterEach(() => {
-    queue?.destroy();
+    queue.destroy();
   });
 
   describe('constructor', () => {

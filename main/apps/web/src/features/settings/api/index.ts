@@ -1,6 +1,7 @@
 // main/apps/web/src/features/settings/api/index.ts
 export { createSettingsApi } from './settingsApi';
 export type {
+  ApiError,
   AvatarDeleteResponse,
   AvatarUploadResponse,
   ApiKeyLocal,

@@ -6,12 +6,7 @@
  * Uses the double-submit cookie pattern with signed tokens.
  */
 
-import {
-  encryptToken,
-  generateToken,
-  signToken,
-  validateCsrfToken,
-} from '@bslt/server-system';
+import { encryptToken, generateToken, signToken, validateCsrfToken } from '@bslt/server-system';
 import {
   AUTH_CONSTANTS,
   CSRF_EXEMPT_PATHS,
@@ -86,12 +81,13 @@ export function registerCsrf(server: FastifyInstance, options: CsrfOptions): voi
     }
 
     // Set the CSRF cookie
+    // Do NOT pass `signed` here — we already handle signing/encryption via
+    // signToken/encryptToken above. Passing signed=true would double-sign.
     this.setCookie(cookieName, finalToken, {
       path,
       httpOnly,
       secure,
       sameSite,
-      signed,
     });
 
     return token;

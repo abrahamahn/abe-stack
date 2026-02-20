@@ -61,6 +61,11 @@
       "source": "./src/config/index.ts",
       "types": "./dist/config/index.d.ts",
       "default": "./dist/config/index.js"
+    },
+    "./system/crypto": {
+      "source": "./src/system/crypto/index.ts",
+      "types": "./dist/system/crypto/index.d.ts",
+      "default": "./dist/system/crypto/index.js"
     }
   },
   "files": [

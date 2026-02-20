@@ -72,11 +72,13 @@ export function useAdminUser(userId: string | null): UseAdminUserResult {
   // Fetch user when userId changes
   useEffect(() => {
     if (userId !== null && userId !== '') {
-      fetchUser(userId).catch(() => {
-        // Error is already handled in fetchUser
+      queueMicrotask(() => {
+        void fetchUser(userId);
       });
     } else {
-      setState({ user: null, isLoading: false, error: null });
+      queueMicrotask(() => {
+        setState({ user: null, isLoading: false, error: null });
+      });
     }
   }, [userId, fetchUser]);
 

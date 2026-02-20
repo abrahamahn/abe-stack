@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { generateUniqueUsername, splitFullName } from './username';
 
-import type { Repositories } from '../../../../db/src';
+import type { Repositories, User } from '../../../../db/src';
 
 describe('generateUniqueUsername', () => {
   let mockRepos: Repositories;
@@ -83,7 +83,7 @@ describe('generateUniqueUsername', () => {
   describe('when handling collisions', () => {
     it('should append suffix on first collision', async () => {
       vi.mocked(mockRepos.users.findByUsername)
-        .mockResolvedValueOnce({ id: 'existing' } as any)
+        .mockResolvedValueOnce({ id: 'existing' } as unknown as User)
         .mockResolvedValueOnce(null);
 
       const result = await generateUniqueUsername(mockRepos, 'john@example.com');
@@ -96,9 +96,9 @@ describe('generateUniqueUsername', () => {
 
     it('should retry with different suffix on continued collisions', async () => {
       vi.mocked(mockRepos.users.findByUsername)
-        .mockResolvedValueOnce({ id: 'existing1' } as any) // bare prefix collision
-        .mockResolvedValueOnce({ id: 'existing2' } as any) // first suffix collision
-        .mockResolvedValueOnce({ id: 'existing3' } as any) // second suffix collision
+        .mockResolvedValueOnce({ id: 'existing1' } as unknown as User) // bare prefix collision
+        .mockResolvedValueOnce({ id: 'existing2' } as unknown as User) // first suffix collision
+        .mockResolvedValueOnce({ id: 'existing3' } as unknown as User) // second suffix collision
         .mockResolvedValueOnce(null); // finally available
 
       const result = await generateUniqueUsername(mockRepos, 'john@example.com');
@@ -110,7 +110,7 @@ describe('generateUniqueUsername', () => {
 
     it('should truncate prefix when appending suffix to stay within 15 chars', async () => {
       vi.mocked(mockRepos.users.findByUsername)
-        .mockResolvedValueOnce({ id: 'existing' } as any)
+        .mockResolvedValueOnce({ id: 'existing' } as unknown as User)
         .mockResolvedValueOnce(null);
 
       const result = await generateUniqueUsername(
@@ -127,12 +127,12 @@ describe('generateUniqueUsername', () => {
     it('should fall back to "user_XXXXXXXX" after 5 collision retries', async () => {
       // 1 bare prefix + 5 suffix attempts = 6 collisions
       vi.mocked(mockRepos.users.findByUsername)
-        .mockResolvedValueOnce({ id: 'existing1' } as any)
-        .mockResolvedValueOnce({ id: 'existing2' } as any)
-        .mockResolvedValueOnce({ id: 'existing3' } as any)
-        .mockResolvedValueOnce({ id: 'existing4' } as any)
-        .mockResolvedValueOnce({ id: 'existing5' } as any)
-        .mockResolvedValueOnce({ id: 'existing6' } as any);
+        .mockResolvedValueOnce({ id: 'existing1' } as unknown as User)
+        .mockResolvedValueOnce({ id: 'existing2' } as unknown as User)
+        .mockResolvedValueOnce({ id: 'existing3' } as unknown as User)
+        .mockResolvedValueOnce({ id: 'existing4' } as unknown as User)
+        .mockResolvedValueOnce({ id: 'existing5' } as unknown as User)
+        .mockResolvedValueOnce({ id: 'existing6' } as unknown as User);
 
       const result = await generateUniqueUsername(mockRepos, 'john@example.com');
 
@@ -143,12 +143,12 @@ describe('generateUniqueUsername', () => {
 
     it('should ensure fallback username fits within 15 chars', async () => {
       vi.mocked(mockRepos.users.findByUsername)
-        .mockResolvedValueOnce({ id: 'existing1' } as any)
-        .mockResolvedValueOnce({ id: 'existing2' } as any)
-        .mockResolvedValueOnce({ id: 'existing3' } as any)
-        .mockResolvedValueOnce({ id: 'existing4' } as any)
-        .mockResolvedValueOnce({ id: 'existing5' } as any)
-        .mockResolvedValueOnce({ id: 'existing6' } as any);
+        .mockResolvedValueOnce({ id: 'existing1' } as unknown as User)
+        .mockResolvedValueOnce({ id: 'existing2' } as unknown as User)
+        .mockResolvedValueOnce({ id: 'existing3' } as unknown as User)
+        .mockResolvedValueOnce({ id: 'existing4' } as unknown as User)
+        .mockResolvedValueOnce({ id: 'existing5' } as unknown as User)
+        .mockResolvedValueOnce({ id: 'existing6' } as unknown as User);
 
       const result = await generateUniqueUsername(mockRepos, 'test@example.com');
 
@@ -168,7 +168,7 @@ describe('generateUniqueUsername', () => {
 
     it('should return username matching pattern even with collision', async () => {
       vi.mocked(mockRepos.users.findByUsername)
-        .mockResolvedValueOnce({ id: 'existing' } as any)
+        .mockResolvedValueOnce({ id: 'existing' } as unknown as User)
         .mockResolvedValueOnce(null);
 
       const result = await generateUniqueUsername(mockRepos, 'test123@example.com');
@@ -178,12 +178,12 @@ describe('generateUniqueUsername', () => {
 
     it('should return username matching pattern even with fallback', async () => {
       vi.mocked(mockRepos.users.findByUsername)
-        .mockResolvedValueOnce({ id: 'existing1' } as any)
-        .mockResolvedValueOnce({ id: 'existing2' } as any)
-        .mockResolvedValueOnce({ id: 'existing3' } as any)
-        .mockResolvedValueOnce({ id: 'existing4' } as any)
-        .mockResolvedValueOnce({ id: 'existing5' } as any)
-        .mockResolvedValueOnce({ id: 'existing6' } as any);
+        .mockResolvedValueOnce({ id: 'existing1' } as unknown as User)
+        .mockResolvedValueOnce({ id: 'existing2' } as unknown as User)
+        .mockResolvedValueOnce({ id: 'existing3' } as unknown as User)
+        .mockResolvedValueOnce({ id: 'existing4' } as unknown as User)
+        .mockResolvedValueOnce({ id: 'existing5' } as unknown as User)
+        .mockResolvedValueOnce({ id: 'existing6' } as unknown as User);
 
       const result = await generateUniqueUsername(mockRepos, 'test@example.com');
 

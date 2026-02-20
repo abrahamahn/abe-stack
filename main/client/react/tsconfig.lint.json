@@ -1,0 +1,33 @@
+{
+  "extends": "../../../config/tsconfig.react.json",
+  "compilerOptions": {
+    "composite": false,
+    "noEmit": true,
+    "declaration": false,
+    "declarationMap": false,
+    "baseUrl": "./",
+    "paths": {
+      "@bslt/shared": ["../../shared/src/index.ts"],
+      "@bslt/shared/*": ["../../shared/src/*"],
+      "@bslt/client-engine": ["../engine/src/index.ts"],
+      "@bslt/client-engine/*": ["../engine/src/*"],
+      "@bslt/api": ["../api/src/index.ts"],
+      "@bslt/api/*": ["../api/src/*"],
+      "@hooks": ["./src/hooks"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@providers": ["./src/providers"],
+      "@providers/*": ["./src/providers/*"],
+      "@router": ["./src/router"],
+      "@router/*": ["./src/router/*"]
+    },
+    "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.react.lint.tsbuildinfo"
+  },
+  "include": [
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "src/**/*.spec.ts",
+    "src/**/*.spec.tsx",
+    "src/**/__tests__/**/*"
+  ],
+  "exclude": ["node_modules", "dist"]
+}

@@ -53,14 +53,14 @@ export async function listUserSessions(
   currentFamilyId?: string,
 ): Promise<UserSession[]> {
   // Get all active (non-revoked) token families for this user
-  const families = await repos.refreshTokenFamilies.findActiveByUserId(userId);
+  const families = await repos.refreshTokens.findActiveFamilies(userId);
 
   return families.map((family) => ({
-    id: family.id,
-    createdAt: family.createdAt,
+    id: family.familyId,
+    createdAt: family.familyCreatedAt,
     ipAddress: family.ipAddress,
     userAgent: family.userAgent,
-    isCurrent: family.id === currentFamilyId,
+    isCurrent: family.familyId === currentFamilyId,
   }));
 }
 
@@ -87,19 +87,19 @@ export async function revokeSession(
   }
 
   // Verify the session belongs to this user
-  const family = await repos.refreshTokenFamilies.findById(sessionId);
+  const family = await repos.refreshTokens.findFamilyById(sessionId);
 
   if (family?.userId !== userId) {
     throw new NotFoundError('Session not found');
   }
 
-  if (family.revokedAt !== null) {
+  if (family.familyRevokedAt !== null) {
     // Already revoked, nothing to do
     return;
   }
 
   // Revoke the session
-  await repos.refreshTokenFamilies.revoke(sessionId, 'User revoked session');
+  await repos.refreshTokens.revokeFamily(sessionId, 'User revoked session');
 }
 
 /**
@@ -118,15 +118,15 @@ export async function revokeAllSessions(
   currentFamilyId?: string,
 ): Promise<number> {
   // Get all active sessions
-  const families = await repos.refreshTokenFamilies.findActiveByUserId(userId);
+  const families = await repos.refreshTokens.findActiveFamilies(userId);
 
   // Filter out the current session
-  const sessionsToRevoke = families.filter((f) => f.id !== currentFamilyId);
+  const sessionsToRevoke = families.filter((f) => f.familyId !== currentFamilyId);
 
   // Revoke each session
   let revokedCount = 0;
   for (const family of sessionsToRevoke) {
-    await repos.refreshTokenFamilies.revoke(family.id, 'User logged out from all devices');
+    await repos.refreshTokens.revokeFamily(family.familyId, 'User logged out from all devices');
     revokedCount++;
   }
 
@@ -143,6 +143,6 @@ export async function revokeAllSessions(
  * @complexity O(1) after repository call - Array.length is O(1)
  */
 export async function getSessionCount(repos: Repositories, userId: string): Promise<number> {
-  const families = await repos.refreshTokenFamilies.findActiveByUserId(userId);
+  const families = await repos.refreshTokens.findActiveFamilies(userId);
   return families.length;
 }

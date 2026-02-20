@@ -26,11 +26,10 @@ import { record } from '../../audit/service';
 import { hashPassword, revokeAllUserTokens, verifyPassword } from '../../auth';
 import { ERROR_MESSAGES } from '../types';
 
-import type { UserRole } from '@bslt/shared';
-import type { FastifyRequest } from 'fastify';
 import type { DbClient, Repositories } from '../../../../db/src';
-import type { HandlerContext, RouteResult } from '../../../../system/src';
+import type { HandlerContext, HttpRequest, RouteResult } from '../../../../system/src';
 import type { UsersAuthConfig, UsersModuleDeps, UsersRequest } from '../types';
+import type { UserRole } from '@bslt/shared';
 
 /**
  * Storage service interface for file operations.
@@ -67,8 +66,8 @@ export interface ProfileUser {
   id: string;
   /** User's email address */
   email: string;
-  /** User's unique username */
-  username: string;
+  /** User's unique username — null for users without one */
+  username: string | null;
   /** User's first name */
   firstName: string;
   /** User's last name */
@@ -88,8 +87,8 @@ export interface ProfileUser {
  * Nullable fields can be set to null to clear them.
  */
 export interface UpdateProfileData {
-  /** New username */
-  username?: string;
+  /** New username — pass null to clear */
+  username?: string | null;
   /** New first name */
   firstName?: string;
   /** New last name */
@@ -143,8 +142,8 @@ export async function updateProfile(
   // Build update payload from provided fields
   const updatePayload: Record<string, unknown> = {};
   if ('username' in data) {
-    // Check username uniqueness if changing
-    if (data.username !== user.username) {
+    // Check username uniqueness if changing to a non-null value
+    if (data.username !== null && data.username !== user.username) {
       const existing = await repos.users.findByUsername(data.username);
       if (existing !== null && existing.id !== userId) {
         throw new BadRequestError('Username is already taken', 'USERNAME_TAKEN');
@@ -263,12 +262,12 @@ export async function changePassword(
   }
 
   // Validate new password strength against user's personal info
-  const passwordValidation = await validatePassword(newPassword, [
-    user.email,
-    user.username,
-    user.firstName,
-    user.lastName,
-  ]);
+  const passwordValidation = await validatePassword(
+    newPassword,
+    [user.email, user.username, user.firstName, user.lastName].filter(
+      (s): s is string => s !== null,
+    ),
+  );
   if (!passwordValidation.isValid) {
     throw new WeakPasswordError({ errors: passwordValidation.errors });
   }
@@ -545,7 +544,7 @@ function asUsersDeps(ctx: HandlerContext): UsersModuleDeps {
 export async function handleUploadAvatar(
   ctx: HandlerContext,
   body: unknown,
-  req: FastifyRequest,
+  req: HttpRequest,
 ): Promise<RouteResult> {
   const deps = asUsersDeps(ctx);
   const request = req as unknown as UsersRequest;
@@ -609,7 +608,7 @@ export async function handleUploadAvatar(
 export async function handleDeleteAvatar(
   ctx: HandlerContext,
   _body: undefined,
-  req: FastifyRequest,
+  req: HttpRequest,
 ): Promise<RouteResult> {
   const deps = asUsersDeps(ctx);
   const request = req as unknown as UsersRequest;
@@ -658,7 +657,7 @@ interface ChangePasswordBody {
 export async function handleUpdateProfile(
   ctx: HandlerContext,
   body: UpdateProfileData,
-  req: FastifyRequest,
+  req: HttpRequest,
 ): Promise<RouteResult> {
   const deps = asUsersDeps(ctx);
   const request = req as unknown as UsersRequest;
@@ -699,7 +698,7 @@ export async function handleUpdateProfile(
 export async function handleChangePassword(
   ctx: HandlerContext,
   body: ChangePasswordBody,
-  req: FastifyRequest,
+  req: HttpRequest,
 ): Promise<RouteResult> {
   const deps = asUsersDeps(ctx);
   const request = req as unknown as UsersRequest;

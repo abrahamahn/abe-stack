@@ -41,8 +41,8 @@ import {
   updateSubscription,
 } from './service';
 
-import type { BillingService, CheckoutParams } from '@bslt/shared';
 import type { BillingRepositories } from './types';
+import type { BillingService, CheckoutParams } from '@bslt/shared';
 
 // ============================================================================
 // Mock Dependencies

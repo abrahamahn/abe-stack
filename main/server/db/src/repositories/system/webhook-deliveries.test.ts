@@ -25,6 +25,7 @@ const createMockDb = (): RawDb => ({
   getClient: vi.fn() as RawDb['getClient'],
   queryOne: vi.fn(),
   execute: vi.fn(),
+  withSession: vi.fn() as RawDb['withSession'],
 });
 
 // ============================================================================
@@ -37,15 +38,12 @@ const mockDelivery = {
   event_type: 'user.created',
   payload: { userId: 'usr-123', email: 'test@example.com' },
   status: 'pending',
-  attempt_count: 0,
-  max_attempts: 3,
+  attempts: 0,
   next_retry_at: null,
   response_status: null,
   response_body: null,
-  error_message: null,
   delivered_at: null,
   created_at: new Date('2024-01-01T10:00:00Z'),
-  updated_at: new Date('2024-01-01T10:00:00Z'),
 };
 
 // ============================================================================
@@ -101,12 +99,10 @@ describe('createWebhookDeliveryRepository', () => {
     it('should handle optional fields', async () => {
       const deliveryWithDefaults = {
         ...mockDelivery,
-        attempt_count: 0,
-        max_attempts: 3,
+        attempts: 0,
         next_retry_at: null,
         response_status: null,
         response_body: null,
-        error_message: null,
       };
       vi.mocked(mockDb.queryOne).mockResolvedValue(deliveryWithDefaults);
 
@@ -118,8 +114,7 @@ describe('createWebhookDeliveryRepository', () => {
         status: 'pending',
       });
 
-      expect(result.attemptCount).toBe(0);
-      expect(result.maxAttempts).toBe(3);
+      expect(result.attempts).toBe(0);
       expect(result.nextRetryAt).toBeNull();
       expect(result.responseStatus).toBeNull();
     });
@@ -212,8 +207,7 @@ describe('createWebhookDeliveryRepository', () => {
       expect(result?.webhookId).toBe('wh-123');
       expect(result?.eventType).toBe('user.created');
       expect(result?.status).toBe('pending');
-      expect(result?.attemptCount).toBe(0);
-      expect(result?.maxAttempts).toBe(3);
+      expect(result?.attempts).toBe(0);
     });
   });
 
@@ -263,7 +257,7 @@ describe('createWebhookDeliveryRepository', () => {
     it('should respect custom limit', async () => {
       const deliveries = Array.from({ length: 50 }, (_, i) => ({
         ...mockDelivery,
-        id: `del-${i}`,
+        id: `del-${String(i)}`,
       }));
       vi.mocked(mockDb.query).mockResolvedValue(deliveries);
 
@@ -335,7 +329,7 @@ describe('createWebhookDeliveryRepository', () => {
     it('should respect custom limit', async () => {
       const deliveries = Array.from({ length: 25 }, (_, i) => ({
         ...mockDelivery,
-        id: `del-${i}`,
+        id: `del-${String(i)}`,
       }));
       vi.mocked(mockDb.query).mockResolvedValue(deliveries);
 
@@ -354,7 +348,7 @@ describe('createWebhookDeliveryRepository', () => {
         const repo = createWebhookDeliveryRepository(mockDb);
         const result = await repo.findByStatus(status);
 
-        expect(result[0].status).toBe(status);
+        expect(result[0]?.status).toBe(status);
       }
     });
 
@@ -380,7 +374,6 @@ describe('createWebhookDeliveryRepository', () => {
         status: 'delivered',
         response_status: 200,
         delivered_at: new Date('2024-01-01T10:05:00Z'),
-        updated_at: new Date('2024-01-01T10:05:00Z'),
       };
       vi.mocked(mockDb.queryOne).mockResolvedValue(updatedDelivery);
 
@@ -410,43 +403,40 @@ describe('createWebhookDeliveryRepository', () => {
       expect(result).toBeNull();
     });
 
-    it('should update status to failed with error message', async () => {
+    it('should update status to failed with incremented attempts', async () => {
       const failedDelivery = {
         ...mockDelivery,
         status: 'failed',
-        error_message: 'Connection timeout',
-        attempt_count: 1,
+        attempts: 1,
       };
       vi.mocked(mockDb.queryOne).mockResolvedValue(failedDelivery);
 
       const repo = createWebhookDeliveryRepository(mockDb);
       const result = await repo.update('del-123', {
         status: 'failed',
-        errorMessage: 'Connection timeout',
-        attemptCount: 1,
+        attempts: 1,
       });
 
       expect(result?.status).toBe('failed');
-      expect(result?.errorMessage).toBe('Connection timeout');
-      expect(result?.attemptCount).toBe(1);
+      expect(result?.attempts).toBe(1);
     });
 
     it('should update response details', async () => {
       const deliveryWithResponse = {
         ...mockDelivery,
         response_status: 200,
-        response_body: { success: true, id: 'evt-123' },
+        response_body: JSON.stringify({ success: true, id: 'evt-123' }),
       };
       vi.mocked(mockDb.queryOne).mockResolvedValue(deliveryWithResponse);
 
       const repo = createWebhookDeliveryRepository(mockDb);
       const result = await repo.update('del-123', {
         responseStatus: 200,
-        responseBody: { success: true, id: 'evt-123' },
+        responseBody: JSON.stringify({ success: true, id: 'evt-123' }),
       });
 
       expect(result?.responseStatus).toBe(200);
-      expect(result?.responseBody).toEqual({ success: true, id: 'evt-123' });
+      expect(result?.responseBody).toBe(JSON.stringify({ success: true, id: 'evt-123' }));
     });
 
     it('should update next retry time', async () => {
@@ -454,40 +444,39 @@ describe('createWebhookDeliveryRepository', () => {
       const deliveryWithRetry = {
         ...mockDelivery,
         status: 'pending',
-        attempt_count: 1,
+        attempts: 1,
         next_retry_at: retryTime,
       };
       vi.mocked(mockDb.queryOne).mockResolvedValue(deliveryWithRetry);
 
       const repo = createWebhookDeliveryRepository(mockDb);
       const result = await repo.update('del-123', {
-        attemptCount: 1,
+        attempts: 1,
         nextRetryAt: retryTime,
       });
 
-      expect(result?.attemptCount).toBe(1);
+      expect(result?.attempts).toBe(1);
       expect(result?.nextRetryAt).toEqual(retryTime);
     });
 
-    it('should increment attempt count', async () => {
+    it('should increment attempts', async () => {
       const retriedDelivery = {
         ...mockDelivery,
-        attempt_count: 2,
+        attempts: 2,
       };
       vi.mocked(mockDb.queryOne).mockResolvedValue(retriedDelivery);
 
       const repo = createWebhookDeliveryRepository(mockDb);
-      const result = await repo.update('del-123', { attemptCount: 2 });
+      const result = await repo.update('del-123', { attempts: 2 });
 
-      expect(result?.attemptCount).toBe(2);
+      expect(result?.attempts).toBe(2);
     });
 
     it('should update multiple fields at once', async () => {
       const updatedDelivery = {
         ...mockDelivery,
         status: 'failed',
-        attempt_count: 3,
-        error_message: 'Max retries exceeded',
+        attempts: 3,
         response_status: 500,
       };
       vi.mocked(mockDb.queryOne).mockResolvedValue(updatedDelivery);
@@ -495,14 +484,12 @@ describe('createWebhookDeliveryRepository', () => {
       const repo = createWebhookDeliveryRepository(mockDb);
       const result = await repo.update('del-123', {
         status: 'failed',
-        attemptCount: 3,
-        errorMessage: 'Max retries exceeded',
+        attempts: 3,
         responseStatus: 500,
       });
 
       expect(result?.status).toBe('failed');
-      expect(result?.attemptCount).toBe(3);
-      expect(result?.errorMessage).toBe('Max retries exceeded');
+      expect(result?.attempts).toBe(3);
       expect(result?.responseStatus).toBe(500);
     });
   });
@@ -511,8 +498,7 @@ describe('createWebhookDeliveryRepository', () => {
     it('should handle deliveries with max attempts reached', async () => {
       const maxAttemptsDelivery = {
         ...mockDelivery,
-        attempt_count: 3,
-        max_attempts: 3,
+        attempts: 3,
         status: 'failed',
       };
       vi.mocked(mockDb.queryOne).mockResolvedValue(maxAttemptsDelivery);
@@ -520,8 +506,7 @@ describe('createWebhookDeliveryRepository', () => {
       const repo = createWebhookDeliveryRepository(mockDb);
       const result = await repo.findById('del-123');
 
-      expect(result?.attemptCount).toBe(3);
-      expect(result?.maxAttempts).toBe(3);
+      expect(result?.attempts).toBe(3);
       expect(result?.status).toBe('failed');
     });
 
@@ -541,7 +526,7 @@ describe('createWebhookDeliveryRepository', () => {
 
     it('should handle very large payloads', async () => {
       const largePayload = {
-        items: Array.from({ length: 1000 }, (_, i) => ({ id: i, data: `item-${i}` })),
+        items: Array.from({ length: 1000 }, (_, i) => ({ id: i, data: `item-${String(i)}` })),
       };
       const deliveryWithLargePayload = {
         ...mockDelivery,
@@ -571,22 +556,22 @@ describe('createWebhookDeliveryRepository', () => {
       }
     });
 
-    it('should handle long error messages', async () => {
-      const longError = 'Error: ' + 'A'.repeat(2000);
-      const deliveryWithLongError = {
+    it('should handle long response bodies', async () => {
+      const longBody = 'A'.repeat(2000);
+      const deliveryWithLongBody = {
         ...mockDelivery,
         status: 'failed',
-        error_message: longError,
+        response_body: longBody,
       };
-      vi.mocked(mockDb.queryOne).mockResolvedValue(deliveryWithLongError);
+      vi.mocked(mockDb.queryOne).mockResolvedValue(deliveryWithLongBody);
 
       const repo = createWebhookDeliveryRepository(mockDb);
       const result = await repo.findById('del-123');
 
-      expect(result?.errorMessage).toBe(longError);
+      expect(result?.responseBody).toBe(longBody);
     });
 
-    it('should handle complex response bodies', async () => {
+    it('should handle complex response bodies as JSON strings', async () => {
       const complexResponse = {
         status: 'success',
         data: { id: 'evt-123', timestamp: '2024-01-01T10:00:00Z' },
@@ -594,14 +579,14 @@ describe('createWebhookDeliveryRepository', () => {
       };
       const deliveryWithComplexResponse = {
         ...mockDelivery,
-        response_body: complexResponse,
+        response_body: JSON.stringify(complexResponse),
       };
       vi.mocked(mockDb.queryOne).mockResolvedValue(deliveryWithComplexResponse);
 
       const repo = createWebhookDeliveryRepository(mockDb);
       const result = await repo.findById('del-123');
 
-      expect(result?.responseBody).toEqual(complexResponse);
+      expect(result?.responseBody).toBe(JSON.stringify(complexResponse));
     });
 
     it('should handle future retry times', async () => {

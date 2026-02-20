@@ -10,7 +10,9 @@
 
 import { getAccessToken } from '@app/authToken';
 import { getApiClient } from '@bslt/api';
+import { clientConfig } from '@config';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+
 
 import type { TotpSetupResponse } from '@bslt/shared';
 
@@ -60,10 +62,7 @@ export function useTotpManagement(): UseTotpManagementResult {
   const api = useMemo(
     () =>
       getApiClient({
-        baseUrl:
-          typeof import.meta.env['VITE_API_URL'] === 'string'
-            ? import.meta.env['VITE_API_URL']
-            : '',
+        baseUrl: clientConfig.apiUrl,
         getToken: getAccessToken,
       }),
     [],

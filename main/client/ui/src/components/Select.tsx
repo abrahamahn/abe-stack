@@ -68,7 +68,7 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>((props, ref) => {
   const generatedId = useId();
   const id = idProp != null && idProp !== '' ? idProp : generatedId;
   const listboxId = `${id}-listbox`;
-  const triggerRef = useRef<HTMLButtonElement>(null);
+  const triggerRef = useRef<HTMLElement>(null);
 
   const options = useMemo<OptionShape[]>(() => {
     return Children.toArray(children)
@@ -135,7 +135,7 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>((props, ref) => {
   return (
     <div className={`select-custom ${className}`.trim()} ref={ref}>
       <Button
-        ref={triggerRef as any}
+        ref={triggerRef}
         id={id}
         className="select select-trigger"
         aria-haspopup="listbox"

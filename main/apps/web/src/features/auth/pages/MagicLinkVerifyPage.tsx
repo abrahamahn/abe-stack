@@ -30,8 +30,10 @@ export const MagicLinkVerifyPage = (): ReactElement => {
 
   useEffect(() => {
     if (token === null) {
-      setStatus('error');
-      setMessage('Invalid or missing magic link token');
+      queueMicrotask(() => {
+        setStatus('error');
+        setMessage('Invalid or missing magic link token');
+      });
       return;
     }
 

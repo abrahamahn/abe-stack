@@ -9,12 +9,12 @@
 
 import { Dialog, Input, Kbd, Text } from '@bslt/ui';
 import {
-  ReactElement,
-  KeyboardEvent as ReactKeyboardEvent,
   useCallback,
   useEffect,
   useRef,
   type ChangeEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type ReactElement,
 } from 'react';
 
 import { useCommandPalette } from '../hooks';

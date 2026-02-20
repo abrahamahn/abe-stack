@@ -1,7 +1,9 @@
 // main/apps/web/src/app/components/FeatureHint.test.tsx
+import { Button } from '@bslt/ui';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { afterEach, beforeEach, describe, expect, it, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+
 
 import { FeatureHint } from './FeatureHint';
 

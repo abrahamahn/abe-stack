@@ -61,6 +61,7 @@ export function getInvoiceStatusLabel(status: InvoiceStatus): string {
     paid: 'Paid',
     open: 'Open',
     draft: 'Draft',
+    past_due: 'Past Due',
     void: 'Void',
     uncollectible: 'Uncollectible',
   };
@@ -75,6 +76,7 @@ export function getInvoiceStatusVariant(status: InvoiceStatus): StatusVariant {
     paid: 'success',
     open: 'warning',
     draft: 'neutral',
+    past_due: 'warning',
     void: 'neutral',
     uncollectible: 'error',
   };

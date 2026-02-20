@@ -5,9 +5,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createMockEnvironment, mockUser, renderWithProviders } from '../../../__tests__/utils';
 
-import type { UserId } from '@bslt/shared';
 import type { RenderWithProvidersResult } from '../../../__tests__/utils';
 import type { User } from '../../auth';
+import type { UserId } from '@bslt/shared';
 
 // Mock useNavigate
 const mockNavigate = vi.fn();

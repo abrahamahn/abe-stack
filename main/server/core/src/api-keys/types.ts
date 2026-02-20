@@ -10,8 +10,8 @@
  * duplicate Logger and request interfaces across packages.
  */
 
-import type { BaseContext } from '@bslt/shared';
 import type { ApiKeyRepository, AuditEventRepository } from '../../../db/src';
+import type { BaseContext } from '@bslt/shared';
 
 // ============================================================================
 // Handler Context

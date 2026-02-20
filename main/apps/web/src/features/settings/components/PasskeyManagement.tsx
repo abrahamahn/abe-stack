@@ -7,7 +7,7 @@
 
 import { formatDateTime } from '@bslt/shared';
 import { Button, Card, Input, Skeleton, Text } from '@bslt/ui';
-import { useCallback, useState, type ReactElement } from 'react';
+import { useCallback, useState, type ChangeEvent, type ReactElement } from 'react';
 
 import { usePasskeys, useRegisterPasskey } from '../../auth/hooks/useWebauthn';
 

@@ -102,6 +102,7 @@ export {
   CACHE_TTL,
   CORS_CONFIG,
   CRYPTO,
+  CSRF_COOKIE_NAME,
   CSRF_EXEMPT_PATHS,
   DEVICE_TYPES,
   EMAIL_PROVIDERS,
@@ -115,13 +116,17 @@ export {
   LOG_LEVELS,
   PLATFORM_TYPES,
   RATE_LIMIT_WINDOWS,
+  REFRESH_TOKEN_COOKIE_NAME,
   SAFE_METHODS,
   STANDARD_HEADERS,
   SUBSCRIBABLE_EVENT_TYPES,
+  SUDO_TOKEN_HEADER,
   TERMINAL_DELIVERY_STATUSES,
   TERMINAL_STATUSES,
   WEBHOOK_DELIVERY_STATUSES,
   WEBHOOK_EVENT_TYPES,
+  WEBSOCKET_PATH,
+  WS_CLOSE_POLICY_VIOLATION,
   type HttpStatusCode,
   // security
   SENSITIVE_KEYS,
@@ -503,31 +508,11 @@ export {
 // Crypto
 // ============================================================================
 
-export {
-  // jwt
-  checkTokenSecret,
-  createJwtRotationHandler,
-  decode,
-  jwtDecode,
-  JwtError,
-  jwtSign,
-  jwtVerify,
-  sign,
-  signWithRotation,
-  verify,
-  verifyWithRotation,
-  type JwtErrorCode,
-  type JwtHeader,
-  type JwtPayload,
-  type JwtRotationConfig,
-  type SignOptions,
-  type VerifyOptions,
-  // token
-  addAuthHeader,
-  createTokenStore,
-  tokenStore,
-  type TokenStore,
-} from './crypto';
+// JWT is server-only (uses node:crypto). Use @bslt/shared/system/crypto for JWT functions.
+// Keeping them here would pull jwt.ts into browser bundles via @bslt/shared root barrel.
+
+// Token storage is browser-safe — does not import node:crypto.
+export { addAuthHeader, createTokenStore, tokenStore, type TokenStore } from './crypto/token';
 
 // ============================================================================
 // API Keys
@@ -741,6 +726,7 @@ export {
   type RecordMap,
   type RecordPointer,
   type VersionConflict,
+  type VersionedRecord,
   type WriteResponse,
 } from './realtime';
 
@@ -771,6 +757,8 @@ export {
   calculateRetryDelay,
   createWebhookDeliverySchema,
   createWebhookSchema,
+  deliveryListResponseSchema,
+  deliveryReplayResponseSchema,
   isDeliveryTerminal,
   matchesEventFilter,
   rotateSecretResponseSchema,
@@ -788,6 +776,8 @@ export {
   webhookWithDeliveriesSchema,
   type CreateWebhook,
   type CreateWebhookDelivery,
+  type DeliveryListResponse,
+  type DeliveryReplayResponse,
   type RotateSecretResponse,
   type UpdateWebhook,
   type UpdateWebhookDelivery,
@@ -800,6 +790,7 @@ export {
   type WebhookListResponse,
   type WebhookMutationResponse,
   type WebhookResponse,
+  type WebhookEventType,
   type WebhookWithDeliveries,
 } from './webhooks';
 

@@ -85,7 +85,7 @@ export function loadNotificationsConfig(env: FullEnv): NotificationConfig {
   };
 
   // Resolve active provider (Explicit Choice > OneSignal > FCM > Courier)
-  const provider = resolveActiveProvider(env.NOTIFICATIONS_PROVIDER, availability);
+  const provider = resolveActiveProvider(env.NOTIFICATIONS_PROVIDER, availability, env.NODE_ENV === 'production');
 
   // Determine if notifications should be enabled based on valid credentials
   const isEnabled = provider != null;
@@ -149,8 +149,8 @@ export function loadNotificationsConfig(env: FullEnv): NotificationConfig {
 function resolveActiveProvider(
   explicit: NotificationProvider | undefined,
   avail: { onesignal: boolean; fcm: boolean; courier: boolean },
+  isProd: boolean,
 ): NotificationProvider | null {
-  const isProd = process.env['NODE_ENV'] === 'production';
 
   // Check if explicit provider has credentials
   if (explicit === 'onesignal' && avail.onesignal) return 'onesignal';

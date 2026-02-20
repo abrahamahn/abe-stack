@@ -10,13 +10,13 @@ import {
   PlanNotFoundError,
 } from '@bslt/shared';
 
-import type { BillingService, CreateProductParams } from '@bslt/shared';
 import type {
   Plan as DbPlan,
   PlanFeature,
   PlanRepository,
   SubscriptionRepository,
 } from '../../../db/src';
+import type { BillingService, CreateProductParams } from '@bslt/shared';
 
 // ============================================================================
 // Types

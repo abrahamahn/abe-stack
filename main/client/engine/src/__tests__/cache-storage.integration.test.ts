@@ -75,7 +75,7 @@ function createCacheStorageSystem(): {
       table: table as TestTableNames,
       id,
     });
-    if (record !== null && record !== undefined) {
+    if (record !== undefined) {
       cache.set(table, id, record);
     }
     return record as TestTables[T] | undefined;
@@ -290,7 +290,7 @@ describe('RecordCache + RecordStorage Integration', () => {
       expect(cachedPost?.authorId).toBe('u1');
 
       const authorId = cachedPost?.authorId;
-      if (authorId !== null && authorId !== undefined && authorId !== '') {
+      if (authorId !== undefined && authorId !== '') {
         const author = (cache as unknown as RecordCache<TestTables>).get('user', authorId);
         expect(author?.name).toBe('Alice');
       }

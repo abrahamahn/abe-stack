@@ -7,8 +7,8 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { UILibraryPreviewArea } from './components/UILibraryPreviewArea';
 
-import type { ReactElement } from 'react';
 import type { ComponentDemo } from './types';
+import type { ReactElement } from 'react';
 
 export const UILibraryPage = (): ReactElement => {
   const [activeCategory, setActiveCategory] = useState<string>('elements');

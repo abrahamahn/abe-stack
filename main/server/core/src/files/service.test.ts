@@ -12,7 +12,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { deleteFile, getDownloadUrl, getFileMetadata, uploadFile } from './service';
 
 import type { FileStorageProvider } from './types';
-import type { FileRecord, FileRepository } from '../../../db/src';
+import type { FileRecord, FileRepository, NewFileRecord } from '../../../db/src';
 
 // ============================================================================
 // Test Fixtures
@@ -51,7 +51,7 @@ function createMockFileRepo(record: FileRecord | null = null): FileRepository {
     findById: vi.fn().mockResolvedValue(record),
     findByUserId: vi.fn().mockResolvedValue(record !== null ? [record] : []),
     findByTenantId: vi.fn().mockResolvedValue(record !== null ? [record] : []),
-    create: vi.fn().mockImplementation((data) => ({
+    create: vi.fn().mockImplementation((data: NewFileRecord): FileRecord => ({
       ...createMockFileRecord(),
       ...data,
       id: 'file-new',

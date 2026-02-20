@@ -2,12 +2,10 @@
 /**
  * System Health Check Tests
  *
- * Tests the health orchestration layer in engine which delegates
- * to the pure health-check utilities in @bslt/shared. Validates
- * context wiring, WebSocket stats injection, and the aggregation of
- * individual service checks into a single detailed response.
+ * Tests the health orchestration layer which delegates to the pure
+ * health-check utilities in @bslt/shared. Schema validation is now
+ * injected as a callback — no @bslt/db dependency inside health.ts.
  */
-import { validateSchema } from '@bslt/db';
 import { describe, expect, test, vi } from 'vitest';
 
 import {
@@ -22,33 +20,16 @@ import {
   logStartupSummary,
 } from './health';
 
-import type { SystemContext } from './types';
-
-vi.mock('@bslt/db', async (importOriginal) => {
-  const original = await importOriginal<typeof import('@bslt/db')>();
-  return {
-    ...original,
-    validateSchema: vi.fn().mockResolvedValue({
-      valid: true,
-      missingTables: [],
-      tables: original.REQUIRED_TABLES,
-    }),
-  };
-});
-
-const mockValidateSchema = vi.mocked(validateSchema);
+import type { HealthContext } from './types';
 
 // ============================================================================
 // Test Helpers
 // ============================================================================
 
-/**
- * Create a minimal mock SystemContext for testing.
- *
- * @param overrides - Partial overrides for the context
- * @returns Fully-mocked SystemContext
- */
-function createMockContext(overrides: Partial<SystemContext> = {}): SystemContext {
+/** Minimal mock validator — returns healthy schema by default. */
+const mockValidator = vi.fn().mockResolvedValue({ valid: true, missingTables: [] });
+
+function createMockContext(overrides: Partial<HealthContext> = {}): HealthContext {
   return {
     config: {
       server: { logLevel: 'info', nodeEnv: 'test' },
@@ -56,20 +37,20 @@ function createMockContext(overrides: Partial<SystemContext> = {}): SystemContex
       storage: { provider: 'local' },
       billing: { enabled: false },
       notifications: { enabled: false },
-    } as unknown as SystemContext['config'],
+    } as unknown as HealthContext['config'],
     db: {
       healthCheck: vi.fn<() => Promise<boolean>>().mockResolvedValue(true),
       execute: vi.fn().mockResolvedValue([{ result: 1 }]),
-    } as unknown as SystemContext['db'],
+    } as unknown as HealthContext['db'],
     cache: {
       getStats: vi.fn().mockResolvedValue({ hits: 0, misses: 0, size: 0 }),
-    } as unknown as SystemContext['cache'],
+    } as unknown as HealthContext['cache'],
     queue: {
       getStats: vi.fn().mockResolvedValue({ pending: 0, failed: 0 }),
-    } as unknown as SystemContext['queue'],
+    } as unknown as HealthContext['queue'],
     pubsub: {
       getSubscriptionCount: vi.fn<() => number>().mockReturnValue(3),
-    } as unknown as SystemContext['pubsub'],
+    } as unknown as HealthContext['pubsub'],
     log: {
       info: vi.fn(),
       warn: vi.fn(),
@@ -77,29 +58,17 @@ function createMockContext(overrides: Partial<SystemContext> = {}): SystemContex
       fatal: vi.fn(),
       debug: vi.fn(),
       trace: vi.fn(),
-    } as unknown as SystemContext['log'],
-    repos: {} as unknown as SystemContext['repos'],
-    write: {} as unknown as SystemContext['write'],
-    search: {} as unknown as SystemContext['search'],
-    emailTemplates: {} as unknown as SystemContext['emailTemplates'],
-    queueStore: {} as unknown as SystemContext['queueStore'],
-    errorTracker: {
-      captureError: vi.fn(),
-      addBreadcrumb: vi.fn(),
-      setUserContext: vi.fn(),
-    },
-    health: vi.fn(),
-    contextualize: vi.fn(),
+    } as unknown as HealthContext['log'],
     ...overrides,
-  } as SystemContext;
+  };
 }
 
 // ============================================================================
-// checkDbStatus Tests
+// checkDbStatus
 // ============================================================================
 
 describe('checkDbStatus', () => {
-  test('should return up when database is healthy', async () => {
+  test('returns up when database is healthy', async () => {
     const ctx = createMockContext();
     const result = await checkDbStatus(ctx);
 
@@ -107,206 +76,186 @@ describe('checkDbStatus', () => {
     expect(result.message).toBe('connected');
   });
 
-  test('should return down when database health check fails', async () => {
+  test('returns down when database health check fails', async () => {
     const ctx = createMockContext({
       db: {
         healthCheck: vi.fn<() => Promise<boolean>>().mockResolvedValue(false),
         execute: vi.fn(),
-      } as unknown as SystemContext['db'],
+      } as unknown as HealthContext['db'],
     });
-
     const result = await checkDbStatus(ctx);
-
     expect(result.status).toBe('down');
   });
 
-  test('should return down when database throws', async () => {
+  test('returns down when database throws', async () => {
     const ctx = createMockContext({
       db: {
         healthCheck: vi
           .fn<() => Promise<boolean>>()
           .mockRejectedValue(new Error('Connection refused')),
         execute: vi.fn(),
-      } as unknown as SystemContext['db'],
+      } as unknown as HealthContext['db'],
     });
-
     const result = await checkDbStatus(ctx);
-
     expect(result.status).toBe('down');
     expect(result.message).toBe('Connection refused');
   });
 });
 
 // ============================================================================
-// checkSchemaStatus Tests
+// checkSchemaStatus
 // ============================================================================
 
 describe('checkSchemaStatus', () => {
-  test('should return up when schema is valid', async () => {
+  test('returns up when schema is valid', async () => {
     const ctx = createMockContext();
-
-    const result = await checkSchemaStatus(ctx);
+    const validator = vi.fn().mockResolvedValue({ valid: true, missingTables: [] });
+    const result = await checkSchemaStatus(ctx, validator, 30);
 
     expect(result.status).toBe('up');
-    expect(result.tableCount).toBeGreaterThan(0);
+    expect(validator).toHaveBeenCalledOnce();
   });
 
-  test('should return down when schema validation throws', async () => {
-    mockValidateSchema.mockRejectedValueOnce(new Error('Schema error'));
+  test('returns down when validator reports missing tables', async () => {
     const ctx = createMockContext();
+    const validator = vi
+      .fn()
+      .mockResolvedValue({ valid: false, missingTables: ['users', 'sessions'] });
+    const result = await checkSchemaStatus(ctx, validator, 30);
 
-    const result = await checkSchemaStatus(ctx);
+    expect(result.status).toBe('down');
+  });
+
+  test('returns down when validator throws', async () => {
+    const ctx = createMockContext();
+    const validator = vi.fn().mockRejectedValue(new Error('Schema error'));
+    const result = await checkSchemaStatus(ctx, validator, 30);
 
     expect(result.status).toBe('down');
   });
 });
 
 // ============================================================================
-// checkEmailStatus Tests
+// checkEmailStatus
 // ============================================================================
 
 describe('checkEmailStatus', () => {
-  test('should return up with configured provider', () => {
+  test('returns up with configured provider', () => {
     const ctx = createMockContext();
     const result = checkEmailStatus(ctx);
-
     expect(result.status).toBe('up');
     expect(result.message).toBe('console');
   });
 
-  test('should return up with smtp provider', () => {
+  test('returns up with smtp provider', () => {
     const ctx = createMockContext({
       config: {
         email: { provider: 'smtp' },
         storage: { provider: 'local' },
         billing: { enabled: false },
         notifications: { enabled: false },
-      } as SystemContext['config'],
+      } as HealthContext['config'],
     });
-
     const result = checkEmailStatus(ctx);
-
     expect(result.status).toBe('up');
     expect(result.message).toBe('smtp');
   });
 });
 
 // ============================================================================
-// checkStorageStatus Tests
+// checkStorageStatus
 // ============================================================================
 
 describe('checkStorageStatus', () => {
-  test('should return up with configured provider', () => {
+  test('returns up with local provider', () => {
     const ctx = createMockContext();
     const result = checkStorageStatus(ctx);
-
     expect(result.status).toBe('up');
     expect(result.message).toBe('local');
   });
 
-  test('should return up with s3 provider', () => {
+  test('returns up with s3 provider', () => {
     const ctx = createMockContext({
       config: {
         email: { provider: 'console' },
         storage: { provider: 's3' },
         billing: { enabled: false },
         notifications: { enabled: false },
-      } as SystemContext['config'],
+      } as HealthContext['config'],
     });
-
     const result = checkStorageStatus(ctx);
-
     expect(result.status).toBe('up');
     expect(result.message).toBe('s3');
   });
 });
 
 // ============================================================================
-// checkPubSubStatus Tests
+// checkPubSubStatus
 // ============================================================================
 
 describe('checkPubSubStatus', () => {
-  test('should return up with subscription count', () => {
+  test('returns up with subscription count', () => {
     const ctx = createMockContext();
     const result = checkPubSubStatus(ctx);
-
     expect(result.status).toBe('up');
     expect(result.message).toBe('3 active subscriptions');
   });
 
-  test('should return up with zero subscriptions', () => {
+  test('returns up with zero subscriptions', () => {
     const ctx = createMockContext({
-      pubsub: {
-        getSubscriptionCount: vi.fn<() => number>().mockReturnValue(0),
-      },
+      pubsub: { getSubscriptionCount: vi.fn<() => number>().mockReturnValue(0) },
     });
-
     const result = checkPubSubStatus(ctx);
-
     expect(result.status).toBe('up');
     expect(result.message).toBe('0 active subscriptions');
   });
 });
 
 // ============================================================================
-// checkWebSocketStatus Tests
+// checkWebSocketStatus
 // ============================================================================
 
 describe('checkWebSocketStatus', () => {
-  test('should return up when plugin is registered', () => {
-    const result = checkWebSocketStatus({
-      pluginRegistered: true,
-      activeConnections: 10,
-    });
-
+  test('returns up when plugin is registered', () => {
+    const result = checkWebSocketStatus({ pluginRegistered: true, activeConnections: 10 });
     expect(result.status).toBe('up');
     expect(result.message).toBe('10 active connections');
   });
 
-  test('should return down when plugin is not registered', () => {
-    const result = checkWebSocketStatus({
-      pluginRegistered: false,
-      activeConnections: 0,
-    });
-
+  test('returns down when plugin is not registered', () => {
+    const result = checkWebSocketStatus({ pluginRegistered: false, activeConnections: 0 });
     expect(result.status).toBe('down');
     expect(result.message).toBe('plugin not registered');
   });
 
-  test('should return up with zero connections when plugin is registered', () => {
-    const result = checkWebSocketStatus({
-      pluginRegistered: true,
-      activeConnections: 0,
-    });
-
+  test('returns up with zero connections when plugin is registered', () => {
+    const result = checkWebSocketStatus({ pluginRegistered: true, activeConnections: 0 });
     expect(result.status).toBe('up');
     expect(result.message).toBe('0 active connections');
   });
 });
 
 // ============================================================================
-// checkRateLimitStatus Tests
+// checkRateLimitStatus
 // ============================================================================
 
 describe('checkRateLimitStatus', () => {
-  test('should return up with active status', () => {
+  test('returns up with active status', () => {
     const result = checkRateLimitStatus();
-
     expect(result.status).toBe('up');
     expect(result.message).toBe('sliding window active');
   });
 });
 
 // ============================================================================
-// getDetailedHealth Tests
+// getDetailedHealth
 // ============================================================================
 
 describe('getDetailedHealth', () => {
-  test('should aggregate all service health checks', async () => {
+  test('aggregates all service health checks', async () => {
     const ctx = createMockContext();
     const result = await getDetailedHealth(ctx, {
-      pluginRegistered: true,
-      activeConnections: 5,
+      websocketStats: { pluginRegistered: true, activeConnections: 5 },
     });
 
     expect(result.status).toBeDefined();
@@ -315,7 +264,7 @@ describe('getDetailedHealth', () => {
     expect(result.services).toBeDefined();
   });
 
-  test('should use default websocket stats when none provided', async () => {
+  test('uses default websocket stats when none provided', async () => {
     const ctx = createMockContext();
     const result = await getDetailedHealth(ctx);
 
@@ -324,47 +273,44 @@ describe('getDetailedHealth', () => {
     expect(result.services['websocket']?.message).toBe('plugin not registered');
   });
 
-  test('should report healthy when all services are up', async () => {
+  test('reports healthy when all services are up', async () => {
     const ctx = createMockContext();
     const result = await getDetailedHealth(ctx, {
-      pluginRegistered: true,
-      activeConnections: 0,
+      websocketStats: { pluginRegistered: true, activeConnections: 0 },
     });
-
     expect(result.status).toBe('healthy');
   });
 
-  test('should include database service status', async () => {
+  test('includes database service status', async () => {
     const ctx = createMockContext();
     const result = await getDetailedHealth(ctx);
-
-    expect(result.services['database']).toBeDefined();
     expect(result.services['database']?.status).toBe('up');
   });
 
-  test('should include email service status', async () => {
+  test('runs schema check when validator provided', async () => {
     const ctx = createMockContext();
-    const result = await getDetailedHealth(ctx);
-
-    expect(result.services['email']).toBeDefined();
-    expect(result.services['email']?.status).toBe('up');
+    const result = await getDetailedHealth(ctx, {
+      schemaValidator: mockValidator,
+      totalTableCount: 30,
+    });
+    expect(mockValidator).toHaveBeenCalled();
+    expect(result.services['schema']).toBeDefined();
   });
 
-  test('should include storage service status', async () => {
+  test('omits schema check when no validator provided', async () => {
     const ctx = createMockContext();
     const result = await getDetailedHealth(ctx);
-
-    expect(result.services['storage']).toBeDefined();
-    expect(result.services['storage']?.status).toBe('up');
+    // Schema service still present but reported as healthy placeholder
+    expect(result.services['schema']?.status).toBe('up');
   });
 });
 
 // ============================================================================
-// logStartupSummary Tests
+// logStartupSummary
 // ============================================================================
 
 describe('logStartupSummary', () => {
-  test('should log startup summary with service statuses', async () => {
+  test('logs startup summary with service statuses', async () => {
     const ctx = createMockContext();
 
     await logStartupSummary(ctx, {
@@ -383,39 +329,31 @@ describe('logStartupSummary', () => {
           port: 8080,
           url: 'http://localhost:8080',
         }),
-        stats: expect.objectContaining({
-          routes: 12,
-        }),
+        stats: expect.objectContaining({ routes: 12 }),
       }),
     );
   });
 
-  test('should resolve localhost for 0.0.0.0 host', async () => {
+  test('resolves localhost for 0.0.0.0 host', async () => {
     const ctx = createMockContext();
 
-    await logStartupSummary(ctx, {
-      host: '0.0.0.0',
-      port: 3000,
-      routeCount: 5,
-    });
+    await logStartupSummary(ctx, { host: '0.0.0.0', port: 3000, routeCount: 5 });
 
     expect(ctx.log.info).toHaveBeenCalledWith(
       'Startup Summary',
       expect.objectContaining({
-        server: expect.objectContaining({
-          url: 'http://localhost:3000',
-        }),
+        server: expect.objectContaining({ url: 'http://localhost:3000' }),
       }),
     );
   });
 
-  test('should pass websocket stats through to health check', async () => {
+  test('passes websocket stats through to health check', async () => {
     const ctx = createMockContext();
 
     await logStartupSummary(
       ctx,
       { host: 'localhost', port: 8080, routeCount: 1 },
-      { pluginRegistered: true, activeConnections: 42 },
+      { websocketStats: { pluginRegistered: true, activeConnections: 42 } },
     );
 
     expect(ctx.log.info).toHaveBeenCalledTimes(1);

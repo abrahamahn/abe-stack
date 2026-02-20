@@ -26,6 +26,7 @@ const createMockDb = (): RawDb =>
     getClient: vi.fn() as RawDb['getClient'],
     queryOne: vi.fn(),
     execute: vi.fn(),
+    withSession: vi.fn() as RawDb['withSession'],
   }) as unknown as RawDb;
 
 // ============================================================================
@@ -195,10 +196,10 @@ describe('createDataExportRequestRepository', () => {
       const result = await repo.findByUserId('usr-123');
 
       expect(result).toHaveLength(2);
-      expect(result[0].id).toBe('der-123');
-      expect(result[1].id).toBe('der-456');
-      expect(result[0].userId).toBe('usr-123');
-      expect(result[1].userId).toBe('usr-123');
+      expect(result[0]?.id).toBe('der-123');
+      expect(result[1]?.id).toBe('der-456');
+      expect(result[0]?.userId).toBe('usr-123');
+      expect(result[1]?.userId).toBe('usr-123');
       expect(mockDb.query).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining('SELECT'),
@@ -251,8 +252,8 @@ describe('createDataExportRequestRepository', () => {
       const repo = createDataExportRequestRepository(mockDb);
       const result = await repo.findByUserId('usr-123');
 
-      expect(result[0].metadata).toEqual({ a: 1 });
-      expect(result[1].metadata).toEqual({ b: 2 });
+      expect(result[0]?.metadata).toEqual({ a: 1 });
+      expect(result[1]?.metadata).toEqual({ b: 2 });
     });
   });
 
@@ -394,6 +395,69 @@ describe('createDataExportRequestRepository', () => {
           text: expect.stringMatching(/WHERE.*id/s),
         }),
       );
+    });
+  });
+
+  describe('deleteExpired', () => {
+    it('should delete expired non-completed requests', async () => {
+      vi.mocked(mockDb.execute).mockResolvedValue(2);
+
+      const repo = createDataExportRequestRepository(mockDb);
+      const result = await repo.deleteExpired();
+
+      expect(result).toBe(2);
+      expect(mockDb.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: expect.stringContaining('DELETE FROM'),
+        }),
+      );
+    });
+
+    it('should return zero when no expired requests exist', async () => {
+      vi.mocked(mockDb.execute).mockResolvedValue(0);
+
+      const repo = createDataExportRequestRepository(mockDb);
+      const result = await repo.deleteExpired();
+
+      expect(result).toBe(0);
+    });
+
+    it('should filter by expires_at < now', async () => {
+      vi.mocked(mockDb.execute).mockResolvedValue(1);
+
+      const repo = createDataExportRequestRepository(mockDb);
+      await repo.deleteExpired();
+
+      expect(mockDb.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: expect.stringContaining('expires_at'),
+        }),
+      );
+    });
+
+    it('should exclude completed requests from deletion', async () => {
+      vi.mocked(mockDb.execute).mockResolvedValue(1);
+
+      const repo = createDataExportRequestRepository(mockDb);
+      await repo.deleteExpired();
+
+      expect(mockDb.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: expect.stringContaining('status'),
+        }),
+      );
+    });
+
+    it('should not delete completed requests even if expired', async () => {
+      vi.mocked(mockDb.execute).mockResolvedValue(0);
+
+      const repo = createDataExportRequestRepository(mockDb);
+      await repo.deleteExpired();
+
+      const call = vi.mocked(mockDb.execute).mock.calls[0]?.[0];
+      expect(call).toBeDefined();
+      // The ne('status', 'completed') guard must be present
+      expect(call?.values).toEqual(expect.arrayContaining(['completed']));
     });
   });
 });

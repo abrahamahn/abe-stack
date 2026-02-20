@@ -10,7 +10,6 @@
 
 import { adminRoutes } from '@bslt/core/admin';
 import { createAuthGuard } from '@bslt/core/auth';
-import { registerRouteMap } from '@bslt/server-system';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
@@ -21,7 +20,12 @@ import {
   type TestServer,
 } from './test-utils';
 
-import type { AuthGuardFactory, RouteMap as DbRouteMap } from '@bslt/server-system';
+import type { AuthGuardFactory } from '@/http';
+import type { RouteMap as DbRouteMap } from '@bslt/server-system';
+
+import { registerRouteMap } from '@/http';
+
+import { registerRouteMap } from '@/http';
 
 // ============================================================================
 // Mock Factories
@@ -442,6 +446,139 @@ describe('Audit Log Flow Integration Tests', () => {
       const lines = body.data.split('\n').filter((line) => line.trim().length > 0);
       // At least a header row + data rows
       expect(lines.length).toBeGreaterThanOrEqual(1 + SEED_EVENTS.length);
+    });
+  });
+
+  // ==========================================================================
+  // Flow: Data integrity between query and export
+  // ==========================================================================
+
+  // ==========================================================================
+  // Flow: Pagination
+  // ==========================================================================
+
+  describe('pagination', () => {
+    it('returns correct hasNext/hasPrev for first page', async () => {
+      // First page with more data available
+      mockDb.query.mockResolvedValueOnce(SEED_EVENTS.slice(0, 3));
+      mockDb.queryOne.mockResolvedValueOnce({ count: String(SEED_EVENTS.length) });
+
+      const adminJwt = createAdminJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/admin/security/events',
+          accessToken: adminJwt,
+          payload: { page: 1, limit: 3 },
+        }),
+      );
+
+      expect(response.statusCode).toBe(200);
+      const body = parseJsonResponse(response) as {
+        data: unknown[];
+        total: number;
+        page: number;
+        hasNext: boolean;
+        hasPrev: boolean;
+      };
+      expect(body.data).toHaveLength(3);
+      expect(body.total).toBe(SEED_EVENTS.length);
+      expect(body.page).toBe(1);
+      expect(body.hasNext).toBe(true);
+      expect(body.hasPrev).toBe(false);
+    });
+
+    it('returns correct hasNext/hasPrev for last page', async () => {
+      mockDb.query.mockResolvedValueOnce(SEED_EVENTS.slice(3));
+      mockDb.queryOne.mockResolvedValueOnce({ count: String(SEED_EVENTS.length) });
+
+      const adminJwt = createAdminJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/admin/security/events',
+          accessToken: adminJwt,
+          payload: { page: 2, limit: 3 },
+        }),
+      );
+
+      expect(response.statusCode).toBe(200);
+      const body = parseJsonResponse(response) as {
+        page: number;
+        hasNext: boolean;
+        hasPrev: boolean;
+      };
+      expect(body.page).toBe(2);
+      expect(body.hasNext).toBe(false);
+      expect(body.hasPrev).toBe(true);
+    });
+  });
+
+  // ==========================================================================
+  // Flow: Combined type + severity filters
+  // ==========================================================================
+
+  describe('combined filters', () => {
+    it('applies both eventType and severity filters simultaneously', async () => {
+      const filtered = SEED_EVENTS.filter(
+        (e) => e.event_type === 'account_locked' && e.severity === 'high',
+      );
+      mockDb.query.mockResolvedValueOnce(filtered);
+      mockDb.queryOne.mockResolvedValueOnce({ count: String(filtered.length) });
+
+      const adminJwt = createAdminJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/admin/security/events',
+          accessToken: adminJwt,
+          payload: {
+            page: 1,
+            limit: 50,
+            filter: { eventType: 'account_locked', severity: 'high' },
+          },
+        }),
+      );
+
+      expect(response.statusCode).toBe(200);
+      const body = parseJsonResponse(response) as {
+        data: Array<{ eventType: string; severity: string }>;
+        total: number;
+      };
+      expect(body.total).toBe(2);
+      expect(body.data.every((e) => e.eventType === 'account_locked')).toBe(true);
+      expect(body.data.every((e) => e.severity === 'high')).toBe(true);
+    });
+  });
+
+  // ==========================================================================
+  // Flow: Export with filters applied
+  // ==========================================================================
+
+  describe('export with filters', () => {
+    it('exports only events matching the applied filter', async () => {
+      const highEvents = SEED_EVENTS.filter((e) => e.severity === 'high');
+      mockDb.query.mockResolvedValueOnce(highEvents);
+
+      const adminJwt = createAdminJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/admin/security/export',
+          accessToken: adminJwt,
+          payload: { format: 'json', filter: { severity: 'high' } },
+        }),
+      );
+
+      expect(response.statusCode).toBe(200);
+      const body = parseJsonResponse(response) as {
+        data: string;
+        contentType: string;
+      };
+      expect(body.contentType).toBe('application/json');
+      const exported = JSON.parse(body.data) as Array<{ severity: string }>;
+      expect(exported).toHaveLength(highEvents.length);
+      expect(exported.every((e) => e.severity === 'high')).toBe(true);
     });
   });
 

@@ -178,6 +178,11 @@ export function loadAuthConfig(env: FullEnv, apiBaseUrl: string): AuthConfig {
       path: '/',
     },
 
+    // Dedicated key for AES-256-GCM encryption of stored OAuth tokens.
+    // Falls back to cookie.secret for backwards-compatibility with existing encrypted data.
+    oauthTokenEncryptionKey:
+      env.OAUTH_TOKEN_ENCRYPTION_KEY ?? env.COOKIE_SECRET ?? jwtSecret,
+
     oauth: buildOAuthProviders(),
 
     magicLink: {
@@ -220,7 +225,7 @@ export function loadAuthConfig(env: FullEnv, apiBaseUrl: string): AuthConfig {
  * @throws {AuthValidationError} If any security policy is violated.
  */
 export function validateAuthConfig(config: AuthConfig): void {
-  const { jwt, cookie, lockout, refreshToken, password } = config;
+  const { jwt, cookie, lockout, refreshToken, password, oauthTokenEncryptionKey } = config;
 
   if (jwt.secret.length < AUTH_VALIDATION.MIN_SECRET_LENGTH)
     throw new AuthValidationError('JWT secret must be at least 32 characters', 'jwt.secret');
@@ -233,6 +238,12 @@ export function validateAuthConfig(config: AuthConfig): void {
 
   if (cookie.secret.length < AUTH_VALIDATION.MIN_SECRET_LENGTH)
     throw new AuthValidationError('Cookie secret must be >= 32 chars', 'cookie.secret');
+
+  if (oauthTokenEncryptionKey.length < AUTH_VALIDATION.MIN_SECRET_LENGTH)
+    throw new AuthValidationError(
+      'OAuth token encryption key must be at least 32 characters',
+      'oauthTokenEncryptionKey',
+    );
 
   if (
     lockout.maxAttempts < AUTH_VALIDATION.LOCKOUT_MIN_ATTEMPTS ||

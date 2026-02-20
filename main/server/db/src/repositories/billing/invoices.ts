@@ -5,7 +5,7 @@
  * Data access layer for billing invoices table.
  */
 
-import { and, eq, or, select, insert, update } from '../../builder/index';
+import { and, eq, inArray, select, insert, update } from '../../builder/index';
 import {
   type Invoice,
   type InvoiceStatus,
@@ -126,7 +126,7 @@ export function createInvoiceRepository(db: RawDb): InvoiceRepository {
       }
       if (filters.status !== undefined) {
         if (Array.isArray(filters.status)) {
-          conditions.push(or(...filters.status.map((s) => eq('status', s))));
+          conditions.push(inArray('status', filters.status));
         } else {
           conditions.push(eq('status', filters.status));
         }

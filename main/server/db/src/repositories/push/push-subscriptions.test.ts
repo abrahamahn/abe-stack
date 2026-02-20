@@ -25,6 +25,7 @@ const createMockDb = (): RawDb => ({
   getClient: vi.fn() as RawDb['getClient'],
   queryOne: vi.fn(),
   execute: vi.fn(),
+  withSession: vi.fn() as RawDb['withSession'],
 });
 
 // ============================================================================
@@ -108,6 +109,7 @@ describe('createPushSubscriptionRepository', () => {
       const repo = createPushSubscriptionRepository(mockDb);
       const result = await repo.create({
         userId: 'usr-123',
+        deviceId: 'device-123',
         endpoint: 'https://fcm.googleapis.com/fcm/send/abc123',
         keysP256dh: 'p256dh-key',
         keysAuth: 'auth-key',
@@ -127,6 +129,7 @@ describe('createPushSubscriptionRepository', () => {
       const repo = createPushSubscriptionRepository(mockDb);
       const result = await repo.create({
         userId: 'usr-123',
+        deviceId: 'device-123',
         endpoint: 'https://fcm.googleapis.com/fcm/send/abc123',
         keysP256dh: 'p256dh-key',
         keysAuth: 'auth-key',
@@ -141,6 +144,7 @@ describe('createPushSubscriptionRepository', () => {
       const repo = createPushSubscriptionRepository(mockDb);
       const result = await repo.create({
         userId: 'usr-123',
+        deviceId: 'device-123',
         endpoint: 'https://fcm.googleapis.com/fcm/send/abc123',
         keysP256dh: 'p256dh-key',
         keysAuth: 'auth-key',
@@ -162,8 +166,8 @@ describe('createPushSubscriptionRepository', () => {
       const result = await repo.findByUserId('usr-123');
 
       expect(result).toHaveLength(2);
-      expect(result[0].userId).toBe('usr-123');
-      expect(result[1].userId).toBe('usr-123');
+      expect(result[0]?.userId).toBe('usr-123');
+      expect(result[1]?.userId).toBe('usr-123');
       expect(mockDb.query).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining('user_id'),
@@ -356,6 +360,7 @@ describe('createPushSubscriptionRepository', () => {
       const repo = createPushSubscriptionRepository(mockDb);
       const result = await repo.create({
         userId: 'usr-123',
+        deviceId: 'device-123',
         endpoint: longEndpoint,
         keysP256dh: 'p256dh-key',
         keysAuth: 'auth-key',

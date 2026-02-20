@@ -13,12 +13,12 @@ import { useCallback, useMemo } from 'react';
 
 import { createNotificationsApi } from '../api/notificationsApi';
 
-import type { Notification } from '@bslt/shared';
 import type {
   DeleteNotificationResponse,
   MarkReadResponse,
   NotificationsListResponse,
 } from '../api/notificationsApi';
+import type { Notification } from '@bslt/shared';
 
 // ============================================================================
 // Types

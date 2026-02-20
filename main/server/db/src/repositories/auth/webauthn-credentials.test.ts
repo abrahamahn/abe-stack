@@ -23,6 +23,7 @@ const createMockDb = (): RawDb =>
     getClient: vi.fn() as RawDb['getClient'],
     queryOne: vi.fn(),
     execute: vi.fn(),
+    withSession: vi.fn() as RawDb['withSession'],
   }) as unknown as RawDb;
 
 // ============================================================================
@@ -105,8 +106,8 @@ describe('createWebauthnCredentialRepository', () => {
       const result = await repo.findByUserId('usr-123');
 
       expect(result).toHaveLength(1);
-      expect(result[0].userId).toBe('usr-123');
-      expect(result[0].name).toBe('My Passkey');
+      expect(result[0]?.userId).toBe('usr-123');
+      expect(result[0]?.name).toBe('My Passkey');
     });
 
     it('should return empty array when no credentials found', async () => {

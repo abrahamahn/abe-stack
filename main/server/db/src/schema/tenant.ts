@@ -3,7 +3,7 @@
  * Tenant Schema Types
  *
  * TypeScript interfaces for tenants, memberships, and invitations tables.
- * Maps to migration 0001_tenant.sql.
+ * Maps to migration 0100_tenants.sql.
  */
 
 import { INVITATION_STATUSES, type InvitationStatus, type TenantRole } from '@bslt/shared';
@@ -36,7 +36,7 @@ export const INVITATIONS_TABLE = 'invitations';
  * Tenant record (SELECT result).
  * Represents a workspace / organization.
  *
- * @see 0001_tenant.sql
+ * @see 0100_tenants.sql
  */
 export interface Tenant {
   id: string;
@@ -90,7 +90,7 @@ export interface UpdateTenant {
  * Membership record (SELECT result).
  * Represents a user's role within a tenant.
  *
- * @see 0001_tenant.sql — UNIQUE(tenant_id, user_id)
+ * @see 0100_tenants.sql — UNIQUE(tenant_id, user_id)
  */
 export interface Membership {
   id: string;
@@ -130,7 +130,7 @@ export interface UpdateMembership {
  * Invitation record (SELECT result).
  * Represents an email invite to join a tenant.
  *
- * @see 0001_tenant.sql — UNIQUE(tenant_id, email) for pending invites
+ * @see 0100_tenants.sql — UNIQUE(tenant_id, email) for pending invites
  */
 export interface Invitation {
   id: string;

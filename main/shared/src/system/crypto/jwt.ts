@@ -10,6 +10,9 @@
 
 import { createHmac, timingSafeEqual } from 'node:crypto';
 
+import { HTTP_STATUS } from '../constants/platform';
+import { AppError } from '../errors';
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -38,21 +41,24 @@ export interface VerifyOptions {
 // Errors
 // ============================================================================
 
-export class JwtError extends Error {
-  constructor(
-    message: string,
-    public readonly code: JwtErrorCode,
-  ) {
-    super(message);
-    this.name = 'JwtError';
-  }
-}
-
 export type JwtErrorCode =
   | 'INVALID_TOKEN'
   | 'INVALID_SIGNATURE'
   | 'TOKEN_EXPIRED'
   | 'MALFORMED_TOKEN';
+
+const JWT_STATUS: Record<JwtErrorCode, number> = {
+  MALFORMED_TOKEN: HTTP_STATUS.BAD_REQUEST,
+  INVALID_TOKEN: HTTP_STATUS.UNAUTHORIZED,
+  INVALID_SIGNATURE: HTTP_STATUS.UNAUTHORIZED,
+  TOKEN_EXPIRED: HTTP_STATUS.UNAUTHORIZED,
+};
+
+export class JwtError extends AppError {
+  constructor(message: string, code: JwtErrorCode) {
+    super(message, JWT_STATUS[code], code);
+  }
+}
 
 // ============================================================================
 // Utilities

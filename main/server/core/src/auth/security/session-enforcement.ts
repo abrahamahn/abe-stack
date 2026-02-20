@@ -69,14 +69,16 @@ export async function enforceMaxConcurrentSessions(
     return 0;
   }
 
-  const activeFamilies = await repos.refreshTokenFamilies.findActiveByUserId(userId);
+  const activeFamilies = await repos.refreshTokens.findActiveFamilies(userId);
 
   if (activeFamilies.length <= maxSessions) {
     return 0;
   }
 
   // Sort by creation date ascending (oldest first)
-  const sorted = [...activeFamilies].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+  const sorted = [...activeFamilies].sort(
+    (a, b) => a.familyCreatedAt.getTime() - b.familyCreatedAt.getTime(),
+  );
 
   // Revoke the oldest sessions that exceed the limit
   const excessCount = activeFamilies.length - maxSessions;
@@ -84,7 +86,7 @@ export async function enforceMaxConcurrentSessions(
 
   let revokedCount = 0;
   for (const family of toEvict) {
-    await repos.refreshTokenFamilies.revoke(family.id, 'Session limit exceeded');
+    await repos.refreshTokens.revokeFamily(family.familyId, 'Session limit exceeded');
     revokedCount++;
   }
 

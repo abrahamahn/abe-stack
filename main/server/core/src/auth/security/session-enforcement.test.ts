@@ -13,7 +13,7 @@ import {
   isSessionIdle,
 } from './session-enforcement';
 
-import type { RefreshTokenFamily, Repositories } from '../../../../db/src';
+import type { RefreshTokenFamilyView, Repositories } from '../../../../db/src';
 
 // ============================================================================
 // Mock Repositories
@@ -21,23 +21,15 @@ import type { RefreshTokenFamily, Repositories } from '../../../../db/src';
 
 function createMockRepos(): Repositories {
   return {
-    refreshTokenFamilies: {
-      findById: vi.fn(),
-      findActiveByUserId: vi.fn(),
-      create: vi.fn(),
-      revoke: vi.fn(),
-      revokeAllForUser: vi.fn(),
-    },
     users: {} as never,
-    refreshTokens: {} as never,
+    refreshTokens: {
+      findActiveFamilies: vi.fn(),
+      revokeFamily: vi.fn(),
+    } as never,
+    authTokens: {} as never,
     loginAttempts: {} as never,
-    passwordResetTokens: {} as never,
-    emailVerificationTokens: {} as never,
     securityEvents: {} as never,
     totpBackupCodes: {} as never,
-    emailChangeTokens: {} as never,
-    emailChangeRevertTokens: {} as never,
-    magicLinkTokens: {} as never,
     oauthConnections: {} as never,
     apiKeys: {} as never,
     pushSubscriptions: {} as never,
@@ -62,8 +54,7 @@ function createMockRepos(): Repositories {
     usageMetrics: {} as never,
     usageSnapshots: {} as never,
     legalDocuments: {} as never,
-    userAgreements: {} as never,
-    consentLogs: {} as never,
+    consentRecords: {} as never,
     dataExportRequests: {} as never,
     activities: {} as never,
     webauthnCredentials: {} as never,
@@ -72,15 +63,16 @@ function createMockRepos(): Repositories {
   } as Repositories;
 }
 
-function createMockFamily(overrides: Partial<RefreshTokenFamily> = {}): RefreshTokenFamily {
+function createMockFamily(overrides: Partial<RefreshTokenFamilyView> = {}): RefreshTokenFamilyView {
   return {
-    id: 'family-1',
+    familyId: 'family-1',
     userId: 'user-1',
-    createdAt: new Date('2026-01-15T10:00:00Z'),
+    familyCreatedAt: new Date('2026-01-15T10:00:00Z'),
+    familyRevokedAt: null,
+    familyRevokeReason: null,
+    latestExpiresAt: new Date('2026-02-15T10:00:00Z'),
     ipAddress: '192.168.1.1',
     userAgent: 'Mozilla/5.0',
-    revokedAt: null,
-    revokeReason: null,
     ...overrides,
   };
 }
@@ -180,44 +172,56 @@ describe('enforceMaxConcurrentSessions', () => {
   });
 
   it('should not revoke any sessions when under the limit', async () => {
-    const families = [createMockFamily({ id: 'family-1' }), createMockFamily({ id: 'family-2' })];
-    vi.mocked(repos.refreshTokenFamilies.findActiveByUserId).mockResolvedValue(families);
+    const families = [
+      createMockFamily({ familyId: 'family-1' }),
+      createMockFamily({ familyId: 'family-2' }),
+    ];
+    vi.mocked(repos.refreshTokens.findActiveFamilies).mockResolvedValue(families);
 
     const count = await enforceMaxConcurrentSessions(repos, 'user-1', 5);
 
     expect(count).toBe(0);
-    expect(repos.refreshTokenFamilies.revoke).not.toHaveBeenCalled();
+    expect(repos.refreshTokens.revokeFamily).not.toHaveBeenCalled();
   });
 
   it('should not revoke sessions when exactly at the limit', async () => {
     const families = [
-      createMockFamily({ id: 'family-1' }),
-      createMockFamily({ id: 'family-2' }),
-      createMockFamily({ id: 'family-3' }),
+      createMockFamily({ familyId: 'family-1' }),
+      createMockFamily({ familyId: 'family-2' }),
+      createMockFamily({ familyId: 'family-3' }),
     ];
-    vi.mocked(repos.refreshTokenFamilies.findActiveByUserId).mockResolvedValue(families);
+    vi.mocked(repos.refreshTokens.findActiveFamilies).mockResolvedValue(families);
 
     const count = await enforceMaxConcurrentSessions(repos, 'user-1', 3);
 
     expect(count).toBe(0);
-    expect(repos.refreshTokenFamilies.revoke).not.toHaveBeenCalled();
+    expect(repos.refreshTokens.revokeFamily).not.toHaveBeenCalled();
   });
 
   it('should revoke oldest sessions when over the limit', async () => {
     const families = [
-      createMockFamily({ id: 'family-newest', createdAt: new Date('2026-01-15T10:00:00Z') }),
-      createMockFamily({ id: 'family-oldest', createdAt: new Date('2026-01-10T10:00:00Z') }),
-      createMockFamily({ id: 'family-middle', createdAt: new Date('2026-01-12T10:00:00Z') }),
+      createMockFamily({
+        familyId: 'family-newest',
+        familyCreatedAt: new Date('2026-01-15T10:00:00Z'),
+      }),
+      createMockFamily({
+        familyId: 'family-oldest',
+        familyCreatedAt: new Date('2026-01-10T10:00:00Z'),
+      }),
+      createMockFamily({
+        familyId: 'family-middle',
+        familyCreatedAt: new Date('2026-01-12T10:00:00Z'),
+      }),
     ];
-    vi.mocked(repos.refreshTokenFamilies.findActiveByUserId).mockResolvedValue(families);
-    vi.mocked(repos.refreshTokenFamilies.revoke).mockResolvedValue(null);
+    vi.mocked(repos.refreshTokens.findActiveFamilies).mockResolvedValue(families);
+    vi.mocked(repos.refreshTokens.revokeFamily).mockResolvedValue(1);
 
     const count = await enforceMaxConcurrentSessions(repos, 'user-1', 2);
 
     expect(count).toBe(1);
-    expect(repos.refreshTokenFamilies.revoke).toHaveBeenCalledTimes(1);
+    expect(repos.refreshTokens.revokeFamily).toHaveBeenCalledTimes(1);
     // Should revoke the oldest one
-    expect(repos.refreshTokenFamilies.revoke).toHaveBeenCalledWith(
+    expect(repos.refreshTokens.revokeFamily).toHaveBeenCalledWith(
       'family-oldest',
       'Session limit exceeded',
     );
@@ -225,36 +229,36 @@ describe('enforceMaxConcurrentSessions', () => {
 
   it('should revoke multiple sessions when far over the limit', async () => {
     const families = [
-      createMockFamily({ id: 'family-1', createdAt: new Date('2026-01-10T10:00:00Z') }),
-      createMockFamily({ id: 'family-2', createdAt: new Date('2026-01-11T10:00:00Z') }),
-      createMockFamily({ id: 'family-3', createdAt: new Date('2026-01-12T10:00:00Z') }),
-      createMockFamily({ id: 'family-4', createdAt: new Date('2026-01-13T10:00:00Z') }),
-      createMockFamily({ id: 'family-5', createdAt: new Date('2026-01-14T10:00:00Z') }),
+      createMockFamily({ familyId: 'family-1', familyCreatedAt: new Date('2026-01-10T10:00:00Z') }),
+      createMockFamily({ familyId: 'family-2', familyCreatedAt: new Date('2026-01-11T10:00:00Z') }),
+      createMockFamily({ familyId: 'family-3', familyCreatedAt: new Date('2026-01-12T10:00:00Z') }),
+      createMockFamily({ familyId: 'family-4', familyCreatedAt: new Date('2026-01-13T10:00:00Z') }),
+      createMockFamily({ familyId: 'family-5', familyCreatedAt: new Date('2026-01-14T10:00:00Z') }),
     ];
-    vi.mocked(repos.refreshTokenFamilies.findActiveByUserId).mockResolvedValue(families);
-    vi.mocked(repos.refreshTokenFamilies.revoke).mockResolvedValue(null);
+    vi.mocked(repos.refreshTokens.findActiveFamilies).mockResolvedValue(families);
+    vi.mocked(repos.refreshTokens.revokeFamily).mockResolvedValue(1);
 
     const count = await enforceMaxConcurrentSessions(repos, 'user-1', 2);
 
     expect(count).toBe(3);
-    expect(repos.refreshTokenFamilies.revoke).toHaveBeenCalledTimes(3);
+    expect(repos.refreshTokens.revokeFamily).toHaveBeenCalledTimes(3);
     // Should revoke the 3 oldest
-    expect(repos.refreshTokenFamilies.revoke).toHaveBeenCalledWith(
+    expect(repos.refreshTokens.revokeFamily).toHaveBeenCalledWith(
       'family-1',
       'Session limit exceeded',
     );
-    expect(repos.refreshTokenFamilies.revoke).toHaveBeenCalledWith(
+    expect(repos.refreshTokens.revokeFamily).toHaveBeenCalledWith(
       'family-2',
       'Session limit exceeded',
     );
-    expect(repos.refreshTokenFamilies.revoke).toHaveBeenCalledWith(
+    expect(repos.refreshTokens.revokeFamily).toHaveBeenCalledWith(
       'family-3',
       'Session limit exceeded',
     );
   });
 
   it('should return 0 when user has no sessions', async () => {
-    vi.mocked(repos.refreshTokenFamilies.findActiveByUserId).mockResolvedValue([]);
+    vi.mocked(repos.refreshTokens.findActiveFamilies).mockResolvedValue([]);
 
     const count = await enforceMaxConcurrentSessions(repos, 'user-1', 5);
 
@@ -265,11 +269,11 @@ describe('enforceMaxConcurrentSessions', () => {
     const count = await enforceMaxConcurrentSessions(repos, 'user-1', 0);
 
     expect(count).toBe(0);
-    expect(repos.refreshTokenFamilies.findActiveByUserId).not.toHaveBeenCalled();
+    expect(repos.refreshTokens.findActiveFamilies).not.toHaveBeenCalled();
   });
 
   it('should propagate repository errors', async () => {
-    vi.mocked(repos.refreshTokenFamilies.findActiveByUserId).mockRejectedValue(
+    vi.mocked(repos.refreshTokens.findActiveFamilies).mockRejectedValue(
       new Error('Database error'),
     );
 

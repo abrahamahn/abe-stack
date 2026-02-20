@@ -14,7 +14,7 @@
 import path from 'node:path';
 
 import { RateLimiter } from '@bslt/server-system';
-import { createConsoleLogger, registerLoggingMiddleware } from '@bslt/server-system/logger';
+import { createConsoleLogger } from '@bslt/server-system/logger';
 import { ERROR_CODES, isAppError, LIMITS } from '@bslt/shared';
 import swagger from '@fastify/swagger';
 import swaggerUI from '@fastify/swagger-ui';
@@ -23,11 +23,12 @@ import fastify from 'fastify';
 import { registerPlugins, type AppErrorInfo } from './http/plugins';
 import { swaggerThemeCss } from './http/swagger-theme';
 import { contextualizeRequest } from './middleware/context';
+import { registerLoggingMiddleware } from './middleware/logging';
 
+import type { HasContext, IServiceContainer, RequestWithCookies } from './types/context';
 import type { DbClient } from '@bslt/db';
 import type { AppConfig } from '@bslt/shared/config';
 import type { FastifyInstance } from 'fastify';
-import type { HasContext, IServiceContainer, RequestWithCookies } from './types/context';
 
 // ============================================================================
 // Types
@@ -94,7 +95,7 @@ export async function createServer(deps: ServerDependencies): Promise<FastifyIns
     corsCredentials: config.server.cors.credentials,
     corsMethods: config.server.cors.methods,
     cookieSecret: config.auth.cookie.secret,
-    rateLimiter: new RateLimiter({ windowMs: 60_000, max: 100 }),
+    rateLimiter: new RateLimiter(config.server.rateLimit),
     isAppError: (err: unknown) => isAppError(err),
     getErrorInfo: (err: unknown): AppErrorInfo => {
       const e = err as {

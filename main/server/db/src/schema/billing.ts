@@ -28,7 +28,7 @@ import {
   type SubscriptionStatus,
 } from '@bslt/shared';
 
-// Re-export shared constants for consumers that import from schema
+// Re-export shared constants and types for consumers that import from schema
 export {
   BILLING_EVENT_TYPES,
   BILLING_PROVIDERS,

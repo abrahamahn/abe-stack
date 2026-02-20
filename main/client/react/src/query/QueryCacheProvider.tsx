@@ -27,7 +27,7 @@ export interface QueryCacheProviderProps {
   /** Options for creating a new QueryCache (if cache not provided) */
   options?: QueryCacheOptions;
   /** Children to render */
-  children: ReactNode;
+  children?: ReactNode;
 }
 
 /**

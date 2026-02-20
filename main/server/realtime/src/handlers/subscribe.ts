@@ -13,8 +13,8 @@ import { isAuthenticatedRequest } from '@bslt/shared/core';
 
 import { isTableAllowed, loadRecords } from '../service';
 
-import type { RecordPointer, RouteResult } from '@bslt/shared';
 import type { GetRecordsResult, RealtimeModuleDeps, RealtimeRequest } from '../types';
+import type { RecordPointer, RouteResult } from '@bslt/shared';
 
 // ============================================================================
 // Handlers

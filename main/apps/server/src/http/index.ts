@@ -75,21 +75,19 @@ export {
   sanitizeString, type SanitizationResult, type SQLInjectionDetectionOptions, type ValidationOptions
 } from './middleware';
 
-// Router — re-exported from @bslt/server-system (canonical implementation)
+// Router — Fastify bridge (implementation) + route types (from @bslt/server-system)
+export { registerRouteMap, type AuthGuardFactory, type RouterOptions } from './router';
 export {
   createRouteMap,
   protectedRoute,
   publicRoute,
-  registerRouteMap,
-  type AuthGuardFactory,
   type HandlerContext,
   type HttpMethod,
   type RouteDefinition,
   type RouteHandler,
   type RouteMap,
   type RouteResult,
-  type RouterOptions,
-  type ValidationSchema
+  type ValidationSchema,
 } from '@bslt/server-system';
 
 // Pagination

@@ -28,6 +28,7 @@ const createMockDb = (): RawDb => ({
   getClient: vi.fn() as RawDb['getClient'],
   queryOne: vi.fn(),
   execute: vi.fn(),
+  withSession: vi.fn() as RawDb['withSession'],
 });
 
 // ============================================================================
@@ -54,8 +55,8 @@ const mockInvoice: Invoice = {
 
 const mockDbRow = {
   id: 'inv-123',
-  user_id: 'user-456',
-  subscription_id: 'sub-789',
+  user_id: 'user-456' as string | null,
+  subscription_id: 'sub-789' as string | null,
   provider: 'stripe',
   provider_invoice_id: 'in_stripe123',
   status: 'paid',
@@ -64,8 +65,8 @@ const mockDbRow = {
   currency: 'usd',
   period_start: new Date('2024-01-01T00:00:00Z'),
   period_end: new Date('2024-02-01T00:00:00Z'),
-  paid_at: new Date('2024-01-05T10:00:00Z'),
-  invoice_pdf_url: 'https://example.com/invoice.pdf',
+  paid_at: new Date('2024-01-05T10:00:00Z') as Date | null,
+  invoice_pdf_url: 'https://example.com/invoice.pdf' as string | null,
   created_at: new Date('2024-01-01T00:00:00Z'),
   updated_at: new Date('2024-01-05T10:00:00Z'),
 };
@@ -401,7 +402,7 @@ describe('createInvoiceRepository', () => {
       it('should return nextCursor when more items exist', async () => {
         const rows = Array.from({ length: 11 }, (_, i) =>
           createMockDbRow({
-            id: `inv-${i}`,
+            id: `inv-${String(i)}`,
             created_at: new Date(`2024-01-${String(i + 1).padStart(2, '0')}T00:00:00Z`),
           }),
         );
@@ -457,7 +458,7 @@ describe('createInvoiceRepository', () => {
       });
 
       it('should handle exactly limit items (no more pages)', async () => {
-        const rows = Array.from({ length: 20 }, (_, i) => createMockDbRow({ id: `inv-${i}` }));
+        const rows = Array.from({ length: 20 }, (_, i) => createMockDbRow({ id: `inv-${String(i)}` }));
         vi.mocked(mockDb.query).mockResolvedValue(rows);
 
         const repo = createInvoiceRepository(mockDb);

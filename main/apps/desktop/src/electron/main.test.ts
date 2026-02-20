@@ -93,8 +93,8 @@ vi.mock('./deep-links', () => ({
   handleDeepLink: mocks.mockHandleDeepLink,
 }));
 
-// Mock @bslt/shared which exports waitForPort
-vi.mock('@bslt/shared', () => ({
+// Mock @bslt/server-system which exports waitForPort
+vi.mock('@bslt/server-system', () => ({
   waitForPort: mocks.mockWaitForPort,
 }));
 

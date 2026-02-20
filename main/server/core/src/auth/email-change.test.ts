@@ -9,9 +9,9 @@ import {
   revertEmailChange,
 } from './email-change';
 
-import type { AuthConfig } from '@bslt/shared/config';
-import type { DbClient, Repositories } from '../../../db/src';
 import type { AuthEmailService, AuthEmailTemplates, AuthLogger } from './types';
+import type { DbClient, Repositories } from '../../../db/src';
+import type { AuthConfig } from '@bslt/shared/config';
 
 // ============================================================================
 // Mocks
@@ -61,34 +61,28 @@ describe('email-change', () => {
         findByEmail: vi.fn(),
         update: vi.fn().mockResolvedValue(null),
       },
-      emailChangeTokens: {
+      authTokens: {
         invalidateForUser: vi.fn().mockResolvedValue(0),
         create: vi.fn().mockResolvedValue({
-          id: 'ect-123',
+          id: 'at-123',
+          type: 'email_change' as const,
           userId: 'user-123',
-          newEmail: 'new@example.com',
+          email: null,
           tokenHash: 'hash',
           expiresAt: new Date(),
           usedAt: null,
+          ipAddress: null,
+          userAgent: null,
+          metadata: { newEmail: 'new@example.com' },
           createdAt: new Date(),
         }),
         findByTokenHash: vi.fn(),
+        findValidByTokenHash: vi.fn(),
         markAsUsed: vi.fn().mockResolvedValue(null),
-      },
-      emailChangeRevertTokens: {
-        invalidateForUser: vi.fn().mockResolvedValue(0),
-        create: vi.fn().mockResolvedValue({
-          id: 'ecrt-123',
-          userId: 'user-123',
-          oldEmail: 'old@example.com',
-          newEmail: 'new@example.com',
-          tokenHash: 'hash',
-          expiresAt: new Date(),
-          usedAt: null,
-          createdAt: new Date(),
-        }),
-        findByTokenHash: vi.fn(),
-        markAsUsed: vi.fn().mockResolvedValue(null),
+        countRecentByEmail: vi.fn(),
+        countRecentByIp: vi.fn(),
+        deleteExpired: vi.fn(),
+        deleteExpiredByUser: vi.fn(),
       },
     } as unknown as Repositories;
 
@@ -153,13 +147,13 @@ describe('email-change', () => {
       expect(mockRepos.users.findByEmail).toHaveBeenCalledWith('new@example.com');
 
       // Should invalidate existing tokens via repo
-      expect(mockRepos.emailChangeTokens.invalidateForUser).toHaveBeenCalledWith(userId);
+      expect(mockRepos.authTokens.invalidateForUser).toHaveBeenCalledWith('email_change', userId);
 
       // Should create new token via repo
-      expect(mockRepos.emailChangeTokens.create).toHaveBeenCalledWith(
+      expect(mockRepos.authTokens.create).toHaveBeenCalledWith(
         expect.objectContaining({
+          type: 'email_change',
           userId,
-          newEmail: 'new@example.com',
           tokenHash: expect.any(String),
           expiresAt: expect.any(Date),
         }),
@@ -260,7 +254,7 @@ describe('email-change', () => {
 
       // Should NOT send email or create token
       expect(mockEmailService.send).not.toHaveBeenCalled();
-      expect(mockRepos.emailChangeTokens.create).not.toHaveBeenCalled();
+      expect(mockRepos.authTokens.create).not.toHaveBeenCalled();
     });
 
     test('should allow changing to same email (same user)', async () => {
@@ -403,13 +397,17 @@ describe('email-change', () => {
       const futureDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
       // Mock token lookup via repo
-      vi.mocked(mockRepos.emailChangeTokens.findByTokenHash).mockResolvedValue({
+      vi.mocked(mockRepos.authTokens.findByTokenHash).mockResolvedValue({
         id: 'token-123',
+        type: 'email_change' as const,
         userId,
-        newEmail,
+        email: null,
         tokenHash: 'hash',
         expiresAt: futureDate,
         usedAt: null,
+        ipAddress: null,
+        userAgent: null,
+        metadata: { newEmail },
         createdAt: new Date(),
       } as never);
 
@@ -441,11 +439,11 @@ describe('email-change', () => {
       );
 
       // Should mark token as used via repo
-      expect(mockRepos.emailChangeTokens.markAsUsed).toHaveBeenCalledWith('token-123');
+      expect(mockRepos.authTokens.markAsUsed).toHaveBeenCalledWith('token-123');
     });
 
     test('should throw InvalidTokenError when token not found', async () => {
-      vi.mocked(mockRepos.emailChangeTokens.findByTokenHash).mockResolvedValue(null);
+      vi.mocked(mockRepos.authTokens.findByTokenHash).mockResolvedValue(null);
 
       await expect(confirmEmailChange(mockDb, mockRepos, 'invalid-token')).rejects.toThrow(
         InvalidTokenError,
@@ -457,13 +455,17 @@ describe('email-change', () => {
     });
 
     test('should throw InvalidTokenError when token already used', async () => {
-      vi.mocked(mockRepos.emailChangeTokens.findByTokenHash).mockResolvedValue({
+      vi.mocked(mockRepos.authTokens.findByTokenHash).mockResolvedValue({
         id: 'token-123',
+        type: 'email_change' as const,
         userId: 'user-123',
-        newEmail: 'new@example.com',
+        email: null,
         tokenHash: 'hash',
         expiresAt: new Date(Date.now() + 10000),
         usedAt: new Date(), // Already used
+        ipAddress: null,
+        userAgent: null,
+        metadata: { newEmail: 'new@example.com' },
         createdAt: new Date(),
       } as never);
 
@@ -479,13 +481,17 @@ describe('email-change', () => {
     test('should throw InvalidTokenError when token expired', async () => {
       const pastDate = new Date(Date.now() - 10000);
 
-      vi.mocked(mockRepos.emailChangeTokens.findByTokenHash).mockResolvedValue({
+      vi.mocked(mockRepos.authTokens.findByTokenHash).mockResolvedValue({
         id: 'token-123',
+        type: 'email_change' as const,
         userId: 'user-123',
-        newEmail: 'new@example.com',
+        email: null,
         tokenHash: 'hash',
         expiresAt: pastDate, // Expired
         usedAt: null,
+        ipAddress: null,
+        userAgent: null,
+        metadata: { newEmail: 'new@example.com' },
         createdAt: new Date(),
       } as never);
 
@@ -501,13 +507,17 @@ describe('email-change', () => {
     test('should throw InvalidTokenError when email no longer available', async () => {
       const futureDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
-      vi.mocked(mockRepos.emailChangeTokens.findByTokenHash).mockResolvedValue({
+      vi.mocked(mockRepos.authTokens.findByTokenHash).mockResolvedValue({
         id: 'token-123',
+        type: 'email_change' as const,
         userId: 'user-123',
-        newEmail: 'new@example.com',
+        email: null,
         tokenHash: 'hash',
         expiresAt: futureDate,
         usedAt: null,
+        ipAddress: null,
+        userAgent: null,
+        metadata: { newEmail: 'new@example.com' },
         createdAt: new Date(),
       } as never);
 
@@ -529,13 +539,17 @@ describe('email-change', () => {
     test('should throw InvalidTokenError when user not found', async () => {
       const futureDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
-      vi.mocked(mockRepos.emailChangeTokens.findByTokenHash).mockResolvedValue({
+      vi.mocked(mockRepos.authTokens.findByTokenHash).mockResolvedValue({
         id: 'token-123',
+        type: 'email_change' as const,
         userId: 'user-123',
-        newEmail: 'new@example.com',
+        email: null,
         tokenHash: 'hash',
         expiresAt: futureDate,
         usedAt: null,
+        ipAddress: null,
+        userAgent: null,
+        metadata: { newEmail: 'new@example.com' },
         createdAt: new Date(),
       } as never);
 
@@ -562,6 +576,21 @@ describe('email-change', () => {
       const oldEmail = 'old@example.com';
       const newEmail = 'new@example.com';
 
+      // Override create mock for revert token
+      vi.mocked(mockRepos.authTokens.create).mockResolvedValue({
+        id: 'at-revert-123',
+        type: 'email_change_revert' as const,
+        userId,
+        email: null,
+        tokenHash: 'hash',
+        expiresAt: new Date(),
+        usedAt: null,
+        ipAddress: null,
+        userAgent: null,
+        metadata: { oldEmail, newEmail },
+        createdAt: new Date(),
+      });
+
       const token = await createEmailChangeRevertToken(
         mockDb,
         mockRepos,
@@ -574,14 +603,16 @@ describe('email-change', () => {
       expect(token.length).toBeGreaterThan(0);
 
       // Should invalidate existing revert tokens via repo
-      expect(mockRepos.emailChangeRevertTokens.invalidateForUser).toHaveBeenCalledWith(userId);
+      expect(mockRepos.authTokens.invalidateForUser).toHaveBeenCalledWith(
+        'email_change_revert',
+        userId,
+      );
 
       // Should create new revert token via repo
-      expect(mockRepos.emailChangeRevertTokens.create).toHaveBeenCalledWith(
+      expect(mockRepos.authTokens.create).toHaveBeenCalledWith(
         expect.objectContaining({
+          type: 'email_change_revert',
           userId,
-          oldEmail,
-          newEmail,
           tokenHash: expect.any(String),
           expiresAt: expect.any(Date),
         }),
@@ -592,6 +623,20 @@ describe('email-change', () => {
       const userId = 'user-123';
       const oldEmail = 'old@example.com';
       const newEmail = 'new@example.com';
+
+      vi.mocked(mockRepos.authTokens.create).mockResolvedValue({
+        id: 'at-revert-123',
+        type: 'email_change_revert' as const,
+        userId,
+        email: null,
+        tokenHash: 'hash',
+        expiresAt: new Date(),
+        usedAt: null,
+        ipAddress: null,
+        userAgent: null,
+        metadata: { oldEmail, newEmail },
+        createdAt: new Date(),
+      });
 
       const token1 = await createEmailChangeRevertToken(
         mockDb,
@@ -624,14 +669,17 @@ describe('email-change', () => {
       const futureDate = new Date(Date.now() + 48 * 60 * 60 * 1000);
 
       // Mock revert token lookup via repo
-      vi.mocked(mockRepos.emailChangeRevertTokens.findByTokenHash).mockResolvedValue({
+      vi.mocked(mockRepos.authTokens.findByTokenHash).mockResolvedValue({
         id: 'revert-token-123',
+        type: 'email_change_revert' as const,
         userId,
-        oldEmail,
-        newEmail,
+        email: null,
         tokenHash: 'hash',
         expiresAt: futureDate,
         usedAt: null,
+        ipAddress: null,
+        userAgent: null,
+        metadata: { oldEmail, newEmail },
         createdAt: new Date(),
       } as never);
 
@@ -660,14 +708,14 @@ describe('email-change', () => {
       );
 
       // Should mark revert token as used via repo
-      expect(mockRepos.emailChangeRevertTokens.markAsUsed).toHaveBeenCalledWith('revert-token-123');
+      expect(mockRepos.authTokens.markAsUsed).toHaveBeenCalledWith('revert-token-123');
 
       // Should revoke all user tokens
       expect(revokeAllUserTokens).toHaveBeenCalledWith(mockDb, userId);
     });
 
     test('should throw InvalidTokenError when token not found', async () => {
-      vi.mocked(mockRepos.emailChangeRevertTokens.findByTokenHash).mockResolvedValue(null);
+      vi.mocked(mockRepos.authTokens.findByTokenHash).mockResolvedValue(null);
 
       await expect(revertEmailChange(mockDb, mockRepos, 'invalid-token')).rejects.toThrow(
         InvalidTokenError,
@@ -679,14 +727,17 @@ describe('email-change', () => {
     });
 
     test('should throw InvalidTokenError when token already used', async () => {
-      vi.mocked(mockRepos.emailChangeRevertTokens.findByTokenHash).mockResolvedValue({
+      vi.mocked(mockRepos.authTokens.findByTokenHash).mockResolvedValue({
         id: 'revert-token-123',
+        type: 'email_change_revert' as const,
         userId: 'user-123',
-        oldEmail: 'old@example.com',
-        newEmail: 'new@example.com',
+        email: null,
         tokenHash: 'hash',
         expiresAt: new Date(Date.now() + 10000),
         usedAt: new Date(), // Already used
+        ipAddress: null,
+        userAgent: null,
+        metadata: { oldEmail: 'old@example.com', newEmail: 'new@example.com' },
         createdAt: new Date(),
       } as never);
 
@@ -702,14 +753,17 @@ describe('email-change', () => {
     test('should throw InvalidTokenError when token expired', async () => {
       const pastDate = new Date(Date.now() - 10000);
 
-      vi.mocked(mockRepos.emailChangeRevertTokens.findByTokenHash).mockResolvedValue({
+      vi.mocked(mockRepos.authTokens.findByTokenHash).mockResolvedValue({
         id: 'revert-token-123',
+        type: 'email_change_revert' as const,
         userId: 'user-123',
-        oldEmail: 'old@example.com',
-        newEmail: 'new@example.com',
+        email: null,
         tokenHash: 'hash',
         expiresAt: pastDate, // Expired
         usedAt: null,
+        ipAddress: null,
+        userAgent: null,
+        metadata: { oldEmail: 'old@example.com', newEmail: 'new@example.com' },
         createdAt: new Date(),
       } as never);
 
@@ -725,14 +779,17 @@ describe('email-change', () => {
     test('should throw InvalidTokenError when user not found', async () => {
       const futureDate = new Date(Date.now() + 48 * 60 * 60 * 1000);
 
-      vi.mocked(mockRepos.emailChangeRevertTokens.findByTokenHash).mockResolvedValue({
+      vi.mocked(mockRepos.authTokens.findByTokenHash).mockResolvedValue({
         id: 'revert-token-123',
+        type: 'email_change_revert' as const,
         userId: 'user-123',
-        oldEmail: 'old@example.com',
-        newEmail: 'new@example.com',
+        email: null,
         tokenHash: 'hash',
         expiresAt: futureDate,
         usedAt: null,
+        ipAddress: null,
+        userAgent: null,
+        metadata: { oldEmail: 'old@example.com', newEmail: 'new@example.com' },
         createdAt: new Date(),
       } as never);
 
@@ -750,14 +807,17 @@ describe('email-change', () => {
     test('should throw InvalidTokenError when email already reversed or superseded', async () => {
       const futureDate = new Date(Date.now() + 48 * 60 * 60 * 1000);
 
-      vi.mocked(mockRepos.emailChangeRevertTokens.findByTokenHash).mockResolvedValue({
+      vi.mocked(mockRepos.authTokens.findByTokenHash).mockResolvedValue({
         id: 'revert-token-123',
+        type: 'email_change_revert' as const,
         userId: 'user-123',
-        oldEmail: 'old@example.com',
-        newEmail: 'new@example.com',
+        email: null,
         tokenHash: 'hash',
         expiresAt: futureDate,
         usedAt: null,
+        ipAddress: null,
+        userAgent: null,
+        metadata: { oldEmail: 'old@example.com', newEmail: 'new@example.com' },
         createdAt: new Date(),
       } as never);
 

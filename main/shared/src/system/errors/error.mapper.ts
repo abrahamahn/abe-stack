@@ -22,6 +22,8 @@ export interface HttpErrorResponse {
     message: string;
     code?: string;
     email?: string;
+    lockReason?: string;
+    lockedUntil?: string;
   };
 }
 
@@ -106,7 +108,16 @@ export function mapErrorToHttpResponse(
   }
 
   if (error.name === AUTH_ERROR_NAMES.AccountLockedError) {
-    return { status: 429, body: { message: HTTP_ERROR_MESSAGES.AccountLocked } };
+    const body: HttpErrorResponse['body'] = { message: HTTP_ERROR_MESSAGES.AccountLocked };
+    // Propagate admin-set lock reason and expiry to the client
+    const lockErr = error as { lockReason?: string; lockedUntil?: string };
+    if (typeof lockErr.lockReason === 'string' && lockErr.lockReason.length > 0) {
+      body.lockReason = lockErr.lockReason;
+    }
+    if (typeof lockErr.lockedUntil === 'string' && lockErr.lockedUntil.length > 0) {
+      body.lockedUntil = lockErr.lockedUntil;
+    }
+    return { status: 429, body };
   }
 
   if (isEmailNotVerifiedError(error)) {

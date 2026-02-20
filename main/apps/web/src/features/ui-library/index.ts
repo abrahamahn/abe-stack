@@ -1,9 +1,7 @@
 // main/apps/web/src/features/ui-library/index.ts
 
 // Components
-export { SidePeekUILibraryContent } from './components/SidePeekUILibraryContent';
-export { UILibraryComponentList } from './components/UILibraryComponentList';
-export { UILibraryPreviewArea } from './components/UILibraryPreviewArea';
+export { SidePeekUILibraryContent, UILibraryComponentList, UILibraryPreviewArea } from './components';
 
 // Catalog
 export {
@@ -11,11 +9,11 @@ export {
   getAllCategories,
   getComponentsByCategory,
   getTotalComponentCount,
-} from './catalog/catalog';
+} from './catalog';
 
 // Hooks
-export { useUILibraryPanes } from './hooks/useUILibraryPanes';
-export { useUILibraryTheme, type ThemeMode } from './hooks/useUILibraryTheme';
+export { useUILibraryPanes, useUILibraryTheme } from './hooks';
+export type { ThemeMode } from './hooks';
 
 // Pages
 export { UILibraryPage } from './UILibraryPage';

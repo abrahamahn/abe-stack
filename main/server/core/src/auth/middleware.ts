@@ -20,9 +20,9 @@ import {
 
 import { verifyToken, type TokenPayload } from './utils/jwt';
 
+import type { Repositories } from '../../../db/src';
 import type { UserRole } from '@bslt/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import type { Repositories } from '../../../db/src';
 
 // ============================================================================
 // Internal Types

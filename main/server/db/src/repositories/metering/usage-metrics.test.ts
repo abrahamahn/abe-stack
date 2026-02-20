@@ -25,6 +25,7 @@ const createMockDb = (): RawDb => ({
   getClient: vi.fn() as RawDb['getClient'],
   queryOne: vi.fn(),
   execute: vi.fn(),
+  withSession: vi.fn() as RawDb['withSession'],
 });
 
 // ============================================================================
@@ -233,8 +234,8 @@ describe('createUsageMetricRepository', () => {
       const result = await repo.findAll();
 
       expect(result).toHaveLength(2);
-      expect(result[0].key).toBe('api_calls');
-      expect(result[1].key).toBe('storage_gb');
+      expect(result[0]?.key).toBe('api_calls');
+      expect(result[1]?.key).toBe('storage_gb');
       expect(mockDb.query).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining('ORDER BY'),

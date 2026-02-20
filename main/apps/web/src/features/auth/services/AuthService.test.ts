@@ -68,9 +68,9 @@ vi.mock('@bslt/api', async (importOriginal) => {
 
 import { AuthService, createAuthService } from './AuthService';
 
+import type { ClientConfig } from '../../../config';
 import type { LoginSuccessResponse, RegisterResponse, User } from '@bslt/api';
 import type { UserId } from '@bslt/shared';
-import type { ClientConfig } from '../../../config';
 
 // ============================================================================
 // Test Helpers

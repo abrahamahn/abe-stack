@@ -1,9 +1,69 @@
 // main/client/engine/src/index.ts
 
+// API Client re-exports for react layer (DAG: react → c-engine → api)
+export { createApiClient } from '@bslt/api';
+export type { ApiClient, ApiClientConfig } from '@bslt/api';
+
+export { createAdminBillingClient } from '@bslt/api';
+export type { AdminBillingClient, AdminBillingClientConfig } from '@bslt/api';
+
+export { createBillingClient } from '@bslt/api';
+export type { BillingClient, BillingClientConfig } from '@bslt/api';
+
+export { createDeviceClient } from '@bslt/api';
+export type { DeviceClient, DeviceClientConfig, DeviceItem } from '@bslt/api';
+
+export { createApiKeysClient } from '@bslt/api';
+export type {
+  ApiKeyItem,
+  ApiKeysClient,
+  ApiKeysClientConfig,
+  CreateApiKeyRequest,
+  CreateApiKeyResponse,
+  DeleteApiKeyResponse,
+  RevokeApiKeyResponse,
+} from '@bslt/api';
+
+export {
+  createNotificationClient,
+  getDeviceId,
+  getExistingSubscription,
+  getPushPermission,
+  isPushSupported,
+  requestPushPermission,
+  subscribeToPush,
+  unsubscribeFromPush,
+} from '@bslt/api';
+export type { NotificationClient, NotificationClientConfig } from '@bslt/api';
+
+export { createPhoneClient } from '@bslt/api';
+export type { PhoneClient, PhoneClientConfig } from '@bslt/api';
+
+export { createWebhookClient } from '@bslt/api';
+export type {
+  CreateWebhookRequest,
+  UpdateWebhookRequest,
+  WebhookClient,
+  WebhookClientConfig,
+  WebhookDeliveryItem,
+  WebhookItem,
+  WebhookWithDeliveries,
+} from '@bslt/api';
+
+export { createLegalClient } from '@bslt/api';
+export type {
+  LegalClient,
+  LegalClientConfig,
+  LegalDocumentItem,
+  PublishLegalDocumentRequest,
+  PublishLegalDocumentResponse,
+  UserAgreementItem,
+} from '@bslt/api';
+
 // In-Memory Cache
-export { Loader, LoaderCache, loadWithCache } from './cache/LoaderCache';
-export type { LoaderCacheOptions, LoaderOptions, LoaderState } from './cache/LoaderCache';
-export { RecordCache } from './cache/RecordCache';
+export { Loader, LoaderCache, loadWithCache } from './cache';
+export type { LoaderCacheOptions, LoaderOptions, LoaderState } from './cache';
+export { RecordCache } from './cache';
 export type {
   CacheStats,
   IdentifiableRecord,
@@ -11,21 +71,21 @@ export type {
   RecordChange,
   RecordChangeListener,
   SetRecordOptions,
-  TableMap
-} from './cache/RecordCache';
+  TableMap,
+} from './cache';
 
 // Shared types (used alongside engine's realtime features)
 export type { RecordPointer, VersionedRecord } from '@bslt/shared';
 
 // Offline Support
-export { createTransactionQueue, TransactionQueue } from './offline/TransactionQueue';
+export { createTransactionQueue, TransactionQueue } from './offline';
 export type {
   QueuedTransaction,
   TransactionQueueOptions,
   TransactionQueueStatus,
   TransactionRecordPointer,
-  TransactionResponse
-} from './offline/TransactionQueue';
+  TransactionResponse,
+} from './offline';
 
 // Real-Time
 export {
@@ -34,10 +94,9 @@ export {
   type ConnectionState,
   type ConnectionStateListener,
   type ServerPubsubMessage,
-  type WebsocketPubsubClientConfig
-} from './realtime/WebsocketPubsubClient';
-
-export { SubscriptionCache, type SubscriptionCacheOptions } from './realtime/SubscriptionCache';
+  type WebsocketPubsubClientConfig,
+} from './realtime';
+export { SubscriptionCache, type SubscriptionCacheOptions } from './realtime';
 
 // Persistent Storage
 export {
@@ -45,69 +104,63 @@ export {
   createRecordStorage,
   iterateRecordMap,
   RecordStorage,
-  RecordStorageError
-} from './storage/RecordStorage';
+  RecordStorageError,
+} from './storage';
 export type {
   RecordMap,
   RecordStorageErrorType,
   RecordStorageEvent,
   RecordStorageListener,
   RecordStorageOptions,
-  RecordWithTable
-} from './storage/RecordStorage';
-
-export { clear, createStore, del, get, keys, set, type IDBStore } from './storage/idb';
-
-export { idbStorage, localStorageQueue, type StorageAdapter } from './storage/storage';
-
+  RecordWithTable,
+} from './storage';
+export { clear, createStore, del, get, keys, set, type IDBStore } from './storage';
+export { idbStorage, localStorageQueue, type StorageAdapter } from './storage';
 export {
   clearQueryCache,
   createPersistedClientFromQueryCache,
   createQueryPersister,
-  restorePersistedQueryCache, type PersistedClient,
+  restorePersistedQueryCache,
+  type PersistedClient,
   type PersistedClientState,
   type PersistedQuery,
-  type Persister, type QueryPersisterOptions
-} from './storage/queryPersister';
-
+  type Persister,
+  type QueryPersisterOptions,
+} from './storage';
 export {
   createMutationQueue,
   MutationQueue,
   type MutationQueueOptions,
   type QueuedMutation,
-  type QueueStatus
-} from './storage/mutationQueue';
+  type QueueStatus,
+} from './storage';
 
 // Undo/Redo
-export { createUndoRedoStack, UndoRedoStack } from './undo/UndoRedoStack';
+export { createUndoRedoStack, UndoRedoStack } from './undo';
 export type {
   OperationGroup,
   UndoableOperation,
   UndoRedoStackOptions,
-  UndoRedoState
-} from './undo/UndoRedoStack';
+  UndoRedoState,
+} from './undo';
 
 // Query Cache
-export { hashQueryKey, QueryCache, queryKeysEqual } from './query/QueryCache';
+export { hashQueryKey, QueryCache, queryKeysEqual } from './query';
 export type {
   FetchStatus,
   QueryCacheOptions,
   QueryKey,
   QueryState,
   QueryStatus,
-  SetQueryDataOptions
-} from './query/QueryCache';
+  SetQueryDataOptions,
+} from './query';
 
 // Query Keys
 export { queryKeys } from './queryKeys';
 export type { PostListFilters, QueryKeys, UserListFilters } from './queryKeys';
 
 // Search (client-specific)
-export {
-  ClientSearchQueryBuilder,
-  createClientSearchQuery,
-  fromClientSearchQuery
-} from './search/query-builder';
+export { ClientSearchQueryBuilder, createClientSearchQuery, fromClientSearchQuery } from './search';
 
 // Theme
 export {
@@ -120,6 +173,18 @@ export {
   highContrastDarkOverrides,
   highContrastLightOverrides,
   type ContrastMode,
-  type Density
+  type Density,
 } from './theme';
 
+// UI / Keyboard
+export {
+  formatKeyBinding,
+  isEditableElement,
+  isMac,
+  matchesAnyBinding,
+  matchesKeyBinding,
+  matchesModifiers,
+  parseKeyBinding,
+  type KeyModifiers,
+  type ParsedKeyBinding,
+} from './ui';

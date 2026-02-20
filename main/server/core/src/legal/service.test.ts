@@ -4,10 +4,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getCurrentLegalDocuments, getUserAgreements, publishLegalDocument } from './service';
 
 import type {
+  ConsentRecord,
+  ConsentRecordRepository,
   LegalDocument,
   LegalDocumentRepository,
-  UserAgreement,
-  UserAgreementRepository,
 } from '../../../db/src';
 
 // ============================================================================
@@ -25,12 +25,14 @@ function createMockLegalDocRepo(): LegalDocumentRepository {
   };
 }
 
-function createMockUserAgreementRepo(): UserAgreementRepository {
+function createMockConsentRecordRepo(): ConsentRecordRepository {
   return {
-    create: vi.fn(),
-    findByUserId: vi.fn(),
-    findByUserAndDocument: vi.fn(),
-    findByDocumentId: vi.fn(),
+    recordAgreement: vi.fn(),
+    findAgreementsByUserId: vi.fn(),
+    findAgreementByUserAndDocument: vi.fn(),
+    recordConsent: vi.fn(),
+    findConsentsByUserId: vi.fn(),
+    findLatestConsentByUserAndType: vi.fn(),
   };
 }
 
@@ -47,13 +49,18 @@ function createMockDocument(overrides?: Partial<LegalDocument>): LegalDocument {
   };
 }
 
-function createMockAgreement(overrides?: Partial<UserAgreement>): UserAgreement {
+function createMockConsentRecord(overrides?: Partial<ConsentRecord>): ConsentRecord {
   return {
-    id: 'agreement-1',
+    id: 'cr-1',
     userId: 'user-1',
+    recordType: 'legal_document' as const,
     documentId: 'doc-1',
-    agreedAt: new Date('2026-01-15T10:00:00Z'),
+    consentType: null,
+    granted: null,
     ipAddress: '127.0.0.1',
+    userAgent: null,
+    metadata: {},
+    createdAt: new Date('2026-01-15T10:00:00Z'),
     ...overrides,
   };
 }
@@ -97,27 +104,27 @@ describe('getCurrentLegalDocuments', () => {
 // ============================================================================
 
 describe('getUserAgreements', () => {
-  let agreementRepo: UserAgreementRepository;
+  let consentRecordRepo: ConsentRecordRepository;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    agreementRepo = createMockUserAgreementRepo();
+    consentRecordRepo = createMockConsentRecordRepo();
   });
 
   it('should return agreements for user', async () => {
-    const agreements = [createMockAgreement()];
-    vi.mocked(agreementRepo.findByUserId).mockResolvedValue(agreements);
+    const agreements = [createMockConsentRecord()];
+    vi.mocked(consentRecordRepo.findAgreementsByUserId).mockResolvedValue(agreements);
 
-    const result = await getUserAgreements(agreementRepo, 'user-1');
+    const result = await getUserAgreements(consentRecordRepo, 'user-1');
 
     expect(result).toBe(agreements);
-    expect(agreementRepo.findByUserId).toHaveBeenCalledWith('user-1');
+    expect(consentRecordRepo.findAgreementsByUserId).toHaveBeenCalledWith('user-1');
   });
 
   it('should return empty array when no agreements exist', async () => {
-    vi.mocked(agreementRepo.findByUserId).mockResolvedValue([]);
+    vi.mocked(consentRecordRepo.findAgreementsByUserId).mockResolvedValue([]);
 
-    const result = await getUserAgreements(agreementRepo, 'user-1');
+    const result = await getUserAgreements(consentRecordRepo, 'user-1');
 
     expect(result).toEqual([]);
   });

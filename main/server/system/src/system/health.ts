@@ -1,6 +1,4 @@
 // main/server/system/src/system/health.ts
-
-import { REQUIRED_TABLES, validateSchema } from '@bslt/db';
 import {
   buildDetailedHealthResponse,
   checkCache,
@@ -12,23 +10,38 @@ import {
   checkSchema,
   checkStorage,
   checkWebSocket,
-} from '@bslt/shared';
+} from '@bslt/shared/system';
 
-import type { RawDb } from '@bslt/db';
+import type { HealthContext } from './types';
 import type {
   DetailedHealthResponse,
-  HealthCheckDatabase,
   SchemaHealth,
   ServiceHealth,
   StartupSummaryOptions,
   WebSocketStats,
-} from '@bslt/shared';
-import type { SystemContext } from './types';
+} from '@bslt/shared/system';
 
-/** Callback shape expected by the shared `checkSchema` utility. */
-type SchemaValidator = (
-  db: HealthCheckDatabase,
-) => Promise<{ valid: boolean; missingTables: string[] }>;
+/** Callback that performs the DB-level schema validation. */
+export type SchemaValidatorFn = () => Promise<{ valid: boolean; missingTables: string[] }>;
+
+// ============================================================================
+// Options
+// ============================================================================
+
+export interface DetailedHealthOptions {
+  /**
+   * If provided, a schema check is included in the health response.
+   * Pass `() => validateSchema(db)` from @bslt/db at the composition layer.
+   */
+  schemaValidator?: SchemaValidatorFn;
+  /**
+   * Expected table count — required when schemaValidator is provided.
+   * Pass `REQUIRED_TABLES.length` from @bslt/db at the composition layer.
+   */
+  totalTableCount?: number;
+  /** Optional WebSocket stats; omit when realtime is disabled. */
+  websocketStats?: WebSocketStats;
+}
 
 // ============================================================================
 // Health Check Functions
@@ -37,81 +50,83 @@ type SchemaValidator = (
 /**
  * Check database connectivity by executing a lightweight query.
  *
- * @param ctx - System context containing the database handle
+ * @param ctx - Health context containing the database handle
  * @returns Service health status for the database
- * @complexity O(1) - single `SELECT 1` round-trip
+ * @complexity O(1) — single `SELECT 1` round-trip
  */
-export async function checkDbStatus(ctx: SystemContext): Promise<ServiceHealth> {
+export async function checkDbStatus(ctx: HealthContext): Promise<ServiceHealth> {
   return checkDatabase(ctx.db);
 }
 
 /**
- * Check database schema completeness against the expected table list.
+ * Check database schema completeness.
  *
- * @param ctx - System context containing the database handle
+ * @param ctx       - Health context containing the database handle
+ * @param validate  - Callback performing the actual schema validation (from @bslt/db)
+ * @param tableCount - Expected number of tables
  * @returns Schema health status including any missing tables
  * @complexity O(n) where n = number of expected tables
  */
-export async function checkSchemaStatus(ctx: SystemContext): Promise<SchemaHealth> {
-  const schemaValidator: SchemaValidator = async (db) => {
-    const result = await validateSchema(db as RawDb);
-    return { valid: result.valid, missingTables: result.missingTables };
-  };
-  return checkSchema(ctx.db, schemaValidator, REQUIRED_TABLES.length);
+export async function checkSchemaStatus(
+  ctx: HealthContext,
+  validate: SchemaValidatorFn,
+  tableCount: number,
+): Promise<SchemaHealth> {
+  return checkSchema(ctx.db, validate, tableCount);
 }
 
 /**
  * Check cache service status.
  *
- * @param ctx - System context containing the cache handle
+ * @param ctx - Health context containing the cache handle
  * @returns Service health status for the cache
  * @complexity O(1)
  */
-export async function checkCacheStatus(ctx: SystemContext): Promise<ServiceHealth> {
+export async function checkCacheStatus(ctx: HealthContext): Promise<ServiceHealth> {
   return checkCache(ctx.cache);
 }
 
 /**
  * Check queue service status.
  *
- * @param ctx - System context containing the queue handle
+ * @param ctx - Health context containing the queue handle
  * @returns Service health status for the queue
  * @complexity O(1)
  */
-export async function checkQueueStatus(ctx: SystemContext): Promise<ServiceHealth> {
+export async function checkQueueStatus(ctx: HealthContext): Promise<ServiceHealth> {
   return checkQueue(ctx.queue);
 }
 
 /**
  * Check email service status based on the configured provider.
  *
- * @param ctx - System context containing the application configuration
+ * @param ctx - Health context containing the application configuration
  * @returns Service health status for the email provider
  * @complexity O(1)
  */
-export function checkEmailStatus(ctx: SystemContext): ServiceHealth {
+export function checkEmailStatus(ctx: HealthContext): ServiceHealth {
   return checkEmail({ provider: ctx.config.email.provider });
 }
 
 /**
  * Check storage service status based on the configured provider.
  *
- * @param ctx - System context containing the application configuration
+ * @param ctx - Health context containing the application configuration
  * @returns Service health status for the storage provider
  * @complexity O(1)
  */
-export function checkStorageStatus(ctx: SystemContext): ServiceHealth {
+export function checkStorageStatus(ctx: HealthContext): ServiceHealth {
   return checkStorage({ provider: ctx.config.storage.provider });
 }
 
 /**
  * Check pub/sub status using the subscription manager handle.
  *
- * @param ctx - System context containing the pub/sub handle
+ * @param ctx - Health context containing the pub/sub handle
  * @returns Service health status for pub/sub
  * @complexity O(1)
  */
-export function checkPubSubStatus(ctx: SystemContext): ServiceHealth {
+export function checkPubSubStatus(ctx: HealthContext): ServiceHealth {
   return checkPubSub(ctx.pubsub);
 }
 
@@ -119,7 +134,7 @@ export function checkPubSubStatus(ctx: SystemContext): ServiceHealth {
  * Check WebSocket status using externally-provided connection stats.
  *
  * The caller must supply stats (e.g. from `@bslt/realtime`) so that
- * engine remains free of realtime/premium module dependencies.
+ * the system package remains free of realtime module dependencies.
  *
  * @param stats - Current WebSocket connection statistics
  * @returns Service health status for the WebSocket subsystem
@@ -145,27 +160,33 @@ export function checkRateLimitStatus(): ServiceHealth {
  * Runs all individual checks in parallel and aggregates them into a
  * single {@link DetailedHealthResponse}.
  *
- * @param ctx            - System context for database, config, and pub/sub access
- * @param websocketStats - Optional WebSocket stats; omit when realtime is disabled
+ * @param ctx     - Health context for database, config, and pub/sub access
+ * @param options - Optional: schema validator callback, table count, WebSocket stats
  * @returns Aggregated health response for every monitored service
- * @complexity O(n) dominated by the schema check
+ * @complexity O(n) — dominated by the schema check when provided
  */
 export async function getDetailedHealth(
-  ctx: SystemContext,
-  websocketStats?: WebSocketStats,
+  ctx: HealthContext,
+  options?: DetailedHealthOptions,
 ): Promise<DetailedHealthResponse> {
   const defaultWsStats: WebSocketStats = { pluginRegistered: false, activeConnections: 0 };
+  const ws = options?.websocketStats ?? defaultWsStats;
+
+  const schemaPromise: Promise<SchemaHealth> =
+    options?.schemaValidator !== undefined && options.totalTableCount !== undefined
+      ? checkSchemaStatus(ctx, options.schemaValidator, options.totalTableCount)
+      : Promise.resolve({ status: 'up' as const, details: { valid: true, missingTables: [] } });
 
   const [database, schema, cache, queue, email, storage, pubsub, websocket, rateLimit] =
     await Promise.all([
       checkDbStatus(ctx),
-      checkSchemaStatus(ctx),
+      schemaPromise,
       checkCacheStatus(ctx),
       checkQueueStatus(ctx),
       Promise.resolve(checkEmailStatus(ctx)),
       Promise.resolve(checkStorageStatus(ctx)),
       Promise.resolve(checkPubSubStatus(ctx)),
-      Promise.resolve(checkWebSocketStatus(websocketStats ?? defaultWsStats)),
+      Promise.resolve(checkWebSocketStatus(ws)),
       Promise.resolve(checkRateLimitStatus()),
     ]);
 
@@ -188,25 +209,25 @@ export async function getDetailedHealth(
  * Performs a full health check, then logs an INFO-level summary including
  * the server URL, route count, and per-service status.
  *
- * @param ctx            - System context for health checks and logging
- * @param options        - Startup options (host, port, routeCount)
- * @param websocketStats - Optional WebSocket stats; omit when realtime is disabled
+ * @param ctx     - Health context for health checks and logging
+ * @param options - Startup options (host, port, routeCount)
+ * @param healthOptions - Optional health check options (schemaValidator, websocketStats)
  * @complexity O(n) dominated by `getDetailedHealth`
  */
 export async function logStartupSummary(
-  ctx: SystemContext,
+  ctx: HealthContext,
   options: StartupSummaryOptions,
-  websocketStats?: WebSocketStats,
+  healthOptions?: DetailedHealthOptions,
 ): Promise<void> {
   const { host, port, routeCount } = options;
-  const health = await getDetailedHealth(ctx, websocketStats);
+  const health = await getDetailedHealth(ctx, healthOptions);
 
   ctx.log.info('Startup Summary', {
     msg: 'Server started successfully',
     server: {
       host,
       port,
-      url: `http://${host === '0.0.0.0' ? 'localhost' : host}:${port}`,
+      url: `http://${host === '0.0.0.0' ? 'localhost' : host}:${String(port)}`,
     },
     stats: {
       routes: routeCount,
@@ -225,13 +246,13 @@ export async function logStartupSummary(
  * Redacts secrets — only shows provider choices and operational settings.
  */
 function printDevConfigSummary(
-  ctx: SystemContext,
+  ctx: HealthContext,
   options: StartupSummaryOptions,
   health: DetailedHealthResponse,
 ): void {
   const { config } = ctx;
   const { host, port, routeCount } = options;
-  const url = `http://${host === '0.0.0.0' ? 'localhost' : host}:${port}`;
+  const url = `http://${host === '0.0.0.0' ? 'localhost' : host}:${String(port)}`;
 
   const line = '─'.repeat(52);
   const status = (s: ServiceHealth | undefined): string =>

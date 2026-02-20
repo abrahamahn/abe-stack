@@ -3,7 +3,7 @@
  * Trusted Devices Schema Types
  *
  * TypeScript interfaces for the trusted_devices table.
- * Maps to migration 0025_trusted_devices.sql.
+ * Maps to migration 0001_auth_extensions.sql.
  */
 
 // ============================================================================
@@ -20,7 +20,7 @@ export const TRUSTED_DEVICES_TABLE = 'trusted_devices';
  * Trusted device record (SELECT result).
  * Tracks devices a user has logged in from for security monitoring.
  *
- * @see 0025_trusted_devices.sql
+ * @see 0001_auth_extensions.sql
  */
 export interface TrustedDevice {
   id: string;

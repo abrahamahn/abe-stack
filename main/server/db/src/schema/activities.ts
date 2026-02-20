@@ -4,7 +4,7 @@
  *
  * Explicit TypeScript interfaces for the activities table.
  * Provides user-facing activity feed ("X did Y on Z" timeline).
- * Maps to migration 0016_activities.sql.
+ * Maps to migration 0601_activities.sql.
  *
  * @remarks This table is append-only — no UpdateActivity type exists.
  * Similar pattern to audit_events in system.ts but user-facing.
@@ -30,7 +30,7 @@ export const ACTIVITIES_TABLE = 'activities';
  * Activity record (SELECT result).
  * Append-only — no UpdateActivity type.
  *
- * @see 0016_activities.sql — resource_id is TEXT (not UUID) to support external IDs
+ * @see 0601_activities.sql — resource_id is TEXT (not UUID) to support external IDs
  */
 export interface Activity {
   id: string;

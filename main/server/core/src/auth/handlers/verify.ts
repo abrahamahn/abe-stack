@@ -17,8 +17,8 @@ import { resendVerificationEmail, verifyEmail } from '../service';
 import { createErrorMapperLogger } from '../types';
 import { setRefreshTokenCookie } from '../utils';
 
-import type { AuthResponse, HttpErrorResponse } from '@bslt/shared';
 import type { AppContext, ReplyWithCookies } from '../types';
+import type { AuthResponse, HttpErrorResponse } from '@bslt/shared';
 
 /**
  * Handle email verification.

@@ -4,26 +4,30 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { handleGetConsent, handleUpdateConsent } from './handlers';
 
 import type { ConsentAppContext } from './types';
-import type { ConsentLog, ConsentLogRepository, NewConsentLog } from '../../../db/src';
+import type { ConsentRecord, ConsentRecordRepository } from '../../../db/src';
 
 // ============================================================================
 // Test Helpers
 // ============================================================================
 
-function createMockConsentLogRepo(): ConsentLogRepository {
+function createMockConsentRecordRepo(): ConsentRecordRepository {
   return {
-    create: vi.fn(),
-    findByUserId: vi.fn(),
-    findByUserAndType: vi.fn(),
-    findLatestByUserAndType: vi.fn(),
+    recordAgreement: vi.fn(),
+    findAgreementsByUserId: vi.fn(),
+    findAgreementByUserAndDocument: vi.fn(),
+    recordConsent: vi.fn(),
+    findConsentsByUserId: vi.fn(),
+    findLatestConsentByUserAndType: vi.fn(),
   };
 }
 
-function createMockCtx(overrides?: { consentLogs?: ConsentLogRepository }): ConsentAppContext {
+function createMockCtx(overrides?: {
+  consentRecords?: ConsentRecordRepository;
+}): ConsentAppContext {
   return {
     db: {},
     repos: {
-      consentLogs: overrides?.consentLogs ?? createMockConsentLogRepo(),
+      consentRecords: overrides?.consentRecords ?? createMockConsentRecordRepo(),
     },
     log: {
       info: vi.fn(),
@@ -31,13 +35,20 @@ function createMockCtx(overrides?: { consentLogs?: ConsentLogRepository }): Cons
       error: vi.fn(),
       debug: vi.fn(),
     },
+    errorTracker: {
+      captureError: vi.fn(),
+      addBreadcrumb: vi.fn(),
+      setUserContext: vi.fn(),
+    },
   };
 }
 
-function createMockConsentLog(overrides?: Partial<ConsentLog>): ConsentLog {
+function createMockConsentRecord(overrides?: Partial<ConsentRecord>): ConsentRecord {
   return {
-    id: 'cl-1',
+    id: 'cr-1',
     userId: 'user-1',
+    recordType: 'consent_preference',
+    documentId: null,
     consentType: 'analytics',
     granted: true,
     ipAddress: '127.0.0.1',
@@ -80,7 +91,7 @@ describe('handleGetConsent', () => {
   });
 
   it('should return consent preferences', async () => {
-    vi.mocked(ctx.repos.consentLogs.findLatestByUserAndType).mockResolvedValue(null);
+    vi.mocked(ctx.repos.consentRecords.findLatestConsentByUserAndType).mockResolvedValue(null);
 
     const result = await handleGetConsent(ctx, undefined, createAuthenticatedRequest());
 
@@ -92,7 +103,7 @@ describe('handleGetConsent', () => {
   });
 
   it('should return 500 on unexpected error', async () => {
-    vi.mocked(ctx.repos.consentLogs.findLatestByUserAndType).mockRejectedValue(
+    vi.mocked(ctx.repos.consentRecords.findLatestConsentByUserAndType).mockRejectedValue(
       new Error('DB error'),
     );
 
@@ -137,18 +148,20 @@ describe('handleUpdateConsent', () => {
   });
 
   it('should update consent and return preferences', async () => {
-    vi.mocked(ctx.repos.consentLogs.create).mockImplementation((data: NewConsentLog) =>
+    vi.mocked(ctx.repos.consentRecords.recordConsent).mockImplementation((data) =>
       Promise.resolve(
-        createMockConsentLog({
+        createMockConsentRecord({
           consentType: data.consentType,
           granted: data.granted,
         }),
       ),
     );
-    vi.mocked(ctx.repos.consentLogs.findLatestByUserAndType).mockImplementation(
+    vi.mocked(ctx.repos.consentRecords.findLatestConsentByUserAndType).mockImplementation(
       (_userId: string, consentType: string) => {
         if (consentType === 'analytics') {
-          return Promise.resolve(createMockConsentLog({ consentType: 'analytics', granted: true }));
+          return Promise.resolve(
+            createMockConsentRecord({ consentType: 'analytics', granted: true }),
+          );
         }
         return Promise.resolve(null);
       },
@@ -168,15 +181,15 @@ describe('handleUpdateConsent', () => {
   });
 
   it('should handle multiple preference updates', async () => {
-    vi.mocked(ctx.repos.consentLogs.create).mockImplementation((data: NewConsentLog) =>
+    vi.mocked(ctx.repos.consentRecords.recordConsent).mockImplementation((data) =>
       Promise.resolve(
-        createMockConsentLog({
+        createMockConsentRecord({
           consentType: data.consentType,
           granted: data.granted,
         }),
       ),
     );
-    vi.mocked(ctx.repos.consentLogs.findLatestByUserAndType).mockResolvedValue(null);
+    vi.mocked(ctx.repos.consentRecords.findLatestConsentByUserAndType).mockResolvedValue(null);
 
     const result = await handleUpdateConsent(
       ctx,
@@ -190,7 +203,7 @@ describe('handleUpdateConsent', () => {
   });
 
   it('should return 500 on unexpected error', async () => {
-    vi.mocked(ctx.repos.consentLogs.create).mockRejectedValue(new Error('DB error'));
+    vi.mocked(ctx.repos.consentRecords.recordConsent).mockRejectedValue(new Error('DB error'));
 
     const result = await handleUpdateConsent(
       ctx,

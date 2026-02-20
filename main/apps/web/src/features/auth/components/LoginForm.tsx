@@ -5,6 +5,7 @@ import { Link } from '@bslt/react/router';
 import { AuthFormLayout, Button, Input, PasswordInput, Spinner, Text } from '@bslt/ui';
 import { useCallback, useState } from 'react';
 
+import { AccountLockedMessage } from './AccountLockedMessage';
 import { OAuthButtons } from './OAuthButtons';
 import { PasskeyLoginButton } from './PasskeyLoginButton';
 import { SmsChallenge } from './SmsChallenge';
@@ -45,6 +46,9 @@ export const LoginForm = ({
   const [totpError, setTotpError] = useState<string | null>(null);
   const [totpLoading, setTotpLoading] = useState(false);
   const [smsChallenge, setSmsChallenge] = useState<string | null>(null);
+  // Sprint 3.15: Lock metadata from AccountLockedError
+  const [lockReason, setLockReason] = useState<string | null>(null);
+  const [lockedUntil, setLockedUntil] = useState<string | null>(null);
 
   const handleCaptchaToken = useCallback((token: string) => {
     setCaptchaToken(token);
@@ -53,6 +57,10 @@ export const LoginForm = ({
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     if (onLogin === undefined) return;
+
+    // Reset lock metadata before each attempt
+    setLockReason(null);
+    setLockedUntil(null);
 
     try {
       await onLogin({
@@ -70,6 +78,16 @@ export const LoginForm = ({
       if (err instanceof SmsChallengeError) {
         setSmsChallenge(err.challengeToken);
         return;
+      }
+      // Sprint 3.15: Capture lock metadata from AccountLockedError
+      if (err !== null && typeof err === 'object') {
+        const errObj = err as { lockReason?: string; lockedUntil?: string };
+        if (typeof errObj.lockReason === 'string') {
+          setLockReason(errObj.lockReason);
+        }
+        if (typeof errObj.lockedUntil === 'string') {
+          setLockedUntil(errObj.lockedUntil);
+        }
       }
       // Other errors handled by parent component via error prop
     }
@@ -239,7 +257,12 @@ export const LoginForm = ({
           />
 
           {error !== undefined && error !== null && (
-            <AuthFormLayout.Error>{error}</AuthFormLayout.Error>
+            <>
+              <AuthFormLayout.Error>{error}</AuthFormLayout.Error>
+              {(lockReason !== null || lockedUntil !== null) && (
+                <AccountLockedMessage lockReason={lockReason} lockedUntil={lockedUntil} />
+              )}
+            </>
           )}
 
           <TurnstileWidget onToken={handleCaptchaToken} />
@@ -262,7 +285,7 @@ export const LoginForm = ({
         </div>
 
         <AuthFormLayout.Footer>
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           {onModeChange !== undefined ? (
             <Button
               variant="text"

@@ -9,8 +9,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { MemberDetailPanel } from './MemberDetailPanel';
 
-import type { TenantRole } from '@bslt/shared';
 import type { MemberDetail } from './MemberDetailPanel';
+import type { TenantRole } from '@bslt/shared';
 
 // ============================================================================
 // Test Data

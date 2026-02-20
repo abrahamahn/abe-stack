@@ -279,15 +279,15 @@ describe('Files Schema - FileRecord Type', () => {
 
     mimeTypes.forEach((mimeType, index) => {
       const file: FileRecord = {
-        id: `file-${index}`,
+        id: `file-${String(index)}`,
         tenantId: null,
         userId: 'user-789',
-        filename: `test-${index}`,
-        originalName: `test-${index}`,
+        filename: `test-${String(index)}`,
+        originalName: `test-${String(index)}`,
         mimeType,
         sizeBytes: 100,
         storageProvider: 'local',
-        storagePath: `/data/test-${index}`,
+        storagePath: `/data/test-${String(index)}`,
         url: null,
         purpose: 'other',
         metadata: {},

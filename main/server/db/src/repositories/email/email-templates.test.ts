@@ -26,6 +26,7 @@ const createMockDb = (): RawDb =>
     getClient: vi.fn() as RawDb['getClient'],
     queryOne: vi.fn(),
     execute: vi.fn(),
+    withSession: vi.fn() as RawDb['withSession'],
   }) as unknown as RawDb;
 
 // ============================================================================
@@ -97,8 +98,8 @@ describe('createEmailTemplateRepository', () => {
       const result = await repo.findAll();
 
       expect(result).toHaveLength(2);
-      expect(result[0].key).toBe('auth.welcome');
-      expect(result[1].key).toBe('billing.invoice');
+      expect(result[0]?.key).toBe('auth.welcome');
+      expect(result[1]?.key).toBe('billing.invoice');
     });
 
     it('should return empty array when no templates exist', async () => {
@@ -119,7 +120,7 @@ describe('createEmailTemplateRepository', () => {
       const result = await repo.findActive();
 
       expect(result).toHaveLength(1);
-      expect(result[0].isActive).toBe(true);
+      expect(result[0]?.isActive).toBe(true);
       expect(mockDb.query).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining('is_active'),

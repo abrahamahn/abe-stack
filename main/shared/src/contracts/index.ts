@@ -13,5 +13,6 @@ export { jobsContract } from './contract.jobs';
 export { notificationsContract } from './contract.notifications';
 export { realtimeContract } from './contract.realtime';
 export { tenantContract } from './contract.tenant';
+export { usageMeteringContract } from './contract.usage-metering';
 export { usersContract } from './contract.users';
 export { webhooksContract } from './contract.webhooks';

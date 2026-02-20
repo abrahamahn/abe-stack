@@ -2,7 +2,9 @@
 /**
  * useUserActions hook
  *
- * Actions for admin user management (update, lock, unlock).
+ * Actions for admin user management (update, lock, unlock, hard ban).
+ *
+ * Sprint 3.15: Added hard ban action with sudo re-auth token support.
  */
 
 import { getAccessToken } from '@app/authToken';
@@ -12,6 +14,8 @@ import { useCallback, useMemo, useState } from 'react';
 import { createAdminApiClient } from '../services/adminApi';
 
 import type {
+  AdminHardBanRequest,
+  AdminHardBanResponse,
   AdminLockUserRequest,
   AdminLockUserResponse,
   AdminUpdateUserRequest,
@@ -26,13 +30,16 @@ type AdminUpdateUserRequestLocal = AdminUpdateUserRequest;
 type AdminUpdateUserResponseLocal = AdminUpdateUserResponse;
 type AdminLockUserRequestLocal = AdminLockUserRequest;
 type AdminLockUserResponseLocal = AdminLockUserResponse;
+type AdminHardBanRequestLocal = AdminHardBanRequest;
+type AdminHardBanResponseLocal = AdminHardBanResponse;
 
 export interface UseUserActionsState {
   isUpdating: boolean;
   isLocking: boolean;
   isUnlocking: boolean;
+  isHardBanning: boolean;
   error: string | null;
-  lastAction: 'update' | 'lock' | 'unlock' | null;
+  lastAction: 'update' | 'lock' | 'unlock' | 'hardBan' | null;
 }
 
 export interface UseUserActionsResult extends UseUserActionsState {
@@ -45,6 +52,11 @@ export interface UseUserActionsResult extends UseUserActionsState {
     data: AdminLockUserRequestLocal,
   ) => Promise<AdminLockUserResponseLocal | null>;
   unlockUserAction: (userId: string, reason: string) => Promise<AdminLockUserResponseLocal | null>;
+  hardBanUserAction: (
+    userId: string,
+    data: AdminHardBanRequestLocal,
+    sudoToken: string,
+  ) => Promise<AdminHardBanResponseLocal | null>;
   clearError: () => void;
 }
 
@@ -57,6 +69,7 @@ export function useUserActions(): UseUserActionsResult {
     isUpdating: false,
     isLocking: false,
     isUnlocking: false,
+    isHardBanning: false,
     error: null,
     lastAction: null,
   });
@@ -157,6 +170,35 @@ export function useUserActions(): UseUserActionsResult {
     [adminApi],
   );
 
+  const hardBanUserAction = useCallback(
+    async (
+      userId: string,
+      data: AdminHardBanRequestLocal,
+      sudoToken: string,
+    ): Promise<AdminHardBanResponseLocal | null> => {
+      setState((prev) => ({ ...prev, isHardBanning: true, error: null }));
+
+      try {
+        const result = await adminApi.hardBanUser(userId, data, sudoToken);
+        setState((prev) => ({
+          ...prev,
+          isHardBanning: false,
+          lastAction: 'hardBan',
+        }));
+        return result;
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to hard ban user';
+        setState((prev) => ({
+          ...prev,
+          isHardBanning: false,
+          error: errorMessage,
+        }));
+        return null;
+      }
+    },
+    [adminApi],
+  );
+
   const clearError = useCallback(() => {
     setState((prev) => ({ ...prev, error: null }));
   }, []);
@@ -166,6 +208,7 @@ export function useUserActions(): UseUserActionsResult {
     updateUserAction,
     lockUserAction,
     unlockUserAction,
+    hardBanUserAction,
     clearError,
   };
 }

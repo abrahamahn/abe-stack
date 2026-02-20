@@ -19,8 +19,8 @@ import { isCaptchaRequired, sendPasswordChangedAlert, verifyCaptchaToken } from 
 import { requestPasswordReset, resetPassword, setPassword } from '../service';
 import { createErrorMapperLogger } from '../types';
 
-import type { ForgotPasswordRequest, HttpErrorResponse } from '@bslt/shared';
 import type { AppContext, RequestWithCookies } from '../types';
+import type { ForgotPasswordRequest, HttpErrorResponse } from '@bslt/shared';
 
 /**
  * Handle forgot password request.

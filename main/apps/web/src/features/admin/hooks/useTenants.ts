@@ -67,8 +67,8 @@ export function useTenants(): UseTenantsResult {
   }, [adminApi]);
 
   useEffect(() => {
-    fetchTenants().catch(() => {
-      // Error is already handled in fetchTenants
+    queueMicrotask(() => {
+      void fetchTenants();
     });
   }, [fetchTenants]);
 

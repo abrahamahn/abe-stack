@@ -7,8 +7,8 @@ import { createAdminApiClient } from '../services/adminApi';
 
 import { useJobActions } from './useJobActions';
 
-import type { JobActionResponse } from '@bslt/shared';
 import type { AdminApiClient } from '../services/adminApi';
+import type { JobActionResponse } from '@bslt/shared';
 
 vi.mock('@bslt/react', () => ({
   useMutation: vi.fn(),
@@ -53,7 +53,7 @@ describe('useJobActions', () => {
 
     vi.mocked(useMutation).mockImplementation((config) => {
       // Store onSuccess callback for later invocation
-      if (config?.onSuccess != null) {
+      if (config.onSuccess != null) {
         onSuccess.mockImplementation(config.onSuccess);
       }
       return {
@@ -279,7 +279,7 @@ describe('useJobActions', () => {
 
     vi.mocked(useMutation).mockImplementation((config) => {
       // Immediately invoke onSuccess for testing
-      if (config?.onSuccess != null) {
+      if (config.onSuccess != null) {
         void Promise.resolve(mockJobActionResponse).then(() => {
           void config.onSuccess?.(mockJobActionResponse, 'job-123', undefined);
         });
@@ -330,7 +330,7 @@ describe('useJobActions', () => {
       const mutateAsync = callCount === 1 ? retryMutateAsync : cancelMutateAsync;
 
       // Immediately invoke onSuccess for cancel mutation (second call)
-      if (callCount === 2 && config?.onSuccess != null) {
+      if (callCount === 2 && config.onSuccess != null) {
         void Promise.resolve(mockJobActionResponse).then(() => {
           void config.onSuccess?.(mockJobActionResponse, 'job-123', undefined);
         });

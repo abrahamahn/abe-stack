@@ -35,8 +35,8 @@ export interface AuthUser {
   id: UserId;
   /** User's email address */
   email: string;
-  /** User's unique username */
-  username: string;
+  /** User's unique username — null for users without one (e.g. new OAuth users) */
+  username: string | null;
   /** User's first name */
   firstName: string;
   /** User's last name */
@@ -104,7 +104,7 @@ export function createAuthResponse(
   user: {
     id: string;
     email: string;
-    username: string;
+    username: string | null;
     firstName: string;
     lastName: string;
     avatarUrl?: string | null;
@@ -128,7 +128,9 @@ export function createAuthResponse(
     typeof user.createdAt === 'string' ? user.createdAt : user.createdAt.toISOString();
   const updatedAt =
     typeof user.updatedAt === 'string' ? user.updatedAt : user.updatedAt.toISOString();
-  const dateOfBirth = toISODateOnly(user.dateOfBirth ?? null);
+  const dateOfBirthRaw = user.dateOfBirth ?? null;
+  const dateOfBirth =
+    typeof dateOfBirthRaw === 'string' ? dateOfBirthRaw : toISODateOnly(dateOfBirthRaw);
 
   return {
     accessToken,

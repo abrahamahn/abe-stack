@@ -97,7 +97,7 @@ export async function sendSms2faCode(
 
   // Store the hashed code
   await db.raw(
-    `INSERT INTO ${SMS_VERIFICATION_CODES_TABLE} (user_id, phone, code, expires_at)
+    `INSERT INTO ${SMS_VERIFICATION_CODES_TABLE} (user_id, phone, code_hash, expires_at)
      VALUES ($1, $2, $3, $4)`,
     [userId, phone, codeHash, expiresAt],
   );
@@ -135,11 +135,11 @@ export async function verifySms2faCode(
   // Find the latest unverified, unexpired code for this user
   const result = await db.raw<{
     id: string;
-    code: string;
+    code_hash: string;
     attempts: number;
     expires_at: Date;
   }>(
-    `SELECT id, code, attempts, expires_at FROM ${SMS_VERIFICATION_CODES_TABLE}
+    `SELECT id, code_hash, attempts, expires_at FROM ${SMS_VERIFICATION_CODES_TABLE}
      WHERE user_id = $1 AND verified = false AND expires_at > NOW()
      ORDER BY created_at DESC LIMIT 1`,
     [userId],
@@ -167,7 +167,7 @@ export async function verifySms2faCode(
 
   // Timing-safe compare
   const codeHash = hashCode(code);
-  const isValid = timingSafeCompare(codeHash, record.code);
+  const isValid = timingSafeCompare(codeHash, record.code_hash);
 
   if (!isValid) {
     const remainingAttempts = SMS_MAX_ATTEMPTS - record.attempts - 1;

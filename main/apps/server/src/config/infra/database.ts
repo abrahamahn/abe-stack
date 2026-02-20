@@ -84,8 +84,7 @@ export function loadDatabaseConfig(env: FullEnv): DatabaseConfig {
         database: env.POSTGRES_DB ?? DB_DEFAULTS.DEFAULT_DATABASE_NAME,
         user: env.POSTGRES_USER ?? 'postgres',
         password: env.POSTGRES_PASSWORD ?? '',
-        maxConnections: env.DB_MAX_CONNECTIONS ??
-          (isPgProd ? DB_DEFAULTS.POSTGRES_MAX_CONNECTIONS_PROD : DB_DEFAULTS.POSTGRES_MAX_CONNECTIONS_DEV),
+        maxConnections: env.DB_MAX_CONNECTIONS,
         portFallbacks: [...DB_DEFAULTS.POSTGRES_PORT_FALLBACKS],
         // ssl is usually required for cloud providers in production
         ssl: env.DB_SSL !== undefined ? env.DB_SSL === 'true' : isPgProd,

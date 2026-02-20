@@ -6,32 +6,6 @@
  * @module Core/Billing
  */
 
-// --- constants (re-export for backward compatibility) ---
-import {
-  BILLING_EVENT_TYPES,
-  BILLING_PROVIDERS,
-  FEATURE_KEYS,
-  INVOICE_STATUSES,
-  PAYMENT_METHOD_TYPES,
-  PLAN_INTERVALS,
-  SUBSCRIPTION_STATUSES,
-} from '../constants/billing';
-
-export {
-  BILLING_EVENT_TYPES,
-  BILLING_PROVIDERS,
-  FEATURE_KEYS,
-  INVOICE_STATUSES,
-  PAYMENT_METHOD_TYPES,
-  PLAN_INTERVALS,
-  SUBSCRIPTION_STATUSES,
-};
-
-// --- ids (re-export branded types) ---
-import type { PlanId, SubscriptionId } from '../../primitives/schema/ids';
-
-export type { PlanId, SubscriptionId };
-
 // --- billing.schemas ---
 export {
   addPaymentMethodRequestSchema,
@@ -104,7 +78,18 @@ export {
 } from './billing.admin.schemas';
 
 // --- billing.logic ---
-export { calculateProration, PLAN_FEES, type BillingStats } from './billing.logic';
+export {
+  calculateProration,
+  canChangePlan,
+  getEntitlements,
+  getFeatureValue,
+  getLimitUsagePercentage,
+  isOverLimit,
+  isSubscriptionActive,
+  PLAN_FEES,
+  type BillingStats,
+  type Entitlements,
+} from './billing.logic';
 
 // --- billing.display ---
 export {

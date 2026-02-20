@@ -109,10 +109,25 @@ export const baseConfig = [
             { from: 'shared-primitives', allow: [] },
             { from: 'shared-system', allow: ['shared-primitives'] },
             { from: 'shared-core', allow: ['shared-primitives', 'shared-system'] },
-            { from: 'shared-contracts', allow: ['shared-primitives', 'shared-system', 'shared-core'] },
-            { from: 'shared-api', allow: ['shared-primitives', 'shared-system', 'shared-core', 'shared-contracts'] },
+            {
+              from: 'shared-contracts',
+              allow: ['shared-primitives', 'shared-system', 'shared-core'],
+            },
+            {
+              from: 'shared-api',
+              allow: ['shared-primitives', 'shared-system', 'shared-core', 'shared-contracts'],
+            },
             // Shared catch-all (index.ts, config/, __tests__) can reach all internal layers
-            { from: 'shared', allow: ['shared-primitives', 'shared-system', 'shared-core', 'shared-contracts', 'shared-api'] },
+            {
+              from: 'shared',
+              allow: [
+                'shared-primitives',
+                'shared-system',
+                'shared-core',
+                'shared-contracts',
+                'shared-api',
+              ],
+            },
 
             // ── Server DAG Edges ──
             { from: 'db', allow: [...allSharedLayers] },
@@ -132,10 +147,10 @@ export const baseConfig = [
             { from: 'react', allow: [...allSharedLayers, 'c-engine'] },
             { from: 'ui', allow: [...allSharedLayers, 'c-engine', 'react'] },
             { from: 'app-web', allow: [...allSharedLayers, 'api', 'c-engine', 'react', 'ui'] },
-            // Desktop Special Case (Client stack + local engine)
+            // Desktop Special Case (Client stack + local engine + shared web app frontend)
             {
               from: 'app-desktop',
-              allow: [...allSharedLayers, 'api', 'c-engine', 'react', 'ui', 's-system'],
+              allow: [...allSharedLayers, 'api', 'app-web', 'c-engine', 'react', 'ui', 's-system'],
             },
           ],
         },
@@ -145,6 +160,9 @@ export const baseConfig = [
   },
 
   // 3. TYPESCRIPT TYPE-AWARE LOGIC
+  // Test files are intentionally excluded from composite build tsconfigs so they
+  // don't generate .d.ts output. Type-aware rules are disabled for test files in
+  // section 6 which also sets project: false to skip project lookup for them.
   ...tseslint.configs.strictTypeChecked.map((config: any) => ({
     ...config,
     files: ['**/*.{ts,tsx,cts,mts}'],
@@ -180,7 +198,7 @@ export const baseConfig = [
       // --- VELOCITY OVER STYLE (AI-Friendly) ---
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
-      '@typescript-eslint/naming-convention': 'off', // Handle via Prettier
+      '@typescript-eslint/naming-convention': 'off',
       '@typescript-eslint/no-unused-vars': [
         'error',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
@@ -229,7 +247,8 @@ export const baseConfig = [
         'error',
         {
           selector: 'ExportNamedDeclaration[source]',
-          message: 'Re-exports (export { X } from "Y") are only allowed in index.ts barrel files. Import and use the value directly instead.',
+          message:
+            'Re-exports (export { X } from "Y") are only allowed in index.ts barrel files. Import and use the value directly instead.',
         },
       ],
     },
@@ -239,7 +258,7 @@ export const baseConfig = [
   {
     files: ['main/shared/src/**/index.ts'],
     ignores: [
-      'main/shared/src/index.ts',       // Root barrel re-exports from all layers
+      'main/shared/src/index.ts', // Root barrel re-exports from all layers
       'main/shared/src/config/index.ts', // Public entry point — re-exports parsers from ../primitives/helpers
     ],
     rules: {
@@ -247,23 +266,57 @@ export const baseConfig = [
         'error',
         {
           selector: 'ExportNamedDeclaration[source.value=/^\\.\\.\\//]',
-          message: 'Barrel exports must only re-export from sibling files (./), not parent directories (../). This prevents cross-module coupling.',
+          message:
+            'Barrel exports must only re-export from sibling files (./), not parent directories (../). This prevents cross-module coupling.',
+        },
+      ],
+    },
+  },
+
+  // 5c. SERVER/SYSTEM: NO INTERNAL INDEX BARREL IMPORTS
+  // Inside a feature folder, nothing imports ./index — the barrel is for external consumers only.
+  // This prevents hidden circular dependencies and enforces explicit dependency paths.
+  {
+    files: ['main/server/system/src/**/*.ts'],
+    ignores: ['**/*.test.ts', '**/__tests__/**'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              // Matches ./index, ../index, ./providers/index, ../../cache/index, etc.
+              regex: '^\\.{1,2}(?:\\/[^/]+)*\\/index$',
+              message:
+                'Do not import from internal index barrels. Import from the concrete module file instead. Barrels are for external consumers only.',
+            },
+          ],
         },
       ],
     },
   },
 
   // 6. TEST RELAXATION (Fast Loop support)
+  // Test files are excluded from composite build tsconfigs (no .d.ts output needed).
+  // Use project: false to skip project lookup — prevents "file not found in any project" errors.
+  // disableTypeChecked turns off all type-aware rules (they require project info to run).
+  // Non-type-aware rules (import order, unused imports) still apply normally.
   {
     files: ['**/__tests__/**/*', '**/*.{spec,test}.{ts,tsx}'],
+    ...tseslint.configs.disableTypeChecked,
+    languageOptions: {
+      parserOptions: {
+        project: false,
+      },
+    },
     rules: {
-      '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-unsafe-assignment': 'off',
-      '@typescript-eslint/no-unsafe-call': 'off',
-      '@typescript-eslint/no-unsafe-member-access': 'off',
-      '@typescript-eslint/no-non-null-assertion': 'off',
+      ...tseslint.configs.disableTypeChecked.rules,
+      // Non-type-aware rules that are intentionally relaxed in tests:
+      '@typescript-eslint/no-explicit-any': 'off', // mock patterns require any
+      '@typescript-eslint/no-non-null-assertion': 'off', // common in test assertions
       'no-console': 'off',
-      '@typescript-eslint/no-floating-promises': 'error', // Promises still matter in tests!
+      // Raw HTML is acceptable in test render helpers (not shipped to users)
+      'no-restricted-syntax': 'off',
     },
   },
 

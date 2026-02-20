@@ -14,9 +14,9 @@ import {
   upgradeSubscription,
 } from './plan-changes';
 
-import type { BillingService } from '@bslt/shared';
-import type { Plan, Subscription } from '../../../db/src';
 import type { BillingRepositories } from './types';
+import type { Plan, Subscription } from '../../../db/src';
+import type { BillingService } from '@bslt/shared';
 
 // ============================================================================
 // Mock Helpers

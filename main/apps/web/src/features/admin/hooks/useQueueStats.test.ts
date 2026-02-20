@@ -6,8 +6,8 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { createAdminApiClient } from './../services/adminApi';
 import { useQueueStats } from './useQueueStats';
 
-import type { UseQueryResult } from '@bslt/react';
 import type { AdminApiClient } from './../services/adminApi';
+import type { UseQueryResult } from '@bslt/react';
 
 vi.mock('@bslt/react', () => ({
   useQuery: vi.fn(),

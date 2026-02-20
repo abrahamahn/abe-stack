@@ -2,21 +2,27 @@
 /**
  * Logger Module
  *
- * Fastify-specific logging wrappers with correlation ID support.
- * Pure utilities and types are re-exported from @bslt/shared.
+ * Framework-agnostic logging wrappers with correlation ID support.
+ * registerLoggingMiddleware and createJobLogger (Fastify-specific) moved to
+ * apps/server/src/middleware/logging.ts.
  */
 
-// Re-export all pure utilities and types from shared
+// Re-export shared logger constructors and types used by server infrastructure
 export {
-  CONSOLE_LOG_LEVELS, createLogger as createBaseLogger, createRequestLogger as createBaseRequestLogger, createConsoleLogger,
-  createJobCorrelationId, createLogRequestContext, generateCorrelationId,
+  createLogger as createBaseLogger,
+  createRequestLogger as createBaseRequestLogger,
+  createConsoleLogger,
+  createLogRequestContext,
   getOrCreateCorrelationId,
-  isValidCorrelationId, LOG_LEVELS, shouldLog,
-  type BaseLogger, type Logger as BaseLoggerType, type ConsoleLoggerConfig, type ConsoleLogLevel, type LogData, type LoggerConfig, type LogLevel, type LogRequestContext
-} from '@bslt/shared';
+  type BaseLogger,
+  type Logger as BaseLoggerType,
+  type ConsoleLoggerConfig,
+  type ConsoleLogLevel,
+  type LogData,
+  type LoggerConfig,
+  type LogLevel,
+  type LogRequestContext,
+} from '@bslt/shared/system';
 
-// Fastify-specific logger wrappers
+// Logger wrappers (accept BaseLogger instead of FastifyBaseLogger)
 export { createLogger, createRequestLogger, type Logger } from './logger';
-
-// Middleware (Fastify-specific)
-export { createJobLogger, registerLoggingMiddleware } from './middleware';

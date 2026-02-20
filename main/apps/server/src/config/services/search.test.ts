@@ -11,7 +11,7 @@ import {
   validateSqlSearchConfig,
 } from './search';
 
-import type { FullEnv } from '@bslt/shared/config';
+import type { ElasticsearchProviderConfig, FullEnv, SqlSearchProviderConfig } from '@bslt/shared/config';
 
 /**
  * Creates a base environment with search-related defaults (as applied by Zod schema).
@@ -109,9 +109,9 @@ describe('Search Configuration', () => {
       const config = {
         node: '',
         index: '',
-      } as any;
+      } as unknown as ElasticsearchProviderConfig;
 
-      const errors = validateElasticsearchConfig(config);
+      const errors = validateElasticsearchConfig(config, false);
       expect(errors).toContain('ELASTICSEARCH_NODE is required');
       expect(errors).toContain('ELASTICSEARCH_INDEX is required');
     });
@@ -120,9 +120,29 @@ describe('Search Configuration', () => {
       const config = {
         node: 'http://localhost:9200',
         index: 'my-index',
-      } as any;
+      } as unknown as ElasticsearchProviderConfig;
 
-      const errors = validateElasticsearchConfig(config);
+      const errors = validateElasticsearchConfig(config, false);
+      expect(errors).toHaveLength(0);
+    });
+
+    it('validateElasticsearchConfig rejects HTTP node URL in production', () => {
+      const config = {
+        node: 'http://es.internal:9200',
+        index: 'my-index',
+      } as unknown as ElasticsearchProviderConfig;
+
+      const errors = validateElasticsearchConfig(config, true);
+      expect(errors).toContain('Elasticsearch: ELASTICSEARCH_NODE must use HTTPS in production');
+    });
+
+    it('validateElasticsearchConfig accepts HTTPS node URL in production', () => {
+      const config = {
+        node: 'https://es.internal:9200',
+        index: 'my-index',
+      } as unknown as ElasticsearchProviderConfig;
+
+      const errors = validateElasticsearchConfig(config, true);
       expect(errors).toHaveLength(0);
     });
 
@@ -194,7 +214,7 @@ describe('Search Configuration', () => {
       const config = {
         defaultPageSize: 1500,
         maxPageSize: 1000,
-      } as any;
+      } as unknown as SqlSearchProviderConfig;
 
       const errors = validateSqlSearchConfig(config);
       expect(errors).toContain('SQL_SEARCH_DEFAULT_PAGE_SIZE cannot exceed MAX_PAGE_SIZE');
@@ -204,7 +224,7 @@ describe('Search Configuration', () => {
       const config = {
         defaultPageSize: 50,
         maxPageSize: 1000,
-      } as any;
+      } as unknown as SqlSearchProviderConfig;
 
       const errors = validateSqlSearchConfig(config);
       expect(errors).toHaveLength(0);

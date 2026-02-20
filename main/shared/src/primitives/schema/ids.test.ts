@@ -16,7 +16,7 @@ import {
   activityIdSchema,
   apiKeyIdSchema,
   auditEventIdSchema,
-  consentLogIdSchema,
+  consentRecordIdSchema,
   emailLogIdSchema,
   emailTemplateKeySchema,
   fileIdSchema,
@@ -33,7 +33,6 @@ import {
   sessionIdSchema,
   subscriptionIdSchema,
   tenantIdSchema,
-  userAgreementIdSchema,
   userIdSchema,
   webhookDeliveryIdSchema,
   webhookIdSchema,
@@ -66,8 +65,7 @@ const UUID_SCHEMAS = [
   { name: 'fileIdSchema', schema: fileIdSchema, brand: 'FileId' },
   { name: 'emailLogIdSchema', schema: emailLogIdSchema, brand: 'EmailLogId' },
   { name: 'legalDocumentIdSchema', schema: legalDocumentIdSchema, brand: 'LegalDocumentId' },
-  { name: 'userAgreementIdSchema', schema: userAgreementIdSchema, brand: 'UserAgreementId' },
-  { name: 'consentLogIdSchema', schema: consentLogIdSchema, brand: 'ConsentLogId' },
+  { name: 'consentRecordIdSchema', schema: consentRecordIdSchema, brand: 'ConsentRecordId' },
 ] as const;
 
 // ============================================================================

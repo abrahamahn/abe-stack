@@ -6,14 +6,13 @@
  * for admin plan management operations.
  */
 
-import { createAdminBillingClient } from '@bslt/api';
+import { createAdminBillingClient } from '@bslt/client-engine';
 import { useMemo } from 'react';
 
 import { useMutation } from '../query/useMutation';
 import { useQuery } from '../query/useQuery';
 
-import type { AdminBillingClientConfig } from '@bslt/api';
-import type { QueryKey } from '@bslt/client-engine';
+import type { AdminBillingClientConfig, QueryKey } from '@bslt/client-engine';
 import type {
   AdminPlan,
   CreatePlanRequest,
@@ -65,7 +64,7 @@ export interface AdminPlansState {
  * @returns Admin plans state and actions
  */
 export function useAdminPlans(clientConfig: AdminBillingClientConfig): AdminPlansState {
-  const client = useMemo(() => createAdminBillingClient(clientConfig), [clientConfig.baseUrl]);
+  const client = useMemo(() => createAdminBillingClient(clientConfig), [clientConfig]);
 
   const query = useQuery({
     queryKey: adminBillingQueryKeys.plans(),

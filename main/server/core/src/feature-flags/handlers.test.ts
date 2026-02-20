@@ -46,6 +46,11 @@ function createMockContext(): FeatureFlagAppContext {
       error: vi.fn(),
       debug: vi.fn(),
     },
+    errorTracker: {
+      captureError: vi.fn(),
+      addBreadcrumb: vi.fn(),
+      setUserContext: vi.fn(),
+    },
   };
 }
 

@@ -239,4 +239,61 @@ describe('Request Tracing Flow', () => {
       expect(correlationId).toMatch(UUID_V4_REGEX);
     });
   });
+
+  // ==========================================================================
+  // Correlation ID Propagated to Downstream Calls
+  // ==========================================================================
+
+  describe('correlation ID propagation to downstream service calls and queue jobs', () => {
+    it('correlation ID is available on request object for downstream propagation', async () => {
+      const clientId = 'downstream-trace-789';
+      const response = await testServer.inject({
+        method: 'GET',
+        url: '/api/test/echo',
+        headers: { [CORRELATION_HEADER]: clientId },
+      });
+
+      expect(response.statusCode).toBe(200);
+      const body = parseJsonResponse(response) as { correlationId: string };
+      // The correlationId is available in request context, meaning any
+      // downstream service call or queue job enqueued in a handler can read it
+      expect(body.correlationId).toBe(clientId);
+    });
+
+    it('auto-generated correlation ID is available for downstream propagation', async () => {
+      const response = await testServer.inject({
+        method: 'GET',
+        url: '/api/test/echo',
+      });
+
+      expect(response.statusCode).toBe(200);
+      const body = parseJsonResponse(response) as { correlationId: string };
+      // Even without a client-provided ID, the server generates one
+      // that handlers can propagate to queued jobs
+      expect(body.correlationId).toBeDefined();
+      expect(body.correlationId).toMatch(UUID_V4_REGEX);
+      // Verify the response header matches what the handler received
+      expect(response.headers[CORRELATION_HEADER]).toBe(body.correlationId);
+    });
+
+    it('correlation ID remains consistent between response header and handler context', async () => {
+      // This verifies the ID set by middleware is the same one the handler sees
+      // and the same one returned in the response header — critical for
+      // correlation across HTTP responses and downstream queue jobs
+      const requests = Array.from({ length: 5 }, () =>
+        testServer.inject({ method: 'GET', url: '/api/test/echo' }),
+      );
+
+      const responses = await Promise.all(requests);
+
+      for (const response of responses) {
+        const body = parseJsonResponse(response) as { correlationId: string };
+        const headerValue = response.headers[CORRELATION_HEADER] as string;
+        // Header and body correlationId must be identical
+        expect(body.correlationId).toBe(headerValue);
+        // Must be a valid UUID
+        expect(headerValue).toMatch(UUID_V4_REGEX);
+      }
+    });
+  });
 });

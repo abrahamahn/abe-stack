@@ -77,7 +77,7 @@ export const TEST_USERS: SeedUser[] = [
  */
 export async function seed(): Promise<void> {
   // Load + validate `config/env` files (prefers `.env.local` when present).
-  loadServerEnv();
+  await loadServerEnv();
 
   // Safety check: refuse to seed in production
   if (process.env['NODE_ENV'] === 'production') {

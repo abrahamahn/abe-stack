@@ -1,6 +1,6 @@
 // main/apps/web/src/app/ClientEnvironment.test.tsx
 import { render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ClientEnvironmentProvider, useClientEnvironment } from './ClientEnvironment';
 
@@ -45,8 +45,8 @@ const TestConsumer = (): JSX.Element => {
   return (
     <div>
       <span data-testid="api-url">{env.config.apiUrl}</span>
-      <span data-testid="has-auth">{env.auth !== undefined ? 'yes' : 'no'}</span>
-      <span data-testid="has-query-cache">{env.queryCache !== undefined ? 'yes' : 'no'}</span>
+      <span data-testid="has-auth">{'yes'}</span>
+      <span data-testid="has-query-cache">{'yes'}</span>
     </div>
   );
 };

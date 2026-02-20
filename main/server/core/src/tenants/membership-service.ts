@@ -17,8 +17,8 @@ import {
   NotFoundError,
 } from '@bslt/shared';
 
-import type { TenantRole } from '@bslt/shared';
 import type { Repositories } from '../../../db/src';
+import type { TenantRole } from '@bslt/shared';
 
 // ============================================================================
 // Types

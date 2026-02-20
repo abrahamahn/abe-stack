@@ -1,5 +1,5 @@
 // main/apps/web/src/features/command-palette/data/commands.test.ts
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createCommands, filterCommands } from './commands';
 

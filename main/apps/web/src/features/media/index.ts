@@ -6,33 +6,30 @@
  */
 
 // API
-export { createMediaApi } from './api/mediaApi';
+export { createMediaApi } from './api';
 export type {
   MediaApi,
   MediaApiConfig,
   MediaMetadata,
   MediaStatusResponse,
   MediaUploadResponse,
-} from './api/mediaApi';
+} from './api';
 
 // Hooks
-export {
-  useDeleteMedia,
-  useMedia,
-  useMediaStatus,
-  useUploadMedia,
-  type UseDeleteMediaResult,
-  type UseMediaOptions,
-  type UseMediaResult,
-  type UseMediaStatusOptions,
-  type UseMediaStatusResult,
-  type UseUploadMediaResult,
-} from './hooks/useMedia';
+export { useDeleteMedia, useMedia, useMediaStatus, useUploadMedia } from './hooks';
+export type {
+  UseDeleteMediaResult,
+  UseMediaOptions,
+  UseMediaResult,
+  UseMediaStatusOptions,
+  UseMediaStatusResult,
+  UseUploadMediaResult,
+} from './hooks';
 
 // Components
-export { MediaGallery, type MediaGalleryProps } from './components/MediaGallery';
-export {
-  MediaStatusIndicator,
-  type MediaStatusIndicatorProps,
-} from './components/MediaStatusIndicator';
-export { MediaUpload, type MediaUploadProps } from './components/MediaUpload';
+export { MediaGallery, MediaStatusIndicator, MediaUpload } from './components';
+export type { MediaGalleryProps, MediaStatusIndicatorProps, MediaUploadProps } from './components';
+
+// Pages
+export { MediaLibraryPage } from './pages';
+export type { MediaLibraryPageProps } from './pages';

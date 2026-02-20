@@ -51,7 +51,6 @@ import {
   extractAppleUserFromIdToken,
 } from './providers';
 
-import type { AuthConfig, OAuthProviderConfig } from '@bslt/shared/config';
 import type {
   OAuthConnectionInfo,
   OAuthProviderClient,
@@ -59,6 +58,7 @@ import type {
   OAuthTokenResponse,
   OAuthUserInfo,
 } from './types';
+import type { AuthConfig, OAuthProviderConfig } from '@bslt/shared/config';
 
 // ============================================================================
 // Types
@@ -76,7 +76,7 @@ export interface OAuthAuthResult {
   user: {
     id: UserId;
     email: string;
-    username: string;
+    username: string | null;
     firstName: string;
     lastName: string;
     avatarUrl: string | null;
@@ -441,7 +441,7 @@ async function authenticateOrCreateWithOAuth(
   userInfo: OAuthUserInfo,
   tokens: OAuthTokenResponse,
 ): Promise<OAuthAuthResult> {
-  const encryptionKey = config.cookie.secret;
+  const encryptionKey = config.oauthTokenEncryptionKey;
   const normalizedEmail = normalizeEmail(userInfo.email);
   const canonicalEmail = canonicalizeEmail(userInfo.email);
 
@@ -643,7 +643,7 @@ export async function linkOAuthAccount(
   userInfo: OAuthUserInfo,
   tokens: OAuthTokenResponse,
 ): Promise<void> {
-  const encryptionKey = config.cookie.secret;
+  const encryptionKey = config.oauthTokenEncryptionKey;
 
   // Run all validation queries in parallel (no dependencies between them) - using repositories
   const [user, existingConnection, otherConnection] = await Promise.all([

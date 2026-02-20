@@ -25,6 +25,7 @@ const createMockDb = (): RawDb => ({
   getClient: vi.fn() as RawDb['getClient'],
   queryOne: vi.fn(),
   execute: vi.fn(),
+  withSession: vi.fn() as RawDb['withSession'],
 });
 
 // ============================================================================
@@ -38,10 +39,6 @@ const mockWebhook = {
   secret: 'whsec_abc123',
   events: ['user.created', 'user.updated'],
   is_active: true,
-  retry_max: 3,
-  retry_backoff: 1000,
-  timeout_ms: 5000,
-  headers: { 'X-Custom': 'value' },
   created_at: new Date('2024-01-01'),
   updated_at: new Date('2024-01-01'),
 };
@@ -97,15 +94,8 @@ describe('createWebhookRepository', () => {
       ).rejects.toThrow('Failed to create webhook');
     });
 
-    it('should handle optional fields', async () => {
-      const webhookWithDefaults = {
-        ...mockWebhook,
-        retry_max: 3,
-        retry_backoff: 1000,
-        timeout_ms: 5000,
-        headers: null,
-      };
-      vi.mocked(mockDb.queryOne).mockResolvedValue(webhookWithDefaults);
+    it('should handle optional fields with defaults', async () => {
+      vi.mocked(mockDb.queryOne).mockResolvedValue(mockWebhook);
 
       const repo = createWebhookRepository(mockDb);
       const result = await repo.create({
@@ -115,32 +105,7 @@ describe('createWebhookRepository', () => {
         events: ['user.created'],
       });
 
-      expect(result.retryMax).toBe(3);
-      expect(result.retryBackoff).toBe(1000);
-      expect(result.timeoutMs).toBe(5000);
-    });
-
-    it('should handle custom headers', async () => {
-      const customHeaders = {
-        'X-Custom': 'value',
-        Authorization: 'Bearer token',
-      };
-      const webhookWithHeaders = {
-        ...mockWebhook,
-        headers: customHeaders,
-      };
-      vi.mocked(mockDb.queryOne).mockResolvedValue(webhookWithHeaders);
-
-      const repo = createWebhookRepository(mockDb);
-      const result = await repo.create({
-        tenantId: 'tenant-123',
-        url: 'https://example.com/webhook',
-        secret: 'whsec_abc123',
-        events: ['user.created'],
-        headers: customHeaders,
-      });
-
-      expect(result.headers).toEqual(customHeaders);
+      expect(result.isActive).toBe(true);
     });
 
     it('should handle multiple events', async () => {
@@ -214,8 +179,8 @@ describe('createWebhookRepository', () => {
       const result = await repo.findByTenantId('tenant-123');
 
       expect(result).toHaveLength(2);
-      expect(result[0].tenantId).toBe('tenant-123');
-      expect(result[1].tenantId).toBe('tenant-123');
+      expect(result[0]?.tenantId).toBe('tenant-123');
+      expect(result[1]?.tenantId).toBe('tenant-123');
       expect(mockDb.query).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining('tenant_id'),
@@ -387,7 +352,6 @@ describe('createWebhookRepository', () => {
         ...mockWebhook,
         url: 'https://newdomain.com/webhook',
         is_active: false,
-        retry_max: 5,
       };
       vi.mocked(mockDb.queryOne).mockResolvedValue(updatedWebhook);
 
@@ -395,26 +359,23 @@ describe('createWebhookRepository', () => {
       const result = await repo.update('wh-123', {
         url: 'https://newdomain.com/webhook',
         isActive: false,
-        retryMax: 5,
       });
 
       expect(result?.url).toBe('https://newdomain.com/webhook');
       expect(result?.isActive).toBe(false);
-      expect(result?.retryMax).toBe(5);
     });
 
-    it('should update headers', async () => {
-      const newHeaders = { 'X-New-Header': 'new-value' };
+    it('should update secret', async () => {
       const updatedWebhook = {
         ...mockWebhook,
-        headers: newHeaders,
+        secret: 'whsec_new456',
       };
       vi.mocked(mockDb.queryOne).mockResolvedValue(updatedWebhook);
 
       const repo = createWebhookRepository(mockDb);
-      const result = await repo.update('wh-123', { headers: newHeaders });
+      const result = await repo.update('wh-123', { secret: 'whsec_new456' });
 
-      expect(result?.headers).toEqual(newHeaders);
+      expect(result?.secret).toBe('whsec_new456');
     });
   });
 
@@ -485,7 +446,7 @@ describe('createWebhookRepository', () => {
     });
 
     it('should handle webhooks with many events', async () => {
-      const manyEvents = Array.from({ length: 20 }, (_, i) => `event.type${i}`);
+      const manyEvents = Array.from({ length: 20 }, (_, i) => `event.type${String(i)}`);
       const manyEventsWebhook = {
         ...mockWebhook,
         events: manyEvents,
@@ -498,17 +459,17 @@ describe('createWebhookRepository', () => {
       expect(result?.events).toEqual(manyEvents);
     });
 
-    it('should handle null headers', async () => {
-      const webhookWithoutHeaders = {
+    it('should handle inactive webhooks', async () => {
+      const inactiveWebhook = {
         ...mockWebhook,
-        headers: null,
+        is_active: false,
       };
-      vi.mocked(mockDb.queryOne).mockResolvedValue(webhookWithoutHeaders);
+      vi.mocked(mockDb.queryOne).mockResolvedValue(inactiveWebhook);
 
       const repo = createWebhookRepository(mockDb);
       const result = await repo.findById('wh-123');
 
-      expect(result?.headers).toBeNull();
+      expect(result?.isActive).toBe(false);
     });
 
     it('should handle very long URLs', async () => {
@@ -523,34 +484,6 @@ describe('createWebhookRepository', () => {
       const result = await repo.findById('wh-123');
 
       expect(result?.url).toBe(longUrl);
-    });
-
-    it('should handle custom retry configurations', async () => {
-      const customRetryWebhook = {
-        ...mockWebhook,
-        retry_max: 10,
-        retry_backoff: 5000,
-      };
-      vi.mocked(mockDb.queryOne).mockResolvedValue(customRetryWebhook);
-
-      const repo = createWebhookRepository(mockDb);
-      const result = await repo.findById('wh-123');
-
-      expect(result?.retryMax).toBe(10);
-      expect(result?.retryBackoff).toBe(5000);
-    });
-
-    it('should handle custom timeout values', async () => {
-      const customTimeoutWebhook = {
-        ...mockWebhook,
-        timeout_ms: 30000,
-      };
-      vi.mocked(mockDb.queryOne).mockResolvedValue(customTimeoutWebhook);
-
-      const repo = createWebhookRepository(mockDb);
-      const result = await repo.findById('wh-123');
-
-      expect(result?.timeoutMs).toBe(30000);
     });
 
     it('should handle different URL protocols', async () => {
@@ -572,23 +505,17 @@ describe('createWebhookRepository', () => {
       }
     });
 
-    it('should handle complex header objects', async () => {
-      const complexHeaders = {
-        Authorization: 'Bearer token123',
-        'X-Custom': 'value',
-        'X-Tenant-ID': 'tenant-123',
-        'Content-Type': 'application/json',
-      };
-      const webhookWithComplexHeaders = {
+    it('should handle null tenantId for global webhooks', async () => {
+      const globalWebhook = {
         ...mockWebhook,
-        headers: complexHeaders,
+        tenant_id: null,
       };
-      vi.mocked(mockDb.queryOne).mockResolvedValue(webhookWithComplexHeaders);
+      vi.mocked(mockDb.queryOne).mockResolvedValue(globalWebhook);
 
       const repo = createWebhookRepository(mockDb);
       const result = await repo.findById('wh-123');
 
-      expect(result?.headers).toEqual(complexHeaders);
+      expect(result?.tenantId).toBeNull();
     });
   });
 });

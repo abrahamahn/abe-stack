@@ -5,8 +5,7 @@ import { handleListActivities, handleListTenantActivities } from './handlers';
 
 import type { ActivityAppContext } from './types';
 import type { Activity } from '../../../db/src';
-import type { HandlerContext } from '../../../system/src';
-import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { HandlerContext, HttpReply, HttpRequest } from '../../../system/src';
 
 // ============================================================================
 // Test Helpers
@@ -30,6 +29,11 @@ function createMockContext(): ActivityAppContext {
       warn: vi.fn(),
       error: vi.fn(),
       debug: vi.fn(),
+    },
+    errorTracker: {
+      captureError: vi.fn(),
+      addBreadcrumb: vi.fn(),
+      setUserContext: vi.fn(),
     },
   };
 }
@@ -55,15 +59,15 @@ function createMockRequest(overrides?: {
   user?: { userId: string };
   query?: Record<string, string>;
   params?: Record<string, string>;
-}): FastifyRequest {
+}): HttpRequest {
   return {
     user: overrides?.user,
     query: overrides?.query ?? {},
     params: overrides?.params ?? {},
-  } as unknown as FastifyRequest;
+  } as unknown as HttpRequest;
 }
 
-const mockReply = {} as FastifyReply;
+const mockReply = {} as HttpReply;
 
 // ============================================================================
 // handleListActivities

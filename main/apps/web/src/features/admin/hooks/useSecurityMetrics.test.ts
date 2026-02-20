@@ -11,8 +11,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useSecurityMetrics } from './useSecurityMetrics';
 
-import type { SecurityMetrics } from '@bslt/shared';
 import type { MetricsPeriod } from './useSecurityMetrics';
+import type { SecurityMetrics } from '@bslt/shared';
 
 // ============================================================================
 // Mocks

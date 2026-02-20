@@ -29,12 +29,16 @@ export function useDocContent(key: DocKey): UseDocContentResult {
   useEffect(() => {
     const cached = cache.get(key);
     if (cached !== undefined) {
-      setContent(cached);
-      setIsLoading(false);
+      queueMicrotask(() => {
+        setContent(cached);
+        setIsLoading(false);
+      });
       return;
     }
 
-    setIsLoading(true);
+    queueMicrotask(() => {
+      setIsLoading(true);
+    });
     loadDocContent(key)
       .then((loaded) => {
         cache.set(key, loaded);

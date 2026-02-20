@@ -166,7 +166,11 @@ describe('LoaderCache Integration', () => {
       let callCount = 0;
       const fetchUser = vi.fn<() => Promise<User>>().mockImplementation(() => {
         callCount++;
-        return Promise.resolve({ id: 'u1', name: `Alice ${callCount}`, email: 'alice@test.com' });
+        return Promise.resolve({
+          id: 'u1',
+          name: `Alice ${callCount.toString()}`,
+          email: 'alice@test.com',
+        });
       });
 
       // First request
@@ -270,7 +274,7 @@ describe('LoaderCache Integration', () => {
       let callCount = 0;
       const fetchUser = vi.fn<() => Promise<User>>().mockImplementation(() => {
         callCount++;
-        return Promise.reject(new Error(`Fetch error ${callCount}`));
+        return Promise.reject(new Error(`Fetch error ${callCount.toString()}`));
       });
 
       // First request fails
@@ -404,7 +408,7 @@ describe('LoaderCache Integration', () => {
           batchFetch([id])
             .then((users) => {
               const user = users.get(id);
-              if (user !== null && user !== undefined) {
+              if (user !== undefined) {
                 loader.resolve(user);
               } else {
                 loader.reject(new Error(`User ${id} not found`));

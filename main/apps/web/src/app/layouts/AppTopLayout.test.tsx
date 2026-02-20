@@ -8,9 +8,13 @@ const mockToggle = vi.fn();
 const mockSidePeekOpen = vi.hoisted(() => ({ current: false }));
 const mockTokenStoreGet = vi.hoisted(() => vi.fn<() => string | null>(() => null));
 
-vi.mock('@bslt/react/hooks', () => ({
-  useSidePeek: () => ({ toggle: mockToggle, isOpen: mockSidePeekOpen.current }),
-}));
+vi.mock('@bslt/react/hooks', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/react/hooks')>();
+  return {
+    ...actual,
+    useSidePeek: () => ({ toggle: mockToggle, isOpen: mockSidePeekOpen.current }),
+  };
+});
 
 vi.mock('@bslt/shared', async () => {
   const actual = await vi.importActual<typeof import('@bslt/shared')>('@bslt/shared');

@@ -15,9 +15,9 @@ function createMockRepos(): Repositories {
     legalDocuments: {
       findLatestByType: vi.fn(),
     },
-    userAgreements: {
-      findByUserAndDocument: vi.fn(),
-      create: vi.fn(),
+    consentRecords: {
+      findAgreementByUserAndDocument: vi.fn(),
+      recordAgreement: vi.fn(),
     },
   } as unknown as Repositories;
 }
@@ -68,13 +68,18 @@ describe('handleAcceptTos', () => {
   });
 
   it('should return 200 with agreedAt on success', async () => {
-    const agreedAt = new Date('2026-02-08T12:00:00Z');
-    vi.mocked(repos.userAgreements.create).mockResolvedValue({
+    const createdAt = new Date('2026-02-08T12:00:00Z');
+    vi.mocked(repos.consentRecords.recordAgreement).mockResolvedValue({
       id: 'agr-1',
       userId: 'user-123',
+      recordType: 'legal_document' as const,
       documentId: 'doc-1',
-      agreedAt,
+      consentType: null,
+      granted: null,
       ipAddress: '192.168.1.1',
+      userAgent: null,
+      metadata: {},
+      createdAt,
     });
 
     const request = createMockRequest('user-123');
@@ -84,7 +89,7 @@ describe('handleAcceptTos', () => {
       status: 200,
       body: { agreedAt: '2026-02-08T12:00:00.000Z' },
     });
-    expect(repos.userAgreements.create).toHaveBeenCalledWith({
+    expect(repos.consentRecords.recordAgreement).toHaveBeenCalledWith({
       userId: 'user-123',
       documentId: 'doc-1',
       ipAddress: '192.168.1.1',
@@ -102,19 +107,24 @@ describe('handleAcceptTos', () => {
   });
 
   it('should pass ipAddress from request info', async () => {
-    const agreedAt = new Date();
-    vi.mocked(repos.userAgreements.create).mockResolvedValue({
+    const createdAt = new Date();
+    vi.mocked(repos.consentRecords.recordAgreement).mockResolvedValue({
       id: 'agr-2',
       userId: 'user-456',
+      recordType: 'legal_document' as const,
       documentId: 'doc-2',
-      agreedAt,
+      consentType: null,
+      granted: null,
       ipAddress: '192.168.1.1',
+      userAgent: null,
+      metadata: {},
+      createdAt,
     });
 
     const request = createMockRequest('user-456');
     await handleAcceptTos(ctx, { documentId: 'doc-2' }, request);
 
-    expect(repos.userAgreements.create).toHaveBeenCalledWith({
+    expect(repos.consentRecords.recordAgreement).toHaveBeenCalledWith({
       userId: 'user-456',
       documentId: 'doc-2',
       ipAddress: '192.168.1.1',
@@ -147,12 +157,17 @@ describe('handleTosStatus', () => {
       createdAt: new Date(),
     };
     vi.mocked(repos.legalDocuments.findLatestByType).mockResolvedValue(tosDoc);
-    vi.mocked(repos.userAgreements.findByUserAndDocument).mockResolvedValue({
+    vi.mocked(repos.consentRecords.findAgreementByUserAndDocument).mockResolvedValue({
       id: 'agr-1',
       userId: 'user-123',
+      recordType: 'legal_document' as const,
       documentId: 'doc-1',
-      agreedAt: new Date(),
+      consentType: null,
+      granted: null,
       ipAddress: null,
+      userAgent: null,
+      metadata: {},
+      createdAt: new Date(),
     });
 
     const request = createMockRequest('user-123');
@@ -175,7 +190,7 @@ describe('handleTosStatus', () => {
       createdAt: new Date(),
     };
     vi.mocked(repos.legalDocuments.findLatestByType).mockResolvedValue(tosDoc);
-    vi.mocked(repos.userAgreements.findByUserAndDocument).mockResolvedValue(null);
+    vi.mocked(repos.consentRecords.findAgreementByUserAndDocument).mockResolvedValue(null);
 
     const request = createMockRequest('user-123');
     const result = await handleTosStatus(ctx, undefined, request);

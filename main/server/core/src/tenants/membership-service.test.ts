@@ -3,8 +3,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { addMember, listMembers, removeMember, updateMemberRole } from './membership-service';
 
-import type { TenantRole } from '@bslt/shared';
 import type { Repositories } from '../../../db/src';
+import type { TenantRole } from '@bslt/shared';
 
 // ============================================================================
 // Helpers
@@ -33,15 +33,10 @@ function createMockRepos(): Repositories {
     } as unknown as Repositories['users'],
     // Stub the rest with empty objects
     refreshTokens: {} as Repositories['refreshTokens'],
-    refreshTokenFamilies: {} as Repositories['refreshTokenFamilies'],
     loginAttempts: {} as Repositories['loginAttempts'],
-    passwordResetTokens: {} as Repositories['passwordResetTokens'],
-    emailVerificationTokens: {} as Repositories['emailVerificationTokens'],
+    authTokens: {} as Repositories['authTokens'],
     securityEvents: {} as Repositories['securityEvents'],
     totpBackupCodes: {} as Repositories['totpBackupCodes'],
-    emailChangeTokens: {} as Repositories['emailChangeTokens'],
-    emailChangeRevertTokens: {} as Repositories['emailChangeRevertTokens'],
-    magicLinkTokens: {} as Repositories['magicLinkTokens'],
     oauthConnections: {} as Repositories['oauthConnections'],
     apiKeys: {} as Repositories['apiKeys'],
     pushSubscriptions: {} as Repositories['pushSubscriptions'],
@@ -64,8 +59,7 @@ function createMockRepos(): Repositories {
     usageMetrics: {} as Repositories['usageMetrics'],
     usageSnapshots: {} as Repositories['usageSnapshots'],
     legalDocuments: {} as Repositories['legalDocuments'],
-    userAgreements: {} as Repositories['userAgreements'],
-    consentLogs: {} as Repositories['consentLogs'],
+    consentRecords: {} as Repositories['consentRecords'],
     dataExportRequests: {} as Repositories['dataExportRequests'],
     activities: {} as Repositories['activities'],
     webauthnCredentials: {} as Repositories['webauthnCredentials'],

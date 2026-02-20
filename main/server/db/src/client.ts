@@ -177,21 +177,27 @@ export function createRawDb(config: DbConfig | string): RawDb {
 }
 
 /**
- * Create a RawDb interface from an existing postgres client
- * Useful for creating transaction clients
+ * Create a RawDb interface from an existing postgres client.
+ * Exported for testing the RLS session mechanism.
+ * @internal - use createRawDb for production code
  */
-function createDbFromSql(sql: PostgresClient, session?: SessionContext): RawDb {
+export function createDbFromSql(sql: PostgresClient, session?: SessionContext): RawDb {
+  // Escape a string value for use in a PostgreSQL literal (single-quote safe).
+  // Only used for internal RLS session variables (userId, tenantId, role) which are
+  // controlled strings — not arbitrary user input.
+  const escapeLiteral = (val: string): string => `'${val.replace(/'/g, "''")}'`;
+
   // Helper to execute unsafe queries with proper typing
   const unsafeQuery = async <T>(text: string, values: readonly unknown[]): Promise<T[]> => {
     // If a session is present, wrap the query in a transaction to set local RLS variables.
     // This ensures SET LOCAL variables are isolated to the connection and reset after.
     if (session && (session.userId || session.tenantId)) {
-      return (sql as Sql).begin(async (tx: any) => {
+      return (sql as Sql).begin(async (tx: TransactionSql) => {
         if (session.userId)
-          await tx.unsafe(`SET LOCAL app.user_id = ${tx.escapeLiteral(session.userId)}`);
+          await tx.unsafe(`SET LOCAL app.user_id = ${escapeLiteral(session.userId)}`);
         if (session.tenantId)
-          await tx.unsafe(`SET LOCAL app.tenant_id = ${tx.escapeLiteral(session.tenantId)}`);
-        if (session.role) await tx.unsafe(`SET LOCAL app.role = ${tx.escapeLiteral(session.role)}`);
+          await tx.unsafe(`SET LOCAL app.tenant_id = ${escapeLiteral(session.tenantId)}`);
+        if (session.role) await tx.unsafe(`SET LOCAL app.role = ${escapeLiteral(session.role)}`);
         const r = await tx.unsafe(text, [...values] as ParameterOrJSON<never>[]);
         return r as unknown as T[];
       }) as unknown as Promise<T[]>;
@@ -219,28 +225,21 @@ function createDbFromSql(sql: PostgresClient, session?: SessionContext): RawDb {
     },
 
     async execute(query: QueryResult, _options?: QueryOptions): Promise<number> {
-      // Direct execution without the unsafeQuery wrapper if we want to bypass the session
-      // check for counts/etc? No, we want session for everything.
-      // For execute we need the count. unsafeQuery returns T[].
-      // But unsafeQuery internally calls tx.unsafe which returns a result with .count.
-      // However, we are casting it to T[].
-
-      // Let's fix unsafeQuery to be more flexible or just handle it here.
       if (session && (session.userId || session.tenantId)) {
-        return (sql as Sql).begin(async (tx: any) => {
+        return (sql as Sql).begin(async (tx: TransactionSql) => {
           if (session.userId)
-            await tx.unsafe(`SET LOCAL app.user_id = ${tx.escapeLiteral(session.userId)}`);
+            await tx.unsafe(`SET LOCAL app.user_id = ${escapeLiteral(session.userId)}`);
           if (session.tenantId)
-            await tx.unsafe(`SET LOCAL app.tenant_id = ${tx.escapeLiteral(session.tenantId)}`);
+            await tx.unsafe(`SET LOCAL app.tenant_id = ${escapeLiteral(session.tenantId)}`);
           if (session.role)
-            await tx.unsafe(`SET LOCAL app.role = ${tx.escapeLiteral(session.role)}`);
+            await tx.unsafe(`SET LOCAL app.role = ${escapeLiteral(session.role)}`);
           const r = await tx.unsafe(query.text, [...query.values] as ParameterOrJSON<never>[]);
-          return r.count;
+          return (r as unknown as { count: number }).count;
         });
       }
 
       const res = await sql.unsafe(query.text, [...query.values] as ParameterOrJSON<never>[]);
-      return res.count;
+      return (res as unknown as { count: number }).count;
     },
 
     async raw<T = Record<string, unknown>>(sqlText: string, values: unknown[] = []): Promise<T[]> {

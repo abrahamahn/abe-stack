@@ -16,8 +16,8 @@ import { logoutUser } from '../service';
 import { createErrorMapperLogger, REFRESH_COOKIE_NAME } from '../types';
 import { clearRefreshTokenCookie } from '../utils';
 
-import type { HttpErrorResponse, LogoutResponse } from '@bslt/shared';
 import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../types';
+import type { HttpErrorResponse, LogoutResponse } from '@bslt/shared';
 
 /**
  * Handle user logout.

@@ -5,10 +5,10 @@ import { handleGetCurrentLegal, handleGetUserAgreements, handlePublishLegal } fr
 
 import type { LegalAppContext } from './types';
 import type {
+  ConsentRecord,
+  ConsentRecordRepository,
   LegalDocument,
   LegalDocumentRepository,
-  UserAgreement,
-  UserAgreementRepository,
 } from '../../../db/src';
 
 // ============================================================================
@@ -26,30 +26,37 @@ function createMockLegalDocRepo(): LegalDocumentRepository {
   };
 }
 
-function createMockUserAgreementRepo(): UserAgreementRepository {
+function createMockConsentRecordRepo(): ConsentRecordRepository {
   return {
-    create: vi.fn(),
-    findByUserId: vi.fn(),
-    findByUserAndDocument: vi.fn(),
-    findByDocumentId: vi.fn(),
+    recordAgreement: vi.fn(),
+    findAgreementsByUserId: vi.fn(),
+    findAgreementByUserAndDocument: vi.fn(),
+    recordConsent: vi.fn(),
+    findConsentsByUserId: vi.fn(),
+    findLatestConsentByUserAndType: vi.fn(),
   };
 }
 
 function createMockCtx(overrides?: {
   legalDocs?: LegalDocumentRepository;
-  userAgreements?: UserAgreementRepository;
+  consentRecords?: ConsentRecordRepository;
 }): LegalAppContext {
   return {
     db: {},
     repos: {
       legalDocuments: overrides?.legalDocs ?? createMockLegalDocRepo(),
-      userAgreements: overrides?.userAgreements ?? createMockUserAgreementRepo(),
+      consentRecords: overrides?.consentRecords ?? createMockConsentRecordRepo(),
     },
     log: {
       info: vi.fn(),
       warn: vi.fn(),
       error: vi.fn(),
       debug: vi.fn(),
+    },
+    errorTracker: {
+      captureError: vi.fn(),
+      addBreadcrumb: vi.fn(),
+      setUserContext: vi.fn(),
     },
   };
 }
@@ -67,13 +74,18 @@ function createMockDocument(overrides?: Partial<LegalDocument>): LegalDocument {
   };
 }
 
-function createMockAgreement(overrides?: Partial<UserAgreement>): UserAgreement {
+function createMockConsentRecord(overrides?: Partial<ConsentRecord>): ConsentRecord {
   return {
-    id: 'agreement-1',
+    id: 'cr-1',
     userId: 'user-1',
+    recordType: 'legal_document',
     documentId: 'doc-1',
-    agreedAt: new Date('2026-01-15T10:00:00Z'),
+    consentType: null,
+    granted: null,
     ipAddress: '127.0.0.1',
+    userAgent: null,
+    metadata: {},
+    createdAt: new Date('2026-01-15T10:00:00Z'),
     ...overrides,
   };
 }
@@ -174,8 +186,8 @@ describe('handleGetUserAgreements', () => {
   });
 
   it('should return user agreements', async () => {
-    const agreements = [createMockAgreement()];
-    vi.mocked(ctx.repos.userAgreements.findByUserId).mockResolvedValue(agreements);
+    const agreements = [createMockConsentRecord()];
+    vi.mocked(ctx.repos.consentRecords.findAgreementsByUserId).mockResolvedValue(agreements);
 
     const result = await handleGetUserAgreements(ctx, undefined, createAuthenticatedRequest());
 
@@ -186,8 +198,8 @@ describe('handleGetUserAgreements', () => {
   });
 
   it('should format dates as ISO strings in agreements', async () => {
-    const agreements = [createMockAgreement()];
-    vi.mocked(ctx.repos.userAgreements.findByUserId).mockResolvedValue(agreements);
+    const agreements = [createMockConsentRecord()];
+    vi.mocked(ctx.repos.consentRecords.findAgreementsByUserId).mockResolvedValue(agreements);
 
     const result = await handleGetUserAgreements(ctx, undefined, createAuthenticatedRequest());
 

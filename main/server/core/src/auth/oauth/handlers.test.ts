@@ -8,9 +8,8 @@
  * account linking/unlinking, and security event logging.
  */
 
+import { OAUTH_PROVIDERS } from '@bslt/db';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
-
-import { OAUTH_PROVIDERS } from '../../../../db/src';
 
 // ============================================================================
 // Mock Dependencies
@@ -75,10 +74,10 @@ import {
   unlinkOAuthAccount,
 } from './service';
 
-import type { UserId } from '@bslt/shared';
-import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { HttpReply, HttpRequest } from '../../../../system/src';
 import type { AppContext } from '../index';
 import type { OAuthConnectionInfo } from './types';
+import type { UserId } from '@bslt/shared';
 
 // ============================================================================
 // Test Helpers
@@ -115,6 +114,7 @@ function createMockContext(overrides?: Partial<AppContext>): AppContext {
           sameSite: 'lax',
           path: '/',
         },
+        oauthTokenEncryptionKey: 'oauth-token-encryption-key-32-ch!',
         oauth: {
           google: {
             clientId: 'google-client-id',
@@ -153,25 +153,25 @@ function createMockContext(overrides?: Partial<AppContext>): AppContext {
   } as unknown as AppContext;
 }
 
-function createMockRequest(overrides?: Partial<FastifyRequest>): FastifyRequest {
+function createMockRequest(overrides?: Record<string, unknown>): HttpRequest {
   return {
     ip: '127.0.0.1',
     headers: { 'user-agent': 'Test Browser' },
     ...overrides,
-  } as FastifyRequest;
+  } as unknown as HttpRequest;
 }
 
-function createMockReply(): FastifyReply {
+function createMockReply(): HttpReply {
   return {
     setCookie: vi.fn(),
     clearCookie: vi.fn(),
-  } as unknown as FastifyReply;
+  } as unknown as HttpReply;
 }
 
 function createAuthenticatedRequest(
   userId: string,
   role: 'user' | 'admin' | 'moderator' = 'user',
-): FastifyRequest {
+): HttpRequest {
   const request = createMockRequest();
   (request as { user?: { userId: string; role: string } }).user = { userId, role };
   return request;

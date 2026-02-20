@@ -156,7 +156,7 @@ describe('Permission Middleware', () => {
         const middleware = createPermissionMiddleware({ checker });
         const handler = middleware.requireReadPermission(
           'tasks',
-          (req) => (req.params as Record<string, string>)?.['taskId'] ?? null,
+          (req) => (req.params as Record<string, string>)['taskId'] ?? null,
         );
 
         const request = createMockRequest({
@@ -286,7 +286,7 @@ describe('Permission Middleware', () => {
         const handler = middleware.createPermissionGuard({
           table: 'tasks',
           permission: 'read',
-          getRecordId: (req) => (req.params as Record<string, string>)?.['id'] ?? null,
+          getRecordId: (req) => (req.params as Record<string, string>)['id'] ?? null,
         });
 
         const request = createMockRequest({
@@ -447,7 +447,7 @@ describe('Permission Middleware', () => {
       const guard = createStandalonePermissionGuard(checker, {
         permission: 'read',
         table: 'tasks',
-        getRecordId: (req) => (req.params as Record<string, string>)?.['id'] ?? null,
+        getRecordId: (req) => (req.params as Record<string, string>)['id'] ?? null,
       });
 
       const request = createMockRequest({

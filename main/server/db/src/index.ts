@@ -33,7 +33,6 @@ export {
 
 // Schema
 export {
-  ACTIVITIES_TABLE,
   // Activity schema
   ACTIVITY_COLUMNS,
   API_KEY_COLUMNS,
@@ -141,19 +140,20 @@ export {
   type Activity,
   type ApiKey,
   type AuditEvent,
+  type AuthToken,
+  type AuthTokenType,
   type BillingEvent,
   type BillingEventType,
   type BillingProvider,
   type CardDetails,
-  type ConsentLog,
+  type ConsentRecord,
+  type ConsentRecordType,
   type ConsentType,
   type CustomerMapping,
   type DataExportRequest,
   type DataExportStatus,
   type DataExportType,
   type DocumentType,
-  type EmailChangeToken,
-  type EmailVerificationToken,
   type FeatureFlag,
   type FilePurpose,
   type FileRecord,
@@ -162,38 +162,33 @@ export {
   type InvoiceStatus,
   type LegalDocument,
   type LoginAttempt,
-  type MagicLinkToken,
   type NewActivity,
   type NewApiKey,
   type NewAuditEvent,
+  type NewAuthToken,
   type NewBillingEvent,
-  type NewConsentLog,
+  type NewConsentRecord,
   type NewCustomerMapping,
   type NewDataExportRequest,
-  type NewEmailChangeToken,
-  type NewEmailVerificationToken,
   type NewFeatureFlag,
   type NewFileRecord,
   type NewInvoice,
   type NewLegalDocument,
   type NewLoginAttempt,
-  type NewMagicLinkToken,
   type NewNotification,
   type NewNotificationPreference,
   type NewOAuthConnection,
-  type NewPasswordResetToken,
   type NewPaymentMethod,
   type NewPlan,
   type NewPushSubscription,
   type NewRefreshToken,
-  type NewRefreshTokenFamily,
   type NewSecurityEvent,
+  type NewSmsVerificationCode,
   type NewSubscription,
   type NewTenantFeatureOverride,
   type NewTotpBackupCode,
   type NewTrustedDevice,
   type NewUser,
-  type NewUserAgreement,
   type NewUserSession,
   type NewWebauthnCredential,
   type NewWebhook,
@@ -204,7 +199,6 @@ export {
   type NotificationType,
   type OAuthConnection,
   type OAuthProvider,
-  type PasswordResetToken,
   type PaymentMethod,
   type PaymentMethodType,
   type Plan,
@@ -213,7 +207,7 @@ export {
   type PushSubscription,
   type QuietHoursConfig,
   type RefreshToken,
-  type RefreshTokenFamily,
+  type RefreshTokenFamilyView,
   type SecurityEvent,
   type SecurityEventType,
   type SecuritySeverity,
@@ -235,6 +229,7 @@ export {
   type UpdateOAuthConnection,
   type UpdatePaymentMethod,
   type UpdatePlan,
+  type UpdateSmsVerificationCode,
   type UpdateSubscription,
   type UpdateTenantFeatureOverride,
   type UpdateTrustedDevice,
@@ -244,7 +239,6 @@ export {
   type UpdateWebhook,
   type UpdateWebhookDelivery,
   type User,
-  type UserAgreement,
   type UserRole,
   type UserSession,
   type WebauthnCredential,
@@ -261,15 +255,14 @@ export {
   createApiKeyRepository,
   // Audit
   createAuditEventRepository,
-  // Auth
+  // Auth tokens (unified)
+  createAuthTokenRepository,
+  // Billing
   createBillingEventRepository,
   // Compliance
-  createConsentLogRepository,
+  createConsentRecordRepository,
   createCustomerMappingRepository,
   createDataExportRequestRepository,
-  createEmailChangeRevertTokenRepository,
-  createEmailChangeTokenRepository,
-  createEmailVerificationTokenRepository,
   // Features
   createFeatureFlagRepository,
   // Files
@@ -278,20 +271,16 @@ export {
   createInvoiceRepository,
   createLegalDocumentRepository,
   createLoginAttemptRepository,
-  // Magic Link
-  createMagicLinkTokenRepository,
   createMembershipRepository,
   createNotificationPreferenceRepository,
   // In-App Notifications
   createNotificationRepository,
   // OAuth
   createOAuthConnectionRepository,
-  createPasswordResetTokenRepository,
   createPaymentMethodRepository,
   createPlanRepository,
   // Push
   createPushSubscriptionRepository,
-  createRefreshTokenFamilyRepository,
   createRefreshTokenRepository,
   createSecurityEventRepository,
   createSubscriptionRepository,
@@ -301,7 +290,6 @@ export {
   createTotpBackupCodeRepository,
   // Trusted Devices
   createTrustedDeviceRepository,
-  createUserAgreementRepository,
   // Users
   createUserRepository,
   // Sessions
@@ -313,15 +301,13 @@ export {
   type AdminUserListFilters,
   type ApiKeyRepository,
   type AuditEventRepository,
+  type AuthTokenRepository,
   type BillingEventRepository,
-  type ConsentLogRepository,
+  type ConsentRecordRepository,
   type CursorPaginatedResult,
   type CursorPaginationOptions,
   type CustomerMappingRepository,
   type DataExportRequestRepository,
-  type EmailChangeRevertTokenRepository,
-  type EmailChangeTokenRepository,
-  type EmailVerificationTokenRepository,
   type FeatureFlagRepository,
   type FileRepository,
   type InvitationRepository,
@@ -329,16 +315,13 @@ export {
   type InvoiceRepository,
   type LegalDocumentRepository,
   type LoginAttemptRepository,
-  type MagicLinkTokenRepository,
   type MembershipRepository,
   type NotificationPreferenceRepository,
   type NotificationRepository,
   type OAuthConnectionRepository,
-  type PasswordResetTokenRepository,
   type PaymentMethodRepository,
   type PlanRepository,
   type PushSubscriptionRepository,
-  type RefreshTokenFamilyRepository,
   type RefreshTokenRepository,
   type SecurityEventRepository,
   type SubscriptionFilters,
@@ -348,7 +331,6 @@ export {
   type TimeRangeFilter,
   type TotpBackupCodeRepository,
   type TrustedDeviceRepository,
-  type UserAgreementRepository,
   type UserRepository,
   type UserSessionRepository,
   type WebauthnCredentialRepository,
@@ -425,7 +407,7 @@ export {
 } from './builder';
 
 // Transaction
-export { isInTransaction, withTransaction } from './utils/transaction';
+export { isInTransaction, withTransaction } from './utils';
 
 // Optimistic Locking
 export {
@@ -435,13 +417,17 @@ export {
 } from './utils/optimistic-lock';
 
 // Queue
-export { createPostgresQueueStore, PostgresQueueStore } from './queue/postgres-store';
+export { createPostgresQueueStore, PostgresQueueStore, WriteService, createWriteService } from './queue';
 
 export {
+  type AfterWriteHook,
+  type BeforeValidateHook,
   type JobDetails,
   type JobListOptions,
   type JobListResult,
   type JobStatus,
+  type OperationResult,
+  type OperationType,
   type QueueConfig,
   type QueueStats,
   type QueueStore,
@@ -460,10 +446,17 @@ export {
 } from './read-replica';
 
 // PubSub
-export { createPostgresPubSub, PostgresPubSub } from './pubsub/postgres-pubsub';
+export { createPostgresPubSub, PostgresPubSub } from './pubsub';
 
 // Search
-export { createSqlSearchProvider, SqlSearchProvider } from './search/sql-provider';
+export {
+  createSqlSearchProvider,
+  getSearchProviderFactory,
+  resetSearchProviderFactory,
+  SearchProviderFactory,
+  SqlSearchProvider,
+} from './search';
+export type { ProviderOptions, SqlSearchProviderOptions } from './search';
 
 export type {
   ElasticsearchProviderConfig,

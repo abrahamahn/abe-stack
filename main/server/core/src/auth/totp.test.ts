@@ -12,8 +12,8 @@ import {
   verifyTotpForLogin,
 } from './totp';
 
-import type { AuthConfig } from '@bslt/shared/config';
 import type { DbClient } from '../../../db/src';
+import type { AuthConfig } from '@bslt/shared/config';
 
 // ============================================================================
 // Mocks
@@ -61,7 +61,7 @@ describe('setupTotp', () => {
   test('should generate secret, otpauth URL, and backup codes', async () => {
     // Mock implementation for each backup code hash
     for (let i = 0; i < 10; i++) {
-      mockHashPassword.mockResolvedValueOnce(`hashed_code_${i}`);
+      mockHashPassword.mockResolvedValueOnce(`hashed_code_${String(i)}`);
     }
 
     const result = await setupTotp(db, 'user-123', 'test@example.com', mockConfig);
@@ -81,7 +81,7 @@ describe('setupTotp', () => {
 
   test('should store secret in database with totp_enabled = false', async () => {
     for (let i = 0; i < 10; i++) {
-      mockHashPassword.mockResolvedValueOnce(`hashed_code_${i}`);
+      mockHashPassword.mockResolvedValueOnce(`hashed_code_${String(i)}`);
     }
 
     const result = await setupTotp(db, 'user-123', 'test@example.com', mockConfig);
@@ -94,7 +94,7 @@ describe('setupTotp', () => {
 
   test('should hash and store all backup codes', async () => {
     for (let i = 0; i < 10; i++) {
-      mockHashPassword.mockResolvedValueOnce(`hashed_code_${i}`);
+      mockHashPassword.mockResolvedValueOnce(`hashed_code_${String(i)}`);
     }
 
     await setupTotp(db, 'user-123', 'test@example.com', mockConfig);
@@ -108,7 +108,7 @@ describe('setupTotp', () => {
 
   test('should delete old backup codes before inserting new ones', async () => {
     for (let i = 0; i < 10; i++) {
-      mockHashPassword.mockResolvedValueOnce(`hashed_code_${i}`);
+      mockHashPassword.mockResolvedValueOnce(`hashed_code_${String(i)}`);
     }
 
     await setupTotp(db, 'user-123', 'test@example.com', mockConfig);

@@ -6,7 +6,7 @@
  * @module Core/Compliance
  */
 
-import type { ConsentLog, LegalDocument, UserAgreement } from './compliance.schemas';
+import type { ConsentRecord, LegalDocument } from './compliance.schemas';
 
 // ============================================================================
 // Document Acceptance
@@ -24,7 +24,7 @@ import type { ConsentLog, LegalDocument, UserAgreement } from './compliance.sche
  * @complexity O(1)
  */
 export function needsReacceptance(
-  agreement: Pick<UserAgreement, 'documentId'>,
+  agreement: Pick<ConsentRecord, 'documentId'>,
   latestDoc: Pick<LegalDocument, 'id' | 'version'>,
   agreedDoc: Pick<LegalDocument, 'id' | 'version'>,
 ): boolean {
@@ -41,32 +41,32 @@ export function needsReacceptance(
 // ============================================================================
 
 /**
- * Checks whether a consent log entry represents a grant.
+ * Checks whether a consent record represents a granted preference.
  *
- * @param log - The consent log entry
- * @returns `true` if consent was granted
+ * @param record - The consent record
+ * @returns `true` if consent was explicitly granted
  * @complexity O(1)
  */
-export function isConsentGranted(log: Pick<ConsentLog, 'granted'>): boolean {
-  return log.granted;
+export function isConsentGranted(record: Pick<ConsentRecord, 'granted'>): boolean {
+  return record.granted === true;
 }
 
 /**
  * Determines the effective consent state from a chronologically-ordered
- * list of consent log entries. The last entry wins.
+ * list of consent records. The last entry wins.
  *
- * @param logs - Consent log entries sorted by `createdAt` ascending
+ * @param records - Consent records sorted by `createdAt` ascending
  * @returns `true` if effectively consented, `false` if revoked, `null` if no entries
- * @complexity O(n) where n = number of log entries
+ * @complexity O(n) where n = number of records
  */
 export function getEffectiveConsent(
-  logs: ReadonlyArray<Pick<ConsentLog, 'granted'>>,
+  records: ReadonlyArray<Pick<ConsentRecord, 'granted'>>,
 ): boolean | null {
-  if (logs.length === 0) {
+  if (records.length === 0) {
     return null;
   }
   // Last entry in chronological order determines current state
-  const lastEntry = logs[logs.length - 1];
+  const lastEntry = records[records.length - 1];
   if (lastEntry === undefined) {
     return null;
   }

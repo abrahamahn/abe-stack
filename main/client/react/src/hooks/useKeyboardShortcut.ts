@@ -7,8 +7,8 @@ import {
   parseKeyBinding,
   type KeyModifiers,
   type ParsedKeyBinding,
-} from '@bslt/shared';
-import { useCallback, useEffect, useRef } from 'react';
+} from '@bslt/client-engine';
+import { useCallback, useEffect, useLayoutEffect, useRef } from 'react';
 
 // Re-export shared types and utilities for consumers of this module
 export { formatKeyBinding, parseKeyBinding, type KeyModifiers, type ParsedKeyBinding };
@@ -117,7 +117,9 @@ export function useKeyboardShortcut(options: KeyboardShortcutOptions): void {
 
   // Store handler in ref to avoid recreating listener on handler changes
   const handlerRef = useRef(handler);
-  handlerRef.current = handler;
+  useLayoutEffect(() => {
+    handlerRef.current = handler;
+  });
 
   const handleKeyEvent = useCallback(
     (event: Event): void => {

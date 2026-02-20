@@ -26,8 +26,8 @@ import {
 } from '../../../../db/src';
 import { PayPalProvider } from '../paypal-provider';
 
-import type { PayPalProviderConfig as PayPalConfig } from '@bslt/shared/config';
 import type { WebhookRepositories, WebhookResult } from '../types';
+import type { PayPalProviderConfig as PayPalConfig } from '@bslt/shared/config';
 
 // ============================================================================
 // Webhook Handler
