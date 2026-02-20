@@ -35,7 +35,7 @@ export {
   INVOICE_STATUSES,
   PAYMENT_METHOD_TYPES,
   PLAN_INTERVALS,
-  SUBSCRIPTION_STATUSES
+  SUBSCRIPTION_STATUSES,
 };
 export type {
   BillingEventType,
@@ -45,7 +45,7 @@ export type {
   PaymentMethodType,
   PlanFeature,
   PlanInterval,
-  SubscriptionStatus
+  SubscriptionStatus,
 };
 
 // ============================================================================
@@ -62,8 +62,6 @@ export const BILLING_EVENTS_TABLE = 'billing_events';
 // ============================================================================
 // Plan Types
 // ============================================================================
-
-// PlanFeature imported from @bslt/shared (canonical definition)
 
 /**
  * Plan record from database (SELECT result)
@@ -274,8 +272,6 @@ export interface UpdateInvoice {
 // ============================================================================
 // Payment Method Types
 // ============================================================================
-
-// CardDetails imported from @bslt/shared (canonical definition)
 
 /**
  * Payment method record from database (SELECT result)
