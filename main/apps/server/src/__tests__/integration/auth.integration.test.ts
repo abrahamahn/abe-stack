@@ -10,7 +10,12 @@ import { authRoutes, createAuthGuard, hashPassword } from '@bslt/core/auth';
 import { AUTH_SUCCESS_MESSAGES, HTTP_ERROR_MESSAGES } from '@bslt/shared';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { createTestServer, parseJsonResponse, type TestServer } from './test-utils';
+import {
+  createTestJwt,
+  createTestServer,
+  parseJsonResponse,
+  type TestServer,
+} from './test-utils';
 
 import type { AuthGuardFactory } from '@/http';
 
@@ -34,6 +39,7 @@ function createMockRepos() {
       resetFailedAttempts: vi.fn().mockResolvedValue(undefined),
       lockAccount: vi.fn().mockResolvedValue(undefined),
       unlockAccount: vi.fn().mockResolvedValue(undefined),
+      incrementTokenVersion: vi.fn().mockResolvedValue(undefined),
       delete: vi.fn().mockResolvedValue(true),
       updateWithVersion: vi.fn().mockResolvedValue(null),
     },
@@ -41,8 +47,10 @@ function createMockRepos() {
       findById: vi.fn().mockResolvedValue(null),
       findByToken: vi.fn().mockResolvedValue(null),
       findByUserId: vi.fn().mockResolvedValue([]),
+      findActiveFamilies: vi.fn().mockResolvedValue([]),
       create: vi.fn().mockResolvedValue({ id: 'rt-1' }),
       delete: vi.fn().mockResolvedValue(true),
+      revokeFamily: vi.fn().mockResolvedValue(undefined),
       deleteByToken: vi.fn().mockResolvedValue(true),
       deleteByUserId: vi.fn().mockResolvedValue(0),
       deleteByFamilyId: vi.fn().mockResolvedValue(0),
@@ -258,6 +266,9 @@ describe('Auth API Integration Tests', () => {
   let mockRepos: ReturnType<typeof createMockRepos>;
   let mockEmail: ReturnType<typeof createMockEmailTemplates>;
   let mockLogger: ReturnType<typeof createMockLogger>;
+  const mockSms = {
+    send: vi.fn().mockResolvedValue({ success: true, messageId: 'sms-msg-1' }),
+  };
 
   beforeAll(async () => {
     // Hash a known password using test-weight argon2 params for login success tests
@@ -283,6 +294,7 @@ describe('Auth API Integration Tests', () => {
       repos: mockRepos,
       log: mockLogger,
       email: testServer.email,
+      sms: mockSms,
       emailTemplates: mockEmail,
       config: testServer.config,
     };
@@ -867,6 +879,109 @@ describe('Auth API Integration Tests', () => {
       expect(response.statusCode).toBe(429);
       const body = parseJsonResponse(response) as { message: string };
       expect(body.message).toBe(HTTP_ERROR_MESSAGES.AccountLocked);
+    });
+
+    it('lock -> login blocked -> unlock -> login allowed', async () => {
+      const now = new Date();
+      const lockedUser = {
+        id: 'user-lock-flow',
+        email: 'lockflow@example.com',
+        canonicalEmail: 'lockflow@example.com',
+        username: 'lockflow',
+        firstName: 'Lock',
+        lastName: 'Flow',
+        passwordHash: testPasswordHash,
+        role: 'user',
+        emailVerified: true,
+        failedLoginAttempts: 0,
+        lockedUntil: new Date(Date.now() + 60 * 60 * 1000),
+        lockReason: 'Suspicious activity detected',
+        totpEnabled: false,
+        totpSecret: null,
+        phone: null,
+        phoneVerified: null,
+        tokenVersion: 0,
+        deactivatedAt: null,
+        deletedAt: null,
+        deletionGracePeriodEnds: null,
+        dateOfBirth: null,
+        gender: null,
+        bio: null,
+        city: null,
+        state: null,
+        country: null,
+        language: null,
+        website: null,
+        avatarUrl: null,
+        createdAt: now,
+        updatedAt: now,
+        version: 1,
+      };
+
+      mockRepos.users.findByEmail.mockImplementation(async () => lockedUser);
+      mockRepos.users.findByUsername.mockResolvedValue(null);
+
+      const blockedResponse = await testServer.inject({
+        method: 'POST',
+        url: '/api/auth/login',
+        payload: { identifier: 'lockflow@example.com', password: 'StrongP@ssword123!' },
+      });
+      expect(blockedResponse.statusCode).toBe(429);
+      const blockedBody = parseJsonResponse(blockedResponse) as { message: string };
+      expect(blockedBody.message).toBe(HTTP_ERROR_MESSAGES.AccountLocked);
+
+      mockRepos.users.unlockAccount.mockImplementationOnce(async () => {
+        lockedUser.lockedUntil = null;
+        lockedUser.lockReason = null;
+      });
+      await mockRepos.users.unlockAccount(lockedUser.id);
+      mockDb.queryOne.mockResolvedValue({ count: 0 });
+      mockRepos.refreshTokenFamilies.findActiveByUserId.mockResolvedValue([]);
+      mockRepos.trustedDevices.findByFingerprint.mockResolvedValue(null);
+      mockRepos.trustedDevices.upsert.mockResolvedValue({ id: 'td-lock-flow' });
+      mockRepos.memberships.findByUserId.mockResolvedValue([]);
+
+      const familyRow = {
+        id: 'family-lock-flow',
+        user_id: 'user-lock-flow',
+        created_at: now.toISOString(),
+        revoked_at: null,
+        revoke_reason: null,
+      };
+      mockDb.transaction.mockImplementation(
+        async (cb: (tx: Record<string, unknown>) => Promise<unknown>) => {
+          const mockTxLocal = {
+            query: vi.fn().mockResolvedValue([familyRow]),
+            queryOne: vi.fn().mockResolvedValue(null),
+            execute: vi.fn().mockResolvedValue(0),
+            raw: vi.fn().mockResolvedValue([]),
+            transaction: vi.fn(),
+            healthCheck: vi.fn(),
+            close: vi.fn(),
+            getClient: vi.fn(),
+          };
+          mockTxLocal.transaction.mockImplementation(
+            (innerCb: (tx: Record<string, unknown>) => Promise<unknown>) =>
+              innerCb(mockTxLocal as never),
+          );
+          return cb(mockTxLocal as never);
+        },
+      );
+
+      const allowedResponse = await testServer.inject({
+        method: 'POST',
+        url: '/api/auth/login',
+        payload: { identifier: 'lockflow@example.com', password: 'StrongP@ssword123!' },
+      });
+      expect(allowedResponse.statusCode).toBe(200);
+      const allowedBody = parseJsonResponse(allowedResponse) as {
+        token?: string;
+        user: { id: string };
+      };
+      if (allowedBody.token !== undefined) {
+        expect(typeof allowedBody.token).toBe('string');
+      }
+      expect(allowedBody.user.id).toBe('user-lock-flow');
     });
 
     it('POST /api/auth/register returns 201 for duplicate verified email (anti-enumeration)', async () => {
@@ -1814,6 +1929,388 @@ describe('Auth API Integration Tests', () => {
       });
       expect(mockEmail.newLoginAlert).toHaveBeenCalled();
       expect(testServer.email.send).toHaveBeenCalled();
+    });
+
+    it('POST /api/auth/login sets isNewDevice and /api/auth/invalidate-sessions bumps token version', async () => {
+      const now = new Date();
+
+      mockRepos.users.findByEmail.mockResolvedValue({
+        id: 'user-device-flow',
+        email: 'deviceflow@example.com',
+        canonicalEmail: 'deviceflow@example.com',
+        username: 'deviceflow',
+        firstName: 'Device',
+        lastName: 'Flow',
+        passwordHash: testPasswordHash,
+        role: 'user',
+        emailVerified: true,
+        failedLoginAttempts: 0,
+        lockedUntil: null,
+        totpEnabled: false,
+        totpSecret: null,
+        phone: null,
+        phoneVerified: null,
+        tokenVersion: 0,
+        deactivatedAt: null,
+        deletedAt: null,
+        deletionGracePeriodEnds: null,
+        dateOfBirth: null,
+        gender: null,
+        bio: null,
+        city: null,
+        state: null,
+        country: null,
+        language: null,
+        website: null,
+        avatarUrl: null,
+        createdAt: now,
+        updatedAt: now,
+        version: 1,
+      });
+
+      mockDb.queryOne.mockResolvedValueOnce({ count: 0 });
+      mockRepos.refreshTokenFamilies.findActiveByUserId.mockResolvedValue([]);
+      mockRepos.trustedDevices.findByFingerprint.mockResolvedValue(null);
+      mockRepos.trustedDevices.upsert.mockResolvedValue({ id: 'td-device-flow' });
+      mockRepos.memberships.findByUserId.mockResolvedValue([]);
+      const familyRow = {
+        id: 'family-device-flow',
+        user_id: 'user-device-flow',
+        created_at: now.toISOString(),
+        revoked_at: null,
+        revoke_reason: null,
+      };
+
+      mockDb.transaction.mockImplementation(
+        async (cb: (tx: Record<string, unknown>) => Promise<unknown>) => {
+          const mockTxLocal = {
+            query: vi.fn().mockResolvedValue([familyRow]),
+            queryOne: vi.fn().mockResolvedValue(null),
+            execute: vi.fn().mockResolvedValue(0),
+            raw: vi.fn().mockResolvedValue([]),
+            transaction: vi.fn(),
+            healthCheck: vi.fn(),
+            close: vi.fn(),
+            getClient: vi.fn(),
+          };
+          mockTxLocal.transaction.mockImplementation(
+            (innerCb: (tx: Record<string, unknown>) => Promise<unknown>) =>
+              innerCb(mockTxLocal as never),
+          );
+          return cb(mockTxLocal as never);
+        },
+      );
+
+      const loginResponse = await testServer.inject({
+        method: 'POST',
+        url: '/api/auth/login',
+        payload: { identifier: 'deviceflow@example.com', password: 'StrongP@ssword123!' },
+      });
+
+      expect(loginResponse.statusCode).toBe(200);
+      const loginBody = parseJsonResponse(loginResponse) as { isNewDevice?: boolean };
+      expect(loginBody.isNewDevice).toBe(true);
+
+      const invalidateResponse = await testServer.inject({
+        method: 'POST',
+        url: '/api/auth/invalidate-sessions',
+        headers: {
+          authorization: `Bearer ${createTestJwt({
+            userId: 'user-device-flow',
+            email: 'deviceflow@example.com',
+          })}`,
+        },
+      });
+
+      expect(invalidateResponse.statusCode).toBe(200);
+      expect(mockRepos.users.incrementTokenVersion).toHaveBeenCalledWith('user-device-flow');
+    });
+
+    it('SMS 2FA integration: login challenge -> send code -> verify code', async () => {
+      const now = new Date();
+      let latestRecord:
+        | {
+            id: string;
+            userId: string;
+            phone: string;
+            codeHash: string;
+            attempts: number;
+            verified: boolean;
+            expiresAt: Date;
+          }
+        | null = null;
+
+      mockDb.raw.mockImplementation(
+        async (sql: string, params?: unknown[]) => {
+          if (
+            sql.includes('UPDATE sms_verification_codes SET verified = true') &&
+            sql.includes('WHERE user_id = $1')
+          ) {
+            if (latestRecord !== null && latestRecord.userId === (params?.[0] as string)) {
+              latestRecord.verified = true;
+            }
+            return [];
+          }
+
+          if (sql.includes('INSERT INTO sms_verification_codes')) {
+            latestRecord = {
+              id: 'sms-rec-1',
+              userId: String(params?.[0]),
+              phone: String(params?.[1]),
+              codeHash: String(params?.[2]),
+              attempts: 0,
+              verified: false,
+              expiresAt: params?.[3] as Date,
+            };
+            return [];
+          }
+
+          if (sql.includes('SELECT id, code_hash, attempts, expires_at FROM sms_verification_codes')) {
+            if (latestRecord === null || latestRecord.verified) return [];
+            return [
+              {
+                id: latestRecord.id,
+                code_hash: latestRecord.codeHash,
+                attempts: latestRecord.attempts,
+                expires_at: latestRecord.expiresAt,
+              },
+            ];
+          }
+
+          if (sql.includes('SET attempts = attempts + 1 WHERE id = $1')) {
+            if (latestRecord !== null && latestRecord.id === (params?.[0] as string)) {
+              latestRecord.attempts += 1;
+            }
+            return [];
+          }
+
+          if (sql.includes('SET verified = true WHERE id = $1')) {
+            if (latestRecord !== null && latestRecord.id === (params?.[0] as string)) {
+              latestRecord.verified = true;
+            }
+            return [];
+          }
+
+          return [];
+        },
+      );
+
+      const smsUser = {
+        id: 'user-sms-flow',
+        email: 'smsflow@example.com',
+        canonicalEmail: 'smsflow@example.com',
+        username: 'smsflow',
+        firstName: 'SMS',
+        lastName: 'Flow',
+        passwordHash: testPasswordHash,
+        role: 'user' as const,
+        emailVerified: true,
+        failedLoginAttempts: 0,
+        lockedUntil: null,
+        totpEnabled: false,
+        totpSecret: null,
+        phone: '+15551234567',
+        phoneVerified: true,
+        tokenVersion: 0,
+        deactivatedAt: null,
+        deletedAt: null,
+        deletionGracePeriodEnds: null,
+        dateOfBirth: null,
+        gender: null,
+        bio: null,
+        city: null,
+        state: null,
+        country: null,
+        language: null,
+        website: null,
+        avatarUrl: null,
+        createdAt: now,
+        updatedAt: now,
+        version: 1,
+      };
+
+      mockRepos.users.findByEmail.mockResolvedValue(smsUser);
+      mockRepos.users.findById.mockResolvedValue(smsUser);
+      mockDb.queryOne.mockResolvedValueOnce({ count: 0 });
+      mockRepos.refreshTokenFamilies.findActiveByUserId.mockResolvedValue([]);
+      mockRepos.trustedDevices.findByFingerprint.mockResolvedValue(null);
+      mockRepos.trustedDevices.upsert.mockResolvedValue({ id: 'td-sms-flow' });
+      mockRepos.memberships.findByUserId.mockResolvedValue([]);
+
+      const familyRow = {
+        id: 'family-sms-flow',
+        user_id: 'user-sms-flow',
+        created_at: now.toISOString(),
+        revoked_at: null,
+        revoke_reason: null,
+      };
+
+      mockDb.transaction.mockImplementation(
+        async (cb: (tx: Record<string, unknown>) => Promise<unknown>) => {
+          const mockTxLocal = {
+            query: vi.fn().mockResolvedValue([familyRow]),
+            queryOne: vi.fn().mockResolvedValue(null),
+            execute: vi.fn().mockResolvedValue(0),
+            raw: mockDb.raw,
+            transaction: vi.fn(),
+            healthCheck: vi.fn(),
+            close: vi.fn(),
+            getClient: vi.fn(),
+          };
+          mockTxLocal.transaction.mockImplementation(
+            (innerCb: (tx: Record<string, unknown>) => Promise<unknown>) =>
+              innerCb(mockTxLocal as never),
+          );
+          return cb(mockTxLocal as never);
+        },
+      );
+
+      const loginResponse = await testServer.inject({
+        method: 'POST',
+        url: '/api/auth/login',
+        payload: { identifier: 'smsflow@example.com', password: 'StrongP@ssword123!' },
+      });
+
+      expect(loginResponse.statusCode).toBe(202);
+      const loginBody = parseJsonResponse(loginResponse) as {
+        requiresSms: boolean;
+        challengeToken: string;
+      };
+      expect(loginBody.requiresSms).toBe(true);
+      expect(loginBody.challengeToken).toBeDefined();
+
+      const sendResponse = await testServer.inject({
+        method: 'POST',
+        url: '/api/auth/sms/send',
+        payload: { challengeToken: loginBody.challengeToken },
+      });
+      expect(sendResponse.statusCode).toBe(200);
+
+      const smsBody = String(mockSms.send.mock.calls.at(-1)?.[0]?.body ?? '');
+      const codeMatch = smsBody.match(/(\d{6})/);
+      expect(codeMatch).not.toBeNull();
+      const code = codeMatch?.[1] ?? '';
+
+      const verifyResponse = await testServer.inject({
+        method: 'POST',
+        url: '/api/auth/sms/verify',
+        payload: { challengeToken: loginBody.challengeToken, code },
+      });
+
+      expect(verifyResponse.statusCode).toBe(200);
+      const verifyBody = parseJsonResponse(verifyResponse) as { token?: string; user: { id: string } };
+      expect(typeof verifyBody.token).toBe('string');
+      expect(verifyBody.user.id).toBe('user-sms-flow');
+    });
+
+    it('phone verification integration: set phone -> verify code', async () => {
+      let latestRecord:
+        | {
+            id: string;
+            userId: string;
+            phone: string;
+            codeHash: string;
+            attempts: number;
+            verified: boolean;
+            expiresAt: Date;
+          }
+        | null = null;
+
+      mockDb.raw.mockImplementation(
+        async (sql: string, params?: unknown[]) => {
+          if (
+            sql.includes('UPDATE sms_verification_codes SET verified = true') &&
+            sql.includes('WHERE user_id = $1')
+          ) {
+            if (latestRecord !== null && latestRecord.userId === (params?.[0] as string)) {
+              latestRecord.verified = true;
+            }
+            return [];
+          }
+
+          if (sql.includes('INSERT INTO sms_verification_codes')) {
+            latestRecord = {
+              id: 'sms-phone-1',
+              userId: String(params?.[0]),
+              phone: String(params?.[1]),
+              codeHash: String(params?.[2]),
+              attempts: 0,
+              verified: false,
+              expiresAt: params?.[3] as Date,
+            };
+            return [];
+          }
+
+          if (sql.includes('SELECT id, code_hash, attempts, expires_at FROM sms_verification_codes')) {
+            if (latestRecord === null || latestRecord.verified) return [];
+            return [
+              {
+                id: latestRecord.id,
+                code_hash: latestRecord.codeHash,
+                attempts: latestRecord.attempts,
+                expires_at: latestRecord.expiresAt,
+              },
+            ];
+          }
+
+          if (sql.includes('SET attempts = attempts + 1 WHERE id = $1')) {
+            if (latestRecord !== null && latestRecord.id === (params?.[0] as string)) {
+              latestRecord.attempts += 1;
+            }
+            return [];
+          }
+
+          if (
+            sql.includes('SELECT phone FROM sms_verification_codes') &&
+            sql.includes('verified = true')
+          ) {
+            if (latestRecord === null || !latestRecord.verified) return [];
+            return [{ phone: latestRecord.phone }];
+          }
+
+          if (sql.includes('SET verified = true WHERE id = $1')) {
+            if (latestRecord !== null && latestRecord.id === (params?.[0] as string)) {
+              latestRecord.verified = true;
+            }
+            return [];
+          }
+
+          if (sql.includes('UPDATE users SET phone = $1, phone_verified = true')) {
+            return [];
+          }
+
+          return [];
+        },
+      );
+
+      const authHeader = `Bearer ${createTestJwt({
+        userId: 'user-phone-flow',
+        email: 'phoneflow@example.com',
+      })}`;
+
+      const setResponse = await testServer.inject({
+        method: 'POST',
+        url: '/api/users/me/phone',
+        headers: { authorization: authHeader },
+        payload: { phone: '+15551234567' },
+      });
+
+      expect(setResponse.statusCode).toBe(200);
+      const smsBody = String(mockSms.send.mock.calls.at(-1)?.[0]?.body ?? '');
+      const codeMatch = smsBody.match(/(\d{6})/);
+      expect(codeMatch).not.toBeNull();
+      const code = codeMatch?.[1] ?? '';
+
+      const verifyResponse = await testServer.inject({
+        method: 'POST',
+        url: '/api/users/me/phone/verify',
+        headers: { authorization: authHeader },
+        payload: { code },
+      });
+
+      expect(verifyResponse.statusCode).toBe(200);
+      const verifyBody = parseJsonResponse(verifyResponse) as { verified: boolean };
+      expect(verifyBody.verified).toBe(true);
     });
 
     it('POST /api/auth/refresh detects token reuse and revokes family', () => {

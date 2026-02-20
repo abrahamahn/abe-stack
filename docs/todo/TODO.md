@@ -213,45 +213,45 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 #### Sprint 3 Remaining Work (Incomplete TODO Backlog)
 
-> Snapshot date: 2026-02-12. This is the canonical list of still-open Sprint 3 work.
-> `Total open checkboxes: 206` across slices `3.1`-`3.25`.
+> Snapshot date: 2026-02-20. This is the canonical list of still-open Sprint 3 work.
+> Open-item counts below may lag after reconciliation edits in this file.
 
 **P0 (Launch/Critical Path):**
 
 - [ ] 3.2 Billing lifecycle end-to-end (subscriptions, invoices, upgrades/downgrades, entitlements, dunning)
-- [ ] 3.17 Operational quality gaps (health/readiness verification, metrics, docs endpoint, queue verification)
+- [x] 3.17 Operational quality gaps (health/readiness verification, metrics, docs endpoint, queue verification)
   - [x] Verify: `GET /health` — returns server health (up/degraded/down)
   - [x] Verify: `GET /ready` — returns readiness (DB connected, cache warm, queue running)
   - [x] Service: health check includes all subsystems (DB, cache, queue, storage, email)
-- [ ] 3.18 Backend security/infra gaps (oauth-refresh job, webhook idempotency, email-change-revert token repo)
+- [x] 3.18 Backend security/infra gaps (oauth-refresh job, webhook idempotency, email-change-revert token repo)
   - [x] Job: `oauth-refresh` — proactively renew expiring OAuth tokens (hourly)
   - [x] Repo: extract `email_change_revert_tokens` operations from raw SQL in `email-change.ts` into a dedicated repository
-- [ ] 3.25 Webhook delivery completion (client/UI + integration/E2E)
+- [x] 3.25 Webhook delivery completion (client/UI + integration/E2E)
 
 **P1 (Admin/Workspace/Compliance):**
 
 - [ ] 3.13 System admin gaps (webhook monitor/replay, health dashboard, per-tenant overrides)
 - [ ] 3.12 Workspace admin remaining UI and invitation hardening (logo, danger zone, regenerate/reminder flow)
 - [ ] 3.8 Compliance gaps (legal current/agreements endpoints, legal publish, consent banner, deletion status UI)
-- [ ] 3.15 Ban flows completion (lock reason UX/email, hard-ban confirmation/cascade/anonymization)
+- [x] 3.15 Ban flows completion (lock reason UX/email, hard-ban confirmation/cascade/anonymization)
 
 **P2 (UX + Verification Backfill):**
 
-- [ ] 3.1 API keys client/UI + integration/E2E
+- [x] 3.1 API keys client/UI + integration/E2E
 - [ ] 3.4 Notifications remaining email templates/bounce/unsubscribe + test coverage
 - [ ] 3.5 Avatar/file pipeline verification + tests
-- [ ] 3.6 Activities contracts + tests
+- [x] 3.6 Activities contracts + tests
 - [ ] 3.7 Usage metering + workspace override UI + tests
 - [ ] 3.9 Realtime reconnection/offline queue/delta sync + tests
 - [ ] 3.10 Media library/gallery + tests
-- [ ] 3.11 Settings completeness (preferences/API keys/backup codes tabs + E2E)
-- [ ] 3.14 Impersonation integration/E2E
+- [x] 3.11 Settings completeness (preferences/API keys/backup codes tabs + E2E)
+- [x] 3.14 Impersonation integration/E2E
 - [ ] 3.16 Data hygiene follow-through (search/list visibility, audit shape, FK safety, file cleanup, tests)
 - [ ] 3.19 Desktop manual verification
-- [ ] 3.20 Staging infra/docs
-- [ ] 3.21 Storybook layout/pattern stories
-- [ ] 3.23 Device detection remaining email template + integration/E2E
-- [ ] 3.24 SMS 2FA integration/E2E
+- [x] 3.20 Staging infra/docs
+- [x] 3.21 Storybook layout/pattern stories
+- [x] 3.23 Device detection remaining email template + integration/E2E
+- [x] 3.24 SMS 2FA integration/E2E
 
 **Open Item Count by Slice (for tracking):**
 
@@ -278,8 +278,8 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 **Tests:**
 
-- [ ] Integration: create key → authenticate with bearer token → revoke → bearer rejected
-- [ ] E2E: settings → create API key → copy → use in API call → revoke → key rejected
+- [x] Integration: create key → authenticate with bearer token → revoke → bearer rejected
+- [x] E2E: settings → create API key → copy → use in API call → revoke → key rejected
 
 ---
 
@@ -311,26 +311,26 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 - [x] Route: `POST /api/billing/subscriptions/downgrade` — downgrade plan (at period end)
 - [x] Route: `POST /api/billing/subscriptions/cancel` — cancel (remains active until period end)
 - [x] Service: proration handling for mid-cycle changes
-- [ ] UI: upgrade/downgrade flow with confirmation + proration preview
+- [x] UI: upgrade/downgrade flow with confirmation + proration preview
 
 **Entitlements + Usage Limits (BUSINESS 3.6):**
 
 - [x] Service: `resolveEntitlements(subscription, role)` → returns feature flags + limits
 - [x] Service: `assertEntitled("feature_x")` — Fastify preHandler middleware
-- [ ] Service: seat-based limit enforcement (max users per plan)
-- [ ] Service: storage/resource limit enforcement
-- [ ] UI: usage bar ("80% of storage used") in billing settings
+- [x] Service: seat-based limit enforcement (max users per plan)
+- [x] Service: storage/resource limit enforcement
+- [x] UI: usage bar ("80% of storage used") in billing settings
 
 **Dunning / Failed Payments:**
 
-- [ ] Service: handle `past_due` state — retry logic, grace period
-- [ ] Service: notify user on failed payment (email + in-app)
-- [ ] Service: downgrade/suspend on prolonged payment failure
+- [x] Service: handle `past_due` state — retry logic, grace period
+- [x] Service: notify user on failed payment (email + in-app)
+- [x] Service: downgrade/suspend on prolonged payment failure
 
 **Tests:**
 
-- [ ] Unit: entitlements resolution, plan validation, webhook signature verification, state transitions
-- [ ] Integration: plan CRUD, webhook processing → DB state, checkout session creation, entitlement enforcement
+- [x] Unit: entitlements resolution, plan validation, webhook signature verification, state transitions
+- [x] Integration: plan CRUD, webhook processing → DB state, checkout session creation, entitlement enforcement
 - [ ] E2E: view pricing → select plan → checkout → active subscription; upgrade/downgrade; view invoices; cancel
 
 ---
@@ -382,13 +382,13 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 - [ ] Service: handle email bounces (soft/hard) — update delivery status
 - [ ] Service: one-click unsubscribe header (RFC 8058)
-- [ ] Route: `GET /api/email/unsubscribe/:token` — unsubscribe endpoint
+- [x] Route: `GET /api/email/unsubscribe/:token` — unsubscribe endpoint
 - [ ] Service: respect unsubscribe preference in email sending pipeline
 
 **Tests:**
 
-- [ ] Unit: notification service (create, mark read, delete), template rendering, preference evaluation
-- [ ] Integration: notification CRUD, email delivery (console provider), push lifecycle, preferences
+- [x] Unit: notification service (create, mark read, delete), template rendering, preference evaluation
+- [x] Integration: notification CRUD, email delivery (console provider), push lifecycle, preferences
 - [ ] E2E: trigger action → bell shows alert → click → navigate; toggle preferences; transactional email
 
 ---
@@ -420,13 +420,13 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 > **Existing:** `activities` table + repository, partial domain logic.
 > **Gap:** No handler integration, no feed endpoint, no UI.
 
-- [ ] Contract: `shared/domain/activities/` — activity event types, request/response schemas
+- [x] Contract: `shared/domain/activities/` — activity event types, request/response schemas
 
 **Tests:**
 
-- [ ] Unit: activity creation, feed query logic, filtering
-- [ ] Integration: trigger action → activity logged → feed endpoint returns it
-- [ ] E2E: perform action → see it in activity feed
+- [x] Unit: activity creation, feed query logic, filtering
+- [x] Integration: trigger action → activity logged → feed endpoint returns it
+- [x] E2E: perform action → see it in activity feed
 
 ---
 
@@ -438,21 +438,21 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 **Feature Flags (BUSINESS 5.4):**
 
-- [ ] UI: tenant-level override editor in workspace admin
+- [x] UI: tenant-level override editor in workspace admin
 
 **Usage Metering (BUSINESS 5.5):**
 
-- [ ] Service: `recordUsage(metricKey, tenantId, delta)` — increment counter
-- [ ] Service: `getUsage(metricKey, tenantId, period)` — query usage for billing period
-- [ ] Service: snapshot cron — daily/hourly snapshots of usage counters
-- [ ] Service: integrate with entitlements — `assertWithinLimit("storage", tenantId)`
-- [ ] Route: `GET /api/tenants/:id/usage` — current usage summary
-- [ ] UI: usage dashboard in workspace settings (bar charts per metric)
+- [x] Service: `recordUsage(metricKey, tenantId, delta)` — increment counter
+- [x] Service: `getUsage(metricKey, tenantId, period)` — query usage for billing period
+- [x] Service: snapshot cron — daily/hourly snapshots of usage counters
+- [x] Service: integrate with entitlements — `assertWithinLimit("storage", tenantId)`
+- [x] Route: `GET /api/tenants/:id/usage` — current usage summary
+- [x] UI: usage dashboard in workspace settings (bar charts per metric)
 
 **Tests:**
 
-- [ ] Unit: flag evaluation (global, tenant override, rollout %), usage recording + querying
-- [ ] Integration: flag CRUD, tenant override, metering record → query → snapshot
+- [x] Unit: flag evaluation (global, tenant override, rollout %), usage recording + querying
+- [x] Integration: flag CRUD, tenant override, metering record → query → snapshot
 - [ ] E2E: admin toggles flag → feature gated/ungated; usage bar updates after action
 
 ---
@@ -467,13 +467,13 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 > ToS gating middleware + acceptance wired in Sprint 1.6. Remaining: admin publish + agreements list.
 
-- [ ] Route: `GET /api/legal/current` — get current ToS + privacy policy versions
-- [ ] Route: `GET /api/users/me/agreements` — list user's accepted agreements
-- [ ] Admin route: `POST /api/admin/legal/publish` — publish new ToS version
+- [x] Route: `GET /api/legal/current` — get current ToS + privacy policy versions
+- [x] Route: `GET /api/users/me/agreements` — list user's accepted agreements
+- [x] Admin route: `POST /api/admin/legal/publish` — publish new ToS version
 
 **Consent Management (BUSINESS 6.2):**
 
-- [ ] UI: cookie consent banner on first visit (if applicable)
+- [x] UI: cookie consent banner on first visit (if applicable)
 
 **Data Export — Right to Portability (BUSINESS 6.3):**
 
@@ -481,12 +481,12 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 > Self-service deletion API built in Sprint 2.6. Remaining: hard-delete cron + PII anonymization.
 
-- [ ] UI: deletion request status indicator (countdown to permanent deletion)
+- [x] UI: deletion request status indicator (countdown to permanent deletion)
 
 **Tests:**
 
-- [ ] Unit: deletion logic (grace period, anonymization rules), export aggregation, consent versioning
-- [ ] Integration: export request → job queued → archive generated; ToS gating + acceptance; consent CRUD
+- [x] Unit: deletion logic (grace period, anonymization rules), export aggregation, consent versioning
+- [x] Integration: export request → job queued → archive generated; ToS gating + acceptance; consent CRUD
 - [ ] E2E: request export → receive download; accept ToS modal; toggle consent preferences
 
 ---
@@ -500,11 +500,11 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 - [x] Client: automatic reconnection with exponential backoff on disconnect
 - [x] Client: offline queue — buffer outgoing messages during disconnect, flush on reconnect
-- [ ] Client: missed-message recovery — request delta sync after reconnect
+- [x] Client: missed-message recovery — request delta sync after reconnect
 
 **Tests:**
 
-- [ ] Unit: reconnection logic, offline queue buffering, delta sync request
+- [x] Unit: reconnection logic, offline queue buffering, delta sync request
 - [ ] Integration: WebSocket connect → auth → subscribe → receive published message
 - [ ] E2E: two browser tabs → action in tab A → real-time update in tab B; disconnect → reconnect → sync
 
@@ -520,7 +520,7 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 **Client Integration:**
 
-- [ ] UI: media library/gallery component (grid of uploaded media)
+- [x] UI: media library/gallery component (grid of uploaded media)
 
 **Tests:**
 
@@ -539,21 +539,21 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 **Preferences Page:**
 
-- [ ] UI: preferences settings page (theme selector, timezone picker, locale dropdown)
-- [ ] UI: notification preferences section (link to notification preference center from 3.4)
+- [x] UI: preferences settings page (theme selector, timezone picker, locale dropdown)
+- [x] UI: notification preferences section (link to notification preference center from 3.4)
 
 **Data Controls Page:**
 
-- [ ] UI: confirmation dialogs with countdown for destructive actions
+- [x] UI: confirmation dialogs with countdown for destructive actions
 
 **API Key Management:**
 
-- [ ] UI: API keys section in settings — list keys, create new, revoke (from 3.1)
-- [ ] UI: key creation dialog — name input, scope checkboxes, copy-once modal
+- [x] UI: API keys section in settings — list keys, create new, revoke (from 3.1)
+- [x] UI: key creation dialog — name input, scope checkboxes, copy-once modal
 
 **TOTP Management:**
 
-- [ ] UI: backup codes display + regenerate flow
+- [x] UI: backup codes display + regenerate flow
 
 **Magic Link Frontend (CHECKLIST 1.7 | BUSINESS 1.5):**
 
@@ -563,7 +563,7 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 **Tests:**
 
-- [ ] E2E: navigate through all settings tabs; save/load preferences; manage API keys; configure 2FA
+- [x] E2E: navigate through all settings tabs; save/load preferences; manage API keys; configure 2FA
 
 ---
 
@@ -580,21 +580,21 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 **Workspace Settings:**
 
-- [ ] UI: workspace logo upload (reuse avatar upload pattern)
-- [ ] UI: danger zone — delete workspace (requires owner + sudo)
+- [x] UI: workspace logo upload (reuse avatar upload pattern)
+- [x] UI: danger zone — delete workspace (requires owner + sudo)
 
 **Workspace Billing:**
 
-- [ ] UI: current plan display + upgrade/downgrade buttons (links to billing flow from 3.2)
-- [ ] UI: invoice list for workspace (from 3.2)
-- [ ] UI: "Manage Payment Method" button → Stripe customer portal redirect
+- [x] UI: current plan display + upgrade/downgrade buttons (links to billing flow from 3.2)
+- [x] UI: invoice list for workspace (from 3.2)
+- [x] UI: "Manage Payment Method" button → Stripe customer portal redirect
 
 **Workspace Audit Log:**
 
 **Workspace Feature Overrides:**
 
-- [ ] UI: feature flag overrides list (from 3.7 — tenant override CRUD)
-- [ ] UI: toggle overrides per flag for this workspace
+- [x] UI: feature flag overrides list (from 3.7 — tenant override CRUD)
+- [x] UI: toggle overrides per flag for this workspace
 
 **Domain Restrictions:**
 
@@ -626,24 +626,24 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 **Webhook Monitor + Replay:**
 
-- [ ] UI: webhook list with status indicators
-- [ ] UI: delivery log with retry/replay buttons
+- [x] UI: webhook list with status indicators
+- [x] UI: delivery log with retry/replay buttons
 
 **Feature Flag Admin:**
 
-- [ ] UI: per-tenant override table
+- [x] UI: per-tenant override table
 
 **System Health Dashboard (BUSINESS 7.3):**
 
-- [ ] UI: health dashboard page — component status cards (green/yellow/red)
-- [ ] UI: job queue stats widget (pending, processing, failed counts + charts)
-- [ ] UI: recent error log widget (last N errors with stack traces)
-- [ ] UI: active connections count (WebSocket, HTTP)
+- [x] UI: health dashboard page — component status cards (green/yellow/red)
+- [x] UI: job queue stats widget (pending, processing, failed counts + charts)
+- [x] UI: recent error log widget (last N errors with stack traces)
+- [x] UI: active connections count (WebSocket, HTTP)
 
 **Tests:**
 
 - [ ] Unit: multi-field search, tenant suspension logic
-- [ ] Integration: admin user CRUD, tenant CRUD, webhook replay, health endpoint
+- [x] Integration: admin user CRUD, tenant CRUD, webhook replay, health endpoint
 - [ ] E2E: admin searches user → views detail → locks; admin manages tenants; admin views health
 
 ---
@@ -664,8 +664,8 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 **Tests:**
 
-- [ ] Integration: start → perform actions → verify audit trail → end; admin-only enforcement
-- [ ] E2E: admin impersonates user → sees user's dashboard → sees banner → ends session → returns to admin
+- [x] Integration: start → perform actions → verify audit trail → end; admin-only enforcement
+- [x] E2E: admin impersonates user → sees user's dashboard → sees banner → ends session → returns to admin
 
 ---
 
@@ -676,27 +676,27 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 **Soft Ban Enhancements:**
 
-- [ ] Service: lock reason displayed to user on login attempt ("Your account has been suspended. Reason: ...")
-- [ ] Service: notification email on lock/unlock (to user)
-- [ ] UI: admin lock dialog — reason input + duration selector (permanent / 1h / 24h / 7d / 30d / custom)
-- [ ] UI: user-facing lock message on login page
+- [x] Service: lock reason displayed to user on login attempt ("Your account has been suspended. Reason: ...")
+- [x] Service: notification email on lock/unlock (to user)
+- [x] UI: admin lock dialog — reason input + duration selector (permanent / 1h / 24h / 7d / 30d / custom)
+- [x] UI: user-facing lock message on login page
 
 **Hard Ban:**
 
-- [ ] Service: admin confirmation required (re-enter password or 2FA via sudo)
-- [ ] Service: immediate actions — revoke all sessions + tokens
-- [ ] Service: cancel active subscriptions (via billing provider API)
-- [ ] Service: remove from all tenant memberships (respecting orphan prevention from Sprint 2.10)
-- [ ] Service: grace period before hard delete (configurable, default 7 days)
-- [ ] Service: notification email — "Your account has been permanently suspended"
-- [ ] Background job: anonymize PII after grace period (hash email, clear profile, preserve audit structure)
-- [ ] UI: admin hard-ban dialog with confirmation + grace period display
+- [x] Service: admin confirmation required (re-enter password or 2FA via sudo)
+- [x] Service: immediate actions — revoke all sessions + tokens
+- [x] Service: cancel active subscriptions (via billing provider API)
+- [x] Service: remove from all tenant memberships (respecting orphan prevention from Sprint 2.10)
+- [x] Service: grace period before hard delete (configurable, default 7 days)
+- [x] Service: notification email — "Your account has been permanently suspended"
+- [x] Background job: anonymize PII after grace period (hash email, clear profile, preserve audit structure)
+- [x] UI: admin hard-ban dialog with confirmation + grace period display
 
 **Tests:**
 
-- [ ] Unit: lock reason storage, timed lock expiry, hard ban cascade rules
-- [ ] Integration: lock → login blocked → unlock → login allowed; hard ban → sessions revoked → data scheduled for deletion
-- [ ] E2E: admin locks user → user sees reason on login; admin hard-bans → cascading effects verified
+- [x] Unit: lock reason storage, timed lock expiry, hard ban cascade rules
+- [x] Integration: lock → login blocked → unlock → login allowed; hard ban → sessions revoked → data scheduled for deletion
+- [x] E2E: admin locks user → user sees reason on login; admin hard-bans → cascading effects verified
 
 ---
 
@@ -712,15 +712,15 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 **PII Anonymization Cron (BUSINESS 6.4):**
 
-- [ ] Service: preserve audit log structure — replace actor names with "Deleted User (hash)"
-- [ ] Service: foreign key safety — audit logs, invoices, activity history must not break
-- [ ] Service: delete stored files (avatars, uploads) associated with anonymized users
+- [x] Service: preserve audit log structure — replace actor names with "Deleted User (hash)"
+- [x] Service: foreign key safety — audit logs, invoices, activity history must not break
+- [x] Service: delete stored files (avatars, uploads) associated with anonymized users
 
 **Unverified User Cleanup (CHECKLIST 9.2):**
 
 **Tests:**
 
-- [ ] Unit: anonymization rules, grace period calculation, foreign key safety checks
+- [x] Unit: anonymization rules, grace period calculation, foreign key safety checks
 - [ ] Integration: soft-delete user → cron runs → PII anonymized → audit trail intact
 - [ ] Integration: create unverified user → wait past threshold → cron deletes → user gone
 
@@ -731,8 +731,8 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 #### 3.17 Operational Quality (CHECKLIST 10 | BUSINESS 5)
 
-> **Existing:** Health endpoints (tested), correlation IDs middleware.
-> **Gap:** No Sentry, no metrics, no OpenAPI, no auth-protected docs.
+> **Existing:** Health/readiness endpoints, correlation IDs, Sentry integration,
+> metrics, OpenAPI generation, and auth-protected docs endpoint.
 
 **Health + Readiness:**
 
@@ -744,7 +744,7 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 **Error Reporting:**
 
 - [x] Service: breadcrumbs for request lifecycle (auth, DB, external calls)
-- [ ] Client: Sentry browser SDK integration (error boundary → Sentry)
+- [x] Client: Sentry browser SDK integration (error boundary → Sentry)
 
 **Metrics:**
 
@@ -768,8 +768,8 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 **Tests:**
 
-- [ ] Integration: health/ready endpoints return correct status; metrics endpoint returns data
-- [ ] Integration: job queue lifecycle — enqueue → process → success callback; failure → retry → dead-letter
+- [x] Integration: health/ready endpoints return correct status; metrics endpoint returns data
+- [x] Integration: job queue lifecycle — enqueue → process → success callback; failure → retry → dead-letter
 
 ---
 
@@ -785,10 +785,10 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 **Security:**
 
-- [ ] Middleware: IP blocklist/reputation hooks — per-route policy config (Appendix E.5)
+- [x] Middleware: IP blocklist/reputation hooks — per-route policy config (Appendix E.5)
 - [x] Service: idempotent webhook receiving — store event IDs, ignore duplicates, safe out-of-order handling (Appendix D)
-- [ ] Service: file upload scanning hooks — extensible middleware for malware/script detection (Appendix E.7)
-- [ ] Docs: secret rotation guidelines — JWT secrets, API keys, OAuth client secrets, env patterns (Appendix E.7)
+- [x] Service: file upload scanning hooks — extensible middleware for malware/script detection (Appendix E.7)
+- [x] Docs: secret rotation guidelines — JWT secrets, API keys, OAuth client secrets, env patterns (Appendix E.7)
 
 **Repository Gaps (Module 2 Verification):**
 
@@ -796,14 +796,14 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 **Developer Experience:**
 
-- [ ] Tool: generated API client package — auto-generate typed fetch client from route definitions
+- [x] Tool: generated API client package — auto-generate typed fetch client from route definitions
 - [x] Tool: module scaffold CLI — `pnpm scaffold:module <name>` → creates handler, service, route, test stubs
 - [x] Tool: `pnpm db:reset` — convenience command to drop + recreate + migrate + seed dev DB (Appendix E.6)
 
 **Tests:**
 
-- [ ] Unit: job scheduling, IP allowlist matching, webhook signature generation/verification
-- [ ] Integration: scheduled jobs execute on schedule; IP allowlist blocks/allows correctly
+- [x] Unit: job scheduling, IP allowlist matching, webhook signature generation/verification
+- [x] Integration: scheduled jobs execute on schedule; IP allowlist blocks/allows correctly
 
 ---
 
@@ -818,27 +818,28 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 ---
 
-#### 3.20 CI/CD Gaps (CHECKLIST 13.3)
+#### 3.20 CI/CD Gaps (CHECKLIST 13.3) — COMPLETE
 
-> **Existing:** CI, deploy, security, audit, rollback, infra workflows all working.
-> **Gap:** No staging environment, no PR preview deployments.
+> **Existing:** CI, deploy, security, audit, rollback, infra workflows all working,
+> with staging Terraform/docs present.
+> **Gap:** PR preview deployments backlog.
 
 **Staging Environment:**
 
-- [ ] Infra: staging environment Terraform config (mirrors prod, smaller resources)
-- [ ] Docs: staging environment setup guide
+- [x] Infra: staging environment Terraform config (mirrors prod, smaller resources)
+- [x] Docs: staging environment setup guide
 
 **Preview Deployments:**
 
 ---
 
-#### 3.21 Storybook (CHECKLIST 12)
+#### 3.21 Storybook (CHECKLIST 12) — COMPLETE
 
-> **Existing:** `main/apps/storybook/` directory exists but empty.
-> **Gap:** No config, no stories.
+> **Existing:** Storybook layouts and patterns stories are present under
+> `main/apps/storybook/src/stories/`.
 
-- [ ] Stories: layouts — AuthLayout, Container, Modal, AppShell, ResizablePanel
-- [ ] Stories: patterns — forms, navigation, data tables, loading states
+- [x] Stories: layouts — AuthLayout, Container, Modal, AppShell, ResizablePanel
+- [x] Stories: patterns — forms, navigation, data tables, loading states
 
 ---
 
@@ -870,8 +871,8 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 **Tests:**
 
-- [ ] Integration tests: new device detection → security event created, token invalidation flow
-- [ ] E2E test: login → see new device banner → trust device → banner gone on next login
+- [x] Integration tests: new device detection → security event created, token invalidation flow
+- [x] E2E test: login → see new device banner → trust device → banner gone on next login
 
 ---
 
@@ -890,8 +891,8 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 **Tests:**
 
-- [ ] Integration tests: phone verification flow, SMS 2FA login challenge end-to-end
-- [ ] E2E test: settings → add phone → verify → enable SMS 2FA → login with SMS code
+- [x] Integration tests: phone verification flow, SMS 2FA login challenge end-to-end
+- [x] E2E test: settings → add phone → verify → enable SMS 2FA → login with SMS code
 
 ---
 
@@ -908,15 +909,15 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 **Client + UI:**
 
-- [ ] Client API: `webhooks/client.ts` — CRUD hooks for webhook management
-- [ ] UI: Webhook management page — create, list, edit, delete webhooks
-- [ ] UI: Webhook detail — delivery log with success/failure indicators, replay button
+- [x] Client API: `webhooks/client.ts` — CRUD hooks for webhook management
+- [x] UI: Webhook management page — create, list, edit, delete webhooks
+- [x] UI: Webhook detail — delivery log with success/failure indicators, replay button
 
 **Tests:**
 
-- [ ] Integration: register webhook → trigger event → delivery queued → POST sent → logged
-- [ ] Integration: endpoint failure → retry scheduled → eventual dead-letter
-- [ ] E2E: admin → create webhook → trigger event → see delivery in log
+- [x] Integration: register webhook → trigger event → delivery queued → POST sent → logged
+- [x] Integration: endpoint failure → retry scheduled → eventual dead-letter
+- [x] E2E: admin → create webhook → trigger event → see delivery in log
 
 ---
 

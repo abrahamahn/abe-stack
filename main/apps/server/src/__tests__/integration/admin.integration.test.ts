@@ -1028,6 +1028,55 @@ describe('Admin API Integration Tests', () => {
       expect(mockRepos.users.unlockAccount).toHaveBeenCalledWith('user-locked');
     });
 
+    it('POST /api/admin/users/:id/hard-ban revokes sessions and schedules deletion', async () => {
+      const targetUser = {
+        id: 'user-hard-ban',
+        email: 'hardban@example.com',
+        role: 'user',
+        emailVerified: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      mockRepos.users.findById.mockResolvedValue(targetUser);
+      mockRepos.users.lockAccount.mockResolvedValue(undefined);
+      mockRepos.users.update.mockResolvedValue({
+        ...targetUser,
+        deletedAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        deletionGracePeriodEnds: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      });
+
+      const adminJwt = createAdminJwt({ userId: 'admin-1', email: 'admin@example.com' });
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/admin/users/user-hard-ban/hard-ban',
+          accessToken: adminJwt,
+          headers: { 'x-sudo-token': 'sudo-verified-token' },
+          payload: { reason: 'Fraud and abuse' },
+        }),
+      );
+
+      expect(response.statusCode).toBe(200);
+      const body = parseJsonResponse(response) as { message: string; gracePeriodEnds: string };
+      expect(body.message).toContain('permanently banned');
+      expect(typeof body.gracePeriodEnds).toBe('string');
+
+      expect(mockDb.transaction).toHaveBeenCalled();
+      expect(mockRepos.users.lockAccount).toHaveBeenCalledWith(
+        'user-hard-ban',
+        expect.any(Date),
+        'Fraud and abuse',
+      );
+      expect(mockRepos.users.update).toHaveBeenCalledWith(
+        'user-hard-ban',
+        expect.objectContaining({
+          deletedAt: expect.any(Date),
+          deletionGracePeriodEnds: expect.any(Date),
+        }),
+      );
+    });
+
     it('GET /api/admin/routes returns route manifest', async () => {
       const adminJwt = createAdminJwt();
       const response = await testServer.inject(
@@ -1145,6 +1194,133 @@ describe('Admin API Integration Tests', () => {
       expect(body.data).toBeDefined();
       expect(body.filename).toContain('security-events');
       expect(body.contentType).toBe('application/json');
+    });
+  });
+
+  // ==========================================================================
+  // Impersonation Integration Flow
+  // ==========================================================================
+
+  describe('impersonation integration', () => {
+    it('start -> perform action -> verify audit trail -> end', async () => {
+      const now = new Date('2026-01-01T00:00:00.000Z');
+      mockRepos.users.findById.mockImplementation(async (id: string) => {
+        if (id === 'admin-1') {
+          return {
+            id: 'admin-1',
+            email: 'admin@example.com',
+            username: 'admin',
+            firstName: 'Admin',
+            lastName: 'User',
+            role: 'admin',
+            emailVerified: true,
+            emailVerifiedAt: now,
+            lockedUntil: null,
+            lockReason: null,
+            failedLoginAttempts: 0,
+            phone: null,
+            phoneVerified: null,
+            createdAt: now,
+            updatedAt: now,
+          };
+        }
+        if (id === 'user-2') {
+          return {
+            id: 'user-2',
+            email: 'user2@example.com',
+            username: 'user2',
+            firstName: 'Regular',
+            lastName: 'User',
+            role: 'user',
+            emailVerified: true,
+            emailVerifiedAt: now,
+            lockedUntil: null,
+            lockReason: null,
+            failedLoginAttempts: 0,
+            phone: null,
+            phoneVerified: null,
+            createdAt: now,
+            updatedAt: now,
+          };
+        }
+        return null;
+      });
+
+      const adminJwt = createAdminJwt({ userId: 'admin-1', email: 'admin@example.com' });
+      const startResponse = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/admin/impersonate/user-2',
+          accessToken: adminJwt,
+        }),
+      );
+
+      expect(startResponse.statusCode).toBe(200);
+      const startBody = parseJsonResponse(startResponse) as { token: string };
+      expect(typeof startBody.token).toBe('string');
+      expect(startBody.token.length).toBeGreaterThan(20);
+
+      // With impersonation token, admin-only route must not be accessible.
+      const adminRouteWithImpersonationToken = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'GET',
+          url: '/api/admin/users',
+          accessToken: startBody.token,
+        }),
+      );
+      expect([401, 403]).toContain(adminRouteWithImpersonationToken.statusCode);
+
+      const endResponse = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/admin/impersonate/end?targetUserId=user-2',
+          accessToken: adminJwt,
+        }),
+      );
+
+      expect(endResponse.statusCode).toBe(200);
+      const endBody = parseJsonResponse(endResponse) as { message: string };
+      expect(endBody.message).toContain('ended');
+
+      expect(mockRepos.auditEvents.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          actorId: 'admin-1',
+          action: 'admin_impersonation_start',
+          resource: 'user',
+          resourceId: 'user-2',
+        }),
+      );
+      expect(mockRepos.auditEvents.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          actorId: 'admin-1',
+          action: 'admin_impersonation_end',
+          resource: 'user',
+          resourceId: 'user-2',
+        }),
+      );
+    });
+
+    it('admin-only enforcement: non-admin user cannot start or end impersonation', async () => {
+      const userJwt = createTestJwt({ userId: 'user-regular-1', role: 'user' });
+
+      const startResponse = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/admin/impersonate/user-2',
+          accessToken: userJwt,
+        }),
+      );
+      expect(startResponse.statusCode).toBe(403);
+
+      const endResponse = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/admin/impersonate/end',
+          accessToken: userJwt,
+          payload: { targetUserId: 'user-2' },
+        }),
+      );
+      expect(endResponse.statusCode).toBe(403);
     });
   });
 });

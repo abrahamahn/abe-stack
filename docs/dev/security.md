@@ -45,6 +45,28 @@ Short-lived access tokens carry user identity and role.
 
 Tokens are created via `createAccessToken()` and verified via `verifyToken()` in `main/server/core/src/auth/utils/jwt.ts`.
 
+### Secret Rotation Guidelines
+
+For all production secret classes (JWT, API keys, OAuth client secrets), rotate using a dual-window strategy:
+
+1. Add the new secret while keeping the previous secret available for verification.
+2. Start signing new tokens/keys with the new secret immediately.
+3. Keep the old secret only for verification during a bounded grace window.
+4. Remove the old secret after access/refresh token max lifetime + rollback buffer.
+
+Required operational rules:
+
+- Never rotate multiple secret classes in the same deploy.
+- Always rotate with an auditable change record (date, owner, reason, rollback plan).
+- Verify `/health` and auth flows after each rotation.
+- Prefer environment-driven secret injection; never hardcode secrets in source or committed files.
+
+BSLT-specific references:
+
+- JWT dual-secret verification: `main/server/system/src/security/crypto/jwt.rotation.ts`
+- Auth token config wiring: `main/apps/server/src/config/`
+- Webhook and provider secrets: `main/apps/server/src/config/services/`
+
 ## Refresh Token Families
 
 Refresh tokens use **family-based rotation** with reuse detection (`main/server/core/src/auth/utils/refresh-token.ts`).

@@ -178,3 +178,15 @@ export type {
   UserAgreementItem,
   UserAgreementsResponse,
 } from './legal';
+
+// Generated API Client (from route definitions)
+export { createGeneratedApiClient, generatedRouteDefinitions } from './generated';
+export type {
+  GeneratedApiClientConfig,
+  GeneratedApiMethod,
+  GeneratedApiPath,
+  GeneratedApiRequest,
+  GeneratedRouteDefinition,
+  GeneratedRouteModule,
+  MethodsForPath,
+} from './generated';

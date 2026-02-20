@@ -35,6 +35,7 @@
     "sync:headers:watch": "node --import tsx main/tools/sync/sync-file-headers.ts --watch",
     "build:theme": "node --import tsx main/tools/sync/sync-css-theme.ts",
     "sync:docs": "node --import tsx main/tools/sync/sync-docs.ts",
+    "api:generate-client": "node --import tsx main/tools/scripts/api/generate-client.ts",
     "sync:imports": "tsx main/tools/sync/sync-import-aliases.ts",
     "sync:ts": "tsx main/tools/sync/sync-ts-references.ts",
     "ci:verify": "pnpm -w run sync:headers:check && pnpm audit:api-governance:strict && pnpm build",
