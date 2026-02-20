@@ -225,7 +225,9 @@ describe('assertSeatLimit', () => {
   it('should pass when feature limit is 1 and tenant has 0 members', async () => {
     const subscription = createMockSubscription();
     const plan = createMockPlan({
-      features: [{ key: 'team:invite', name: 'team:invite', included: true, limit: 1 }],
+      features: [
+        { key: 'team:invite', name: 'team:invite', included: true, limit: 1 },
+      ] as unknown as Plan['features'],
     });
 
     vi.mocked(repos.subscriptions.findActiveByUserId).mockResolvedValue(subscription);

@@ -211,7 +211,7 @@ export const LockUserDialog = ({
 
           {/* Warning */}
           <div className="bg-warning-muted rounded-lg p-3">
-            <Text size="sm" tone="warning">
+            <Text size="sm" tone="default">
               The user will be notified by email that their account has been locked.
             </Text>
           </div>

@@ -215,7 +215,7 @@ describe('assertStorageLimit', () => {
   it('should pass when feature has no limit (unlimited storage)', async () => {
     const subscription = createMockSubscription();
     const plan = createMockPlan({
-      features: [{ key: 'storage:limit', name: 'storage:limit', included: true }],
+      features: [{ key: 'storage:limit', name: 'storage:limit', included: true, value: Infinity }],
     });
 
     vi.mocked(repos.subscriptions.findActiveByUserId).mockResolvedValue(subscription);
@@ -310,7 +310,7 @@ describe('getStorageUsage', () => {
   it('should return unlimited when feature has no limit', async () => {
     const subscription = createMockSubscription();
     const plan = createMockPlan({
-      features: [{ key: 'storage:limit', name: 'storage:limit', included: true }],
+      features: [{ key: 'storage:limit', name: 'storage:limit', included: true, value: Infinity }],
     });
 
     vi.mocked(repos.subscriptions.findActiveByUserId).mockResolvedValue(subscription);

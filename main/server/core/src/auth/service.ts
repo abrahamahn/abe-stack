@@ -480,10 +480,13 @@ export async function authenticateUser(
         userAgent,
         LOGIN_FAILURE_REASON.ACCOUNT_LOCKED,
       );
-      throw new AccountLockedError({
-        lockReason: user.lockReason ?? undefined,
+      const lockOpts: { retryAfter?: number; lockReason?: string; lockedUntil?: string } = {
         lockedUntil: user.lockedUntil.toISOString(),
-      });
+      };
+      if (user.lockReason !== null) {
+        lockOpts.lockReason = user.lockReason;
+      }
+      throw new AccountLockedError(lockOpts);
     }
     // Lock expired — auto-unlock (fire-and-forget)
     repos.users.unlockAccount(user.id).catch(() => {});

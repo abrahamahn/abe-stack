@@ -70,8 +70,8 @@ function ErrorDetail({
           Error Details
         </Text>
         <Button
-          variant="ghost"
-          size="sm"
+          variant="text"
+          size="small"
           onClick={onClose}
           className="text-xs text-muted hover:text-text cursor-pointer"
         >

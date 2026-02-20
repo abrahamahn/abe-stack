@@ -7,10 +7,11 @@
  * Requires admin role (enforced by route definitions).
  */
 
-import { getMetricsCollector, type MetricsSummary, HttpReply, HttpRequest  } from '../../../system/src';
+import { getMetricsCollector } from '../../../system/src';
 import { ERROR_MESSAGES } from '../auth';
 
 import type { AdminAppContext } from './types';
+import type { HttpReply, HttpRequest, MetricsSummary } from '../../../system/src';
 
 // ============================================================================
 // Response Types

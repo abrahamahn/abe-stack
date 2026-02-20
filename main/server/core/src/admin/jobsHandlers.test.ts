@@ -19,7 +19,7 @@ import {
 } from './jobsHandlers';
 
 import type { AdminAppContext } from './types';
-import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { HttpReply, HttpRequest } from '../../../system/src';
 
 // ============================================================================
 // Mocks
@@ -127,7 +127,7 @@ function createMockRequest(
   overrides: Record<string, unknown> = {},
   params: Record<string, string> = {},
   query: Record<string, unknown> = {},
-): FastifyRequest {
+): HttpRequest {
   return {
     user: { userId: 'admin-123', email: 'admin@example.com', role: 'admin' },
     params,
@@ -135,11 +135,11 @@ function createMockRequest(
     headers: {},
     body: {},
     ...overrides,
-  } as unknown as FastifyRequest;
+  } as unknown as HttpRequest;
 }
 
-function createMockReply(): FastifyReply {
-  return {} as FastifyReply;
+function createMockReply(): HttpReply {
+  return {} as HttpReply;
 }
 
 // ============================================================================

@@ -12,7 +12,11 @@
  * @module billing/usage-metering
  */
 
-import { aggregateSnapshots, isOverQuota } from '@bslt/shared';
+import {
+  aggregateSnapshots,
+  isOverQuota,
+  type UsageSnapshot as SharedUsageSnapshot,
+} from '@bslt/shared';
 
 import type {
   UsageMetricRepository,
@@ -245,19 +249,18 @@ export async function getUsage(
 
   if (periodSnapshots.length === 0) return 0;
 
-  return aggregateSnapshots(
-    periodSnapshots.map((s) => ({
-      id: s.id,
-      tenantId: s.tenantId,
-      metricKey: s.metricKey,
-      value: s.value,
-      periodStart:
-        s.periodStart instanceof Date ? s.periodStart.toISOString() : String(s.periodStart),
-      periodEnd: s.periodEnd instanceof Date ? s.periodEnd.toISOString() : String(s.periodEnd),
-      updatedAt: s.updatedAt instanceof Date ? s.updatedAt.toISOString() : String(s.updatedAt),
-    })),
-    metric.aggregationType,
-  );
+  const mapped = periodSnapshots.map((s) => ({
+    id: s.id,
+    tenantId: s.tenantId,
+    metricKey: s.metricKey,
+    value: s.value,
+    periodStart:
+      s.periodStart instanceof Date ? s.periodStart.toISOString() : String(s.periodStart),
+    periodEnd: s.periodEnd instanceof Date ? s.periodEnd.toISOString() : String(s.periodEnd),
+    updatedAt: s.updatedAt instanceof Date ? s.updatedAt.toISOString() : String(s.updatedAt),
+  })) as unknown as SharedUsageSnapshot[];
+
+  return aggregateSnapshots(mapped, metric.aggregationType);
 }
 
 // ============================================================================

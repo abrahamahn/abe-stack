@@ -22,9 +22,9 @@
  * @module lib/sentry
  */
 
-import { clientConfig } from '@/config';
-
 import type { ComponentType, ReactNode } from 'react';
+
+import { clientConfig } from '@/config';
 
 // ============================================================================
 // Lazy Sentry reference — resolved at init-time, stays null when missing
@@ -93,10 +93,12 @@ export async function initSentry(): Promise<void> {
     return;
   }
 
-  // Try to dynamically import @sentry/react; silently skip if not installed
+  // Try to dynamically import @sentry/react; silently skip if not installed.
+  // The module name is constructed via a variable so that Vite's static
+  // import analysis doesn't reject the import at build/transform time.
   try {
-    // @ts-expect-error -- @sentry/react may not be installed; the catch block handles that
-    Sentry = await import('@sentry/react');
+    const sentryModule = '@sentry' + '/react';
+    Sentry = await import(/* @vite-ignore */ sentryModule);
   } catch {
     if (clientConfig.isDev) {
       // eslint-disable-next-line no-console
@@ -260,9 +262,7 @@ export function SentryErrorBoundary({
   fallback?: ReactNode;
 }): ReactNode {
   if (Sentry !== null && Sentry.ErrorBoundary != null) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const Boundary = Sentry.ErrorBoundary as any;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    const Boundary = Sentry.ErrorBoundary;
     return Boundary({ children, fallback }) as ReactNode;
   }
   return children;
