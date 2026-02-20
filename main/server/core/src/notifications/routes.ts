@@ -30,6 +30,7 @@ import {
 
 import {
   handleDeleteNotification,
+  handleEmailUnsubscribe,
   handleGetPreferences,
   handleGetVapidKey,
   handleListNotifications,
@@ -291,6 +292,14 @@ export const notificationRoutes = createRouteMap([
       async (ctx, body, req) => handleDeleteNotification(ctx, body, req),
       ['user'],
       notificationDeleteRequestSchema,
+    ),
+  ],
+
+  // Email unsubscribe — public, no auth required (token-based verification)
+  [
+    'email/unsubscribe/:token',
+    notificationPublicRoute<undefined>('GET', async (ctx, _body, req) =>
+      handleEmailUnsubscribe(ctx, _body, req),
     ),
   ],
 ]);

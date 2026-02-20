@@ -174,11 +174,71 @@ const FlagIcon = (): ReactElement => {
   );
 };
 
+const HealthIcon = (): ReactElement => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+    </svg>
+  );
+};
+
+const WebhookIcon = (): ReactElement => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M18 16.98h-5.99c-1.1 0-1.95.94-2.48 1.9A4 4 0 0 1 2 17c.01-.7.2-1.4.57-2" />
+      <path d="m6 17 3.13-5.78c.53-.97.1-2.18-.5-3.1a4 4 0 1 1 6.89-4.06" />
+      <path d="m12 6 3.13 5.73C15.66 12.7 16.9 13 18 13a4 4 0 0 1 0 8H12" />
+    </svg>
+  );
+};
+
+const TenantIcon = (): ReactElement => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+    </svg>
+  );
+};
+
 const NAV_ITEMS: NavItem[] = [
+  { label: 'Health', path: '/admin/health', icon: <HealthIcon /> },
   { label: 'Users', path: '/admin/users', icon: <UsersIcon /> },
+  { label: 'Tenants', path: '/admin/tenants', icon: <TenantIcon /> },
   { label: 'Security', path: '/admin/security', icon: <ShieldIcon /> },
   { label: 'Audit Log', path: '/admin/audit', icon: <AuditIcon /> },
   { label: 'Feature Flags', path: '/admin/feature-flags', icon: <FlagIcon /> },
+  { label: 'Webhooks', path: '/admin/webhook-monitor', icon: <WebhookIcon /> },
   { label: 'Jobs', path: '/admin/jobs', icon: <QueueIcon /> },
   { label: 'Billing', path: '/admin/billing/plans', icon: <BillingIcon /> },
   { label: 'API Routes', path: '/admin/routes', icon: <RoutesIcon /> },

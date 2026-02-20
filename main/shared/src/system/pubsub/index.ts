@@ -23,7 +23,7 @@ export type {
 
 // Subscription manager (browser-safe - only uses type import from postgres-pubsub)
 export { SubscriptionManager } from './subscription.manager';
-export type { SubscriptionManagerOptions } from './subscription.manager';
+export type { MessageHistoryEntry, SubscriptionManagerOptions } from './subscription.manager';
 
 // Helpers (browser-safe)
 export { publishAfterWrite } from './helpers';

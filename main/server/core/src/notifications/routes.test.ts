@@ -27,17 +27,20 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 // ============================================================================
 
 vi.mock('@bslt/server-system', async () => {
-  const actual = await vi.importActual<typeof import('../../../system/src')>(
-    '@bslt/server-system',
-  );
+  const actual = await vi.importActual<typeof import('../../../system/src')>('@bslt/server-system');
   return {
     ...actual,
   };
 });
 
 vi.mock('./handlers', () => ({
+  handleDeleteNotification: vi.fn(),
+  handleEmailUnsubscribe: vi.fn(),
   handleGetPreferences: vi.fn(),
   handleGetVapidKey: vi.fn(),
+  handleListNotifications: vi.fn(),
+  handleMarkAllAsRead: vi.fn(),
+  handleMarkAsRead: vi.fn(),
   handleSendNotification: vi.fn(),
   handleSubscribe: vi.fn(),
   handleTestNotification: vi.fn(),
@@ -104,7 +107,7 @@ describe('Notification Routes', () => {
 
     test('should define all expected routes', () => {
       const routeKeys = Array.from(notificationRoutes.keys());
-      expect(routeKeys).toHaveLength(11);
+      expect(routeKeys).toHaveLength(12);
 
       expect(routeKeys).toContain('notifications/vapid-key');
       expect(routeKeys).toContain('notifications/subscribe');
@@ -117,10 +120,11 @@ describe('Notification Routes', () => {
       expect(routeKeys).toContain('notifications/mark-read');
       expect(routeKeys).toContain('notifications/mark-all-read');
       expect(routeKeys).toContain('notifications/delete');
+      expect(routeKeys).toContain('email/unsubscribe/:token');
     });
 
-    test('should have exactly 11 routes', () => {
-      expect(notificationRoutes.size).toBe(11);
+    test('should have exactly 12 routes', () => {
+      expect(notificationRoutes.size).toBe(12);
     });
   });
 
@@ -1228,13 +1232,15 @@ describe('Schema Validation', () => {
 // ============================================================================
 
 describe('Route Protection', () => {
-  test('should have exactly 1 public route', () => {
+  test('should have exactly 2 public routes', () => {
     const publicRoutes = Array.from(notificationRoutes.entries()).filter(
       ([_, def]: [string, RouteDefinition]) => def.isPublic,
     );
 
-    expect(publicRoutes).toHaveLength(1);
-    expect(publicRoutes[0]![0]).toBe('notifications/vapid-key');
+    expect(publicRoutes).toHaveLength(2);
+    const publicRouteNames = publicRoutes.map(([name]) => name);
+    expect(publicRouteNames).toContain('notifications/vapid-key');
+    expect(publicRouteNames).toContain('email/unsubscribe/:token');
   });
 
   test('should have exactly 9 user-protected routes', () => {
@@ -1280,6 +1286,7 @@ describe('Route Protection', () => {
     expect(notificationRoutes.get('notifications/mark-read')!.isPublic).toBe(false);
     expect(notificationRoutes.get('notifications/mark-all-read')!.isPublic).toBe(false);
     expect(notificationRoutes.get('notifications/delete')!.isPublic).toBe(false);
+    expect(notificationRoutes.get('email/unsubscribe/:token')!.isPublic).toBe(true);
   });
 });
 
@@ -1291,6 +1298,7 @@ describe('Route Methods', () => {
   test('should use GET method for read-only routes', () => {
     expect(notificationRoutes.get('notifications/vapid-key')!.method).toBe('GET');
     expect(notificationRoutes.get('notifications/preferences')!.method).toBe('GET');
+    expect(notificationRoutes.get('email/unsubscribe/:token')!.method).toBe('GET');
   });
 
   test('should use POST method for creation and action routes', () => {

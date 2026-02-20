@@ -32,6 +32,11 @@ import {
   handleSetDefaultPaymentMethod,
   handleUpdateSubscription,
 } from './handlers';
+import {
+  handleGetBillingUsage,
+  handleGetTenantUsage,
+  handleRecordUsage,
+} from './usage-metering-handlers';
 
 import type {
   BillingAppContext,
@@ -262,25 +267,51 @@ export const billingRoutes: BillingRouteMap = createBillingRouteMap([
     ),
   ],
 
-  // Usage
+  // Usage summary for authenticated user
   [
     'billing/usage',
     billingProtectedRoute(
       'GET',
-      (
-        _ctx: BillingAppContext,
-        _body: unknown,
-        _req: BillingRequest,
+      async (
+        ctx: BillingAppContext,
+        body: unknown,
+        req: BillingRequest,
       ): Promise<BillingRouteResult> => {
-        // TODO: Implement handleGetUsage
-        return Promise.resolve({
-          status: 200,
-          body: {
-            metrics: [],
-          },
-        });
+        return handleGetBillingUsage(ctx, body, req);
       },
       'user',
+    ),
+  ],
+
+  // Usage summary for a specific tenant
+  [
+    'tenants/:id/usage',
+    billingProtectedRoute(
+      'GET',
+      async (
+        ctx: BillingAppContext,
+        body: unknown,
+        req: BillingRequest,
+      ): Promise<BillingRouteResult> => {
+        return handleGetTenantUsage(ctx, body, req);
+      },
+      'user',
+    ),
+  ],
+
+  // Record usage for a tenant (admin/internal)
+  [
+    'tenants/:id/usage/record',
+    billingProtectedRoute(
+      'POST',
+      async (
+        ctx: BillingAppContext,
+        body: unknown,
+        req: BillingRequest,
+      ): Promise<BillingRouteResult> => {
+        return handleRecordUsage(ctx, body, req);
+      },
+      'admin',
     ),
   ],
 

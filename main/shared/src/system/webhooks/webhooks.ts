@@ -150,6 +150,16 @@ export interface RotateSecretResponse {
   webhook: WebhookItem;
 }
 
+/** Response for listing deliveries */
+export interface DeliveryListResponse {
+  deliveries: WebhookDeliveryItem[];
+}
+
+/** Response for replaying a delivery */
+export interface DeliveryReplayResponse {
+  delivery: WebhookDeliveryItem;
+}
+
 // ============================================================================
 // Constants
 // ============================================================================
@@ -383,6 +393,27 @@ export const rotateSecretResponseSchema: Schema<RotateSecretResponse> = createSc
     const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
     return {
       webhook: webhookItemSchema.parse(obj['webhook']),
+    };
+  },
+);
+
+export const deliveryListResponseSchema: Schema<DeliveryListResponse> = createSchema(
+  (data: unknown) => {
+    const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+    if (!Array.isArray(obj['deliveries'])) {
+      throw new Error('deliveries must be an array');
+    }
+    return {
+      deliveries: obj['deliveries'].map((d) => webhookDeliveryItemSchema.parse(d)),
+    };
+  },
+);
+
+export const deliveryReplayResponseSchema: Schema<DeliveryReplayResponse> = createSchema(
+  (data: unknown) => {
+    const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+    return {
+      delivery: webhookDeliveryItemSchema.parse(obj['delivery']),
     };
   },
 );

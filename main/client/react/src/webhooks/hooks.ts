@@ -16,6 +16,7 @@ import type {
   CreateWebhookRequest,
   UpdateWebhookRequest,
   WebhookClientConfig,
+  WebhookDeliveryItem,
   WebhookItem,
   WebhookWithDeliveries,
 } from '@bslt/client-engine';
@@ -28,6 +29,7 @@ export const webhookQueryKeys = {
   all: ['webhooks'] as const,
   list: () => [...webhookQueryKeys.all, 'list'] as const,
   detail: (id: string) => [...webhookQueryKeys.all, 'detail', id] as const,
+  deliveries: (webhookId: string) => [...webhookQueryKeys.all, 'deliveries', webhookId] as const,
 } as const;
 
 // ============================================================================
@@ -235,5 +237,82 @@ export function useRotateWebhookSecret(
     isLoading: mutation.isPending,
     error: mutation.error ?? null,
     newSecret: mutation.data?.webhook.secret ?? null,
+  };
+}
+
+// ============================================================================
+// useWebhookDeliveries
+// ============================================================================
+
+export interface WebhookDeliveriesState {
+  deliveries: WebhookDeliveryItem[];
+  isLoading: boolean;
+  error: Error | null;
+  refresh: () => Promise<void>;
+}
+
+export function useWebhookDeliveries(
+  clientConfig: WebhookClientConfig,
+  webhookId: string | null,
+): WebhookDeliveriesState {
+  const client = useMemo(() => createWebhookClient(clientConfig), [clientConfig]);
+
+  const query = useQuery({
+    queryKey: webhookQueryKeys.deliveries(webhookId ?? ''),
+    queryFn: () => client.listDeliveries(webhookId as string),
+    enabled: webhookId !== null,
+  });
+
+  const handleRefresh = useCallback(async (): Promise<void> => {
+    await query.refetch();
+  }, [query]);
+
+  return {
+    deliveries: query.data?.deliveries ?? [],
+    isLoading: query.isLoading,
+    error: query.error ?? null,
+    refresh: handleRefresh,
+  };
+}
+
+// ============================================================================
+// useReplayDelivery
+// ============================================================================
+
+export interface ReplayDeliveryState {
+  replay: (deliveryId: string) => Promise<void>;
+  isLoading: boolean;
+  error: Error | null;
+}
+
+export function useReplayDelivery(
+  clientConfig: WebhookClientConfig,
+  options?: { onSuccess?: () => void; webhookId?: string },
+): ReplayDeliveryState {
+  const client = useMemo(() => createWebhookClient(clientConfig), [clientConfig]);
+
+  const invalidateKeys = options?.webhookId
+    ? [webhookQueryKeys.deliveries(options.webhookId), webhookQueryKeys.detail(options.webhookId)]
+    : [];
+
+  const mutation = useMutation({
+    mutationFn: (deliveryId: string) => client.replayDelivery(deliveryId),
+    onSuccess: () => {
+      options?.onSuccess?.();
+    },
+    invalidateOnSuccess: invalidateKeys,
+  });
+
+  const handleReplay = useCallback(
+    async (deliveryId: string): Promise<void> => {
+      await mutation.mutateAsync(deliveryId);
+    },
+    [mutation],
+  );
+
+  return {
+    replay: handleReplay,
+    isLoading: mutation.isPending,
+    error: mutation.error ?? null,
   };
 }

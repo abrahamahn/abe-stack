@@ -10,6 +10,7 @@
  */
 
 import { createBillingClient } from '@bslt/client-engine';
+import { calculateProration } from '@bslt/shared';
 import { useMemo, useState } from 'react';
 
 import { useMutation } from '../query/useMutation';
@@ -312,4 +313,77 @@ export function usePaymentMethods(clientConfig: BillingClientConfig): PaymentMet
     },
     refresh: query.refetch,
   };
+}
+
+// ============================================================================
+// useProrationPreview
+// ============================================================================
+
+/**
+ * Proration preview state
+ */
+export interface ProrationPreviewState {
+  /** Direction of the plan change */
+  direction: 'upgrade' | 'downgrade' | 'same';
+  /** Prorated amount in cents (positive = charge, negative = credit) */
+  prorationAmount: number;
+  /** Number of days remaining in the current billing period */
+  remainingDays: number;
+  /** Total number of days in the current billing period */
+  totalDays: number;
+  /** End date of the current billing period (ISO string) */
+  periodEndDate: string;
+}
+
+/**
+ * Hook to compute a proration preview for switching between plans.
+ *
+ * @param subscription - Current subscription (null if none)
+ * @param newPlan - The plan the user wants to switch to (null if not selected)
+ * @returns Proration preview state, or null if preview cannot be computed
+ */
+export function useProrationPreview(
+  subscription: Subscription | null,
+  newPlan: Plan | null,
+): ProrationPreviewState | null {
+  return useMemo(() => {
+    if (subscription === null || newPlan === null) return null;
+
+    const currentPlan = subscription.plan;
+    if (currentPlan.id === newPlan.id) return null;
+
+    const periodStart = new Date(subscription.currentPeriodStart);
+    const periodEnd = new Date(subscription.currentPeriodEnd);
+    const now = new Date();
+
+    const totalMs = periodEnd.getTime() - periodStart.getTime();
+    const remainingMs = Math.max(0, periodEnd.getTime() - now.getTime());
+
+    const totalDays = Math.max(1, Math.round(totalMs / (1000 * 60 * 60 * 24)));
+    const remainingDays = Math.max(0, Math.round(remainingMs / (1000 * 60 * 60 * 24)));
+
+    const prorationAmount = calculateProration(
+      currentPlan.priceInCents,
+      newPlan.priceInCents,
+      remainingDays,
+      totalDays,
+    );
+
+    let direction: 'upgrade' | 'downgrade' | 'same';
+    if (newPlan.priceInCents > currentPlan.priceInCents) {
+      direction = 'upgrade';
+    } else if (newPlan.priceInCents < currentPlan.priceInCents) {
+      direction = 'downgrade';
+    } else {
+      direction = 'same';
+    }
+
+    return {
+      direction,
+      prorationAmount,
+      remainingDays,
+      totalDays,
+      periodEndDate: subscription.currentPeriodEnd,
+    };
+  }, [subscription, newPlan]);
 }

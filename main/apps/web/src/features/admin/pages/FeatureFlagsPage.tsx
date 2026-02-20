@@ -25,6 +25,7 @@ import {
 } from '@bslt/ui';
 import { useCallback, useState } from 'react';
 
+import { FeatureFlagOverrideTable } from '../components/FeatureFlagOverrideTable';
 import {
   useCreateFeatureFlag,
   useDeleteFeatureFlag,
@@ -43,6 +44,7 @@ export function FeatureFlagsPage(): ReactElement {
   const [showCreate, setShowCreate] = useState(false);
   const [newKey, setNewKey] = useState('');
   const [newDescription, setNewDescription] = useState('');
+  const [selectedOverrideKey, setSelectedOverrideKey] = useState<string | null>(null);
 
   const createFlag = useCreateFeatureFlag({
     onSuccess: () => {
@@ -222,23 +224,42 @@ export function FeatureFlagsPage(): ReactElement {
                   <Text size="sm">{formatDate(flag.createdAt)}</Text>
                 </TableCell>
                 <TableCell>
-                  <Button
-                    type="button"
-                    variant="text"
-                    size="small"
-                    className="text-danger"
-                    onClick={() => {
-                      handleDelete(flag.key);
-                    }}
-                    disabled={deleteFlag.isLoading}
-                  >
-                    Delete
-                  </Button>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      type="button"
+                      variant="text"
+                      size="small"
+                      onClick={() => {
+                        setSelectedOverrideKey(selectedOverrideKey === flag.key ? null : flag.key);
+                      }}
+                    >
+                      {selectedOverrideKey === flag.key ? 'Hide Overrides' : 'Overrides'}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="text"
+                      size="small"
+                      className="text-danger"
+                      onClick={() => {
+                        handleDelete(flag.key);
+                      }}
+                      disabled={deleteFlag.isLoading}
+                    >
+                      Delete
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
+      )}
+
+      {/* Per-Tenant Override Table */}
+      {selectedOverrideKey !== null && (
+        <div className="mt-6">
+          <FeatureFlagOverrideTable flagKey={selectedOverrideKey} />
+        </div>
       )}
     </div>
   );

@@ -31,16 +31,15 @@ const JITTER_FACTOR = 0.3;
  */
 export type ClientPubsubMessage =
   | { type: 'subscribe'; key: string }
-  | { type: 'unsubscribe'; key: string };
+  | { type: 'unsubscribe'; key: string }
+  | { type: 'sync_request'; lastTimestamp: number; keys: string[] };
 
 /**
  * Message types received from server
  */
-export interface ServerPubsubMessage<T = unknown> {
-  type: 'update';
-  key: string;
-  value: T;
-}
+export type ServerPubsubMessage<T = unknown> =
+  | { type: 'update'; key: string; value: T; timestamp?: number }
+  | { type: 'sync_response'; messages: Array<{ key: string; version: number; timestamp: number }> };
 
 /**
  * Connection states for the WebSocket client
@@ -125,6 +124,23 @@ export interface WebsocketPubsubClientConfig {
    * Defaults to 100.
    */
   maxQueueSize?: number;
+
+  /**
+   * Enable delta sync recovery on reconnect.
+   * When enabled, the client tracks the last received message timestamp
+   * per subscription and sends a sync_request after reconnecting to
+   * recover any messages missed during disconnection.
+   * Defaults to true.
+   */
+  deltaSyncEnabled?: boolean;
+
+  /**
+   * Called when a sync_response is received after reconnect.
+   * The messages array contains all missed updates since disconnect.
+   * Each message has { key, version, timestamp }.
+   * If not provided, missed messages are delivered via onMessage.
+   */
+  onSyncResponse?: (messages: Array<{ key: string; version: number; timestamp: number }>) => void;
 }
 
 /**
@@ -182,7 +198,13 @@ export class WebsocketPubsubClient {
   private readonly config: Required<
     Pick<
       WebsocketPubsubClientConfig,
-      'host' | 'secure' | 'debug' | 'maxReconnectAttempts' | 'baseReconnectDelayMs' | 'maxQueueSize'
+      | 'host'
+      | 'secure'
+      | 'debug'
+      | 'maxReconnectAttempts'
+      | 'baseReconnectDelayMs'
+      | 'maxQueueSize'
+      | 'deltaSyncEnabled'
     >
   > &
     WebsocketPubsubClientConfig;
@@ -205,6 +227,18 @@ export class WebsocketPubsubClient {
    */
   private readonly stateListeners = new Set<ConnectionStateListener>();
 
+  /**
+   * Tracks the last received server timestamp per subscription key.
+   * Used for delta sync recovery on reconnect.
+   */
+  private readonly lastReceivedTimestamp = new Map<string, number>();
+
+  /**
+   * Global last received timestamp across all subscriptions.
+   * Used as fallback when per-key timestamps are unavailable.
+   */
+  private globalLastTimestamp = 0;
+
   constructor(config: WebsocketPubsubClientConfig) {
     // Default to secure (wss://). Only use ws:// when explicitly set to false (e.g. local dev).
     this.config = {
@@ -214,6 +248,7 @@ export class WebsocketPubsubClient {
       maxReconnectAttempts: config.maxReconnectAttempts ?? DEFAULT_MAX_RECONNECT_ATTEMPTS,
       baseReconnectDelayMs: config.baseReconnectDelayMs ?? MS_PER_SECOND,
       maxQueueSize: config.maxQueueSize ?? DEFAULT_MAX_QUEUE_SIZE,
+      deltaSyncEnabled: config.deltaSyncEnabled ?? true,
     };
 
     this.webSocketConstructor = config.WebSocketImpl ?? WebSocket;
@@ -317,10 +352,12 @@ export class WebsocketPubsubClient {
       this.ws = null;
     }
 
-    // Clear offline queue and subscriptions on close
+    // Clear offline queue, subscriptions, and delta sync state on close
     this.offlineQueue.length = 0;
     this.activeSubscriptions.clear();
     this.stateListeners.clear();
+    this.lastReceivedTimestamp.clear();
+    this.globalLastTimestamp = 0;
 
     this.setConnectionState('disconnected');
   }
@@ -365,11 +402,17 @@ export class WebsocketPubsubClient {
 
     this.ws.onopen = (): void => {
       this.log('Connected!');
+      const wasReconnect = this.reconnectAttempt > 0;
       this.reconnectAttempt = 0;
       this.setConnectionState('connected');
 
       // Re-subscribe to all tracked subscriptions
       this.resubscribeAll();
+
+      // Request delta sync for missed messages on reconnect
+      if (wasReconnect && this.config.deltaSyncEnabled) {
+        this.requestDeltaRecovery();
+      }
 
       // Flush the offline queue
       this.flushQueue();
@@ -379,8 +422,28 @@ export class WebsocketPubsubClient {
 
     this.ws.onmessage = (event: MessageEvent<string>): void => {
       try {
-        const message = JSON.parse(event.data) as ServerPubsubMessage;
+        const raw = JSON.parse(event.data) as Record<string, unknown>;
+        const msgType = raw['type'] as string;
+
+        if (msgType === 'sync_response') {
+          const message = raw as unknown as Extract<ServerPubsubMessage, { type: 'sync_response' }>;
+          this.log('< sync_response', message.messages.length, 'missed messages');
+          this.handleSyncResponse(message.messages);
+          return;
+        }
+
+        // Standard update message
+        const message = raw as unknown as Extract<ServerPubsubMessage, { type: 'update' }>;
         this.log('<', message.type, message.key, message.value);
+
+        // Track timestamp for delta sync
+        if (message.timestamp !== undefined) {
+          this.lastReceivedTimestamp.set(message.key, message.timestamp);
+          if (message.timestamp > this.globalLastTimestamp) {
+            this.globalLastTimestamp = message.timestamp;
+          }
+        }
+
         this.config.onMessage(message.key, message.value);
       } catch (error) {
         this.log('Failed to parse message:', error);
@@ -517,6 +580,97 @@ export class WebsocketPubsubClient {
         listener(state);
       }
     }
+  }
+
+  // ==========================================================================
+  // Delta Sync Recovery
+  // ==========================================================================
+
+  /**
+   * Send a sync_request to the server to recover messages missed during disconnect.
+   * Uses the global last timestamp and requests messages for all active subscriptions.
+   */
+  private requestDeltaRecovery(): void {
+    if (this.globalLastTimestamp === 0) {
+      this.log('Delta sync: no previous timestamp, skipping');
+      return;
+    }
+
+    if (this.activeSubscriptions.size === 0) {
+      this.log('Delta sync: no active subscriptions, skipping');
+      return;
+    }
+
+    const syncRequest: ClientPubsubMessage = {
+      type: 'sync_request',
+      lastTimestamp: this.globalLastTimestamp,
+      keys: Array.from(this.activeSubscriptions),
+    };
+
+    this.log(
+      'Delta sync: requesting messages since',
+      this.globalLastTimestamp,
+      'for',
+      this.activeSubscriptions.size,
+      'subscriptions',
+    );
+
+    if (this.ws !== null && this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify(syncRequest));
+    }
+  }
+
+  /**
+   * Handle a sync_response from the server containing missed messages.
+   * Delivers each missed message via onSyncResponse (batch) or onMessage (individual).
+   *
+   * @param messages - Array of missed messages with key, version, and timestamp
+   */
+  private handleSyncResponse(
+    messages: Array<{ key: string; version: number; timestamp: number }>,
+  ): void {
+    if (messages.length === 0) {
+      this.log('Delta sync: no missed messages');
+      return;
+    }
+
+    this.log('Delta sync: received', messages.length, 'missed messages');
+
+    // Update tracked timestamps from recovered messages
+    for (const msg of messages) {
+      if (msg.timestamp > (this.lastReceivedTimestamp.get(msg.key) ?? 0)) {
+        this.lastReceivedTimestamp.set(msg.key, msg.timestamp);
+      }
+      if (msg.timestamp > this.globalLastTimestamp) {
+        this.globalLastTimestamp = msg.timestamp;
+      }
+    }
+
+    // Deliver via batch callback or individual messages
+    if (this.config.onSyncResponse !== undefined) {
+      this.config.onSyncResponse(messages);
+    } else {
+      // Fall back to delivering each missed message via onMessage
+      for (const msg of messages) {
+        this.config.onMessage(msg.key, msg.version);
+      }
+    }
+  }
+
+  /**
+   * Get the last received timestamp for a specific key.
+   * Useful for debugging or custom sync logic.
+   */
+  getLastReceivedTimestamp(key: string): number | undefined {
+    return this.lastReceivedTimestamp.get(key);
+  }
+
+  /**
+   * Get the global last received timestamp.
+   * This is the most recent timestamp across all subscriptions.
+   */
+  getGlobalLastTimestamp(): number {
+    return this.globalLastTimestamp;
   }
 
   private log(...args: unknown[]): void {

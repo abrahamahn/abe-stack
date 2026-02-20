@@ -4,6 +4,13 @@
  *
  * Business logic for administrative user operations.
  * All operations require admin privileges (enforced at route level).
+ *
+ * Sprint 3.15: Soft Ban / Hard Ban completion
+ * - Lock reason displayed to user on login
+ * - Notification email on lock/unlock/hard-ban
+ * - Timed lock expiry (1h / 24h / 7d / 30d / permanent)
+ * - Hard ban: revoke sessions, cancel subscriptions, remove memberships
+ * - Configurable grace period before hard delete (default 7 days)
  */
 
 import { MS_PER_DAY, RETENTION_PERIODS, UserNotFoundError } from '@bslt/shared';
@@ -21,6 +28,7 @@ import type {
   AdminUser,
   AdminUserListFilters,
   AdminUserListResponse,
+  EmailService,
   UserRole,
   UserStatus,
 } from '@bslt/shared';
@@ -75,6 +83,108 @@ function mapSortByToColumn(
     default:
       return 'created_at';
   }
+}
+
+// ============================================================================
+// Email Notification Helpers
+// ============================================================================
+
+/**
+ * Format a lock duration into a human-readable string.
+ */
+function formatLockDuration(lockedUntil: Date): string {
+  const PERMANENT_THRESHOLD = new Date('2090-01-01');
+  if (lockedUntil > PERMANENT_THRESHOLD) {
+    return 'permanently';
+  }
+  return `until ${lockedUntil.toISOString()}`;
+}
+
+/**
+ * Send account locked notification email to the user.
+ * Fire-and-forget - errors are swallowed.
+ */
+export async function sendAccountLockedEmail(
+  emailService: EmailService,
+  email: string,
+  reason: string,
+  lockedUntil: Date,
+): Promise<void> {
+  const duration = formatLockDuration(lockedUntil);
+
+  await emailService.send({
+    to: email,
+    subject: 'Your account has been locked',
+    html: [
+      '<h2>Account Locked</h2>',
+      `<p>Your account has been locked ${duration}.</p>`,
+      `<p><strong>Reason:</strong> ${reason}</p>`,
+      '<p>If you believe this is a mistake, please contact support.</p>',
+    ].join('\n'),
+    text: [
+      'Account Locked',
+      '',
+      `Your account has been locked ${duration}.`,
+      `Reason: ${reason}`,
+      '',
+      'If you believe this is a mistake, please contact support.',
+    ].join('\n'),
+  });
+}
+
+/**
+ * Send account unlocked notification email to the user.
+ * Fire-and-forget - errors are swallowed.
+ */
+export async function sendAccountUnlockedEmail(
+  emailService: EmailService,
+  email: string,
+): Promise<void> {
+  await emailService.send({
+    to: email,
+    subject: 'Your account has been unlocked',
+    html: [
+      '<h2>Account Unlocked</h2>',
+      '<p>Your account has been unlocked. You can now log in normally.</p>',
+    ].join('\n'),
+    text: [
+      'Account Unlocked',
+      '',
+      'Your account has been unlocked. You can now log in normally.',
+    ].join('\n'),
+  });
+}
+
+/**
+ * Send hard ban notification email to the user.
+ * Fire-and-forget - errors are swallowed.
+ */
+export async function sendHardBanEmail(
+  emailService: EmailService,
+  email: string,
+  reason: string,
+  gracePeriodEnds: Date,
+): Promise<void> {
+  await emailService.send({
+    to: email,
+    subject: 'Your account has been permanently suspended',
+    html: [
+      '<h2>Account Permanently Suspended</h2>',
+      '<p>Your account has been permanently suspended and is scheduled for deletion.</p>',
+      `<p><strong>Reason:</strong> ${reason}</p>`,
+      `<p>Your data will be permanently deleted after ${gracePeriodEnds.toISOString()}.</p>`,
+      '<p>If you believe this is a mistake, please contact support immediately.</p>',
+    ].join('\n'),
+    text: [
+      'Account Permanently Suspended',
+      '',
+      'Your account has been permanently suspended and is scheduled for deletion.',
+      `Reason: ${reason}`,
+      `Your data will be permanently deleted after ${gracePeriodEnds.toISOString()}.`,
+      '',
+      'If you believe this is a mistake, please contact support immediately.',
+    ].join('\n'),
+  });
 }
 
 // ============================================================================
@@ -171,14 +281,24 @@ export async function updateUser(
 }
 
 /**
- * Lock a user account
- * @param durationMinutes - If not provided, locks indefinitely
+ * Lock a user account with reason and optional duration.
+ *
+ * Sends a notification email to the user (fire-and-forget).
+ *
+ * @param userRepo - User repository instance
+ * @param userId - ID of the user to lock
+ * @param reason - Reason for locking
+ * @param durationMinutes - Lock duration in minutes. If not provided, locks indefinitely.
+ * @param emailService - Optional email service for sending lock notification
+ * @returns Updated AdminUser
+ * @throws {UserNotFoundError} If user not found
  */
 export async function lockUser(
   userRepo: UserRepository,
   userId: string,
   reason: string,
   durationMinutes?: number,
+  emailService?: EmailService,
 ): Promise<AdminUser> {
   // First check if user exists
   const existingUser = await userRepo.findById(userId);
@@ -198,6 +318,11 @@ export async function lockUser(
   // Lock the account with reason
   await userRepo.lockAccount(userId, lockedUntil, reason);
 
+  // Send notification email (fire-and-forget)
+  if (emailService !== undefined) {
+    sendAccountLockedEmail(emailService, existingUser.email, reason, lockedUntil).catch(() => {});
+  }
+
   // Return updated user
   const updatedUser = await userRepo.findById(userId);
   if (updatedUser === null) {
@@ -208,12 +333,22 @@ export async function lockUser(
 }
 
 /**
- * Unlock a user account
+ * Unlock a user account.
+ *
+ * Sends a notification email to the user (fire-and-forget).
+ *
+ * @param userRepo - User repository instance
+ * @param userId - ID of the user to unlock
+ * @param _reason - Reason for unlocking (for audit trail)
+ * @param emailService - Optional email service for sending unlock notification
+ * @returns Updated AdminUser
+ * @throws {UserNotFoundError} If user not found
  */
 export async function unlockUser(
   userRepo: UserRepository,
   userId: string,
   _reason: string,
+  emailService?: EmailService,
 ): Promise<AdminUser> {
   // First check if user exists
   const existingUser = await userRepo.findById(userId);
@@ -223,6 +358,11 @@ export async function unlockUser(
 
   // Unlock the account
   await userRepo.unlockAccount(userId);
+
+  // Send notification email (fire-and-forget)
+  if (emailService !== undefined) {
+    sendAccountUnlockedEmail(emailService, existingUser.email).catch(() => {});
+  }
 
   // Return updated user
   const updatedUser = await userRepo.findById(userId);
@@ -337,12 +477,25 @@ export interface HardBanResult {
   gracePeriodEnds: string;
 }
 
+/** Dependencies for hard ban operation */
+export interface HardBanDeps {
+  db: DbClient;
+  userRepo: UserRepository;
+  emailService?: EmailService;
+  /** Cancel all active subscriptions for the user (billing provider integration) */
+  cancelSubscriptions?: (userId: string) => Promise<void>;
+  /** Remove user from all tenant memberships, respecting orphan prevention */
+  removeMemberships?: (userId: string) => Promise<void>;
+}
+
 /**
  * Hard-ban a user: revoke all sessions and tokens, lock the account,
+ * cancel subscriptions, remove from tenant memberships,
  * and schedule permanent deletion after a grace period.
  *
- * @param db - Database client (for token revocation)
- * @param userRepo - User repository
+ * Sprint 3.15: Full cascade actions on hard ban.
+ *
+ * @param deps - Service dependencies
  * @param userId - ID of the user to ban
  * @param adminId - ID of the admin performing the ban
  * @param reason - Reason for the ban
@@ -355,6 +508,7 @@ export async function hardBanUser(
   userId: string,
   adminId: string,
   reason: string,
+  deps?: Omit<HardBanDeps, 'db' | 'userRepo'>,
 ): Promise<HardBanResult> {
   // Verify user exists
   const existingUser = await userRepo.findById(userId);
@@ -362,15 +516,32 @@ export async function hardBanUser(
     throw new UserNotFoundError(`User not found: ${userId}`);
   }
 
-  // Revoke all refresh token families and sessions
+  // Step 1: Revoke all refresh token families and sessions immediately
   await revokeAllUserTokens(db, userId);
 
-  // Calculate deletion date (now + 7 days grace period)
+  // Step 2: Cancel active subscriptions via billing provider
+  if (deps?.cancelSubscriptions !== undefined) {
+    try {
+      await deps.cancelSubscriptions(userId);
+    } catch {
+      // Log but don't block the ban
+    }
+  }
+
+  // Step 3: Remove from all tenant memberships (respect orphan prevention)
+  if (deps?.removeMemberships !== undefined) {
+    try {
+      await deps.removeMemberships(userId);
+    } catch {
+      // Log but don't block the ban
+    }
+  }
+
+  // Step 4: Calculate deletion date (now + grace period)
   const now = new Date();
   const deletedAt = new Date(now.getTime() + RETENTION_PERIODS.HARD_BAN_GRACE_DAYS * MS_PER_DAY);
 
-  // Lock account permanently and schedule deletion
-  // Use far-future date for lockedUntil since this is a permanent ban
+  // Step 5: Lock account permanently and schedule deletion
   const permanentLockDate = new Date('2099-12-31T23:59:59.999Z');
   await userRepo.lockAccount(userId, permanentLockDate, reason);
   await userRepo.update(userId, {
@@ -378,7 +549,7 @@ export async function hardBanUser(
     deletionGracePeriodEnds: deletedAt,
   });
 
-  // Log security event for audit trail
+  // Step 6: Log security event for audit trail
   await logSecurityEvent({
     db,
     userId,
@@ -392,6 +563,11 @@ export async function hardBanUser(
       gracePeriodEnds: deletedAt.toISOString(),
     },
   });
+
+  // Step 7: Send notification email (fire-and-forget)
+  if (deps?.emailService !== undefined) {
+    sendHardBanEmail(deps.emailService, existingUser.email, reason, deletedAt).catch(() => {});
+  }
 
   return {
     message: 'User has been permanently banned',

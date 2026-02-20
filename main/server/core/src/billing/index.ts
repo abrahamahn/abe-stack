@@ -18,9 +18,21 @@ export { StripeProvider } from './stripe-provider';
 
 // Service
 export {
-  addPaymentMethod, cancelSubscription, createCheckoutSession, createSetupIntent, getActivePlans, getCustomerId, getPlanById, getUserInvoice,
+  addPaymentMethod,
+  cancelSubscription,
+  createCheckoutSession,
+  createSetupIntent,
+  getActivePlans,
+  getCustomerId,
+  getPlanById,
+  getUserInvoice,
   getUserInvoices,
-  getUserPaymentMethods, getUserSubscription, removePaymentMethod, resumeSubscription, setDefaultPaymentMethod, updateSubscription
+  getUserPaymentMethods,
+  getUserSubscription,
+  removePaymentMethod,
+  resumeSubscription,
+  setDefaultPaymentMethod,
+  updateSubscription,
 } from './service';
 
 // Types
@@ -37,14 +49,25 @@ export type {
   BillingRouteResult,
   BillingValidationSchema,
   WebhookRepositories,
-  WebhookResult
+  WebhookResult,
 } from './types';
 
 // Handlers
 export {
-  handleAddPaymentMethod, handleCancelSubscription, handleCreateCheckout,
-  handleCreatePortalSession, handleCreateSetupIntent, handleGetInvoice, handleGetSubscription, handleListInvoices,
-  handleListPaymentMethods, handleListPlans, handleRemovePaymentMethod, handleResumeSubscription, handleSetDefaultPaymentMethod, handleUpdateSubscription
+  handleAddPaymentMethod,
+  handleCancelSubscription,
+  handleCreateCheckout,
+  handleCreatePortalSession,
+  handleCreateSetupIntent,
+  handleGetInvoice,
+  handleGetSubscription,
+  handleListInvoices,
+  handleListPaymentMethods,
+  handleListPlans,
+  handleRemovePaymentMethod,
+  handleResumeSubscription,
+  handleSetDefaultPaymentMethod,
+  handleUpdateSubscription,
 } from './handlers';
 
 // Subscription Lifecycle
@@ -57,7 +80,7 @@ export {
   type LifecycleState,
   type SubscriptionEvent,
   type TransitionResult,
-  type TrialSubscription
+  type TrialSubscription,
 } from './subscription-lifecycle';
 
 // Plan Changes
@@ -66,14 +89,14 @@ export {
   downgradeSubscription,
   upgradeSubscription,
   type PlanChangeDirection,
-  type PlanChangeResult
+  type PlanChangeResult,
 } from './plan-changes';
 
 // Entitlements (server-side)
 export {
   assertUsageWithinLimit,
   resolveEntitlementsForUser,
-  type UsageCounter
+  type UsageCounter,
 } from './entitlements';
 
 // Middleware
@@ -85,3 +108,56 @@ export { billingRoutes } from './routes';
 // Webhooks
 export { handlePayPalWebhook, handleStripeWebhook } from './webhooks';
 
+// Seat Limits
+export { assertSeatLimit, getSeatUsage, type SeatLimitDeps, type SeatUsage } from './seat-limits';
+
+// Resource / Storage Limits
+export {
+  assertStorageLimit,
+  getStorageUsage,
+  type StorageUsage,
+  type StorageUsageCounter,
+} from './resource-limits';
+
+// Dunning / Failed Payments
+export {
+  DUNNING_GRACE_PERIOD_DAYS,
+  getGracePeriodStatus,
+  handlePaymentFailure,
+  handlePaymentSuccess,
+  processGracePeriodExpiry,
+  type GracePeriodExpiryResult,
+  type GracePeriodStatus,
+  type PaymentFailureResult,
+  type PaymentSuccessResult,
+} from './dunning';
+
+// Payment Notifications
+export {
+  notifyAccountSuspended,
+  notifyPaymentFailed,
+  notifyPaymentRetrySuccess,
+  type NotificationResult,
+  type PaymentNotificationDeps,
+} from './payment-notifications';
+
+// Usage Metering
+export {
+  assertWithinUsageLimit,
+  createUsageSnapshot,
+  getUsage,
+  getUsageSummary,
+  recordUsage,
+  type MetricLimit,
+  type MetricUsageSummary,
+  type RecordUsageOptions,
+  type TenantUsageSummary,
+  type UsageMeteringRepositories,
+} from './usage-metering';
+
+// Usage Metering Handlers
+export {
+  handleGetBillingUsage,
+  handleGetTenantUsage,
+  handleRecordUsage,
+} from './usage-metering-handlers';

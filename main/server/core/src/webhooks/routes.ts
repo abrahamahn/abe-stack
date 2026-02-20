@@ -23,7 +23,9 @@ import {
   handleCreateWebhook,
   handleDeleteWebhook,
   handleGetWebhook,
+  handleListDeliveries,
   handleListWebhooks,
+  handleReplayDelivery,
   handleRotateSecret,
   handleUpdateWebhook,
 } from './handlers';
@@ -61,6 +63,8 @@ function asWebhooksDeps(ctx: HandlerContext): WebhooksModuleDeps {
  * - `webhooks/:id/update` (POST, user) - Update a webhook
  * - `webhooks/:id/delete` (POST, user) - Soft-delete a webhook
  * - `webhooks/:id/rotate-secret` (POST, user) - Rotate webhook secret
+ * - `webhooks/:id/deliveries` (GET, user) - List deliveries for a webhook
+ * - `webhooks/deliveries/:deliveryId/replay` (POST, user) - Replay a delivery
  */
 export const webhookRoutes: RouteMap = createRouteMap([
   // Create a new webhook
@@ -171,6 +175,40 @@ export const webhookRoutes: RouteMap = createRouteMap([
       'user',
       emptyBodySchema,
       { summary: 'Rotate webhook secret', tags: ['Webhooks'] },
+    ),
+  ],
+
+  // List deliveries for a webhook
+  [
+    'webhooks/:id/deliveries',
+    protectedRoute(
+      'GET',
+      async (ctx: HandlerContext, _body: undefined, req: HttpRequest): Promise<RouteResult> => {
+        const deps = asWebhooksDeps(ctx);
+        const tenantId = (req.headers['x-tenant-id'] as string | undefined) ?? '';
+        const webhookId = (req.params as { id: string }).id;
+        return handleListDeliveries(deps, tenantId, webhookId, req as unknown as WebhooksRequest);
+      },
+      'user',
+      undefined,
+      { summary: 'List webhook deliveries', tags: ['Webhooks'] },
+    ),
+  ],
+
+  // Replay a delivery
+  [
+    'webhooks/deliveries/:deliveryId/replay',
+    protectedRoute(
+      'POST',
+      async (ctx: HandlerContext, _body: undefined, req: HttpRequest): Promise<RouteResult> => {
+        const deps = asWebhooksDeps(ctx);
+        const tenantId = (req.headers['x-tenant-id'] as string | undefined) ?? '';
+        const deliveryId = (req.params as { deliveryId: string }).deliveryId;
+        return handleReplayDelivery(deps, tenantId, deliveryId, req as unknown as WebhooksRequest);
+      },
+      'user',
+      emptyBodySchema,
+      { summary: 'Replay webhook delivery', tags: ['Webhooks'] },
     ),
   ],
 ]);

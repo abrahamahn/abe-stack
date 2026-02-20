@@ -3,13 +3,15 @@
  * UserDetailPage Component
  *
  * Admin page for viewing and managing a single user.
+ *
+ * Sprint 3.15: Added hard ban action with HardBanDialog + LockUserDialog.
  */
 
 import { useNavigate, useParams } from '@bslt/react/router';
 import { Alert, Button, Heading, PageContainer } from '@bslt/ui';
 import { useCallback, useState } from 'react';
 
-import { UserActionsMenu, UserDetailCard } from '../components';
+import { HardBanDialog, LockUserDialog, UserActionsMenu, UserDetailCard } from '../components';
 import { useAdminUser, useImpersonation, useUserActions } from '../hooks';
 
 import type { JSX } from 'react';
@@ -50,15 +52,21 @@ export const UserDetailPage = (): JSX.Element => {
     updateUserAction,
     lockUserAction,
     unlockUserAction,
+    hardBanUserAction,
     isUpdating,
     isLocking,
     isUnlocking,
+    isHardBanning,
     error: actionError,
     clearError,
   } = useUserActions();
   const { startImpersonation } = useImpersonation();
   const [isImpersonating, setIsImpersonating] = useState(false);
   const [impersonateError, setImpersonateError] = useState<string | null>(null);
+
+  // Dialog state
+  const [isLockDialogOpen, setIsLockDialogOpen] = useState(false);
+  const [isHardBanDialogOpen, setIsHardBanDialogOpen] = useState(false);
 
   const canImpersonate = user !== null && user.role !== 'admin';
 
@@ -103,6 +111,7 @@ export const UserDetailPage = (): JSX.Element => {
       if (result?.user !== undefined) {
         setUser(result.user);
       }
+      setIsLockDialogOpen(false);
     },
     [id, user, clearError, lockUserAction, setUser],
   );
@@ -118,6 +127,21 @@ export const UserDetailPage = (): JSX.Element => {
       }
     },
     [id, user, clearError, unlockUserAction, setUser],
+  );
+
+  const handleHardBan = useCallback(
+    async (reason: string, sudoToken: string) => {
+      if (id === undefined || id.length === 0 || user === null) return;
+
+      clearError();
+      const result = await hardBanUserAction(id, { reason }, sudoToken);
+      if (result !== null) {
+        // Refresh user data after hard ban
+        void refresh();
+      }
+      setIsHardBanDialogOpen(false);
+    },
+    [id, user, clearError, hardBanUserAction, refresh],
   );
 
   const handleBack = useCallback(() => {
@@ -169,19 +193,69 @@ export const UserDetailPage = (): JSX.Element => {
 
           {/* Actions */}
           {user !== null && (
-            <UserActionsMenu
-              user={user}
-              onUpdate={handleUpdate}
-              onLock={handleLock}
-              onUnlock={handleUnlock}
-              isUpdating={isUpdating}
-              isLocking={isLocking}
-              isUnlocking={isUnlocking}
-              error={actionError}
-            />
+            <div className="space-y-6">
+              <UserActionsMenu
+                user={user}
+                onUpdate={handleUpdate}
+                onLock={handleLock}
+                onUnlock={handleUnlock}
+                isUpdating={isUpdating}
+                isLocking={isLocking}
+                isUnlocking={isUnlocking}
+                error={actionError}
+              />
+
+              {/* Hard Ban Button */}
+              <div className="border border-danger rounded-lg p-4">
+                <Heading as="h3" size="md" className="mb-2 text-danger">
+                  Danger Zone
+                </Heading>
+                <p className="text-sm text-muted mb-4">
+                  Permanently ban this user. This will revoke all sessions, cancel subscriptions,
+                  and schedule the account for deletion.
+                </p>
+                <Button
+                  variant="primary"
+                  className="bg-danger hover:bg-danger-hover text-white"
+                  onClick={() => {
+                    setIsHardBanDialogOpen(true);
+                  }}
+                  disabled={isLoading || isHardBanning}
+                >
+                  {isHardBanning ? 'Banning...' : 'Permanently Ban User'}
+                </Button>
+              </div>
+            </div>
           )}
         </div>
       </div>
+
+      {/* Lock User Dialog */}
+      {user !== null && (
+        <LockUserDialog
+          isOpen={isLockDialogOpen}
+          onClose={() => {
+            setIsLockDialogOpen(false);
+          }}
+          onConfirm={handleLock}
+          userName={`${user.firstName} ${user.lastName}`}
+          isLoading={isLocking}
+        />
+      )}
+
+      {/* Hard Ban Dialog */}
+      {user !== null && (
+        <HardBanDialog
+          isOpen={isHardBanDialogOpen}
+          onClose={() => {
+            setIsHardBanDialogOpen(false);
+          }}
+          onConfirm={handleHardBan}
+          userEmail={user.email}
+          userName={`${user.firstName} ${user.lastName}`}
+          isLoading={isHardBanning}
+        />
+      )}
     </PageContainer>
   );
 };

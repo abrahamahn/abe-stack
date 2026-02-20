@@ -4,6 +4,11 @@
  *
  * HTTP handlers for administrative user operations.
  * All handlers expect admin role (enforced by route middleware).
+ *
+ * Sprint 3.15: Soft Ban / Hard Ban completion
+ * - Passes email service to lock/unlock for notification emails
+ * - Hard ban requires sudo re-auth (X-Sudo-Token header)
+ * - Hard ban cascades: revoke tokens, cancel subs, remove memberships
  */
 
 import { HTTP_STATUS, UserNotFoundError } from '@bslt/shared';
@@ -218,6 +223,8 @@ export async function handleUpdateUser(
 
 /**
  * Handle POST /api/admin/users/:id/lock
+ *
+ * Sprint 3.15: Now sends notification email to the user.
  */
 export async function handleLockUser(
   ctx: AdminAppContext,
@@ -244,7 +251,13 @@ export async function handleLockUser(
       return { status: HTTP_STATUS.BAD_REQUEST, body: { message: 'Cannot lock your own account' } };
     }
 
-    const user = await lockUser(ctx.repos.users, userId, body.reason, body.durationMinutes);
+    const user = await lockUser(
+      ctx.repos.users,
+      userId,
+      body.reason,
+      body.durationMinutes,
+      ctx.email,
+    );
 
     ctx.log.info(
       {
@@ -282,6 +295,8 @@ export async function handleLockUser(
 
 /**
  * Handle POST /api/admin/users/:id/unlock
+ *
+ * Sprint 3.15: Now sends notification email to the user.
  */
 export async function handleUnlockUser(
   ctx: AdminAppContext,
@@ -303,7 +318,7 @@ export async function handleUnlockUser(
       return { status: HTTP_STATUS.NOT_FOUND, body: { message: ERROR_MESSAGES.USER_NOT_FOUND } };
     }
 
-    const user = await unlockUser(ctx.repos.users, userId, body.reason);
+    const user = await unlockUser(ctx.repos.users, userId, body.reason, ctx.email);
 
     ctx.log.info(
       { adminId: authUser.userId, targetUserId: userId, reason: body.reason },
@@ -382,8 +397,14 @@ export async function handleSearchUsers(
 // Hard Ban Handler
 // ============================================================================
 
+/** Header name for sudo/2FA re-auth token */
+const SUDO_TOKEN_HEADER = 'x-sudo-token';
+
 /**
  * Handle POST /api/admin/users/:id/hard-ban
+ *
+ * Sprint 3.15: Requires sudo re-auth via X-Sudo-Token header.
+ * Cascades: revoke sessions, cancel subs, remove memberships, send email.
  */
 export async function handleHardBan(
   ctx: AdminAppContext,
@@ -410,7 +431,27 @@ export async function handleHardBan(
       return { status: HTTP_STATUS.BAD_REQUEST, body: { message: 'Cannot ban your own account' } };
     }
 
-    const result = await hardBanUser(ctx.db, ctx.repos.users, userId, authUser.userId, body.reason);
+    // Sprint 3.15: Require sudo re-auth for hard ban (destructive action)
+    const sudoToken = request.headers[SUDO_TOKEN_HEADER];
+    if (typeof sudoToken !== 'string' || sudoToken.length === 0) {
+      return {
+        status: HTTP_STATUS.FORBIDDEN,
+        body: {
+          message: 'Sudo re-authentication required for hard ban. Please re-verify your identity.',
+        },
+      };
+    }
+
+    const result = await hardBanUser(
+      ctx.db,
+      ctx.repos.users,
+      userId,
+      authUser.userId,
+      body.reason,
+      {
+        emailService: ctx.email,
+      },
+    );
 
     ctx.log.info(
       {

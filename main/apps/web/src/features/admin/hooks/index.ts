@@ -7,6 +7,12 @@ export type {
   UseAdminUsersResult,
   UseAdminUsersState,
 } from './useAdminUsers';
+export { useAdminErrorLog } from './useAdminErrorLog';
+export type { UseAdminErrorLogOptions, UseAdminErrorLogResult } from './useAdminErrorLog';
+export { useAdminHealth } from './useAdminHealth';
+export type { UseAdminHealthOptions, UseAdminHealthResult } from './useAdminHealth';
+export { useAdminMetrics } from './useAdminMetrics';
+export type { UseAdminMetricsOptions, UseAdminMetricsResult } from './useAdminMetrics';
 export { useAuditEvents } from './useAuditEvents';
 export type { UseAuditEventsOptions, UseAuditEventsResult } from './useAuditEvents';
 export { useExportEvents } from './useExportEvents';
@@ -29,6 +35,19 @@ export type {
   UseUpdateFeatureFlagOptions,
   UseUpdateFeatureFlagResult,
 } from './useFeatureFlags';
+export {
+  useDeleteFeatureFlagOverride,
+  useFeatureFlagOverrides,
+  useSetFeatureFlagOverride,
+} from './useFeatureFlagOverrides';
+export type {
+  UseDeleteFeatureFlagOverrideOptions,
+  UseDeleteFeatureFlagOverrideResult,
+  UseFeatureFlagOverridesOptions,
+  UseFeatureFlagOverridesResult,
+  UseSetFeatureFlagOverrideOptions,
+  UseSetFeatureFlagOverrideResult,
+} from './useFeatureFlagOverrides';
 export { useImpersonation } from './useImpersonation';
 export type { UseImpersonationResult } from './useImpersonation';
 export { useJobActions } from './useJobActions';
@@ -58,7 +77,29 @@ export type {
 } from './useSecurityMetrics';
 export { useTenant } from './useTenant';
 export type { UseTenantResult, UseTenantState } from './useTenant';
+export { useTenantPlanAssignment } from './useTenantPlanAssignment';
+export type {
+  UseTenantPlanAssignmentOptions,
+  UseTenantPlanAssignmentResult,
+} from './useTenantPlanAssignment';
 export { useTenants } from './useTenants';
 export type { UseTenantsResult, UseTenantsState } from './useTenants';
 export { useUserActions } from './useUserActions';
 export type { UseUserActionsResult, UseUserActionsState } from './useUserActions';
+export {
+  useAdminCreateWebhook,
+  useAdminDeleteWebhook,
+  useAdminReplayDelivery,
+  useAdminRotateWebhookSecret,
+  useAdminUpdateWebhook,
+  useAdminWebhook,
+  useAdminWebhookDeliveries,
+  useAdminWebhooks,
+} from './useWebhookAdmin';
+export { useWebhookMonitor } from './useWebhookMonitor';
+export type { UseWebhookMonitorOptions, UseWebhookMonitorResult } from './useWebhookMonitor';
+export { useWebhookMonitorDeliveries } from './useWebhookMonitorDeliveries';
+export type {
+  UseWebhookMonitorDeliveriesOptions,
+  UseWebhookMonitorDeliveriesResult,
+} from './useWebhookMonitorDeliveries';

@@ -19,6 +19,7 @@
     "@bslt/react": "workspace:*",
     "@bslt/shared": "workspace:*",
     "@bslt/ui": "workspace:*",
+    "@sentry/react": "^9.1.0",
     "@simplewebauthn/browser": "^13.2.2",
     "react": "^19.2.3",
     "react-dom": "^19.2.3"

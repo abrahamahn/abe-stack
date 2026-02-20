@@ -3,14 +3,18 @@
  * Workspace Billing
  *
  * Component for displaying workspace billing information and managing subscriptions.
- * Shows current plan, billing period, and provides quick actions.
+ * Shows current plan, billing period, invoice history, and provides quick actions
+ * including Stripe customer portal redirect for payment method management.
  */
 
 import { useNavigate } from '@bslt/react/router';
 import { formatDate } from '@bslt/shared';
-import { Badge, Button, Card, Heading, Skeleton, Text } from '@bslt/ui';
+import { Alert, Badge, Button, Card, Heading, Skeleton, Text } from '@bslt/ui';
+import { InvoiceList } from '@bslt/ui/components/billing';
 
+import { useStripePortal } from '../hooks/useStripePortal';
 import { useWorkspaceBilling } from '../hooks/useWorkspaceBilling';
+import { useWorkspaceInvoices } from '../hooks/useWorkspaceInvoices';
 
 import type { ReactElement } from 'react';
 
@@ -49,15 +53,24 @@ function getTierBadgeTone(tier: string): 'info' | 'success' | 'warning' {
 export const WorkspaceBilling = ({ tenantId }: WorkspaceBillingProps): ReactElement => {
   const navigate = useNavigate();
   const { plan, subscription, isLoading, error } = useWorkspaceBilling(tenantId);
+  const {
+    invoices,
+    hasMore,
+    isLoading: invoicesLoading,
+    error: invoicesError,
+  } = useWorkspaceInvoices(tenantId);
+  const { openPortal, isLoading: portalLoading, error: portalError } = useStripePortal();
 
   const handleUpgrade = (): void => {
     navigate('/billing/pricing');
   };
 
+  const handleDowngrade = (): void => {
+    navigate('/billing/pricing?action=downgrade');
+  };
+
   const handleManagePayment = (): void => {
-    // In a production app, this would call the Stripe customer portal API
-    // For now, navigate to billing settings
-    navigate('/billing');
+    openPortal();
   };
 
   const handleViewInvoices = (): void => {
@@ -153,17 +166,51 @@ export const WorkspaceBilling = ({ tenantId }: WorkspaceBillingProps): ReactElem
 
             <div className="flex gap-2 flex-wrap">
               <Button onClick={handleUpgrade} variant="secondary">
-                Change Plan
+                Upgrade Plan
               </Button>
-              <Button onClick={handleManagePayment} variant="secondary">
-                Manage Payment Method
+              <Button onClick={handleDowngrade} variant="text">
+                Downgrade
+              </Button>
+              <Button
+                onClick={handleManagePayment}
+                variant="secondary"
+                disabled={portalLoading}
+                data-testid="manage-payment-button"
+              >
+                {portalLoading ? 'Redirecting...' : 'Manage Payment Method'}
               </Button>
               <Button onClick={handleViewInvoices} variant="text">
                 View Invoices
               </Button>
             </div>
+
+            {portalError !== null && (
+              <Alert tone="danger" className="mt-2">
+                {portalError.message}
+              </Alert>
+            )}
           </div>
         )}
+
+        {/* Invoice History */}
+        <div className="border-t pt-4 mt-4">
+          <Heading as="h4" size="sm" className="mb-3">
+            Recent Invoices
+          </Heading>
+          {invoicesLoading ? (
+            <div className="space-y-2">
+              {Array.from({ length: 2 }, (_, i) => (
+                <Skeleton key={i} className="h-10 w-full" />
+              ))}
+            </div>
+          ) : invoicesError !== null ? (
+            <Text tone="danger" size="sm">
+              {invoicesError.message}
+            </Text>
+          ) : (
+            <InvoiceList invoices={invoices} hasMore={hasMore} isLoading={invoicesLoading} />
+          )}
+        </div>
       </Card.Body>
     </Card>
   );

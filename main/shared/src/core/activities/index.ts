@@ -13,3 +13,15 @@ export {
   type ActorType,
   type CreateActivity,
 } from './activities.schemas';
+
+export {
+  ACTIVITY_TYPES,
+  ACTIVITY_TYPE_VALUES,
+  activityEventSchema,
+  activityFeedRequestSchema,
+  activityFeedResponseSchema,
+  type ActivityEvent,
+  type ActivityFeedRequest,
+  type ActivityFeedResponse,
+  type ActivityType,
+} from './activities.types';
