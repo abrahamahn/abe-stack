@@ -490,6 +490,115 @@ describe('User Management API Integration Tests', () => {
   });
 
   // ==========================================================================
+  // Avatar upload/delete verification
+  // ==========================================================================
+
+  describe('Avatar routes', () => {
+    it('PUT /api/users/me/avatar route is reachable with authenticated payload', async () => {
+      const now = new Date('2024-01-01T00:00:00.000Z');
+      mockRepos.users.findById.mockResolvedValue({
+        id: 'user-avatar-1',
+        email: 'avatar@example.com',
+        canonicalEmail: 'avatar@example.com',
+        username: 'avataruser',
+        firstName: 'Avatar',
+        lastName: 'User',
+        avatarUrl: null,
+        role: 'user',
+        emailVerified: true,
+        phone: null,
+        phoneVerified: null,
+        dateOfBirth: null,
+        gender: null,
+        bio: null,
+        city: null,
+        state: null,
+        country: null,
+        language: null,
+        website: null,
+        createdAt: now,
+        updatedAt: now,
+      });
+      mockRepos.users.update.mockResolvedValue(null);
+      testServer.storage.upload.mockResolvedValue('avatars/user-avatar-1/avatar.png');
+      testServer.storage.getSignedUrl.mockResolvedValue(
+        'https://cdn.test/avatars/user-avatar-1/avatar.png?signed=1',
+      );
+
+      const token = createTestJwt({
+        userId: 'user-avatar-1',
+        email: 'avatar@example.com',
+        role: 'user',
+      });
+
+      const response = await testServer.inject({
+        method: 'PUT',
+        url: '/api/users/me/avatar',
+        headers: {
+          authorization: `Bearer ${token}`,
+          'content-type': 'application/json',
+        },
+        payload: JSON.stringify({
+          buffer: [137, 80, 78, 71, 13, 10, 26, 10],
+          mimetype: 'image/png',
+          size: 8,
+        }),
+      });
+
+      expect(response.statusCode).not.toBe(404);
+      expect(response.statusCode).not.toBe(401);
+    });
+
+    it('POST /api/users/me/avatar/delete clears avatar from user record', async () => {
+      const now = new Date('2024-01-01T00:00:00.000Z');
+      mockRepos.users.findById.mockResolvedValue({
+        id: 'user-avatar-2',
+        email: 'avatar2@example.com',
+        canonicalEmail: 'avatar2@example.com',
+        username: 'avataruser2',
+        firstName: 'Avatar',
+        lastName: 'Two',
+        avatarUrl: 'avatars/user-avatar-2/avatar.png',
+        role: 'user',
+        emailVerified: true,
+        phone: null,
+        phoneVerified: null,
+        dateOfBirth: null,
+        gender: null,
+        bio: null,
+        city: null,
+        state: null,
+        country: null,
+        language: null,
+        website: null,
+        createdAt: now,
+        updatedAt: now,
+      });
+      mockRepos.users.update.mockResolvedValue(null);
+
+      const token = createTestJwt({
+        userId: 'user-avatar-2',
+        email: 'avatar2@example.com',
+        role: 'user',
+      });
+
+      const response = await testServer.inject({
+        method: 'POST',
+        url: '/api/users/me/avatar/delete',
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+        payload: {},
+      });
+
+      expect(response.statusCode).toBe(200);
+      const body = parseJsonResponse(response) as { message: string };
+      expect(body.message).toBe('Avatar deleted');
+      expect(mockRepos.users.update).toHaveBeenCalledWith('user-avatar-2', { avatarUrl: null });
+    });
+  });
+
+  // ==========================================================================
   // GET /api/users/list — Admin-only endpoint
   // ==========================================================================
 

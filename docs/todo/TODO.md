@@ -218,7 +218,7 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 **P0 (Launch/Critical Path):**
 
-- [ ] 3.2 Billing lifecycle end-to-end (subscriptions, invoices, upgrades/downgrades, entitlements, dunning)
+- [x] 3.2 Billing lifecycle end-to-end (subscriptions, invoices, upgrades/downgrades, entitlements, dunning)
 - [x] 3.17 Operational quality gaps (health/readiness verification, metrics, docs endpoint, queue verification)
   - [x] Verify: `GET /health` — returns server health (up/degraded/down)
   - [x] Verify: `GET /ready` — returns readiness (DB connected, cache warm, queue running)
@@ -230,8 +230,8 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 **P1 (Admin/Workspace/Compliance):**
 
-- [ ] 3.13 System admin gaps (webhook monitor/replay, health dashboard, per-tenant overrides)
-- [ ] 3.12 Workspace admin remaining UI and invitation hardening (logo, danger zone, regenerate/reminder flow)
+- [x] 3.13 System admin gaps (webhook monitor/replay, health dashboard, per-tenant overrides)
+- [x] 3.12 Workspace admin remaining UI and invitation hardening (logo, danger zone, regenerate/reminder flow)
 - [x] 3.8 Compliance gaps (legal current/agreements endpoints, legal publish, consent banner, deletion status UI)
 - [x] 3.15 Ban flows completion (lock reason UX/email, hard-ban confirmation/cascade/anonymization)
 
@@ -242,8 +242,8 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 - [ ] 3.5 Avatar/file pipeline verification + tests
 - [x] 3.6 Activities contracts + tests
 - [x] 3.7 Usage metering + workspace override UI + tests
-- [ ] 3.9 Realtime reconnection/offline queue/delta sync + tests
-- [ ] 3.10 Media library/gallery + tests
+- [x] 3.9 Realtime reconnection/offline queue/delta sync + tests
+- [x] 3.10 Media library/gallery + tests
 - [x] 3.11 Settings completeness (preferences/API keys/backup codes tabs + E2E)
 - [x] 3.14 Impersonation integration/E2E
 - [ ] 3.16 Data hygiene follow-through (search/list visibility, audit shape, FK safety, file cleanup, tests)
@@ -347,7 +347,7 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 **Retention + Cleanup:**
 
-- [ ] Cron: archive to cold storage before deletion (optional, config-gated)
+- [x] Cron: archive to cold storage before deletion (optional, config-gated)
 
 **Tests:**
 
@@ -366,11 +366,11 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 **Email Setup (BUSINESS 4.3):**
 
-- [ ] Docs: SMTP configuration guide (dev: console provider, staging/prod: SMTP/SES)
-- [ ] Service: verify SMTP config on server boot (optional health check)
-- [ ] Templates: Email Verification — content + layout
-- [ ] Templates: Password Reset — content + layout
-- [ ] Templates: Workspace Invitation — content + layout
+- [x] Docs: SMTP configuration guide (dev: console provider, staging/prod: SMTP/SES)
+- [x] Service: verify SMTP config on server boot (optional health check)
+- [x] Templates: Email Verification — content + layout
+- [x] Templates: Password Reset — content + layout
+- [x] Templates: Workspace Invitation — content + layout
 
 **In-App Notifications (BUSINESS 4.1):**
 
@@ -380,10 +380,10 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 **Bounce + Unsubscribe:**
 
-- [ ] Service: handle email bounces (soft/hard) — update delivery status
-- [ ] Service: one-click unsubscribe header (RFC 8058)
+- [x] Service: handle email bounces (soft/hard) — update delivery status
+- [x] Service: one-click unsubscribe header (RFC 8058)
 - [x] Route: `GET /api/email/unsubscribe/:token` — unsubscribe endpoint
-- [ ] Service: respect unsubscribe preference in email sending pipeline
+- [x] Service: respect unsubscribe preference in email sending pipeline
 
 **Tests:**
 
@@ -524,7 +524,7 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 **Tests:**
 
-- [ ] Unit: upload validation, processing job creation, status transitions
+- [x] Unit: upload validation, processing job creation, status transitions
 - [x] Integration: upload → queue → process → retrieve processed media; reject invalid types
 - [x] E2E: upload image → see processing → see thumbnail; upload invalid file → see error
 
@@ -602,7 +602,7 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 > Sprint 2.9 built the core invitation flow. These items harden lifecycle management.
 
-- [ ] Service: invitation reminder email — configurable N days before expiry (requires email template)
+- [x] Service: invitation reminder email — configurable N days before expiry (requires email template)
 
 **Tests:**
 
@@ -622,7 +622,7 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 **Tenant Management (BUSINESS 7.2):**
 
-- [ ] UI: plan override selector — assign specific plan to tenant
+- [x] UI: plan override selector — assign specific plan to tenant
 
 **Webhook Monitor + Replay:**
 
@@ -642,7 +642,7 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 **Tests:**
 
-- [ ] Unit: multi-field search, tenant suspension logic
+- [x] Unit: multi-field search, tenant suspension logic
 - [x] Integration: admin user CRUD, tenant CRUD, webhook replay, health endpoint
 - [x] E2E: admin searches user → views detail → locks; admin manages tenants; admin views health
 
@@ -707,7 +707,7 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 **Soft Delete Enforcement:**
 
-- [ ] Service: hide soft-deleted users from search results and member lists
+- [x] Service: hide soft-deleted users from search results and member lists
 - [ ] Service: preserve audit trail — soft-deleted user's events remain queryable by admin
 
 **PII Anonymization Cron (BUSINESS 6.4):**

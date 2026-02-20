@@ -197,6 +197,27 @@ describe('Admin User Service', () => {
         updatedAt: mockUser.updatedAt.toISOString(),
       });
     });
+
+    test('should hide soft-deleted users from admin list responses', async () => {
+      vi.mocked(mockRepo.listWithFilters).mockResolvedValue({
+        data: [
+          createMockUser({ id: 'active-user', deletedAt: null }),
+          createMockUser({ id: 'deleted-user', deletedAt: new Date('2024-02-01T00:00:00.000Z') }),
+        ],
+        total: 2,
+        page: 1,
+        limit: 20,
+        totalPages: 1,
+        hasNext: false,
+        hasPrev: false,
+      });
+
+      const result = await listUsers(mockRepo, {});
+
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0]?.id).toBe('active-user');
+      expect(result.total).toBe(1);
+    });
   });
 
   describe('getUserById', () => {

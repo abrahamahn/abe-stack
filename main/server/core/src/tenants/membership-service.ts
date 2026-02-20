@@ -16,6 +16,7 @@ import {
   ForbiddenError,
   NotFoundError,
 } from '@bslt/shared';
+import { isUserDeleted } from '../users/data-hygiene';
 
 import type { Repositories } from '../../../db/src';
 import type { TenantRole } from '@bslt/shared';
@@ -67,14 +68,30 @@ export async function listMembers(
   }
 
   const memberships = await repos.memberships.findByTenantId(tenantId);
+  const members = await Promise.all(
+    memberships.map(async (membership) => {
+      const user = await repos.users.findById(membership.userId);
+      if (user === null || isUserDeleted(user)) {
+        return null;
+      }
 
-  return memberships.map((m) => ({
-    id: m.id,
-    userId: m.userId,
-    role: m.role,
-    createdAt: typeof m.createdAt === 'string' ? m.createdAt : new Date(m.createdAt).toISOString(),
-    updatedAt: typeof m.updatedAt === 'string' ? m.updatedAt : new Date(m.updatedAt).toISOString(),
-  }));
+      return {
+        id: membership.id,
+        userId: membership.userId,
+        role: membership.role,
+        createdAt:
+          typeof membership.createdAt === 'string'
+            ? membership.createdAt
+            : new Date(membership.createdAt).toISOString(),
+        updatedAt:
+          typeof membership.updatedAt === 'string'
+            ? membership.updatedAt
+            : new Date(membership.updatedAt).toISOString(),
+      };
+    }),
+  );
+
+  return members.filter((member): member is MemberInfo => member !== null);
 }
 
 /**

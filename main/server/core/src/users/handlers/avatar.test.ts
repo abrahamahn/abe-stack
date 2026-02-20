@@ -10,9 +10,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
+  cacheBustAvatarUrl,
   changePassword,
   deleteAvatar,
+  getAvatarFallbackUrl,
   getAvatarUrl,
+  getGravatarUrl,
+  getInitialsAvatarUrl,
   updateProfile,
   uploadAvatar,
   type ProfileUser,
@@ -167,6 +171,39 @@ function createMockStorage(): StorageProvider {
     getSignedUrl: vi.fn(),
   };
 }
+
+// ============================================================================
+// Tests: avatar fallback chain helpers
+// ============================================================================
+
+describe('avatar fallback helpers', () => {
+  it('returns gravatar fallback URL by default', () => {
+    const result = getAvatarFallbackUrl('User@Example.com', 'Test', 'User');
+    expect(result).toContain('https://www.gravatar.com/avatar/');
+    expect(result).toContain('&d=blank');
+  });
+
+  it('generates deterministic gravatar URLs for canonicalized email', () => {
+    const one = getGravatarUrl(' User@Example.com ');
+    const two = getGravatarUrl('user@example.com');
+    expect(one).toBe(two);
+  });
+
+  it('generates initials avatar URL when needed by UI fallback', () => {
+    const result = getInitialsAvatarUrl('Jane', 'Doe');
+    expect(result).toContain('https://ui-avatars.com/api/');
+    expect(result).toContain('Jane%20Doe');
+  });
+
+  it('cache-busts avatar URL query parameters', () => {
+    expect(cacheBustAvatarUrl('https://cdn.example.com/a.png', 123)).toBe(
+      'https://cdn.example.com/a.png?v=123',
+    );
+    expect(cacheBustAvatarUrl('https://cdn.example.com/a.png?x=1', new Date(1000))).toBe(
+      'https://cdn.example.com/a.png?x=1&v=1000',
+    );
+  });
+});
 
 // ============================================================================
 // Tests: updateProfile

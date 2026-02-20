@@ -353,6 +353,17 @@ describe('avatarUploadRequestSchema', () => {
       'buffer must be a Uint8Array',
     );
   });
+
+  it('should parse numeric array buffer payloads from JSON transport', () => {
+    const result = avatarUploadRequestSchema.parse({
+      buffer: [1, 2, 3],
+      mimetype: 'image/png',
+      size: 3,
+    });
+
+    expect(result.buffer).toBeInstanceOf(Uint8Array);
+    expect(Array.from(result.buffer)).toEqual([1, 2, 3]);
+  });
 });
 
 // ============================================================================

@@ -112,11 +112,49 @@ describe('listMembers', () => {
       mockMembership('user-1', 'owner'),
       mockMembership('user-2', 'member'),
     ]);
+    vi.mocked(repos.users.findById).mockImplementation(async (userId: string) => {
+      if (userId === 'user-1' || userId === 'user-2') {
+        return {
+          id: userId,
+          deletedAt: null,
+        } as ReturnType<Repositories['users']['findById']> extends Promise<infer T> ? T : never;
+      }
+      return null;
+    });
 
     const result = await listMembers(repos, 't-1', 'user-1');
     expect(result).toHaveLength(2);
     expect(result[0]?.role).toBe('owner');
     expect(result[1]?.role).toBe('member');
+  });
+
+  it('hides soft-deleted users from member list', async () => {
+    vi.mocked(repos.memberships.findByTenantAndUser).mockResolvedValue(
+      mockMembership('user-1', 'owner'),
+    );
+    vi.mocked(repos.memberships.findByTenantId).mockResolvedValue([
+      mockMembership('user-1', 'owner'),
+      mockMembership('user-2', 'member'),
+    ]);
+    vi.mocked(repos.users.findById).mockImplementation(async (userId: string) => {
+      if (userId === 'user-1') {
+        return {
+          id: userId,
+          deletedAt: null,
+        } as ReturnType<Repositories['users']['findById']> extends Promise<infer T> ? T : never;
+      }
+      if (userId === 'user-2') {
+        return {
+          id: userId,
+          deletedAt: new Date('2024-01-01T00:00:00.000Z'),
+        } as ReturnType<Repositories['users']['findById']> extends Promise<infer T> ? T : never;
+      }
+      return null;
+    });
+
+    const result = await listMembers(repos, 't-1', 'user-1');
+    expect(result).toHaveLength(1);
+    expect(result[0]?.userId).toBe('user-1');
   });
 
   it('throws NotFoundError when tenant does not exist', async () => {

@@ -17,6 +17,7 @@ import { MS_PER_DAY, RETENTION_PERIODS, UserNotFoundError } from '@bslt/shared';
 
 import { logSecurityEvent } from '../auth/security/events';
 import { revokeAllUserTokens } from '../auth/utils';
+import { filterSoftDeletedFromResults } from '../users/data-hygiene';
 
 import type {
   AdminUserListFilters as DbAdminUserListFilters,
@@ -215,15 +216,16 @@ export async function listUsers(
     dbFilters.status = filters.status;
   }
   const result = await userRepo.listWithFilters(dbFilters);
+  const activeOnly = filterSoftDeletedFromResults(result);
 
   return {
-    data: result.data.map(toAdminUser),
-    total: result.total,
-    page: result.page,
-    limit: result.limit,
-    totalPages: result.totalPages,
-    hasNext: result.hasNext,
-    hasPrev: result.hasPrev,
+    data: activeOnly.data.map(toAdminUser),
+    total: activeOnly.total,
+    page: activeOnly.page,
+    limit: activeOnly.limit,
+    totalPages: activeOnly.totalPages,
+    hasNext: activeOnly.hasNext,
+    hasPrev: activeOnly.hasPrev,
   };
 }
 

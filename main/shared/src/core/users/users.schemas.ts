@@ -300,8 +300,17 @@ export const avatarUploadResponseSchema: Schema<AvatarUploadResponse> = createSc
 export const avatarUploadRequestSchema: Schema<AvatarUploadRequest> = createSchema(
   (data: unknown) => {
     const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
-    const buffer = obj['buffer'];
-    if (!(buffer instanceof Uint8Array)) {
+    const rawBuffer = obj['buffer'];
+    let buffer: Uint8Array;
+
+    if (rawBuffer instanceof Uint8Array) {
+      buffer = rawBuffer;
+    } else if (
+      Array.isArray(rawBuffer) &&
+      rawBuffer.every((value) => typeof value === 'number' && value >= 0 && value <= 255)
+    ) {
+      buffer = Uint8Array.from(rawBuffer);
+    } else {
       throw new Error('buffer must be a Uint8Array');
     }
 
