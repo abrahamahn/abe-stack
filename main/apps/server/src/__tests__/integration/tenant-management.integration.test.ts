@@ -25,8 +25,6 @@ import type { AuthGuardFactory } from '@/http';
 
 import { registerRouteMap } from '@/http';
 
-import { registerRouteMap } from '@/http';
-
 // ============================================================================
 // Mock Repositories
 // ============================================================================
@@ -702,7 +700,14 @@ describe('Tenant Management API Integration Tests', () => {
       mockRepos.memberships.findByTenantAndUser.mockImplementation(
         async (tenantId: string, _userId: string) => {
           if (tenantId === 'tenant-A') {
-            return { id: 'mb-a', tenantId: 'tenant-A', userId: 'user-scope-1', role: 'owner', createdAt: now, updatedAt: now };
+            return {
+              id: 'mb-a',
+              tenantId: 'tenant-A',
+              userId: 'user-scope-1',
+              role: 'owner',
+              createdAt: now,
+              updatedAt: now,
+            };
           }
           return null; // Not a member of tenant-B
         },
@@ -739,12 +744,54 @@ describe('Tenant Management API Integration Tests', () => {
         return [];
       });
 
+      mockRepos.users.findById.mockImplementation(async (id: string) => {
+        if (id === 'user-scope-1') {
+          return {
+            id: 'user-scope-1',
+            email: 'owner-a@example.com',
+            username: 'ownerA',
+            firstName: 'Owner',
+            lastName: 'A',
+            role: 'user',
+            emailVerified: true,
+            createdAt: now,
+            updatedAt: now,
+          };
+        }
+        if (id === 'user-scope-2') {
+          return {
+            id: 'user-scope-2',
+            email: 'owner-b@example.com',
+            username: 'ownerB',
+            firstName: 'Owner',
+            lastName: 'B',
+            role: 'user',
+            emailVerified: true,
+            createdAt: now,
+            updatedAt: now,
+          };
+        }
+        return null;
+      });
+
       mockRepos.tenants.findById.mockImplementation(async (id: string) => {
         if (id === 'tenant-A') {
-          return { id: 'tenant-A', name: 'Workspace A', slug: 'workspace-a', ownerId: 'user-scope-1', createdAt: now };
+          return {
+            id: 'tenant-A',
+            name: 'Workspace A',
+            slug: 'workspace-a',
+            ownerId: 'user-scope-1',
+            createdAt: now,
+          };
         }
         if (id === 'tenant-B') {
-          return { id: 'tenant-B', name: 'Workspace B', slug: 'workspace-b', ownerId: 'user-scope-2', createdAt: now };
+          return {
+            id: 'tenant-B',
+            name: 'Workspace B',
+            slug: 'workspace-b',
+            ownerId: 'user-scope-2',
+            createdAt: now,
+          };
         }
         return null;
       });
@@ -1170,16 +1217,31 @@ describe('Tenant Management API Integration Tests', () => {
       const now = new Date();
       mockDb.transaction.mockImplementation(async (cb: (tx: unknown) => Promise<unknown>) => {
         const txMock = {
-          query: vi.fn()
-            .mockResolvedValueOnce([{
-              id: 'tenant-special', name: '<script>alert("xss")</script>',
-              slug: 'special-chars', logo_url: null, owner_id: 'user-name-4',
-              is_active: true, metadata: {}, created_at: now, updated_at: now,
-            }])
-            .mockResolvedValueOnce([{
-              id: 'mb-special', tenant_id: 'tenant-special', user_id: 'user-name-4',
-              role: 'owner', created_at: now, updated_at: now,
-            }]),
+          query: vi
+            .fn()
+            .mockResolvedValueOnce([
+              {
+                id: 'tenant-special',
+                name: '<script>alert("xss")</script>',
+                slug: 'special-chars',
+                logo_url: null,
+                owner_id: 'user-name-4',
+                is_active: true,
+                metadata: {},
+                created_at: now,
+                updated_at: now,
+              },
+            ])
+            .mockResolvedValueOnce([
+              {
+                id: 'mb-special',
+                tenant_id: 'tenant-special',
+                user_id: 'user-name-4',
+                role: 'owner',
+                created_at: now,
+                updated_at: now,
+              },
+            ]),
         };
         return cb(txMock);
       });
@@ -1210,16 +1272,31 @@ describe('Tenant Management API Integration Tests', () => {
       const now = new Date();
       mockDb.transaction.mockImplementation(async (cb: (tx: unknown) => Promise<unknown>) => {
         const txMock = {
-          query: vi.fn()
-            .mockResolvedValueOnce([{
-              id: 'tenant-sqli', name: "'; DROP TABLE tenants; --",
-              slug: 'sqli-name', logo_url: null, owner_id: 'user-name-5',
-              is_active: true, metadata: {}, created_at: now, updated_at: now,
-            }])
-            .mockResolvedValueOnce([{
-              id: 'mb-sqli', tenant_id: 'tenant-sqli', user_id: 'user-name-5',
-              role: 'owner', created_at: now, updated_at: now,
-            }]),
+          query: vi
+            .fn()
+            .mockResolvedValueOnce([
+              {
+                id: 'tenant-sqli',
+                name: "'; DROP TABLE tenants; --",
+                slug: 'sqli-name',
+                logo_url: null,
+                owner_id: 'user-name-5',
+                is_active: true,
+                metadata: {},
+                created_at: now,
+                updated_at: now,
+              },
+            ])
+            .mockResolvedValueOnce([
+              {
+                id: 'mb-sqli',
+                tenant_id: 'tenant-sqli',
+                user_id: 'user-name-5',
+                role: 'owner',
+                created_at: now,
+                updated_at: now,
+              },
+            ]),
         };
         return cb(txMock);
       });
@@ -1246,16 +1323,31 @@ describe('Tenant Management API Integration Tests', () => {
       const now = new Date();
       mockDb.transaction.mockImplementation(async (cb: (tx: unknown) => Promise<unknown>) => {
         const txMock = {
-          query: vi.fn()
-            .mockResolvedValueOnce([{
-              id: 'tenant-unicode', name: '\u{1F680} Rocket Workspace \u{2603}',
-              slug: 'rocket-workspace', logo_url: null, owner_id: 'user-name-6',
-              is_active: true, metadata: {}, created_at: now, updated_at: now,
-            }])
-            .mockResolvedValueOnce([{
-              id: 'mb-unicode', tenant_id: 'tenant-unicode', user_id: 'user-name-6',
-              role: 'owner', created_at: now, updated_at: now,
-            }]),
+          query: vi
+            .fn()
+            .mockResolvedValueOnce([
+              {
+                id: 'tenant-unicode',
+                name: '\u{1F680} Rocket Workspace \u{2603}',
+                slug: 'rocket-workspace',
+                logo_url: null,
+                owner_id: 'user-name-6',
+                is_active: true,
+                metadata: {},
+                created_at: now,
+                updated_at: now,
+              },
+            ])
+            .mockResolvedValueOnce([
+              {
+                id: 'mb-unicode',
+                tenant_id: 'tenant-unicode',
+                user_id: 'user-name-6',
+                role: 'owner',
+                created_at: now,
+                updated_at: now,
+              },
+            ]),
         };
         return cb(txMock);
       });
@@ -1591,16 +1683,31 @@ describe('Tenant Management API Integration Tests', () => {
           throw new Error('Unique constraint violation: slug already exists');
         }
         const txMock = {
-          query: vi.fn()
-            .mockResolvedValueOnce([{
-              id: 'tenant-concurrent', name: 'Concurrent WS',
-              slug: 'concurrent-ws', logo_url: null, owner_id: 'user-concurrent',
-              is_active: true, metadata: {}, created_at: now, updated_at: now,
-            }])
-            .mockResolvedValueOnce([{
-              id: 'mb-concurrent', tenant_id: 'tenant-concurrent', user_id: 'user-concurrent',
-              role: 'owner', created_at: now, updated_at: now,
-            }]),
+          query: vi
+            .fn()
+            .mockResolvedValueOnce([
+              {
+                id: 'tenant-concurrent',
+                name: 'Concurrent WS',
+                slug: 'concurrent-ws',
+                logo_url: null,
+                owner_id: 'user-concurrent',
+                is_active: true,
+                metadata: {},
+                created_at: now,
+                updated_at: now,
+              },
+            ])
+            .mockResolvedValueOnce([
+              {
+                id: 'mb-concurrent',
+                tenant_id: 'tenant-concurrent',
+                user_id: 'user-concurrent',
+                role: 'owner',
+                created_at: now,
+                updated_at: now,
+              },
+            ]),
         };
         return cb(txMock);
       });
@@ -1714,7 +1821,9 @@ describe('Tenant Management API Integration Tests', () => {
           method: 'POST',
           url: '/api/tenants',
           accessToken: expiredToken,
-          payload: JSON.parse('{"name":"Hacked","slug":"hacked","__proto__":{"isAdmin":true},"constructor":{"prototype":{"polluted":"yes"}}}'),
+          payload: JSON.parse(
+            '{"name":"Hacked","slug":"hacked","__proto__":{"isAdmin":true},"constructor":{"prototype":{"polluted":"yes"}}}',
+          ),
         }),
       );
 
@@ -1781,7 +1890,10 @@ describe('Tenant Management API Integration Tests', () => {
 
     it('concurrent invitation create + accept for same email does not corrupt data', async () => {
       const ownerToken = createTestJwt({ userId: 'user-race-owner', email: 'raceowner@test.com' });
-      const inviteeToken = createTestJwt({ userId: 'user-race-invitee', email: 'raceinvitee@test.com' });
+      const inviteeToken = createTestJwt({
+        userId: 'user-race-invitee',
+        email: 'raceinvitee@test.com',
+      });
       const now = new Date();
       const futureExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
@@ -1898,7 +2010,10 @@ describe('Tenant Management API Integration Tests', () => {
     });
 
     it('DELETE workspace with non-member token returns 403', async () => {
-      const attackerToken = createTestJwt({ userId: 'attacker-del', email: 'attacker-del@test.com' });
+      const attackerToken = createTestJwt({
+        userId: 'attacker-del',
+        email: 'attacker-del@test.com',
+      });
 
       mockRepos.tenants.findById.mockResolvedValue({
         id: 'tenant-victim',

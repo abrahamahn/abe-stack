@@ -3,8 +3,7 @@
  * Tests for ConfirmationDialog component.
  */
 
-import { act, render, screen } from '@testing-library/react';
-import { userEvent } from '@testing-library/user-event';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ConfirmationDialog } from './ConfirmationDialog';
@@ -124,23 +123,21 @@ describe('ConfirmationDialog', () => {
   });
 
   it('should call onConfirm when confirm button is clicked after countdown', async () => {
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     render(<ConfirmationDialog {...defaultProps} countdownSeconds={1} />);
 
     act(() => {
       vi.advanceTimersByTime(1000);
     });
 
-    await user.click(screen.getByTestId('confirm-button'));
+    fireEvent.click(screen.getByTestId('confirm-button'));
     expect(defaultProps.onConfirm).toHaveBeenCalledTimes(1);
   });
 
-  it('should call onCancel when cancel button is clicked', async () => {
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+  it('should call onCancel when cancel button is clicked', () => {
     render(<ConfirmationDialog {...defaultProps} />);
 
     const cancelButton = screen.getByText('Cancel');
-    await user.click(cancelButton);
+    fireEvent.click(cancelButton);
 
     expect(defaultProps.onCancel).toHaveBeenCalledTimes(1);
   });

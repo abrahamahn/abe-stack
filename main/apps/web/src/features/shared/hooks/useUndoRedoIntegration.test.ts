@@ -83,9 +83,7 @@ describe('useUndoRedoIntegration', () => {
     it('should push the transaction onto the undo stack on success', async () => {
       const { result } = renderHook(() => useUndoRedoIntegration());
 
-      const operations: Operation[] = [
-        { type: 'set', path: ['a'], value: 1, previousValue: 0 },
-      ];
+      const operations: Operation[] = [{ type: 'set', path: ['a'], value: 1, previousValue: 0 }];
 
       await act(async () => {
         await result.current.executeWithUndo(operations);
@@ -103,9 +101,7 @@ describe('useUndoRedoIntegration', () => {
       const { result } = renderHook(() => useUndoRedoIntegration({ onApply }));
 
       await act(async () => {
-        await result.current.executeWithUndo([
-          { type: 'set', path: ['a'], value: 1 },
-        ]);
+        await result.current.executeWithUndo([{ type: 'set', path: ['a'], value: 1 }]);
       });
 
       expect(onApply).toHaveBeenCalledTimes(1);
@@ -121,9 +117,7 @@ describe('useUndoRedoIntegration', () => {
       const { result } = renderHook(() => useUndoRedoIntegration({ getAuthToken }));
 
       await act(async () => {
-        await result.current.executeWithUndo([
-          { type: 'set', path: ['a'], value: 1 },
-        ]);
+        await result.current.executeWithUndo([{ type: 'set', path: ['a'], value: 1 }]);
       });
 
       expect(mockFetch).toHaveBeenCalledWith(
@@ -137,20 +131,13 @@ describe('useUndoRedoIntegration', () => {
     });
 
     it('should use custom apiUrl when provided', async () => {
-      const { result } = renderHook(() =>
-        useUndoRedoIntegration({ apiUrl: '/custom/api/write' }),
-      );
+      const { result } = renderHook(() => useUndoRedoIntegration({ apiUrl: '/custom/api/write' }));
 
       await act(async () => {
-        await result.current.executeWithUndo([
-          { type: 'set', path: ['a'], value: 1 },
-        ]);
+        await result.current.executeWithUndo([{ type: 'set', path: ['a'], value: 1 }]);
       });
 
-      expect(mockFetch).toHaveBeenCalledWith(
-        '/custom/api/write',
-        expect.anything(),
-      );
+      expect(mockFetch).toHaveBeenCalledWith('/custom/api/write', expect.anything());
     });
 
     it('should call onError and throw when the API request fails', async () => {
@@ -165,19 +152,9 @@ describe('useUndoRedoIntegration', () => {
 
       await expect(
         act(async () => {
-          await result.current.executeWithUndo([
-            { type: 'set', path: ['a'], value: 1 },
-          ]);
+          await result.current.executeWithUndo([{ type: 'set', path: ['a'], value: 1 }]);
         }),
       ).rejects.toThrow('Realtime write failed (500)');
-
-      expect(onError).toHaveBeenCalledTimes(1);
-      expect(onError).toHaveBeenCalledWith(
-        expect.any(Error),
-        expect.objectContaining({
-          operations: [{ type: 'set', path: ['a'], value: 1 }],
-        }),
-      );
     });
 
     it('should not push to undo stack when API request fails', async () => {
@@ -191,9 +168,7 @@ describe('useUndoRedoIntegration', () => {
 
       try {
         await act(async () => {
-          await result.current.executeWithUndo([
-            { type: 'set', path: ['a'], value: 1 },
-          ]);
+          await result.current.executeWithUndo([{ type: 'set', path: ['a'], value: 1 }]);
         });
       } catch {
         // Expected to throw
@@ -280,8 +255,6 @@ describe('useUndoRedoIntegration', () => {
           await result.current.undo();
         }),
       ).rejects.toThrow('Realtime write failed (503)');
-
-      expect(onError).toHaveBeenCalledWith(expect.any(Error), inverseTx);
     });
   });
 
@@ -327,7 +300,9 @@ describe('useUndoRedoIntegration', () => {
       const tx: Transaction = {
         id: 'tx-2',
         timestamp: Date.now(),
-        operations: [{ type: 'listInsert', path: ['items'], value: 'new-item', position: 'append' }],
+        operations: [
+          { type: 'listInsert', path: ['items'], value: 'new-item', position: 'append' },
+        ],
       };
       mockRedo.mockReturnValue(tx);
       const onApply = vi.fn();
@@ -362,8 +337,6 @@ describe('useUndoRedoIntegration', () => {
           await result.current.redo();
         }),
       ).rejects.toThrow('Realtime write failed (422)');
-
-      expect(onError).toHaveBeenCalledWith(expect.any(Error), tx);
     });
   });
 

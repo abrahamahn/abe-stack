@@ -20,12 +20,13 @@ import {
   MetricsCollector,
   resetMetricsCollector,
 } from '../../../../../server/system/src/metrics/metrics';
-import {
-  ConsoleErrorTrackingProvider,
-} from '../../../../../server/system/src/observability/console.provider';
+import { ConsoleErrorTrackingProvider } from '../../../../../server/system/src/observability/console.provider';
 import { NoopErrorTrackingProvider } from '../../../../../server/system/src/observability/noop.provider';
 
-import type { ErrorTrackingConfig, ErrorTrackingProvider } from '../../../../../server/system/src/observability/types';
+import type {
+  ErrorTrackingConfig,
+  ErrorTrackingProvider,
+} from '../../../../../server/system/src/observability/types';
 
 // ============================================================================
 // Sentry / Error Tracking Provider Tests (config-gated)
@@ -57,9 +58,8 @@ describe('Sentry Integration Provider (config-gated)', () => {
     };
 
     // When DSN is null, the system should use NoopErrorTrackingProvider
-    const provider = config.dsn === null
-      ? new NoopErrorTrackingProvider()
-      : new ConsoleErrorTrackingProvider();
+    const provider =
+      config.dsn === null ? new NoopErrorTrackingProvider() : new ConsoleErrorTrackingProvider();
 
     provider.init(config);
     // NoopProvider should not throw on any operation
@@ -110,9 +110,7 @@ describe('Sentry Integration Provider (config-gated)', () => {
 
     provider.captureError(new Error('test'));
 
-    const breadcrumbsCall = logFn.mock.calls.find(
-      (call: unknown[]) => call[0] === 'Breadcrumbs:',
-    );
+    const breadcrumbsCall = logFn.mock.calls.find((call: unknown[]) => call[0] === 'Breadcrumbs:');
     expect(breadcrumbsCall).toBeDefined();
     const breadcrumbs = breadcrumbsCall?.[1] as Array<{ message: string }>;
     expect(breadcrumbs).toHaveLength(20);
@@ -319,26 +317,33 @@ describe('Prometheus-compatible /metrics endpoint (config-gated)', () => {
 // ============================================================================
 
 describe('Deployment Sanity', () => {
+  const importRuntimeModule = async (relativePath: string): Promise<Record<string, unknown>> => {
+    const moduleUrl = new URL(relativePath, import.meta.url);
+    return import(/* @vite-ignore */ moduleUrl.href);
+  };
+
   describe('bootstrap-admin.ts idempotency', () => {
     it('bootstrapAdmin exports a function', async () => {
       // Verify the bootstrap-admin module exports the expected function
       // Uses longer timeout because importing @bslt/db and @bslt/core/auth is heavy
-      const mod = await import('../../../../../tools/scripts/db/bootstrap-admin');
-      expect(typeof mod.bootstrapAdmin).toBe('function');
+      const mod = await importRuntimeModule('../../../../../tools/scripts/db/bootstrap-admin');
+      expect(typeof mod['bootstrapAdmin']).toBe('function');
     }, 30_000);
   });
 
   describe('seed.ts exports', () => {
     it('seed module exports seed function and TEST_USERS', async () => {
-      const mod = await import('../../../../../tools/scripts/db/seed');
-      expect(typeof mod.seed).toBe('function');
-      expect(Array.isArray(mod.TEST_USERS)).toBe(true);
-      expect(mod.TEST_USERS.length).toBeGreaterThan(0);
+      const mod = await importRuntimeModule('../../../../../tools/scripts/db/seed');
+      expect(typeof mod['seed']).toBe('function');
+      const testUsers = mod['TEST_USERS'] as Array<unknown>;
+      expect(Array.isArray(testUsers)).toBe(true);
+      expect(testUsers.length).toBeGreaterThan(0);
     });
 
     it('seed TEST_USERS includes admin and user roles', async () => {
-      const mod = await import('../../../../../tools/scripts/db/seed');
-      const roles = mod.TEST_USERS.map((u: { role: string }) => u.role);
+      const mod = await importRuntimeModule('../../../../../tools/scripts/db/seed');
+      const testUsers = mod['TEST_USERS'] as Array<{ role: string }>;
+      const roles = testUsers.map((u) => u.role);
       expect(roles).toContain('admin');
       expect(roles).toContain('user');
     });
@@ -346,10 +351,11 @@ describe('Deployment Sanity', () => {
     it('seed refuses to run in production', async () => {
       // The seed function checks NODE_ENV and calls process.exit(1)
       // We verify the safety guard exists in the source
-      const mod = await import('../../../../../tools/scripts/db/seed');
+      const mod = await importRuntimeModule('../../../../../tools/scripts/db/seed');
       // Verify the module has the production guard by checking TEST_USERS
       // are explicitly labeled as development-only
-      expect(mod.TEST_USERS.every((u: { password: string }) => u.password === 'password123')).toBe(true);
+      const testUsers = mod['TEST_USERS'] as Array<{ password: string }>;
+      expect(testUsers.every((u) => u.password === 'password123')).toBe(true);
     });
   });
 });

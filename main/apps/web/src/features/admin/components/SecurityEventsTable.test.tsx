@@ -6,11 +6,7 @@ import { renderWithProviders } from '../../../__tests__/utils';
 
 import { SecurityEventsTable } from './SecurityEventsTable';
 
-import type {
-  PaginationOptions,
-  SecurityEvent,
-  SecurityEventsListResponse,
-} from '@bslt/shared';
+import type { PaginationOptions, SecurityEvent, SecurityEventsListResponse } from '@bslt/shared';
 
 // ============================================================================
 // Test Data
@@ -103,7 +99,7 @@ describe('SecurityEventsTable', () => {
         />,
       );
 
-      expect(screen.getByText('No security events found')).toBeInTheDocument();
+      expect(screen.getByText('No security events')).toBeInTheDocument();
     });
 
     it('should show no events message when data array is empty', () => {
@@ -116,7 +112,7 @@ describe('SecurityEventsTable', () => {
         />,
       );
 
-      expect(screen.getByText('No security events found')).toBeInTheDocument();
+      expect(screen.getByText('No security events')).toBeInTheDocument();
     });
   });
 

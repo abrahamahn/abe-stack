@@ -28,10 +28,13 @@ import { registerRouteMap } from '@/http';
 
 // Mock dependencies
 vi.mock('@bslt/server-system', () => ({
-  registerRouteMap: vi.fn(),
   protectedRoute: vi.fn(),
   publicRoute: vi.fn(),
   createRouteMap: vi.fn(),
+}));
+
+vi.mock('@/http', () => ({
+  registerRouteMap: vi.fn(),
 }));
 
 vi.mock('@bslt/core/admin', () => ({

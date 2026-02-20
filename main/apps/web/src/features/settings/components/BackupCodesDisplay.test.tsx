@@ -172,8 +172,10 @@ describe('BackupCodesDisplay', () => {
     it('should copy codes to clipboard', async () => {
       const user = userEvent.setup();
       const mockClipboard = vi.fn().mockResolvedValue(undefined);
-      Object.assign(navigator, {
-        clipboard: { writeText: mockClipboard },
+      Object.defineProperty(globalThis.navigator, 'clipboard', {
+        configurable: true,
+        writable: true,
+        value: { writeText: mockClipboard },
       });
 
       vi.mocked(useBackupCodes).mockReturnValue(

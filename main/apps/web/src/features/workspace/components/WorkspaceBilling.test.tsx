@@ -18,6 +18,27 @@ vi.mock('../hooks/useWorkspaceBilling', () => ({
   useWorkspaceBilling: vi.fn(),
 }));
 
+vi.mock('../hooks/useWorkspaceInvoices', () => ({
+  useWorkspaceInvoices: vi.fn(() => ({
+    invoices: [],
+    hasMore: false,
+    isLoading: false,
+    error: null,
+  })),
+}));
+
+const { mockOpenPortal } = vi.hoisted(() => ({
+  mockOpenPortal: vi.fn(),
+}));
+
+vi.mock('../hooks/useStripePortal', () => ({
+  useStripePortal: vi.fn(() => ({
+    openPortal: mockOpenPortal,
+    isLoading: false,
+    error: null,
+  })),
+}));
+
 import { useWorkspaceBilling } from '../hooks/useWorkspaceBilling';
 
 import { WorkspaceBilling } from './WorkspaceBilling';
@@ -26,8 +47,7 @@ import type { Plan, Subscription } from '../hooks/useWorkspaceBilling';
 
 const mockNavigate = vi.fn();
 vi.mock('@bslt/react/router', async () => {
-  const actual =
-    await vi.importActual<typeof import('@bslt/react/router')>('@bslt/react/router');
+  const actual = await vi.importActual<typeof import('@bslt/react/router')>('@bslt/react/router');
   return {
     ...actual,
     useNavigate: () => mockNavigate,
@@ -170,7 +190,7 @@ describe('WorkspaceBilling', () => {
     const manageButton = screen.getByText('Manage Payment Method');
     await user.click(manageButton);
 
-    expect(mockNavigate).toHaveBeenCalledWith('/billing');
+    expect(mockOpenPortal).toHaveBeenCalledTimes(1);
   });
 
   it('should display error message', () => {

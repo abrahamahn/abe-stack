@@ -58,6 +58,17 @@ function createMockRepos() {
       revoke: vi.fn().mockResolvedValue(undefined),
       revokeAllForUser: vi.fn().mockResolvedValue(0),
     },
+    authTokens: {
+      findById: vi.fn().mockResolvedValue(null),
+      findByTokenHash: vi.fn().mockResolvedValue(null),
+      findValidByTokenHash: vi.fn().mockResolvedValue(null),
+      create: vi.fn().mockResolvedValue({ id: 'auth-token-1' }),
+      markAsUsed: vi.fn().mockResolvedValue(undefined),
+      invalidateForUser: vi.fn().mockResolvedValue(0),
+      countRecentByEmail: vi.fn().mockResolvedValue(0),
+      countRecentByIp: vi.fn().mockResolvedValue(0),
+      deleteExpired: vi.fn().mockResolvedValue(0),
+    },
     loginAttempts: {
       create: vi.fn().mockResolvedValue({ id: 'la-1' }),
       countRecentFailures: vi.fn().mockResolvedValue(0),
@@ -889,8 +900,8 @@ describe('Auth API Integration Tests', () => {
         role: 'user',
         emailVerified: true,
         failedLoginAttempts: 0,
-        lockedUntil: new Date(Date.now() + 60 * 60 * 1000),
-        lockReason: 'Suspicious activity detected',
+        lockedUntil: new Date(Date.now() + 60 * 60 * 1000) as Date | null,
+        lockReason: 'Suspicious activity detected' as string | null,
         totpEnabled: false,
         totpSecret: null,
         phone: null,
@@ -1211,10 +1222,15 @@ describe('Auth API Integration Tests', () => {
 
     it('POST /api/auth/reset-password with valid token sends password changed alert', async () => {
       // Mock a valid password reset token
-      mockRepos.passwordResetTokens.findValidByTokenHash.mockResolvedValue({
+      mockRepos.authTokens.findValidByTokenHash.mockResolvedValue({
         id: 'prt-valid',
+        type: 'password_reset',
         userId: 'user-reset',
         tokenHash: 'hashed-token',
+        metadata: {},
+        email: null,
+        ipAddress: null,
+        userAgent: null,
         createdAt: new Date(),
         expiresAt: new Date(Date.now() + 3600000),
         usedAt: null,
@@ -1500,10 +1516,15 @@ describe('Auth API Integration Tests', () => {
       const now = new Date();
 
       // Valid verification token found
-      mockRepos.emailVerificationTokens.findValidByTokenHash.mockResolvedValue({
+      mockRepos.authTokens.findValidByTokenHash.mockResolvedValue({
         id: 'evt-valid',
+        type: 'email_verification',
         userId: 'user-verify-1',
         tokenHash: 'hashed-token',
+        metadata: {},
+        email: null,
+        ipAddress: null,
+        userAgent: null,
         createdAt: now,
         expiresAt: new Date(Date.now() + 3600000),
         usedAt: null,
@@ -1606,7 +1627,7 @@ describe('Auth API Integration Tests', () => {
 
     it('POST /api/auth/verify-email with invalid token returns error', async () => {
       // No valid token found
-      mockRepos.emailVerificationTokens.findValidByTokenHash.mockResolvedValue(null);
+      mockRepos.authTokens.findValidByTokenHash.mockResolvedValue(null);
 
       const response = await testServer.inject({
         method: 'POST',
@@ -1620,7 +1641,7 @@ describe('Auth API Integration Tests', () => {
 
     it('POST /api/auth/reset-password with invalid token returns error', async () => {
       // No valid token found
-      mockRepos.passwordResetTokens.findValidByTokenHash.mockResolvedValue(null);
+      mockRepos.authTokens.findValidByTokenHash.mockResolvedValue(null);
 
       const response = await testServer.inject({
         method: 'POST',
@@ -1697,11 +1718,15 @@ describe('Auth API Integration Tests', () => {
       const now = new Date();
 
       // Valid email change token
-      mockRepos.emailChangeTokens.findByTokenHash.mockResolvedValue({
+      mockRepos.authTokens.findByTokenHash.mockResolvedValue({
         id: 'ect-valid',
+        type: 'email_change',
         userId: 'user-email-change',
-        newEmail: 'newemail@example.com',
+        metadata: { newEmail: 'newemail@example.com' },
         tokenHash: 'hashed-token',
+        email: null,
+        ipAddress: null,
+        userAgent: null,
         expiresAt: new Date(Date.now() + 3600000),
         usedAt: null,
         createdAt: now,
@@ -1738,20 +1763,11 @@ describe('Auth API Integration Tests', () => {
 
       // Successful update and token mark
       mockRepos.users.update.mockResolvedValue(undefined);
-      mockRepos.emailChangeTokens.markAsUsed.mockResolvedValue({ id: 'ect-valid', usedAt: now });
+      mockRepos.authTokens.markAsUsed.mockResolvedValue(undefined);
 
       // Revert token creation
-      mockRepos.emailChangeRevertTokens.invalidateForUser.mockResolvedValue(0);
-      mockRepos.emailChangeRevertTokens.create.mockResolvedValue({
-        id: 'ecrt-created',
-        tokenHash: 'revert-hash',
-        userId: 'user-email-change',
-        oldEmail: 'oldemail@example.com',
-        newEmail: 'newemail@example.com',
-        expiresAt: new Date(Date.now() + 86400000),
-        usedAt: null,
-        createdAt: now,
-      });
+      mockRepos.authTokens.invalidateForUser.mockResolvedValue(0);
+      mockRepos.authTokens.create.mockResolvedValue({ id: 'ecrt-created' });
 
       const response = await testServer.inject({
         method: 'POST',
@@ -1775,12 +1791,18 @@ describe('Auth API Integration Tests', () => {
       const now = new Date();
 
       // Valid revert token
-      mockRepos.emailChangeRevertTokens.findByTokenHash.mockResolvedValue({
+      mockRepos.authTokens.findByTokenHash.mockResolvedValue({
         id: 'ecrt-valid',
+        type: 'email_change_revert',
         userId: 'user-revert',
-        oldEmail: 'original@example.com',
-        newEmail: 'changed@example.com',
+        metadata: {
+          oldEmail: 'original@example.com',
+          newEmail: 'changed@example.com',
+        },
         tokenHash: 'hashed-revert-token',
+        email: null,
+        ipAddress: null,
+        userAgent: null,
         expiresAt: new Date(Date.now() + 3600000),
         usedAt: null,
         createdAt: now,
@@ -1814,10 +1836,7 @@ describe('Auth API Integration Tests', () => {
 
       // Successful update and token mark
       mockRepos.users.update.mockResolvedValue(undefined);
-      mockRepos.emailChangeRevertTokens.markAsUsed.mockResolvedValue({
-        id: 'ecrt-valid',
-        usedAt: now,
-      });
+      mockRepos.authTokens.markAsUsed.mockResolvedValue(undefined);
 
       const response = await testServer.inject({
         method: 'POST',

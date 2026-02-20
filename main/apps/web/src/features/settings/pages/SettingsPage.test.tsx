@@ -18,6 +18,9 @@ vi.mock('../components', () => {
     <div data-testid="api-keys-management">API Keys Management</div>
   );
   const mockAvatarUpload = () => <div data-testid="avatar-upload">Avatar Upload</div>;
+  const mockBackupCodesDisplay = () => (
+    <div data-testid="backup-codes-display">Backup Codes Display</div>
+  );
   const mockDangerZone = () => <div data-testid="danger-zone">Danger Zone</div>;
   const mockDataControlsSection = () => (
     <div data-testid="data-controls-section">Data Controls Section</div>
@@ -28,6 +31,9 @@ vi.mock('../components', () => {
   );
   const mockNotificationPreferencesForm = () => (
     <div data-testid="notification-preferences">Notification Preferences</div>
+  );
+  const mockNotificationPreferencesSection = () => (
+    <div data-testid="notification-preferences-section">Notification Preferences Section</div>
   );
   const mockOAuthConnectionsList = () => (
     <div data-testid="oauth-connections">OAuth Connections</div>
@@ -53,12 +59,14 @@ vi.mock('../components', () => {
   return {
     ApiKeysManagement: mockApiKeysManagement,
     AvatarUpload: mockAvatarUpload,
+    BackupCodesDisplay: mockBackupCodesDisplay,
     DangerZone: mockDangerZone,
     DataControlsSection: mockDataControlsSection,
     DevicesList: mockDevicesList,
     EmailChangeForm: mockEmailChangeForm,
     ForgotPasswordShortcut: mockForgotPasswordShortcut,
     NotificationPreferencesForm: mockNotificationPreferencesForm,
+    NotificationPreferencesSection: mockNotificationPreferencesSection,
     OAuthConnectionsList: mockOAuthConnectionsList,
     PasswordChangeForm: mockPasswordChangeForm,
     PasskeyManagement: mockPasskeyManagement,

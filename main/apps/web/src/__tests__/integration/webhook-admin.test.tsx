@@ -373,8 +373,8 @@ describe('Webhook Admin E2E: admin -> create webhook -> trigger event -> see del
 
       render(<WebhookDetailPage webhookId="wh-1" />);
 
-      expect(screen.getByText('user.created')).toBeInTheDocument();
-      expect(screen.getByText('user.deleted')).toBeInTheDocument();
+      expect(screen.getAllByText('user.created').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('user.deleted').length).toBeGreaterThan(0);
     });
 
     it('should show delivery log with status indicators', () => {
@@ -384,9 +384,9 @@ describe('Webhook Admin E2E: admin -> create webhook -> trigger event -> see del
       render(<WebhookDetailPage webhookId="wh-1" />);
 
       expect(screen.getByText('Delivery Log')).toBeInTheDocument();
-      expect(screen.getByText('Delivered')).toBeInTheDocument();
-      expect(screen.getByText('Failed')).toBeInTheDocument();
-      expect(screen.getByText('Dead Letter')).toBeInTheDocument();
+      expect(screen.getAllByText('Delivered').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('Failed').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('Dead Letter').length).toBeGreaterThan(0);
     });
 
     it('should show replay button for failed deliveries', () => {

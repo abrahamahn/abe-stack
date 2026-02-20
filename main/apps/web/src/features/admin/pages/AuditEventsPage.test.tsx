@@ -25,6 +25,18 @@ vi.mock('@bslt/ui', () => ({
     placeholder?: string;
     value?: string;
   }) => <input {...props} onChange={(e) => onChange?.(e)} />,
+  EmptyState: ({
+    title,
+    description,
+  }: {
+    title: React.ReactNode;
+    description?: React.ReactNode;
+  }) => (
+    <div role="status">
+      <span>{title}</span>
+      {description !== undefined ? <span>{description}</span> : null}
+    </div>
+  ),
   PageContainer: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   Select: ({
     children,
@@ -150,6 +162,6 @@ describe('AuditEventsPage', () => {
 
     render(<AuditEventsPage />);
     expect(screen.getByText('0 events')).toBeInTheDocument();
-    expect(screen.getByText('No audit events found')).toBeInTheDocument();
+    expect(screen.getByText('No audit events')).toBeInTheDocument();
   });
 });

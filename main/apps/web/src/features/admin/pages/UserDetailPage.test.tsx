@@ -106,8 +106,12 @@ vi.mock('../components', () => {
       {user !== null ? 'User loaded' : 'No user'}
     </div>
   );
+  const mockLockUserDialog = () => <div data-testid="lock-user-dialog">Lock User Dialog</div>;
+  const mockHardBanDialog = () => <div data-testid="hard-ban-dialog">Hard Ban Dialog</div>;
 
   return {
+    HardBanDialog: mockHardBanDialog,
+    LockUserDialog: mockLockUserDialog,
     UserActionsMenu: mockUserActionsMenu,
     UserDetailCard: mockUserDetailCard,
   };

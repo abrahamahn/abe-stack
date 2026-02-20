@@ -11,13 +11,8 @@
  */
 
 import { useUndoRedoStore } from '@bslt/react';
-import {
-  createTransaction,
-  invertTransaction,
-  type Operation,
-  type Transaction,
-} from '@bslt/shared';
-import { useCallback, useRef } from 'react';
+import { createTransaction, type Operation, type Transaction } from '@bslt/shared';
+import { useCallback } from 'react';
 
 // ============================================================================
 // Types
@@ -157,12 +152,7 @@ async function sendToServer(
 export function useUndoRedoIntegration(
   options: UseUndoRedoIntegrationOptions = {},
 ): UseUndoRedoIntegrationResult {
-  const {
-    apiUrl = DEFAULT_API_URL,
-    getAuthToken,
-    onApply,
-    onError,
-  } = options;
+  const { apiUrl = DEFAULT_API_URL, getAuthToken, onApply, onError } = options;
 
   const store = useUndoRedoStore();
   const canUndo = store.canUndo();
@@ -170,33 +160,25 @@ export function useUndoRedoIntegration(
   const undoCount = store.undoStackSize();
   const redoCount = store.redoStackSize();
 
-  // Use refs for callbacks to avoid stale closures
-  const onApplyRef = useRef(onApply);
-  onApplyRef.current = onApply;
-  const onErrorRef = useRef(onError);
-  onErrorRef.current = onError;
-  const getAuthTokenRef = useRef(getAuthToken);
-  getAuthTokenRef.current = getAuthToken;
-
   /**
    * Execute operations and push a transaction onto the undo stack.
    */
   const executeWithUndo = useCallback(
     async (operations: Operation[]): Promise<void> => {
       const transaction = createTransaction(operations);
-      const authToken = getAuthTokenRef.current?.() ?? null;
+      const authToken = getAuthToken?.() ?? null;
 
       try {
         await sendToServer(transaction, apiUrl, authToken);
         store.push(transaction);
-        onApplyRef.current?.(transaction);
+        onApply?.(transaction);
       } catch (err) {
         const error = err instanceof Error ? err : new Error(String(err));
-        onErrorRef.current?.(error, transaction);
+        onError?.(error, transaction);
         throw error;
       }
     },
-    [apiUrl, store],
+    [apiUrl, getAuthToken, onApply, onError, store],
   );
 
   /**
@@ -206,17 +188,17 @@ export function useUndoRedoIntegration(
     const inverseTx = store.undo();
     if (inverseTx === undefined) return;
 
-    const authToken = getAuthTokenRef.current?.() ?? null;
+    const authToken = getAuthToken?.() ?? null;
 
     try {
       await sendToServer(inverseTx, apiUrl, authToken);
-      onApplyRef.current?.(inverseTx);
+      onApply?.(inverseTx);
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
-      onErrorRef.current?.(error, inverseTx);
+      onError?.(error, inverseTx);
       throw error;
     }
-  }, [apiUrl, store]);
+  }, [apiUrl, getAuthToken, onApply, onError, store]);
 
   /**
    * Redo the last undone transaction by re-applying it to the server.
@@ -225,17 +207,17 @@ export function useUndoRedoIntegration(
     const tx = store.redo();
     if (tx === undefined) return;
 
-    const authToken = getAuthTokenRef.current?.() ?? null;
+    const authToken = getAuthToken?.() ?? null;
 
     try {
       await sendToServer(tx, apiUrl, authToken);
-      onApplyRef.current?.(tx);
+      onApply?.(tx);
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
-      onErrorRef.current?.(error, tx);
+      onError?.(error, tx);
       throw error;
     }
-  }, [apiUrl, store]);
+  }, [apiUrl, getAuthToken, onApply, onError, store]);
 
   return {
     executeWithUndo,

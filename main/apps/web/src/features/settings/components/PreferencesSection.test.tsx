@@ -73,6 +73,10 @@ vi.mock('@bslt/ui', async () => {
   };
 });
 
+vi.mock('./LanguageSelector', () => ({
+  LanguageSelector: () => <div data-testid="language-selector">Language Selector</div>,
+}));
+
 describe('PreferencesSection', () => {
   const THEME_STORAGE_KEY = 'abe-theme-preference';
   let getItemSpy: ReturnType<typeof vi.spyOn>;

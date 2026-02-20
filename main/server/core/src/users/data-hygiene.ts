@@ -46,7 +46,7 @@ import type { ServerLogger } from '@bslt/shared';
  * @complexity O(1)
  */
 export function isUserDeleted(user: Pick<User, 'deletedAt'>): boolean {
-  return user.deletedAt !== null;
+  return user.deletedAt != null;
 }
 
 /**
@@ -74,6 +74,16 @@ export interface PaginatedUsersResult<T extends Pick<User, 'deletedAt'>> {
   data: T[];
   /** Total count (will be adjusted to exclude soft-deleted users) */
   total: number;
+  /** Current page (1-indexed) */
+  page?: number | undefined;
+  /** Items per page */
+  limit?: number | undefined;
+  /** Whether a next page exists */
+  hasNext?: boolean | undefined;
+  /** Whether a previous page exists */
+  hasPrev?: boolean | undefined;
+  /** Total number of pages */
+  totalPages?: number | undefined;
 }
 
 /**
