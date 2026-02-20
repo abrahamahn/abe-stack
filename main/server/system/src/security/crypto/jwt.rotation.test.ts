@@ -1,7 +1,7 @@
 // main/server/system/src/security/crypto/jwt.rotation.test.ts
 import { describe, expect, test } from 'vitest';
 
-import { JwtError, sign as jwtSign } from './jwt';
+import { JwtError, sign as jwtSign } from '@bslt/shared/system/crypto';
 import {
   checkTokenSecret,
   createJwtRotationHandler,

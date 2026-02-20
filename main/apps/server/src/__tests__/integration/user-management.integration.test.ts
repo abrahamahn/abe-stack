@@ -16,7 +16,9 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 
 import { createTestJwt, createTestServer, parseJsonResponse, type TestServer } from './test-utils';
 
-import type { AuthGuardFactory } from '@bslt/server-system';
+import type { AuthGuardFactory } from '@/http';
+
+import { registerRouteMap } from '@/http';
 
 import { registerRouteMap } from '@/http';
 

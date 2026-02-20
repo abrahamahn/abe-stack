@@ -14,7 +14,7 @@
 
 import { getMetricsCollector } from '../metrics';
 
-import type { QueueConfig, QueueStore, Task, TaskError, TaskHandler, TaskHandlers } from './types';
+import type { QueueConfig, QueueStore, Task, TaskError, TaskHandler, TaskHandlers } from '@bslt/db';
 
 // ============================================================================
 // Logger Interface

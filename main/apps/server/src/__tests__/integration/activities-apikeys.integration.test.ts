@@ -19,7 +19,9 @@ import {
   type TestServer,
 } from './test-utils';
 
-import type { AuthGuardFactory } from '@bslt/server-system';
+import type { AuthGuardFactory } from '@/http';
+
+import { registerRouteMap } from '@/http';
 
 import { registerRouteMap } from '@/http';
 

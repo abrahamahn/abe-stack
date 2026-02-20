@@ -10,7 +10,7 @@
 
 import { authRoutes, createAuthGuard } from '@bslt/core/auth';
 import { userRoutes } from '@bslt/core/users';
-import { registerRouteMap } from '@bslt/server-system';
+
 
 import { buildBillingRouteMap } from './billingRouteAdapter';
 import { registerBillingWebhookRoutes } from './billingWebhooks';
@@ -24,6 +24,8 @@ import type {
 } from '@bslt/server-system';
 import type { AppContext } from '@shared';
 import type { FastifyInstance } from 'fastify';
+
+import { registerRouteMap } from '@/http';
 
 /**
  * Annotate routes from shared modules with OpenAPI metadata.

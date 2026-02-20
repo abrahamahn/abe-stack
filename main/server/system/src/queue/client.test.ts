@@ -5,7 +5,7 @@ import { createQueueServer } from './client';
 import { createMemoryQueueStore } from './memory.store';
 
 import type { MemoryQueueStore } from './memory.store';
-import type { TaskHandlers } from './types';
+import type { TaskHandlers } from '@bslt/db';
 
 // ============================================================================
 // QueueServer Tests

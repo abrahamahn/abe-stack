@@ -38,7 +38,12 @@ import {
 import type { HttpReply, HttpRequest } from '../../../../system/src';
 import type { AppContext, ReplyWithCookies } from '../types';
 import type { OAuthConnectionInfo } from './types';
+import type { HttpReply, HttpRequest } from '../../../../system/src';
 import type { AuthResponse, HttpErrorResponse } from '@bslt/shared';
+<<<<<<< HEAD
+import type { FastifyReply } from 'fastify';
+=======
+>>>>>>> 22aa2927d22407c44f3265bfe62d5e644c3895b5
 
 // ============================================================================
 // Types
@@ -335,7 +340,11 @@ export async function handleOAuthCallbackRequest(
     );
 
     // Set refresh token cookie
+<<<<<<< HEAD
+    const replyWithCookies = reply as unknown as FastifyReply & ReplyWithCookies;
+=======
     const replyWithCookies = reply as unknown as ReplyWithCookies;
+>>>>>>> 22aa2927d22407c44f3265bfe62d5e644c3895b5
     setRefreshTokenCookie(replyWithCookies, result.auth.refreshToken, ctx.config.auth);
 
     return {

@@ -108,7 +108,11 @@ function createMockRequest(user?: {
     body: undefined,
     ip: '127.0.0.1',
     method: 'GET',
+<<<<<<< HEAD
+    url: '/',
+=======
     url: '/test',
+>>>>>>> 22aa2927d22407c44f3265bfe62d5e644c3895b5
     correlationId: 'test-correlation-id',
     logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
     requestInfo: {
@@ -127,9 +131,14 @@ function createMockRequest(user?: {
 function createMockReply(): HttpReply {
   return {
     status: vi.fn().mockReturnThis(),
+<<<<<<< HEAD
+    send: vi.fn(),
+    header: vi.fn().mockReturnThis(),
+=======
     send: vi.fn().mockReturnThis(),
     header: vi.fn().mockReturnThis(),
     redirect: vi.fn().mockReturnThis(),
+>>>>>>> 22aa2927d22407c44f3265bfe62d5e644c3895b5
   } as unknown as HttpReply;
 }
 

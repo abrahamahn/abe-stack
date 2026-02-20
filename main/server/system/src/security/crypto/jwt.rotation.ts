@@ -15,9 +15,9 @@
  * 5. Remove previousSecret
  */
 
-import { JwtError, sign as jwtSign, verify as jwtVerify } from './jwt';
+import { JwtError, sign as jwtSign, verify as jwtVerify } from '@bslt/shared/system/crypto';
 
-import type { JwtPayload, SignOptions as JwtSignOptions } from './jwt';
+import type { JwtPayload, SignOptions as JwtSignOptions } from '@bslt/shared/system/crypto';
 
 // ============================================================================
 // Types

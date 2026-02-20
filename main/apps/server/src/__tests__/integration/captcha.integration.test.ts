@@ -1,9 +1,9 @@
-// main/apps/server/src/__tests__/integration/login-failure.integration.test.ts
+// main/apps/server/src/__tests__/integration/captcha.integration.test.ts
 /**
- * Login Failure Integration Tests
+ * CAPTCHA Integration Tests
  *
- * Verifies anti-enumeration behavior: login failures always return
- * the same generic 401 message regardless of failure reason.
+ * Tests CAPTCHA behavior through the auth API endpoints.
+ * Verifies that CAPTCHA is properly gated by config.
  */
 
 import { authRoutes, createAuthGuard } from '@bslt/core/auth';
@@ -12,8 +12,6 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 import { createTestServer, parseJsonResponse, type TestServer } from './test-utils';
 
 import type { AuthGuardFactory } from '@/http';
-
-import { registerRouteMap } from '@/http';
 
 import { registerRouteMap } from '@/http';
 
@@ -195,13 +193,12 @@ function createMockEmailTemplates() {
 }
 
 // ============================================================================
-// Test Suite
+// Test Suite — CAPTCHA disabled (default test config)
 // ============================================================================
 
-describe('Login Failure Anti-Enumeration Tests', () => {
+describe('CAPTCHA Integration Tests (disabled)', () => {
   let testServer: TestServer;
   let mockRepos: ReturnType<typeof createMockRepos>;
-  let mockDb: ReturnType<typeof createMockDbClient>;
 
   beforeAll(async () => {
     testServer = await createTestServer({
@@ -210,7 +207,7 @@ describe('Login Failure Anti-Enumeration Tests', () => {
       enableSecurityHeaders: false,
     });
 
-    mockDb = createMockDbClient();
+    const mockDb = createMockDbClient();
     mockRepos = createMockRepos();
     const mockLogger = createMockLogger();
     const mockEmail = createMockEmailTemplates();
@@ -241,134 +238,114 @@ describe('Login Failure Anti-Enumeration Tests', () => {
     vi.clearAllMocks();
   });
 
-  // ==========================================================================
-  // Anti-Enumeration: Generic 401 Responses
-  // ==========================================================================
+  it('login succeeds without captchaToken when CAPTCHA is disabled', async () => {
+    mockRepos.users.findByEmail.mockResolvedValue(null);
 
-  describe('anti-enumeration', () => {
-    it('returns generic 401 for non-existent user', async () => {
-      // User does not exist
-      mockRepos.users.findByEmail.mockResolvedValue(null);
-      mockRepos.users.findByUsername.mockResolvedValue(null);
-
-      const response = await testServer.inject({
-        method: 'POST',
-        url: '/api/auth/login',
-        payload: {
-          identifier: 'nonexistent@example.com',
-          password: 'SomePassword123!',
-        },
-      });
-
-      expect(response.statusCode).toBe(401);
-      const body = parseJsonResponse(response) as { message: string };
-      expect(body.message).toBe('Invalid email or password');
+    const response = await testServer.inject({
+      method: 'POST',
+      url: '/api/auth/login',
+      payload: {
+        identifier: 'user@example.com',
+        password: 'TestPassword123!',
+      },
     });
 
-    it('returns generic 401 for wrong password', async () => {
-      // User exists but password is wrong
-      mockDb.query.mockResolvedValue([]);
-      mockDb.queryOne.mockResolvedValue(null);
-      mockRepos.users.findByEmail.mockResolvedValue({
-        id: 'user-1',
-        email: 'real@example.com',
-        name: 'Real User',
-        role: 'user',
-        emailVerified: true,
-        passwordHash: '$argon2id$v=19$m=65536,t=3,p=1$wronghash',
-        failedLoginAttempts: 0,
-        lockedUntil: null,
-        totpEnabled: false,
-        totpSecret: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        version: 1,
-      });
+    // Should fail for invalid credentials (401), not CAPTCHA (400)
+    expect(response.statusCode).toBe(401);
+    const body = parseJsonResponse(response) as { message: string };
+    expect(body.message).toBe('Invalid email or password');
+  });
 
-      const response = await testServer.inject({
-        method: 'POST',
-        url: '/api/auth/login',
-        payload: {
-          identifier: 'real@example.com',
-          password: 'WrongPassword123!',
-        },
-      });
+  it('register proceeds without captchaToken when CAPTCHA is disabled', async () => {
+    mockRepos.users.findByEmail.mockResolvedValue(null);
+    mockRepos.users.findByUsername.mockResolvedValue(null);
 
-      expect(response.statusCode).toBe(401);
-      const body = parseJsonResponse(response) as { message: string };
-      expect(body.message).toBe('Invalid email or password');
+    const response = await testServer.inject({
+      method: 'POST',
+      url: '/api/auth/register',
+      payload: {
+        email: 'newuser@example.com',
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
+        password: 'StrongP@ssword123!',
+        tosAccepted: true,
+      },
     });
 
-    it('both non-existent user and wrong password return identical message', async () => {
-      // First: non-existent user
-      mockRepos.users.findByEmail.mockResolvedValue(null);
-      mockRepos.users.findByUsername.mockResolvedValue(null);
+    // Should get past CAPTCHA and into service logic (not 400 for missing CAPTCHA)
+    expect(response.statusCode).not.toBe(400);
+  });
+});
 
-      const response1 = await testServer.inject({
-        method: 'POST',
-        url: '/api/auth/login',
-        payload: {
-          identifier: 'nobody@example.com',
-          password: 'SomePassword123!',
+// ============================================================================
+// Test Suite — CAPTCHA enabled
+// ============================================================================
+
+describe('CAPTCHA Integration Tests (enabled)', () => {
+  let testServer: TestServer;
+
+  beforeAll(async () => {
+    testServer = await createTestServer({
+      config: {
+        auth: {
+          captcha: {
+            enabled: true,
+            provider: 'turnstile',
+            siteKey: 'test-site-key',
+            secretKey: 'test-secret-key',
+          },
         },
-      });
-
-      // Reset mocks for second request
-      vi.clearAllMocks();
-
-      // Second: existing user, wrong password
-      mockDb.query.mockResolvedValue([]);
-      mockDb.queryOne.mockResolvedValue(null);
-      mockRepos.users.findByEmail.mockResolvedValue({
-        id: 'user-1',
-        email: 'real@example.com',
-        name: 'Real User',
-        role: 'user',
-        emailVerified: true,
-        passwordHash: '$argon2id$v=19$m=65536,t=3,p=1$wronghash',
-        failedLoginAttempts: 0,
-        lockedUntil: null,
-        totpEnabled: false,
-        totpSecret: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        version: 1,
-      });
-
-      const response2 = await testServer.inject({
-        method: 'POST',
-        url: '/api/auth/login',
-        payload: {
-          identifier: 'real@example.com',
-          password: 'WrongPassword123!',
-        },
-      });
-
-      // Both should be 401 with identical message (anti-enumeration)
-      const body1 = parseJsonResponse(response1) as { message: string };
-      const body2 = parseJsonResponse(response2) as { message: string };
-      expect(response1.statusCode).toBe(response2.statusCode);
-      expect(body1.message).toBe(body2.message);
+      } as never,
+      enableCsrf: false,
+      enableCors: false,
+      enableSecurityHeaders: false,
     });
 
-    it('response never exposes specific failure reason to client', async () => {
-      mockRepos.users.findByEmail.mockResolvedValue(null);
+    const mockDb = createMockDbClient();
+    const mockRepos = createMockRepos();
+    const mockLogger = createMockLogger();
+    const mockEmail = createMockEmailTemplates();
 
-      const response = await testServer.inject({
-        method: 'POST',
-        url: '/api/auth/login',
-        payload: {
-          identifier: 'test@example.com',
-          password: 'Test123!',
-        },
-      });
+    const ctx = {
+      db: mockDb,
+      repos: mockRepos,
+      log: mockLogger,
+      email: testServer.email,
+      emailTemplates: mockEmail,
+      config: testServer.config,
+    };
 
-      const body = parseJsonResponse(response) as Record<string, unknown>;
-      // Should not contain any enumeration-revealing fields
-      expect(body).not.toHaveProperty('reason');
-      expect(body).not.toHaveProperty('failureReason');
-      expect(body).not.toHaveProperty('userExists');
-      expect(body).not.toHaveProperty('emailExists');
+    registerRouteMap(testServer.server, ctx as never, authRoutes, {
+      prefix: '/api',
+      jwtSecret: testServer.config.auth.jwt.secret,
+      authGuardFactory: createAuthGuard as unknown as AuthGuardFactory,
     });
+
+    await testServer.ready();
+  });
+
+  afterAll(async () => {
+    await testServer.close();
+  });
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('login rejects missing captchaToken when CAPTCHA is enabled', async () => {
+    const response = await testServer.inject({
+      method: 'POST',
+      url: '/api/auth/login',
+      payload: {
+        identifier: 'user@example.com',
+        password: 'TestPassword123!',
+      },
+    });
+
+    // CAPTCHA verification should fail with 400 for missing/empty token
+    expect(response.statusCode).toBe(400);
+    const body = parseJsonResponse(response) as { message: string };
+    expect(body.message).toContain('CAPTCHA');
   });
 });

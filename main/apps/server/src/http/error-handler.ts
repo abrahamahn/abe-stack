@@ -8,8 +8,6 @@
  *
  * Moved from @bslt/server-system to keep Fastify coupling in the app layer.
  */
-
-import { replyError } from '@bslt/server-system';
 import {
   AppError,
   BadRequestError,
@@ -17,6 +15,7 @@ import {
   mapErrorToHttpResponse,
 } from '@bslt/shared/system';
 
+import { replyError, type HttpReply } from '@bslt/server-system';
 
 import type { FastifyBaseLogger, FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
@@ -104,7 +103,7 @@ export function registerErrorHandler(server: FastifyInstance): void {
         },
         'Request schema validation failed',
       );
-      replyError(reply, new BadRequestError('Request validation failed'), request.correlationId);
+      replyError(reply as unknown as HttpReply, new BadRequestError('Request validation failed'), request.correlationId);
       return;
     }
 

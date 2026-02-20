@@ -8,7 +8,7 @@
  * @module @bslt/server-system/queue
  */
 
-import type { QueueStore, Task, TaskError, TaskResult } from './types';
+import type { QueueStore, Task, TaskError, TaskResult } from '@bslt/db';
 
 // ============================================================================
 // Types

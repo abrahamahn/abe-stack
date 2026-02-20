@@ -14,7 +14,9 @@ import { createDbHarness, type DbHarness } from './db-harness';
 import { seedTestUser } from './seed-helpers';
 import { createTestServer, parseJsonResponse, type TestServer } from './test-utils';
 
-import type { AuthGuardFactory } from '@bslt/server-system';
+import type { AuthGuardFactory } from '@/http';
+
+import { registerRouteMap } from '@/http';
 
 import { registerRouteMap } from '@/http';
 

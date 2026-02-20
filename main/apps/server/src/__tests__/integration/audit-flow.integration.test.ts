@@ -20,7 +20,10 @@ import {
   type TestServer,
 } from './test-utils';
 
-import type { AuthGuardFactory, RouteMap as DbRouteMap } from '@bslt/server-system';
+import type { AuthGuardFactory } from '@/http';
+import type { RouteMap as DbRouteMap } from '@bslt/server-system';
+
+import { registerRouteMap } from '@/http';
 
 import { registerRouteMap } from '@/http';
 

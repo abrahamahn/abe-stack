@@ -11,17 +11,14 @@
  */
 
 import { authRoutes, createAuthGuard } from '@bslt/core/auth';
-import { clearRegistry, getRegisteredRoutes, registerRouteMap } from '@bslt/server-system';
+import { clearRegistry, getRegisteredRoutes } from '@bslt/server-system';
+import { registerRouteMap } from '../../../apps/server/src/http/router';
 
 import { apiManifestRouteModuleRegistrations } from '../../../apps/server/src/routes/apiManifestRouteModules';
 import { buildBillingRouteMap } from '../../../apps/server/src/routes/billingRouteAdapter';
 
-import type {
-  AuthGuardFactory,
-  HandlerContext,
-  RouteMap,
-  RouteRegistryEntry,
-} from '@bslt/server-system';
+import type { AuthGuardFactory } from '../../../apps/server/src/http/router';
+import type { HandlerContext, RouteMap, RouteRegistryEntry } from '@bslt/server-system';
 
 /**
  * Route manifest entry (JSON-serializable subset of RouteRegistryEntry).

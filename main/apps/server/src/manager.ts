@@ -137,7 +137,9 @@ export class ServerManager {
         await (pubsub as unknown as LifecyclePubSub).stop();
       }
       stopScheduledTasks();
-      write.close();
+      if ('close' in write && typeof (write as { close?: () => void }).close === 'function') {
+        (write as { close(): void }).close();
+      }
       if ('close' in cache && typeof (cache as Partial<ClosableCache>).close === 'function') {
         await (cache as ClosableCache).close();
       }

@@ -61,7 +61,6 @@
     "@bslt/db": "workspace:*",
     "@bslt/shared": "workspace:*",
     "@simplewebauthn/server": "^13.2.2",
-    "fastify": "^5.7.4",
     "ioredis": "^5.9.2"
   },
   "optionalDependencies": {
