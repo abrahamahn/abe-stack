@@ -1726,7 +1726,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 - [x] Auth bypass: spoofed non-admin JWT rejected on admin routes — adversarial killer test (`admin.integration.test.ts` line 2279)
 - [x] Session fixation: refresh token rotation on each use — family-based invalidation tested (`auth.integration.test.ts`)
 - [ ] Open redirect: `redirect_uri` validated against registered OAuth callback allowlist (OAuth flow exists; redirect validation needs explicit adversarial test)
-- [ ] File upload polyglot detection: MIME type validated against magic bytes, not just extension (MIME validation exists; magic-byte check not explicitly tested)
+- [x] File upload polyglot detection: MIME type validated against magic bytes, not just extension — adversarial test added (`media.integration.test.ts`)
 
 ---
 
@@ -1787,7 +1787,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 - [x] Jobs admin table: "No jobs found" empty state (`JobsTable.tsx`)
 - [x] Members list: empty state when workspace has no members (`MembersList.tsx`)
 - [x] Invitations list: empty state when no pending invitations (`InvitationsList.tsx`)
-- [ ] Audit log: empty state when no security events recorded (needs verification)
+- [x] Audit log: empty state when no security events recorded — `EmptyState` added to `SecurityEventsTable.tsx` and `AuditEventsPage.tsx`
 
 **Loading States:**
 
@@ -1797,7 +1797,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 - [x] Activity feed: skeleton items during initial load (`ActivityFeed.tsx`)
 - [x] Notification dropdown: `Skeleton` during notification fetch (`NotificationDropdown.tsx`)
 - [x] Media gallery: skeleton grid during upload/load (`MediaGallery.tsx`)
-- [ ] Dashboard page: skeleton for main content area during first load (needs verification)
+- [x] Dashboard page: skeleton for main content area during auth loading — `Skeleton` blocks added to `DashboardPage.tsx`
 
 **Error States:**
 
@@ -1822,13 +1822,25 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Module Boundary Verification:**
 
+- [x] No cross-app imports — `main/apps/server` does not import from `main/apps/web` or vice versa (verified via codebase scan)
+- [x] Shared libraries do not import from apps — `@bslt/shared`, `@bslt/core`, `@bslt/server-system` have no app-level imports (verified)
+- [x] Apps consume shared code only via `@bslt/*` workspace aliases — no relative cross-package paths (verified)
+
 **Cross-Feature Integration Points:**
+
+- [x] Auth → Billing: subscription entitlements checked via `entitlements` service on protected routes
+- [x] Auth → Tenants: workspace membership validated in request context middleware
+- [x] Billing → Notifications: payment failure/success triggers email notifications via notification service
+- [x] Webhooks → Billing: Stripe/PayPal webhook events update subscription state idempotently
 
 **Appendix D Essential Features Verification (CHECKLIST):**
 
 - [ ] Verify: deployment sanity — migrations + seed + bootstrap on fresh DB works first try
 
 **DRY Shared Package Consolidation (per-package):**
+
+- [x] `@bslt/shared` — single source for Zod schemas, envelopes, constants (no duplicates across packages verified)
+- [x] `@bslt/ui` — single source for all UI primitives (`EmptyState`, `Skeleton`, etc.) consumed across features
 
 ---
 
