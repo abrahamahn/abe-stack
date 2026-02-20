@@ -70,8 +70,8 @@ jobs:
       - name: Lint
         run: pnpm lint
 
-      - name: Build Storybook
-        run: pnpm --filter @bslt/storybook build-storybook --quiet 2>/dev/null || echo "Storybook build skipped (package not found)"
+      - name: Build Storybook (validate stories compile)
+        run: pnpm --filter @bslt/storybook build-storybook --quiet
 
   sanity-checks:
     runs-on: ubuntu-latest

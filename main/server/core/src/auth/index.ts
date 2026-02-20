@@ -8,6 +8,21 @@
  * @module @bslt/auth
  */
 
+// Facade (preferred entry point for app-layer consumers)
+export {
+  createAuthFacade,
+  type AuthFacade,
+  type AuthFacadeDeps,
+  type ForgotPasswordInput,
+  type RefreshInput,
+  type ResetPasswordInput,
+  type SignInInput,
+  type SignInResult,
+  type SignOutInput,
+  type SignUpInput,
+  type SignUpResult,
+} from './facade';
+
 // Routes (for auto-registration)
 export { authRoutes } from './routes';
 

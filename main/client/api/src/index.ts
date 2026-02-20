@@ -190,3 +190,7 @@ export type {
   GeneratedRouteModule,
   MethodsForPath,
 } from './generated';
+
+// Generated React Query Hook Factories (from route definitions)
+export { queryKeys, queryOptions, mutationOptions } from './generated';
+export type { GeneratedClient } from './generated';

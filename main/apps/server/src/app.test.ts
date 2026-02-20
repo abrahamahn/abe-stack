@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { App, createApp } from './app';
 
-import type { SystemContext } from '@bslt/core';
+import type { SystemContext } from '@bslt/server-system';
 import type { Repositories } from '@bslt/db';
 import type { AppConfig } from '@bslt/shared/config';
 import type { FastifyInstance } from 'fastify';

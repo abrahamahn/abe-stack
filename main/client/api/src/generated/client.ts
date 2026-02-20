@@ -80,6 +80,7 @@ export const generatedRouteDefinitions = [
   { method: "POST", path: "/api/auth/oauth/google/link", module: "auth", public: false },
   { method: "DELETE", path: "/api/auth/oauth/google/unlink", module: "auth", public: false },
   { method: "GET", path: "/api/auth/oauth/providers", module: "auth", public: true },
+  { method: "POST", path: "/api/auth/password/change", module: "auth", public: false },
   { method: "POST", path: "/api/auth/refresh", module: "auth", public: true },
   { method: "POST", path: "/api/auth/register", module: "auth", public: true },
   { method: "POST", path: "/api/auth/resend-verification", module: "auth", public: true },

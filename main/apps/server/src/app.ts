@@ -2,19 +2,19 @@
 import { SubscriptionManager } from '@bslt/shared';
 import { registerRoutes } from '@routes';
 
-import type { SystemContext } from '@bslt/core';
+import type { SystemContext } from '@bslt/server-system';
 import type { DbClient, QueueStore, Repositories, SessionContext } from '@bslt/db';
 import type {
-  QueueServer,
   ServerSearchProvider,
   SmsProvider,
   WriteService,
 } from '@bslt/server-system';
 import type {
   BillingService,
-  CacheProvider,
   EmailService,
   ErrorTracker,
+  HealthCheckCache,
+  HealthCheckQueue,
   NotificationService,
   PostgresPubSub,
   StorageClient,
@@ -34,10 +34,10 @@ export interface AppOptions {
   notifications?: NotificationService;
   billing?: BillingService;
   search?: ServerSearchProvider;
-  queue?: QueueServer;
+  queue?: HealthCheckQueue;
   queueStore?: QueueStore;
   write?: WriteService;
-  cache?: CacheProvider;
+  cache?: HealthCheckCache;
   errorTracker?: ErrorTracker;
 }
 
@@ -46,16 +46,16 @@ export class App implements IServiceContainer {
 
   public readonly db: DbClient;
   public readonly repos: Repositories;
-  public readonly email: EmailService;
-  public readonly storage: StorageClient;
-  public readonly notifications: NotificationService;
-  public readonly billing: BillingService;
+  public readonly email?: EmailService | undefined;
+  public readonly storage?: StorageClient | undefined;
+  public readonly notifications?: NotificationService | undefined;
+  public readonly billing?: BillingService | undefined;
   public readonly search: ServerSearchProvider;
-  public readonly queue: QueueServer;
+  public readonly queue: HealthCheckQueue;
   public readonly queueStore: QueueStore;
   public readonly write: WriteService;
   public readonly pubsub: SubscriptionManager;
-  public readonly cache: CacheProvider;
+  public readonly cache: HealthCheckCache;
   public readonly emailTemplates: IServiceContainer['emailTemplates'];
   public readonly sms?: SmsProvider | undefined;
   public readonly errorTracker: ErrorTracker;
@@ -68,18 +68,18 @@ export class App implements IServiceContainer {
   ) {
     this.config = config;
 
-    // Assign Services from SystemContext
-    this.db = systemContext.db as unknown as DbClient;
+    // Assign Services from SystemContext — types are now aligned, no casts needed
+    this.db = systemContext.db;
     this.repos = systemContext.repos;
-    this.email = systemContext.email as unknown as EmailService;
-    this.storage = systemContext.storage as unknown as StorageClient;
-    this.notifications = systemContext.notifications as unknown as NotificationService;
-    this.billing = systemContext.billing as unknown as BillingService;
+    this.email = systemContext.email;
+    this.storage = systemContext.storage;
+    this.notifications = systemContext.notifications;
+    this.billing = systemContext.billing;
     this.search = systemContext.search;
-    this.queue = systemContext.queue as unknown as QueueServer;
+    this.queue = systemContext.queue;
     this.queueStore = systemContext.queueStore;
     this.write = systemContext.write;
-    this.cache = systemContext.cache as unknown as CacheProvider;
+    this.cache = systemContext.cache;
     this.emailTemplates = systemContext.emailTemplates;
     this.sms = systemContext.sms;
     this.errorTracker = systemContext.errorTracker;
@@ -96,7 +96,7 @@ export class App implements IServiceContainer {
       typeof pubsub === 'object' &&
       'publish' in pubsub
     ) {
-      this.pubsub.setAdapter(pubsub as unknown as PostgresPubSub);
+      this.pubsub.setAdapter(pubsub as PostgresPubSub);
     }
   }
 
@@ -158,16 +158,18 @@ export class App implements IServiceContainer {
   contextualize(session: SessionContext): AppContext {
     const systemContext = this.systemContext.contextualize(session);
 
-    // Return a scoped AppContext
+    // Return a scoped AppContext — db type is already DbClient, no cast needed
     return {
       ...this.context,
-      db: systemContext.db as unknown as DbClient,
+      db: systemContext.db,
       repos: systemContext.repos,
     };
   }
 
   get log(): FastifyBaseLogger {
     if (this._server) return this._server.log;
+    // SystemContext logger is structurally compatible with FastifyBaseLogger
+    // at runtime; the cast bridges the nominal type difference
     return this.systemContext.log as unknown as FastifyBaseLogger;
   }
 

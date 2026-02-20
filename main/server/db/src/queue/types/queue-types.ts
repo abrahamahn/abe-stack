@@ -58,6 +58,8 @@ export interface Task<TName extends string = string, TArgs = unknown> {
   maxAttempts: number;
   /** Created timestamp */
   createdAt: string;
+  /** Optional idempotency key — if set, duplicate enqueues with the same key are silently skipped */
+  idempotencyKey?: string;
 }
 
 /**

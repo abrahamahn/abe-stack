@@ -9,6 +9,12 @@
  */
 
 // ============================================================================
+// Bootstrap (System Context Assembly)
+// ============================================================================
+
+export { bootstrapSystem, type SystemContext } from './bootstrap';
+
+// ============================================================================
 // Errors
 // ============================================================================
 
@@ -292,12 +298,20 @@ export {
 
 export {
   MemoryQueueStore,
+  // Postgres Queue Store (canonical here)
+  PostgresQueueStore,
   QueueServer,
+  // Redis Store
+  RedisQueueStore,
   WriteService,
   // Memory Store
   createMemoryQueueStore,
+  // Postgres Queue Store Factory
+  createPostgresQueueStore,
   // Queue Server
   createQueueServer,
+  // Redis Queue Store
+  createRedisQueueStore,
   // Write Service
   createWriteService,
   // Write Types
@@ -311,9 +325,11 @@ export {
   type OperationResult,
   type OperationType,
   type QueueConfig,
+  type QueueLogger,
   type QueueServerOptions,
   type QueueStats,
   type QueueStore,
+  type RedisQueueStoreOptions,
   type Task,
   type TaskError,
   type TaskHandler,
@@ -329,10 +345,34 @@ export {
 } from './queue';
 
 // ============================================================================
+// Session
+// ============================================================================
+
+export {
+  RedisSessionStore,
+  createRedisSessionStore,
+  type RedisSessionStoreOptions,
+  type SessionData,
+  type SessionLogger,
+  type SessionStore,
+} from './session';
+
+// ============================================================================
+// PubSub (canonical here)
+// ============================================================================
+
+export {
+  PostgresPubSub,
+  createPostgresPubSub,
+  type PostgresPubSubOptions,
+  type PubSubMessage,
+} from './pubsub';
+
+// ============================================================================
 // Search
 // ============================================================================
 
-// Factory (SearchProviderFactory, ProviderOptions, SqlSearchProviderOptions) canonical in @bslt/db
+// SearchProviderFactory, SqlSearchProvider canonical in @bslt/server-system
 export {
   SearchProviderFactory,
   SearchQueryBuilder,
@@ -416,13 +456,21 @@ export {
 // ============================================================================
 
 export {
+  API_VERSIONS,
+  CURRENT_API_VERSION,
+  SUPPORTED_API_VERSIONS,
+  apiVersioningPlugin,
   clearRegistry,
   createRouteMap,
+  extractApiVersion,
   getRegisteredRoutes,
   protectedRoute,
   publicRoute,
   registerRoute,
   registerRouteMap,
+  type ApiVersion,
+  type ApiVersionInfo,
+  type ApiVersionSource,
   type AuthGuardFactory,
   type HandlerContext,
   type HttpMethod,
@@ -439,6 +487,20 @@ export {
   type RouterOptions,
   type ValidationSchema,
 } from './routing';
+
+// ============================================================================
+// Middleware
+// ============================================================================
+
+export {
+  addTiming,
+  createEnrichedContext,
+  requestContextPlugin,
+  severityFromStatus,
+  type EnrichedRequestContext,
+  type RequestSeverity,
+  type TimingEntry,
+} from './middleware';
 
 // ============================================================================
 // Observability
@@ -458,6 +520,22 @@ export {
   type ErrorTrackingConfig,
   type ErrorTrackingProvider,
 } from './observability';
+
+// ============================================================================
+// Scaling
+// ============================================================================
+
+export {
+  getInstanceId,
+  getInstanceMetadata,
+  registerGracefulShutdown,
+  type CloseableResource,
+  type GracefulShutdownOptions,
+  type InstanceMetadata,
+  type ShutdownHandle,
+  type ShutdownLogger,
+  type ShutdownMetrics,
+} from './scaling';
 
 // ============================================================================
 // Utils

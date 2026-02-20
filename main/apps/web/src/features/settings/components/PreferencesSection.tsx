@@ -10,6 +10,8 @@ import { useMediaQuery } from '@bslt/react/hooks';
 import { Button, Card, Heading, Select, Text } from '@bslt/ui';
 import { useCallback, useEffect, useMemo, useState, type ReactElement } from 'react';
 
+import { LanguageSelector } from './LanguageSelector';
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -26,26 +28,14 @@ export interface PreferencesSectionProps {
 
 const THEME_STORAGE_KEY = 'abe-theme-preference';
 const TIMEZONE_STORAGE_KEY = 'abe-timezone-preference';
-const LOCALE_STORAGE_KEY = 'abe-locale-preference';
-
 const THEME_OPTIONS: { value: ThemeOption; label: string; description: string }[] = [
   { value: 'light', label: 'Light', description: 'Always use light theme' },
   { value: 'dark', label: 'Dark', description: 'Always use dark theme' },
   { value: 'system', label: 'System', description: 'Match your operating system setting' },
 ];
 
-const LOCALE_OPTIONS: { value: string; label: string }[] = [
-  { value: 'auto', label: 'Auto-detect' },
-  { value: 'en-US', label: 'English (US)' },
-  { value: 'en-GB', label: 'English (UK)' },
-  { value: 'fr-FR', label: 'French' },
-  { value: 'de-DE', label: 'German' },
-  { value: 'es-ES', label: 'Spanish' },
-  { value: 'pt-BR', label: 'Portuguese (Brazil)' },
-  { value: 'ja-JP', label: 'Japanese' },
-  { value: 'zh-CN', label: 'Chinese (Simplified)' },
-  { value: 'ko-KR', label: 'Korean' },
-];
+// Locale options are now provided by the LanguageSelector component
+// via the i18n module (SUPPORTED_LOCALES / LOCALE_METADATA).
 
 function getStoredTheme(): ThemeOption {
   const stored = localStorage.getItem(THEME_STORAGE_KEY);
@@ -57,10 +47,6 @@ function getStoredTheme(): ThemeOption {
 
 function getStoredTimezone(): string {
   return localStorage.getItem(TIMEZONE_STORAGE_KEY) ?? 'auto';
-}
-
-function getStoredLocale(): string {
-  return localStorage.getItem(LOCALE_STORAGE_KEY) ?? 'auto';
 }
 
 /**
@@ -121,7 +107,6 @@ function getTimezoneOptions(): { value: string; label: string }[] {
 export const PreferencesSection = ({ className }: PreferencesSectionProps): ReactElement => {
   const [selectedTheme, setSelectedTheme] = useState<ThemeOption>(getStoredTheme);
   const [selectedTimezone, setSelectedTimezone] = useState<string>(getStoredTimezone);
-  const [selectedLocale, setSelectedLocale] = useState<string>(getStoredLocale);
   const prefersDark = useMediaQuery('(prefers-color-scheme: dark)');
 
   const timezoneOptions = useMemo(() => getTimezoneOptions(), []);
@@ -141,17 +126,6 @@ export const PreferencesSection = ({ className }: PreferencesSectionProps): Reac
   const handleTimezoneChange = useCallback((value: string): void => {
     setSelectedTimezone(value);
     localStorage.setItem(TIMEZONE_STORAGE_KEY, value);
-  }, []);
-
-  const handleLocaleChange = useCallback((value: string): void => {
-    setSelectedLocale(value);
-    localStorage.setItem(LOCALE_STORAGE_KEY, value);
-    // Apply locale to document for Intl formatting
-    if (value !== 'auto') {
-      document.documentElement.setAttribute('lang', value);
-    } else {
-      document.documentElement.removeAttribute('lang');
-    }
   }, []);
 
   return (
@@ -233,29 +207,16 @@ export const PreferencesSection = ({ className }: PreferencesSectionProps): Reac
           </Select>
         </div>
 
-        {/* Locale Dropdown */}
+        {/* Language Selector (i18n-aware) */}
         <div className="border-t pt-6">
           <Heading as="h4" size="sm" className="mb-2">
-            Language &amp; Locale
+            Language
           </Heading>
           <Text size="sm" tone="muted" className="mb-4">
-            Choose your preferred language and number/date formatting style.
+            Choose your preferred language for the application interface.
           </Text>
 
-          <Select
-            value={selectedLocale}
-            onChange={(value: string) => {
-              handleLocaleChange(value);
-            }}
-            data-testid="locale-select"
-            className="max-w-md"
-          >
-            {LOCALE_OPTIONS.map(({ value, label }) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </Select>
+          <LanguageSelector />
         </div>
       </div>
     </div>

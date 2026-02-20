@@ -3,10 +3,11 @@
  * Queue Module
  *
  * Background job queue system with write service for atomic operations.
- * Includes in-memory store for dev/test and supports Postgres-backed production stores.
+ * Includes in-memory store for dev/test, Postgres-backed production store,
+ * and Redis store for distributed deployments.
  *
- * WriteService and queue types are canonical in @bslt/db — re-exported here for
- * backwards-compatible access via @bslt/server-system.
+ * PostgresQueueStore and WriteService are canonical in @bslt/server-system.
+ * They are re-exported from @bslt/db for backwards compatibility.
  *
  * @module @bslt/server-system/queue
  */
@@ -18,10 +19,16 @@
 export { createQueueServer, QueueServer, type QueueServerOptions } from './client';
 
 // ============================================================================
-// Write Service (canonical in @bslt/db)
+// Postgres Queue Store (canonical here)
 // ============================================================================
 
-export { createWriteService, WriteService, type WriteServiceOptions } from '@bslt/db';
+export { createPostgresQueueStore, PostgresQueueStore } from './postgres-store';
+
+// ============================================================================
+// Write Service (canonical here)
+// ============================================================================
+
+export { createWriteService, WriteService, type WriteServiceOptions } from './write-service';
 
 // ============================================================================
 // Memory Store
@@ -30,7 +37,18 @@ export { createWriteService, WriteService, type WriteServiceOptions } from '@bsl
 export { createMemoryQueueStore, MemoryQueueStore } from './memory.store';
 
 // ============================================================================
-// Queue & Write Types (canonical in @bslt/db)
+// Redis Store
+// ============================================================================
+
+export {
+  createRedisQueueStore,
+  RedisQueueStore,
+  type QueueLogger,
+  type RedisQueueStoreOptions,
+} from './redis-queue-store';
+
+// ============================================================================
+// Queue & Write Types (from @bslt/db)
 // ============================================================================
 
 export type {

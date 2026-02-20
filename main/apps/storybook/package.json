@@ -1,0 +1,28 @@
+{
+  "name": "@bslt/storybook",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Storybook for bslt UI component library",
+  "type": "module",
+  "scripts": {
+    "storybook": "storybook dev -p 6006",
+    "build": "storybook build -o dist",
+    "build-storybook": "storybook build -o dist"
+  },
+  "dependencies": {
+    "@bslt/shared": "workspace:*",
+    "@bslt/ui": "workspace:*",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
+  },
+  "devDependencies": {
+    "@storybook/addon-a11y": "^8.6.0",
+    "@storybook/addon-essentials": "^8.6.0",
+    "@storybook/addon-viewport": "^8.6.0",
+    "@storybook/react": "^8.6.0",
+    "@storybook/react-vite": "^8.6.0",
+    "storybook": "^8.6.0",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5"
+  }
+}

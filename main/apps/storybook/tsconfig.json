@@ -22,6 +22,6 @@
     "typeRoots": ["../../client/ui/node_modules/@types", "../../../node_modules/@types"],
     "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.storybook.tsbuildinfo"
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "stories/**/*", ".storybook/**/*"],
   "exclude": ["node_modules", "dist"]
 }

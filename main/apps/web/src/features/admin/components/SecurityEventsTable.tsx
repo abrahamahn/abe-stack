@@ -6,14 +6,11 @@
  */
 
 import { useNavigate } from '@bslt/react/router';
-import {
-  formatDateTime,
-  formatSecurityEventType,
-  getSecuritySeverityTone,
-} from '@bslt/shared';
+import { formatDateTime, formatSecurityEventType, getSecuritySeverityTone } from '@bslt/shared';
 import {
   Badge,
   Button,
+  EmptyState,
   Pagination,
   Skeleton,
   Table,
@@ -84,19 +81,12 @@ export const SecurityEventsTable = ({
     );
   }
 
-  if (data === undefined) {
+  if (data === undefined || data.data.length === 0) {
     return (
-      <div className="text-center py-12">
-        <Text tone="muted">No security events found</Text>
-      </div>
-    );
-  }
-
-  if (data.data.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <Text tone="muted">No security events found</Text>
-      </div>
+      <EmptyState
+        title="No security events"
+        description="Security events will appear here as they are recorded"
+      />
     );
   }
 

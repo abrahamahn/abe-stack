@@ -14,7 +14,7 @@ import type {
   JobListResult,
   PostgresQueueStore,
   QueueStats,
-} from '../../../db/src';
+} from '@bslt/db';
 
 // ============================================================================
 // Sensitive Field Redaction

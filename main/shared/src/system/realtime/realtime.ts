@@ -141,6 +141,30 @@ export interface VersionConflict {
 }
 
 // ============================================================================
+// Type Aliases (Sprint 7.1)
+// ============================================================================
+
+/**
+ * Alias for RealtimeTransaction.
+ * A write transaction containing multiple operations to apply atomically.
+ * Prefer using RealtimeTransaction directly in new code.
+ */
+export type WriteTransaction = RealtimeTransaction;
+
+/**
+ * A read transaction: a request to fetch records by their pointers.
+ * Alias for GetRecordsRequest with a transaction-oriented name.
+ */
+export type ReadTransaction = GetRecordsRequest;
+
+/**
+ * Version conflict error details.
+ * Alias for VersionConflict — returned when optimistic locking
+ * detects a concurrent modification.
+ */
+export type ConflictError = VersionConflict;
+
+// ============================================================================
 // Constants
 // ============================================================================
 

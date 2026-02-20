@@ -98,6 +98,37 @@ export {
 } from './realtime';
 export { SubscriptionCache, type SubscriptionCacheOptions } from './realtime';
 
+// Real-Time Hooks
+export {
+  useRecord,
+  useRecords,
+  useWrite,
+  useUndoRedo,
+  type UseRecordDeps,
+  type UseRecordOptions,
+  type UseRecordResult,
+  type UseRecordsDeps,
+  type UseRecordsOptions,
+  type UseRecordsResult,
+  type UseWriteDeps,
+  type UseWriteResult,
+  type WriteOperation,
+  type WriteOptions,
+  type UseUndoRedoDeps,
+  type UseUndoRedoResult,
+} from './realtime';
+
+// Engine-level RealtimeProvider
+export {
+  EngineRealtimeProvider,
+  useEngineRealtime,
+  type EngineRealtimeContextValue,
+  type EngineRealtimeProviderConfig,
+  type EngineRealtimeProviderProps,
+  type EngineUndoableWrite,
+  type EngineWriteOperation,
+} from './realtime';
+
 // Persistent Storage
 export {
   createRecordMap,

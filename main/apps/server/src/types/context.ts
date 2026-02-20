@@ -1,22 +1,19 @@
 // main/apps/server/src/types/context.ts
 
+import type { DbClient, QueueStore, Repositories, SessionContext } from '@bslt/db';
 import type {
-  DbClient,
-  QueueServer,
-  QueueStore,
-  Repositories,
+  AuthEmailTemplates,
   ServerSearchProvider,
-  SessionContext,
   SmsProvider,
   WriteService,
-} from '@bslt/core';
-import type { AuthEmailTemplates } from '@bslt/server-system';
+} from '@bslt/server-system';
 import type {
   BaseContext,
   BillingService,
-  CacheProvider,
   EmailService,
   ErrorTracker,
+  HealthCheckCache,
+  HealthCheckQueue,
   NotificationService,
   ReplyContext,
   RequestInfo,
@@ -84,26 +81,26 @@ export interface IServiceContainer {
   /** Database repositories */
   readonly repos: Repositories;
 
-  /** Email service for sending notifications */
-  readonly email: EmailService;
+  /** Email service for sending notifications (optional — injected at app layer) */
+  readonly email?: EmailService | undefined;
 
-  /** Storage provider for file uploads */
-  readonly storage: StorageClient;
+  /** Storage provider for file uploads (optional — injected at app layer) */
+  readonly storage?: StorageClient | undefined;
 
   /** Pub/sub manager for real-time subscriptions */
   readonly pubsub: SubscriptionManager;
 
-  /** Cache provider for performance optimization */
-  readonly cache: CacheProvider;
+  /** Cache health check adapter */
+  readonly cache: HealthCheckCache;
 
-  /** Billing provider for payments/subscriptions */
-  readonly billing: BillingService;
+  /** Billing provider for payments/subscriptions (optional — injected at app layer) */
+  readonly billing?: BillingService | undefined;
 
-  /** Notification service for push/email */
-  readonly notifications: NotificationService;
+  /** Notification service for push/email (optional — injected at app layer) */
+  readonly notifications?: NotificationService | undefined;
 
-  /** Background job queue server */
-  readonly queue: QueueServer;
+  /** Background job queue (health check interface) */
+  readonly queue: HealthCheckQueue;
 
   /** Queue store (for task cleanup) */
   readonly queueStore: QueueStore;
