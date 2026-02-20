@@ -320,11 +320,11 @@ function createMockDbClient() {
 function createTestPngBuffer(): Buffer {
   // Minimal valid PNG (1x1 transparent pixel)
   return Buffer.from([
-    0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44,
-    0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x08, 0x06, 0x00, 0x00, 0x00, 0x1f,
-    0x15, 0xc4, 0x89, 0x00, 0x00, 0x00, 0x0a, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9c, 0x62, 0x00,
-    0x00, 0x00, 0x02, 0x00, 0x01, 0xe2, 0x21, 0xbc, 0x33, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45,
-    0x4e, 0x44, 0xae, 0x42, 0x60, 0x82,
+    0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
+    0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x08, 0x06, 0x00, 0x00, 0x00, 0x1f, 0x15, 0xc4,
+    0x89, 0x00, 0x00, 0x00, 0x0a, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9c, 0x62, 0x00, 0x00, 0x00, 0x02,
+    0x00, 0x01, 0xe2, 0x21, 0xbc, 0x33, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42,
+    0x60, 0x82,
   ]);
 }
 
@@ -764,7 +764,9 @@ describe('Media Processing Integration Tests', () => {
 
       // Must not allow path traversal; either reject or sanitize
       if (response.statusCode === 201) {
-        const body = parseJsonResponse(response) as { file: { originalName: string; storagePath: string } };
+        const body = parseJsonResponse(response) as {
+          file: { originalName: string; storagePath: string };
+        };
         // If accepted, the stored path must not contain traversal sequences
         expect(body.file.storagePath).not.toContain('..');
         expect(body.file.originalName).not.toContain('..');
@@ -1252,6 +1254,32 @@ describe('Media Processing Integration Tests', () => {
       expect(response.statusCode).toBe(403);
     });
 
+    it('rejects file with mismatched MIME type (content is HTML disguised as image/jpeg)', async () => {
+      // Craft a payload that claims to be image/jpeg but contains raw HTML/script content.
+      // This tests MIME spoofing / polyglot detection: the server must validate that the
+      // declared Content-Type matches the actual file content.
+      const htmlContent = Buffer.from('<html><script>alert(1)</script></html>');
+
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/files/upload',
+          accessToken: jwt,
+          payload: {
+            buffer: htmlContent.toJSON().data,
+            mimetype: 'image/jpeg',
+            originalName: 'disguised.jpg',
+            size: htmlContent.length,
+          },
+        }),
+      );
+
+      // Server must reject the upload (400) or, at minimum, not crash (not 500).
+      // A correct implementation detects the MIME mismatch and returns 400.
+      expect(response.statusCode).not.toBe(500);
+      expect(response.statusCode).toBe(400);
+    });
+
     it.todo('upload with SVG containing embedded JavaScript is rejected or sanitized');
 
     it('prototype pollution via file metadata field', async () => {
@@ -1269,7 +1297,7 @@ describe('Media Processing Integration Tests', () => {
           mimetype: 'image/png',
           originalName: 'proto-test.png',
           size: pngBuffer.length,
-          '__proto__': { polluted: true },
+          __proto__: { polluted: true },
         }),
       });
 

@@ -10,6 +10,7 @@ import { formatDateTime, getAuditSeverityTone, truncate } from '@bslt/shared';
 import {
   Badge,
   Button,
+  EmptyState,
   Heading,
   Input,
   PageContainer,
@@ -149,60 +150,60 @@ export function AuditEventsPage(): ReactElement {
         </div>
       </div>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Time</TableHead>
-            <TableHead>Action</TableHead>
-            <TableHead>Category</TableHead>
-            <TableHead>Severity</TableHead>
-            <TableHead>Resource</TableHead>
-            <TableHead>Actor</TableHead>
-            <TableHead>IP</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {filteredEvents(events, categoryFilter).map((event) => (
-            <TableRow key={event.id} className="hover-row">
-              <TableCell>
-                <Text size="sm">{formatDateTime(event.createdAt)}</Text>
-              </TableCell>
-              <TableCell>
-                <Text size="sm" className="font-mono">
-                  {event.action}
-                </Text>
-              </TableCell>
-              <TableCell>
-                <Badge>{event.category}</Badge>
-              </TableCell>
-              <TableCell>
-                <Badge tone={getAuditSeverityTone(event.severity)}>{event.severity}</Badge>
-              </TableCell>
-              <TableCell>
-                <Text size="sm">
-                  {event.resource}
-                  {event.resourceId !== null ? `:${truncate(event.resourceId, 8)}` : ''}
-                </Text>
-              </TableCell>
-              <TableCell>
-                <Text size="sm" className="font-mono">
-                  {event.actorId !== null ? truncate(event.actorId, 8) : '-'}
-                </Text>
-              </TableCell>
-              <TableCell>
-                <Text size="sm">{event.ipAddress ?? '-'}</Text>
-              </TableCell>
-            </TableRow>
-          ))}
-          {filteredEvents(events, categoryFilter).length === 0 && (
+      {filteredEvents(events, categoryFilter).length === 0 ? (
+        <EmptyState
+          title="No audit events"
+          description="No audit events match the current filters"
+        />
+      ) : (
+        <Table>
+          <TableHeader>
             <TableRow>
-              <TableCell>
-                <Text tone="muted">No audit events found</Text>
-              </TableCell>
+              <TableHead>Time</TableHead>
+              <TableHead>Action</TableHead>
+              <TableHead>Category</TableHead>
+              <TableHead>Severity</TableHead>
+              <TableHead>Resource</TableHead>
+              <TableHead>Actor</TableHead>
+              <TableHead>IP</TableHead>
             </TableRow>
-          )}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {filteredEvents(events, categoryFilter).map((event) => (
+              <TableRow key={event.id} className="hover-row">
+                <TableCell>
+                  <Text size="sm">{formatDateTime(event.createdAt)}</Text>
+                </TableCell>
+                <TableCell>
+                  <Text size="sm" className="font-mono">
+                    {event.action}
+                  </Text>
+                </TableCell>
+                <TableCell>
+                  <Badge>{event.category}</Badge>
+                </TableCell>
+                <TableCell>
+                  <Badge tone={getAuditSeverityTone(event.severity)}>{event.severity}</Badge>
+                </TableCell>
+                <TableCell>
+                  <Text size="sm">
+                    {event.resource}
+                    {event.resourceId !== null ? `:${truncate(event.resourceId, 8)}` : ''}
+                  </Text>
+                </TableCell>
+                <TableCell>
+                  <Text size="sm" className="font-mono">
+                    {event.actorId !== null ? truncate(event.actorId, 8) : '-'}
+                  </Text>
+                </TableCell>
+                <TableCell>
+                  <Text size="sm">{event.ipAddress ?? '-'}</Text>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
     </PageContainer>
   );
 }

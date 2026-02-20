@@ -2,14 +2,14 @@
 import { FeatureHint, SectionErrorBoundary } from '@app/components';
 import { useAuth } from '@auth';
 import { useNavigate, type NavigateFunction } from '@bslt/react/router';
-import { Button, Card, Heading, PageContainer, Text } from '@bslt/ui';
+import { Button, Card, Heading, PageContainer, Skeleton, Text } from '@bslt/ui';
 import { GettingStartedChecklist } from '@dashboard';
 import { ActivityFeed } from '@features/activities';
 
 import type { JSX } from 'react';
 
 export const DashboardPage = (): JSX.Element => {
-  const { user, logout } = useAuth();
+  const { user, isLoading, logout } = useAuth();
   const navigate: NavigateFunction = useNavigate();
   const firstName = user?.firstName ?? '';
   const lastName = user?.lastName ?? '';
@@ -20,6 +20,19 @@ export const DashboardPage = (): JSX.Element => {
     await logout();
     navigate('/');
   };
+
+  if (isLoading) {
+    return (
+      <PageContainer>
+        <div className="flex flex-col gap-4">
+          <Skeleton width="10rem" height="2rem" />
+          <Skeleton width="100%" height="6rem" radius="var(--ui-radius-md)" />
+          <Skeleton width="100%" height="8rem" radius="var(--ui-radius-md)" />
+          <Skeleton width="100%" height="10rem" radius="var(--ui-radius-md)" />
+        </div>
+      </PageContainer>
+    );
+  }
 
   return (
     <PageContainer>
