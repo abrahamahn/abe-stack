@@ -97,7 +97,8 @@
   },
   "pnpm": {
     "overrides": {
-      "esbuild": "^0.25.12"
+      "esbuild": "^0.25.12",
+      "minimatch": "^10.2.1"
     },
     "onlyBuiltDependencies": [
       "argon2",

@@ -15,6 +15,7 @@
 import {
   acceptTosRequestSchema,
   changeEmailRequestSchema,
+  changePasswordRequestSchema,
   confirmEmailChangeRequestSchema,
   emailVerificationRequestSchema,
   emptyBodySchema,
@@ -34,6 +35,7 @@ import {
   verifyPhoneRequestSchema,
   type AcceptTosRequest,
   type ChangeEmailRequest,
+  type ChangePasswordRequest,
   type ConfirmEmailChangeRequest,
   type EmailVerificationRequest,
   type ForgotPasswordRequest,
@@ -95,6 +97,7 @@ import {
   handleVerifyPhone,
   handleVerifySmsCode,
 } from './handlers';
+import { handleChangePassword } from '../users/handlers';
 import { magicLinkRouteEntries } from './magic-link';
 import { oauthRouteEntries } from './oauth';
 import { webauthnRouteEntries } from './webauthn';
@@ -565,6 +568,20 @@ const coreAuthEntries: [string, RouteDefinition][] = [
       [],
       emptyBodySchema,
       { summary: 'Invalidate all sessions', tags: ['Auth', 'Sessions'] },
+    ),
+  ],
+
+  // Password change (authenticated)
+  [
+    'auth/password/change',
+    protectedRoute(
+      'POST',
+      async (ctx: HandlerContext, body: unknown, req: HttpRequest) => {
+        return handleChangePassword(ctx, body as ChangePasswordRequest, req);
+      },
+      'user',
+      changePasswordRequestSchema,
+      { summary: 'Change password', tags: ['Auth'] },
     ),
   ],
 
