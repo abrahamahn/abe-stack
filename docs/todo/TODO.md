@@ -1725,7 +1725,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 - [x] Privilege escalation blocked — API key cannot be used to create another API key (`api-keys.integration.test.ts` line 978)
 - [x] Auth bypass: spoofed non-admin JWT rejected on admin routes — adversarial killer test (`admin.integration.test.ts` line 2279)
 - [x] Session fixation: refresh token rotation on each use — family-based invalidation tested (`auth.integration.test.ts`)
-- [ ] Open redirect: `redirect_uri` validated against registered OAuth callback allowlist (OAuth flow exists; redirect validation needs explicit adversarial test)
+- [x] Open redirect: `redirect_uri` validated against registered OAuth callback allowlist — adversarial tests confirm external redirect_uri returns 400, never 302 to attacker domain (`auth.integration.test.ts` lines 2359–2423)
 - [x] File upload polyglot detection: MIME type validated against magic bytes, not just extension — adversarial test added (`media.integration.test.ts`)
 
 ---
