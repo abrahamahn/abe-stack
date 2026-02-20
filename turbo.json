@@ -15,6 +15,17 @@
       "cache": true,
       "env": ["NODE_ENV", "DATABASE_URL", "NEXT_PUBLIC_*", "VITE_*", "PUBLIC_*"]
     },
+    "build-storybook": {
+      "dependsOn": ["^build", "build:theme"],
+      "outputs": ["dist/**"],
+      "cache": true,
+      "inputs": [
+        "**/*.stories.tsx",
+        "**/*.stories.ts",
+        ".storybook/**",
+        "package.json"
+      ]
+    },
     "dev": {
       "cache": false,
       "persistent": true

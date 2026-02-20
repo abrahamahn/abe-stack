@@ -22,6 +22,46 @@
       "types": "./dist/logger/index.d.ts",
       "default": "./dist/logger/index.js"
     },
+    "./cache": {
+      "source": "./src/cache/index.ts",
+      "types": "./dist/cache/index.d.ts",
+      "default": "./dist/cache/index.js"
+    },
+    "./security": {
+      "source": "./src/security/index.ts",
+      "types": "./dist/security/index.d.ts",
+      "default": "./dist/security/index.js"
+    },
+    "./storage": {
+      "source": "./src/storage/index.ts",
+      "types": "./dist/storage/index.d.ts",
+      "default": "./dist/storage/index.js"
+    },
+    "./queue": {
+      "source": "./src/queue/index.ts",
+      "types": "./dist/queue/index.d.ts",
+      "default": "./dist/queue/index.js"
+    },
+    "./search": {
+      "source": "./src/search/index.ts",
+      "types": "./dist/search/index.d.ts",
+      "default": "./dist/search/index.js"
+    },
+    "./email": {
+      "source": "./src/email/index.ts",
+      "types": "./dist/email/index.d.ts",
+      "default": "./dist/email/index.js"
+    },
+    "./routing": {
+      "source": "./src/routing/index.ts",
+      "types": "./dist/routing/index.d.ts",
+      "default": "./dist/routing/index.js"
+    },
+    "./observability": {
+      "source": "./src/observability/index.ts",
+      "types": "./dist/observability/index.d.ts",
+      "default": "./dist/observability/index.js"
+    },
     "./package.json": "./package.json"
   },
   "scripts": {

@@ -62,6 +62,27 @@ export const enUS: FlatTranslationMap = {
   'settings.passkeys.title': 'Passkeys',
   'settings.dangerZone.title': 'Danger Zone',
 
+  // Settings - Preferences
+  'settings.preferences.title': 'Preferences',
+  'settings.preferences.description': 'Customize the application appearance and behavior.',
+  'settings.preferences.theme.title': 'Theme',
+  'settings.preferences.theme.description':
+    'Choose how the application looks. Select a theme or let it follow your system settings.',
+  'settings.preferences.theme.light': 'Light',
+  'settings.preferences.theme.dark': 'Dark',
+  'settings.preferences.theme.system': 'System',
+  'settings.preferences.theme.lightDescription': 'Always use light theme',
+  'settings.preferences.theme.darkDescription': 'Always use dark theme',
+  'settings.preferences.theme.systemDescription': 'Match your operating system setting',
+  'settings.preferences.theme.currentSelection': 'Current selection:',
+  'settings.preferences.timezone.title': 'Timezone',
+  'settings.preferences.timezone.description':
+    'Set your preferred timezone for displaying dates and times.',
+  'settings.preferences.language.title': 'Language',
+  'settings.preferences.language.description':
+    'Choose your preferred language for the application interface.',
+  'settings.preferences.language.saved': 'Language preference saved.',
+
   // Workspace
   'workspace.create': 'Create Workspace',
   'workspace.members': 'Members',
