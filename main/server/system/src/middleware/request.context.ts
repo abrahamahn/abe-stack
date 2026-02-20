@@ -168,23 +168,22 @@ export const requestContextPlugin: FastifyPluginCallback = (
   }
 
   // --- onRequest: initialise the enriched context ---
-  fastify.addHook('onRequest', (request: FastifyRequest, _reply: FastifyReply, hookDone: () => void): void => {
+  fastify.addHook('onRequest', (request: FastifyRequest, _reply: FastifyReply): void => {
     // Read version info from the versioning plugin (if registered before us)
     const versionInfo: ApiVersionInfo | undefined = (
       request as { apiVersionInfo?: ApiVersionInfo }
     ).apiVersionInfo;
 
     request.enrichedContext = createEnrichedContext(versionInfo);
-    hookDone();
   });
 
   // --- onResponse: finalise timing and severity ---
-  fastify.addHook('onResponse', (request: FastifyRequest, reply: FastifyReply, hookDone: () => void): void => {
-    const ctx = request.enrichedContext;
+  fastify.addHook('onResponse', (request: FastifyRequest, reply: FastifyReply): void => {
+    const ctx: EnrichedRequestContext | undefined = request.enrichedContext;
+    if (ctx === undefined) return;
 
     addTiming(ctx, 'request_end');
     ctx.severity = severityFromStatus(reply.statusCode);
-    hookDone();
   });
 
   done();
