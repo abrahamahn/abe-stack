@@ -141,6 +141,8 @@ export {
 // ============================================================================
 
 export {
+  // IP Blocklist / Reputation
+  IpBlocklist,
   JwtError,
   // Rate Limiting
   MemoryStore,
@@ -151,28 +153,40 @@ export {
   RateLimiter,
   // Token (CSRF)
   TOKEN_LENGTH,
+  // Upload Scanning
+  UploadScanner,
   allowed,
   // Crypto (JWT)
   checkTokenSecret,
   createAdminRule,
   createCustomRule,
   createDefaultPermissionConfig,
+  createIpBlocklist,
+  createIpBlocklistMiddleware,
   createJwtRotationHandler,
   createMemberRule,
   createOwnerRule,
   createPermissionChecker,
   createRateLimiter,
+  createUploadScanner,
   decode,
   decryptToken,
+  DEFAULT_BLOCKED_EXTENSIONS,
   denied,
+  detectMimeFromMagicBytes,
+  detectScriptContent,
   encryptToken,
   // Headers
   generateSecurityHeaders,
   generateToken,
+  getFileExtension,
   getProductionSecurityDefaults,
   getRecordKey,
+  ipv4ToInt,
   isAllowed,
   isDenied,
+  isInCidrRange,
+  parseCidr,
   parseRecordKey,
   sign,
   signToken,
@@ -185,6 +199,10 @@ export {
   type BatchRecordLoader,
   type CsrfValidationOptions,
   type CustomRule,
+  type IpBlocklistConfig,
+  type IpPolicyLevel,
+  type IpReputationProvider,
+  type IpReputationResult,
   type JwtErrorCode,
   type JwtHeader,
   type JwtPayload,
@@ -213,10 +231,14 @@ export {
   type RecordPointer,
   type RoleRule,
   type RotatingJwtOptions,
+  type ScannableFile,
+  type ScannerPlugin,
+  type ScanResult,
   type SecurityHeaderOptions,
   type SecurityHeaders,
   type SignOptions,
   type TablePermissionConfig,
+  type UploadScannerConfig,
   type VerifyOptions,
 } from './security';
 
@@ -394,7 +416,6 @@ export {
 // Routing
 // ============================================================================
 
-// registerRouteMap, AuthGuardFactory, RouterOptions moved to apps/server/src/http/router.ts
 export {
   clearRegistry,
   createRouteMap,
@@ -402,6 +423,8 @@ export {
   protectedRoute,
   publicRoute,
   registerRoute,
+  registerRouteMap,
+  type AuthGuardFactory,
   type HandlerContext,
   type HttpMethod,
   type HttpReply,
@@ -414,6 +437,7 @@ export {
   type RouteRegistryEntry,
   type RouteResult,
   type RouteSchema,
+  type RouterOptions,
   type ValidationSchema,
 } from './routing';
 

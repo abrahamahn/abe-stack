@@ -20,7 +20,7 @@ import type {
   UpdateWebhookData,
   WebhookWithStats,
 } from './types';
-import type { Repositories, Webhook } from '../../../db/src';
+import type { Repositories, Webhook, WebhookDelivery } from '../../../db/src';
 
 // ============================================================================
 // Secret Generation
@@ -240,4 +240,78 @@ export async function rotateWebhookSecret(
   }
 
   return updated;
+}
+
+// ============================================================================
+// Delivery Functions
+// ============================================================================
+
+/**
+ * List deliveries for a specific webhook.
+ *
+ * Validates that the webhook belongs to the specified tenant before
+ * returning delivery records.
+ *
+ * @param repos - Repository container
+ * @param webhookId - Webhook ID whose deliveries to list
+ * @param tenantId - Tenant ID for ownership validation
+ * @param limit - Maximum number of deliveries to return (default: 50)
+ * @returns Array of delivery records, most recent first
+ * @throws NotFoundError if webhook not found or belongs to different tenant
+ * @complexity O(n) where n is the number of deliveries returned
+ */
+export async function listDeliveries(
+  repos: Repositories,
+  webhookId: string,
+  tenantId: string,
+  limit: number = 50,
+): Promise<WebhookDelivery[]> {
+  const webhook = await repos.webhooks.findById(webhookId);
+
+  if (webhook?.tenantId !== tenantId) {
+    throw new NotFoundError('Webhook not found');
+  }
+
+  return repos.webhookDeliveries.findByWebhookId(webhookId, limit);
+}
+
+/**
+ * Replay a failed or dead delivery by resetting it to pending.
+ *
+ * Creates a new pending delivery record with the same event type and payload
+ * as the original delivery. The original record is left unchanged for audit purposes.
+ *
+ * @param repos - Repository container
+ * @param deliveryId - Delivery ID to replay
+ * @param tenantId - Tenant ID for ownership validation
+ * @returns Newly created delivery record
+ * @throws NotFoundError if delivery or webhook not found or belongs to different tenant
+ * @complexity O(1)
+ */
+export async function replayDelivery(
+  repos: Repositories,
+  deliveryId: string,
+  tenantId: string,
+): Promise<WebhookDelivery> {
+  const delivery = await repos.webhookDeliveries.findById(deliveryId);
+
+  if (delivery === null) {
+    throw new NotFoundError('Delivery not found');
+  }
+
+  // Validate ownership via the parent webhook
+  const webhook = await repos.webhooks.findById(delivery.webhookId);
+
+  if (webhook?.tenantId !== tenantId) {
+    throw new NotFoundError('Delivery not found');
+  }
+
+  // Create a new delivery record re-using the original event and payload
+  return repos.webhookDeliveries.create({
+    webhookId: delivery.webhookId,
+    eventType: delivery.eventType,
+    payload: delivery.payload,
+    status: 'pending',
+    attempts: 0,
+  });
 }

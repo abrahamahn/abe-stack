@@ -117,3 +117,37 @@ export {
   type RateLimitInfo,
   type RateLimiterStats,
 } from './rate-limit';
+
+// ============================================================================
+// IP Blocklist / Reputation
+// ============================================================================
+
+export {
+  IpBlocklist,
+  createIpBlocklist,
+  createIpBlocklistMiddleware,
+  ipv4ToInt,
+  isInCidrRange,
+  parseCidr,
+  type IpBlocklistConfig,
+  type IpPolicyLevel,
+  type IpReputationProvider,
+  type IpReputationResult,
+} from './ip-blocklist';
+
+// ============================================================================
+// Upload Scanning
+// ============================================================================
+
+export {
+  DEFAULT_BLOCKED_EXTENSIONS,
+  UploadScanner,
+  createUploadScanner,
+  detectMimeFromMagicBytes,
+  detectScriptContent,
+  getFileExtension,
+  type ScannableFile,
+  type ScannerPlugin,
+  type ScanResult,
+  type UploadScannerConfig,
+} from './upload-scanner';

@@ -175,7 +175,13 @@ export type { FormHandlerOptions } from './utils';
 // Query
 // ============================================================================
 
-export { QueryCacheProvider, useQueryCache, useQuery, useMutation, useInfiniteQuery } from './query';
+export {
+  QueryCacheProvider,
+  useQueryCache,
+  useQuery,
+  useMutation,
+  useInfiniteQuery,
+} from './query';
 export type {
   QueryCacheProviderProps,
   UseQueryOptions,
@@ -250,6 +256,7 @@ export {
   useInvoices,
   usePaymentMethods,
   usePlans,
+  useProrationPreview,
   useSubscription,
 } from './billing';
 export type {
@@ -257,6 +264,7 @@ export type {
   InvoicesState,
   PaymentMethodsState,
   PlansState,
+  ProrationPreviewState,
   SubscriptionState,
 } from './billing';
 
@@ -331,20 +339,38 @@ export type { EnabledOAuthProvidersState, OAuthConnectionsState } from './oauth'
 export {
   useCreateWebhook,
   useDeleteWebhook,
+  useReplayDelivery,
   useRotateWebhookSecret,
   useUpdateWebhook,
   useWebhook,
+  useWebhookDeliveries,
   useWebhooks,
   webhookQueryKeys,
 } from './webhooks';
 export type {
   CreateWebhookState,
   DeleteWebhookState,
+  ReplayDeliveryState,
   RotateWebhookSecretState,
   UpdateWebhookState,
+  WebhookDeliveriesState,
   WebhookDetailState,
   WebhooksState,
 } from './webhooks';
+
+// ============================================================================
+// Legal
+// ============================================================================
+
+export { legalQueryKeys, useCurrentLegal, usePublishLegal, useUserAgreements } from './legal';
+export type {
+  CurrentLegalState,
+  PublishLegalState,
+  UseCurrentLegalOptions,
+  UsePublishLegalOptions,
+  UseUserAgreementsOptions,
+  UserAgreementsState,
+} from './legal';
 
 // ============================================================================
 // Version

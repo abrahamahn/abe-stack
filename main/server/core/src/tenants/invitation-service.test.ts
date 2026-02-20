@@ -43,6 +43,8 @@ function createMockRepos(): Repositories {
       countPendingByTenantId: vi.fn().mockResolvedValue(0),
       findExpiredPending: vi.fn(),
       update: vi.fn(),
+      findPendingExpiringBefore: vi.fn(),
+      updateReminderSentAt: vi.fn(),
     },
     users: {
       findById: vi.fn(),

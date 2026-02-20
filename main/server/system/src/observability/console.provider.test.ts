@@ -1,4 +1,4 @@
-// main/server/system/src/observability/console-provider.test.ts
+// main/server/system/src/observability/console.provider.test.ts
 import { describe, expect, it, vi } from 'vitest';
 
 import { ConsoleErrorTrackingProvider } from './console.provider';

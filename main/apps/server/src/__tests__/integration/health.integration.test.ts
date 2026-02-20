@@ -7,7 +7,6 @@
  * the built-in /health route conflict).
  */
 
-import { registerRouteMap } from '@/http';
 import fastify from 'fastify';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -16,6 +15,8 @@ import { systemRoutes } from '../../routes/system.routes';
 import { createTest } from './test-utils';
 
 import type { FastifyInstance, preHandlerHookHandler } from 'fastify';
+
+import { registerRouteMap } from '@/http';
 
 // Mock @bslt/websocket to avoid real WebSocket dependency
 vi.mock('@bslt/websocket', () => ({

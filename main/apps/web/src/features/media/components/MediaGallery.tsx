@@ -25,6 +25,16 @@ export interface MediaGalleryProps {
   isLoading?: boolean;
   error?: Error | null;
   onUploadSuccess?: () => void;
+  /** External delete handler. When provided, overrides internal delete logic. */
+  onDelete?: (id: string) => void;
+  /** Whether an external delete operation is in progress */
+  isDeleting?: boolean;
+  /** Whether to paginate the gallery items */
+  paginated?: boolean;
+  /** Number of items per page when paginated */
+  pageSize?: number;
+  /** Slot for a custom upload component to render above the gallery */
+  uploadSlot?: React.ReactNode;
   className?: string;
 }
 

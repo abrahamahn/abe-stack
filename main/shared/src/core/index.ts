@@ -610,12 +610,22 @@ export {
 // ============================================================================
 
 export {
+  ACTIVITY_TYPES,
+  ACTIVITY_TYPE_VALUES,
   ACTOR_TYPES,
+  activityEventSchema,
+  activityFeedRequestSchema,
+  activityFeedResponseSchema,
   activitySchema,
   actorTypeSchema,
   createActivitySchema,
   getActorTypeTone,
+  type ActivitiesListFilters,
   type Activity,
+  type ActivityEvent,
+  type ActivityFeedRequest,
+  type ActivityFeedResponse,
+  type ActivityType,
   type ActorType,
   type CreateActivity,
 } from './activities';

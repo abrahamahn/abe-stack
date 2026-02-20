@@ -1,4 +1,4 @@
-// main/server/system/src/security/crypto/jwt-rotation.ts
+// main/server/system/src/security/crypto/jwt.rotation.ts
 /**
  * JWT Secret Rotation Support
  *

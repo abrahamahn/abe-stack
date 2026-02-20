@@ -39,6 +39,8 @@ import {
   type ReactElement,
 } from 'react';
 
+import { addRouteChangeBreadcrumb, SentryErrorBoundary } from '../lib/sentry';
+
 import { getAccessToken } from './authToken';
 import { ClientEnvironmentProvider, type ClientEnvironment } from './ClientEnvironment';
 import { NetworkStatus } from './components';
@@ -67,6 +69,47 @@ const AppToaster = (): ReactElement => {
 /** Announces route changes to screen readers via the LiveRegion provider */
 const RouteFocusAnnouncer = (): null => {
   useRouteFocusAnnounce();
+  return null;
+};
+
+/** Records Sentry breadcrumbs on route changes for debugging context */
+const SentryRouteTracker = (): null => {
+  const prevPath = useRef(window.location.pathname);
+
+  useEffect(() => {
+    // Use a MutationObserver-free approach: listen to popstate + intercept pushState
+    const handleRouteChange = (): void => {
+      const currentPath = window.location.pathname;
+      if (currentPath !== prevPath.current) {
+        addRouteChangeBreadcrumb(prevPath.current, currentPath);
+        prevPath.current = currentPath;
+      }
+    };
+
+    // Listen for browser back/forward
+    window.addEventListener('popstate', handleRouteChange);
+
+    // Patch pushState/replaceState to detect programmatic navigation
+    const originalPushState = history.pushState.bind(history);
+    const originalReplaceState = history.replaceState.bind(history);
+
+    history.pushState = (...args: Parameters<typeof history.pushState>) => {
+      originalPushState(...args);
+      handleRouteChange();
+    };
+
+    history.replaceState = (...args: Parameters<typeof history.replaceState>) => {
+      originalReplaceState(...args);
+      handleRouteChange();
+    };
+
+    return () => {
+      window.removeEventListener('popstate', handleRouteChange);
+      history.pushState = originalPushState;
+      history.replaceState = originalReplaceState;
+    };
+  }, []);
+
   return null;
 };
 
@@ -262,36 +305,39 @@ export const App = ({ environment }: AppProps): ReactElement => {
   } = useTosAcceptance(environment);
 
   return (
-    <ErrorBoundary>
-      <QueryCacheProvider cache={environment.queryCache}>
-        <ThemeProvider>
-          <BrowserRouter>
-            <ClientEnvironmentProvider value={environment}>
-              <HistoryProvider>
-                <LiveRegion>
-                  <div className="h-screen flex flex-col overflow-hidden">
-                    <SkipLink />
-                    <RouteFocusAnnouncer />
-                    <div className="flex-1 min-h-0 relative">
-                      <AppRoutes />
+    <SentryErrorBoundary fallback={<ErrorBoundary>{null}</ErrorBoundary>}>
+      <ErrorBoundary>
+        <QueryCacheProvider cache={environment.queryCache}>
+          <ThemeProvider>
+            <BrowserRouter>
+              <ClientEnvironmentProvider value={environment}>
+                <HistoryProvider>
+                  <LiveRegion>
+                    <div className="h-screen flex flex-col overflow-hidden">
+                      <SkipLink />
+                      <RouteFocusAnnouncer />
+                      <SentryRouteTracker />
+                      <div className="flex-1 min-h-0 relative">
+                        <AppRoutes />
+                      </div>
+                      <AppToaster />
+                      <NetworkStatus />
+                      <CookieConsentBanner />
+                      <TosAcceptanceModal
+                        open={tosState.open}
+                        documentId={tosState.documentId}
+                        requiredVersion={tosState.requiredVersion}
+                        onAccept={handleTosAccept}
+                        onDismiss={handleTosDismiss}
+                      />
                     </div>
-                    <AppToaster />
-                    <NetworkStatus />
-                    <CookieConsentBanner />
-                    <TosAcceptanceModal
-                      open={tosState.open}
-                      documentId={tosState.documentId}
-                      requiredVersion={tosState.requiredVersion}
-                      onAccept={handleTosAccept}
-                      onDismiss={handleTosDismiss}
-                    />
-                  </div>
-                </LiveRegion>
-              </HistoryProvider>
-            </ClientEnvironmentProvider>
-          </BrowserRouter>
-        </ThemeProvider>
-      </QueryCacheProvider>
-    </ErrorBoundary>
+                  </LiveRegion>
+                </HistoryProvider>
+              </ClientEnvironmentProvider>
+            </BrowserRouter>
+          </ThemeProvider>
+        </QueryCacheProvider>
+      </ErrorBoundary>
+    </SentryErrorBoundary>
   );
 };

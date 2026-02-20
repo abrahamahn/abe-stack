@@ -27,10 +27,9 @@ import { hashPassword, revokeAllUserTokens, verifyPassword } from '../../auth';
 import { ERROR_MESSAGES } from '../types';
 
 import type { DbClient, Repositories } from '../../../../db/src';
-import type { HandlerContext, RouteResult } from '../../../../system/src';
+import type { HandlerContext, HttpRequest, RouteResult } from '../../../../system/src';
 import type { UsersAuthConfig, UsersModuleDeps, UsersRequest } from '../types';
 import type { UserRole } from '@bslt/shared';
-import type { FastifyRequest } from 'fastify';
 
 /**
  * Storage service interface for file operations.
@@ -545,7 +544,7 @@ function asUsersDeps(ctx: HandlerContext): UsersModuleDeps {
 export async function handleUploadAvatar(
   ctx: HandlerContext,
   body: unknown,
-  req: FastifyRequest,
+  req: HttpRequest,
 ): Promise<RouteResult> {
   const deps = asUsersDeps(ctx);
   const request = req as unknown as UsersRequest;
@@ -609,7 +608,7 @@ export async function handleUploadAvatar(
 export async function handleDeleteAvatar(
   ctx: HandlerContext,
   _body: undefined,
-  req: FastifyRequest,
+  req: HttpRequest,
 ): Promise<RouteResult> {
   const deps = asUsersDeps(ctx);
   const request = req as unknown as UsersRequest;
@@ -658,7 +657,7 @@ interface ChangePasswordBody {
 export async function handleUpdateProfile(
   ctx: HandlerContext,
   body: UpdateProfileData,
-  req: FastifyRequest,
+  req: HttpRequest,
 ): Promise<RouteResult> {
   const deps = asUsersDeps(ctx);
   const request = req as unknown as UsersRequest;
@@ -699,7 +698,7 @@ export async function handleUpdateProfile(
 export async function handleChangePassword(
   ctx: HandlerContext,
   body: ChangePasswordBody,
-  req: FastifyRequest,
+  req: HttpRequest,
 ): Promise<RouteResult> {
   const deps = asUsersDeps(ctx);
   const request = req as unknown as UsersRequest;

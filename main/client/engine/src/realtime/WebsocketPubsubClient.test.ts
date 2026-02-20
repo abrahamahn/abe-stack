@@ -899,4 +899,265 @@ describe('WebsocketPubsubClient', () => {
       expect(onDebug).toHaveBeenCalledWith('Failed to create WebSocket:', expect.any(Error));
     });
   });
+
+  describe('delta sync recovery', () => {
+    it('should track last received timestamp from server messages', async () => {
+      const client = new WebsocketPubsubClient({
+        host: 'localhost:3000',
+        onMessage: vi.fn(),
+        WebSocketImpl: createMockWebSocket as unknown as typeof WebSocket,
+        secure: false,
+      });
+
+      await vi.advanceTimersByTimeAsync(0);
+
+      const ws = mockWebSocketInstances[0];
+      ws?.simulateMessage({
+        type: 'update',
+        key: 'user:1',
+        value: 'a',
+        timestamp: 1000,
+      } as ServerPubsubMessage);
+      ws?.simulateMessage({
+        type: 'update',
+        key: 'user:2',
+        value: 'b',
+        timestamp: 2000,
+      } as ServerPubsubMessage);
+
+      expect(client.getLastReceivedTimestamp('user:1')).toBe(1000);
+      expect(client.getLastReceivedTimestamp('user:2')).toBe(2000);
+      expect(client.getGlobalLastTimestamp()).toBe(2000);
+
+      client.close();
+    });
+
+    it('should send sync_request on reconnect with last timestamp', async () => {
+      const client = new WebsocketPubsubClient({
+        host: 'localhost:3000',
+        onMessage: vi.fn(),
+        WebSocketImpl: createMockWebSocket as unknown as typeof WebSocket,
+        secure: false,
+        baseReconnectDelayMs: 100,
+        deltaSyncEnabled: true,
+      });
+
+      await vi.advanceTimersByTimeAsync(0);
+
+      // Subscribe and receive a message with timestamp
+      client.subscribe('user:1');
+      client.subscribe('user:2');
+      const ws1 = mockWebSocketInstances[0];
+      ws1?.simulateMessage({
+        type: 'update',
+        key: 'user:1',
+        value: 'a',
+        timestamp: 5000,
+      } as ServerPubsubMessage);
+
+      // Disconnect
+      ws1?.simulateClose();
+
+      // Wait for reconnect
+      await vi.advanceTimersByTimeAsync(100);
+      const ws2 = mockWebSocketInstances[1];
+      ws2?.forceConnect();
+
+      // Check that sync_request was sent
+      const sentMessages = ws2?.getSentMessages() ?? [];
+      const syncRequests = sentMessages.filter((m) => m.type === 'sync_request');
+      expect(syncRequests.length).toBe(1);
+      expect(syncRequests[0]).toEqual(
+        expect.objectContaining({
+          type: 'sync_request',
+          lastTimestamp: 5000,
+        }),
+      );
+      // Keys should include active subscriptions
+      const syncReq = syncRequests[0] as {
+        type: 'sync_request';
+        lastTimestamp: number;
+        keys: string[];
+      };
+      expect(syncReq.keys).toContain('user:1');
+      expect(syncReq.keys).toContain('user:2');
+
+      client.close();
+    });
+
+    it('should not send sync_request on initial connect', async () => {
+      void new WebsocketPubsubClient({
+        host: 'localhost:3000',
+        onMessage: vi.fn(),
+        WebSocketImpl: createMockWebSocket as unknown as typeof WebSocket,
+        secure: false,
+        deltaSyncEnabled: true,
+      });
+
+      await vi.advanceTimersByTimeAsync(0);
+
+      const ws = mockWebSocketInstances[0];
+      const sentMessages = ws?.getSentMessages() ?? [];
+      const syncRequests = sentMessages.filter((m) => m.type === 'sync_request');
+      expect(syncRequests.length).toBe(0);
+    });
+
+    it('should not send sync_request when deltaSyncEnabled is false', async () => {
+      const client = new WebsocketPubsubClient({
+        host: 'localhost:3000',
+        onMessage: vi.fn(),
+        WebSocketImpl: createMockWebSocket as unknown as typeof WebSocket,
+        secure: false,
+        baseReconnectDelayMs: 100,
+        deltaSyncEnabled: false,
+      });
+
+      await vi.advanceTimersByTimeAsync(0);
+
+      client.subscribe('user:1');
+      const ws1 = mockWebSocketInstances[0];
+      ws1?.simulateMessage({
+        type: 'update',
+        key: 'user:1',
+        value: 'a',
+        timestamp: 5000,
+      } as ServerPubsubMessage);
+
+      ws1?.simulateClose();
+      await vi.advanceTimersByTimeAsync(100);
+      const ws2 = mockWebSocketInstances[1];
+      ws2?.forceConnect();
+
+      const sentMessages = ws2?.getSentMessages() ?? [];
+      const syncRequests = sentMessages.filter((m) => m.type === 'sync_request');
+      expect(syncRequests.length).toBe(0);
+
+      client.close();
+    });
+
+    it('should handle sync_response and deliver missed messages via onMessage', async () => {
+      const onMessage = vi.fn();
+      const client = new WebsocketPubsubClient({
+        host: 'localhost:3000',
+        onMessage,
+        WebSocketImpl: createMockWebSocket as unknown as typeof WebSocket,
+        secure: false,
+      });
+
+      await vi.advanceTimersByTimeAsync(0);
+
+      const ws = mockWebSocketInstances[0];
+      // Simulate sync_response from server
+      ws?.onmessage?.(
+        new MessageEvent('message', {
+          data: JSON.stringify({
+            type: 'sync_response',
+            messages: [
+              { key: 'user:1', version: 5, timestamp: 3000 },
+              { key: 'user:2', version: 3, timestamp: 4000 },
+            ],
+          }),
+        }),
+      );
+
+      // Should deliver each missed message via onMessage
+      expect(onMessage).toHaveBeenCalledTimes(2);
+      expect(onMessage).toHaveBeenCalledWith('user:1', 5);
+      expect(onMessage).toHaveBeenCalledWith('user:2', 3);
+
+      // Should update timestamps
+      expect(client.getGlobalLastTimestamp()).toBe(4000);
+
+      client.close();
+    });
+
+    it('should use onSyncResponse callback when provided', async () => {
+      const onMessage = vi.fn();
+      const onSyncResponse = vi.fn();
+      const client = new WebsocketPubsubClient({
+        host: 'localhost:3000',
+        onMessage,
+        onSyncResponse,
+        WebSocketImpl: createMockWebSocket as unknown as typeof WebSocket,
+        secure: false,
+      });
+
+      await vi.advanceTimersByTimeAsync(0);
+
+      const ws = mockWebSocketInstances[0];
+      ws?.onmessage?.(
+        new MessageEvent('message', {
+          data: JSON.stringify({
+            type: 'sync_response',
+            messages: [{ key: 'user:1', version: 5, timestamp: 3000 }],
+          }),
+        }),
+      );
+
+      // Should NOT deliver via onMessage when onSyncResponse is provided
+      expect(onMessage).not.toHaveBeenCalled();
+      // Should deliver via onSyncResponse batch callback
+      expect(onSyncResponse).toHaveBeenCalledTimes(1);
+      expect(onSyncResponse).toHaveBeenCalledWith([{ key: 'user:1', version: 5, timestamp: 3000 }]);
+
+      client.close();
+    });
+
+    it('should clear delta sync state on close', async () => {
+      const client = new WebsocketPubsubClient({
+        host: 'localhost:3000',
+        onMessage: vi.fn(),
+        WebSocketImpl: createMockWebSocket as unknown as typeof WebSocket,
+        secure: false,
+      });
+
+      await vi.advanceTimersByTimeAsync(0);
+
+      const ws = mockWebSocketInstances[0];
+      ws?.simulateMessage({
+        type: 'update',
+        key: 'user:1',
+        value: 'a',
+        timestamp: 1000,
+      } as ServerPubsubMessage);
+      expect(client.getGlobalLastTimestamp()).toBe(1000);
+
+      client.close();
+
+      expect(client.getGlobalLastTimestamp()).toBe(0);
+      expect(client.getLastReceivedTimestamp('user:1')).toBeUndefined();
+    });
+
+    it('should skip sync_request when no previous timestamp exists', async () => {
+      const onDebug = vi.fn();
+      const client = new WebsocketPubsubClient({
+        host: 'localhost:3000',
+        onMessage: vi.fn(),
+        WebSocketImpl: createMockWebSocket as unknown as typeof WebSocket,
+        secure: false,
+        baseReconnectDelayMs: 100,
+        deltaSyncEnabled: true,
+        debug: true,
+        onDebug,
+      });
+
+      await vi.advanceTimersByTimeAsync(0);
+
+      client.subscribe('user:1');
+      // No messages received (no timestamp)
+
+      const ws1 = mockWebSocketInstances[0];
+      ws1?.simulateClose();
+      await vi.advanceTimersByTimeAsync(100);
+      const ws2 = mockWebSocketInstances[1];
+      ws2?.forceConnect();
+
+      const sentMessages = ws2?.getSentMessages() ?? [];
+      const syncRequests = sentMessages.filter((m) => m.type === 'sync_request');
+      expect(syncRequests.length).toBe(0);
+      expect(onDebug).toHaveBeenCalledWith('Delta sync: no previous timestamp, skipping');
+
+      client.close();
+    });
+  });
 });

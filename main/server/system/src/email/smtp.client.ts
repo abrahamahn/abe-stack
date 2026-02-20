@@ -33,6 +33,8 @@ export interface SmtpMessage {
   subject: string;
   text?: string;
   html?: string;
+  /** Additional RFC-compliant headers (e.g., List-Unsubscribe) */
+  headers?: Record<string, string>;
 }
 
 export interface SmtpResult {
@@ -278,6 +280,13 @@ export class SmtpClient {
     content += `To: ${recipients.join(', ')}\r\n`;
     content += `Subject: ${this.encodeHeader(message.subject)}\r\n`;
     content += 'MIME-Version: 1.0\r\n';
+
+    // Append custom headers (e.g., List-Unsubscribe, List-Unsubscribe-Post)
+    if (message.headers !== undefined) {
+      for (const [name, value] of Object.entries(message.headers)) {
+        content += `${name}: ${value}\r\n`;
+      }
+    }
 
     if (
       message.html != null &&

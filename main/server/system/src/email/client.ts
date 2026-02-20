@@ -1,4 +1,13 @@
 // main/server/system/src/email/client.ts
+/**
+ * Mailer Client
+ *
+ * High-level email service facade that selects the underlying transport
+ * (SMTP or console) based on environment configuration.
+ *
+ * Includes an optional SMTP health check on server boot via `verifyOnBoot()`.
+ */
+
 import { EmailSendError } from '@bslt/shared/system';
 
 import { ConsoleEmailService } from './console';
@@ -54,6 +63,44 @@ export class MailerClient implements EmailService {
 
   healthCheck(): Promise<boolean> {
     return this.service.healthCheck();
+  }
+
+  /**
+   * Verify SMTP connectivity on server boot.
+   *
+   * Performs a non-blocking health check against the configured SMTP server.
+   * Logs the result and returns `{ ok, message }` — does NOT throw on failure
+   * so the server can still start (email may recover later).
+   *
+   * @param log - Optional structured logger (falls back to stdout)
+   * @returns `{ ok: true }` when SMTP is reachable, `{ ok: false, message }` otherwise
+   * @complexity O(1) - single TCP connection attempt
+   */
+  async verifyOnBoot(log?: {
+    info: (msg: string) => void;
+    warn: (obj: Record<string, unknown>, msg: string) => void;
+  }): Promise<{ ok: boolean; message?: string }> {
+    try {
+      const healthy = await this.healthCheck();
+      if (healthy) {
+        if (log !== undefined) {
+          log.info('SMTP health check passed — email delivery is available');
+        }
+        return { ok: true };
+      }
+      const msg = 'SMTP health check failed — email delivery may be unavailable';
+      if (log !== undefined) {
+        log.warn({ service: 'email' }, msg);
+      }
+      return { ok: false, message: msg };
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Unknown SMTP error';
+      const msg = `SMTP health check error: ${errorMsg}`;
+      if (log !== undefined) {
+        log.warn({ service: 'email', error: errorMsg }, msg);
+      }
+      return { ok: false, message: msg };
+    }
   }
 
   async send(options: EmailOptions): Promise<EmailResult> {

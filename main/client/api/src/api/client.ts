@@ -197,6 +197,8 @@ export interface ApiClient {
   listPasskeys: () => Promise<PasskeyListItem[]>;
   renamePasskey: (id: string, name: string) => Promise<{ message: string }>;
   deletePasskey: (id: string) => Promise<{ message: string }>;
+  backupCodesStatus: () => Promise<{ remaining: number; total: number }>;
+  regenerateBackupCodes: (data: { code: string }) => Promise<{ backupCodes: string[] }>;
   listUsers: () => Promise<Record<string, unknown>>;
   getSessionCount: () => Promise<{ count: number }>;
   getTosStatus: () => Promise<{
@@ -715,6 +717,15 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
       documentId: string | null;
     }> {
       return request('/auth/tos/status', undefined, tosStatusResponseSchema);
+    },
+    async backupCodesStatus(): Promise<{ remaining: number; total: number }> {
+      return request<{ remaining: number; total: number }>('/auth/backup-codes/status');
+    },
+    async regenerateBackupCodes(data: { code: string }): Promise<{ backupCodes: string[] }> {
+      return request<{ backupCodes: string[] }>('/auth/backup-codes/regenerate', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
     },
     async listUsers(): Promise<Record<string, unknown>> {
       return request('/users/list');

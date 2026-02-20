@@ -2244,13 +2244,73 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 #### Sprint 7 Priority Matrix
 
-| Priority   | Area         | Items                                             |
-| ---------- | ------------ | ------------------------------------------------- |
-| **High**   | Real-Time    | React hooks (Phase 6), `RealtimeProvider` (Phase 2) |
-| **Medium** | Security     | WebAuthn / Passkeys (Milestone 2)                 |
-| **Medium** | Backend      | API versioning, generated `@bslt/api-client`      |
-| **Low**    | Observability | Request context logging, severity-conditional logs |
-| **Low**    | Scaling      | Redis, CDN, load testing — activate on demand     |
+| Priority   | Area          | Items                                               |
+| ---------- | ------------- | --------------------------------------------------- |
+| **High**   | Real-Time     | React hooks (Phase 6), `RealtimeProvider` (Phase 2) |
+| **Medium** | Security      | WebAuthn / Passkeys (Milestone 2)                   |
+| **Medium** | Backend       | API versioning, generated `@bslt/api-client`        |
+| **Low**    | Observability | Request context logging, severity-conditional logs  |
+| **Low**    | Scaling       | Redis, CDN, load testing — activate on demand       |
+
+---
+
+## Architectural Concerns (Post-Sprint 3 Analysis)
+
+> Added 2026-02-20 after evaluating Gemini & ChatGPT audits against the actual codebase.
+> These are real issues confirmed by code inspection — not speculative.
+
+### 1. Move `bootstrapSystem()` from `@bslt/core` to `@bslt/server-system`
+
+`main/server/core/src/bootstrap.ts` contains `bootstrapSystem()` which creates `SystemContext`
+(DB client, cache, queue, pubsub, repos, write service, error tracker, storage, email, SMS,
+billing, notifications). This is **infrastructure assembly**, not business logic — it belongs
+in `@bslt/server-system`, not `@bslt/core`.
+
+- [ ] Move `bootstrapSystem()` + `SystemContext` type to `@bslt/server-system`
+- [ ] Re-export from `@bslt/core` for backwards compatibility during migration
+- [ ] Update `main/apps/server/src/manager.ts` import to point at `@bslt/server-system`
+- [ ] Remove the re-export from `@bslt/core` once all consumers are updated
+
+### 2. Fix `@bslt/server-system` → `@bslt/db` dependency inversion
+
+`@bslt/server-system` depends on `@bslt/db` for search factory, write service, and queue
+types. This is backwards — both are infrastructure packages at the same layer.
+
+Root cause: `@bslt/db` does double duty — pure data access **and** Postgres-backed
+infrastructure services (queue store, pubsub, search provider) that should live in
+`server-system`.
+
+- [ ] Move `PostgresQueueStore` from `@bslt/db` to `@bslt/server-system`
+- [ ] Move `PostgresPubSub` from `@bslt/db` to `@bslt/server-system`
+- [ ] Move `SqlSearchProvider` + factory from `@bslt/db` to `@bslt/server-system`
+- [ ] Move `WriteService` from `@bslt/db` to `@bslt/server-system`
+- [ ] `@bslt/server-system` depends on `@bslt/db` only for `DbClient` type (thin, justified)
+- [ ] Eliminate duplicated `SearchProviderFactory` (exists in both packages)
+
+### 3. Add subpath exports to `@bslt/server-system`
+
+The barrel file `main/server/system/src/index.ts` re-exports ~300 symbols. Only 3 subpath
+exports exist today (`.`, `./config`, `./logger`). Add granular subpaths so consumers import
+only what they need:
+
+- [ ] `@bslt/server-system/cache`
+- [ ] `@bslt/server-system/security`
+- [ ] `@bslt/server-system/storage`
+- [ ] `@bslt/server-system/queue`
+- [ ] `@bslt/server-system/search`
+- [ ] `@bslt/server-system/email`
+- [ ] `@bslt/server-system/routing`
+- [ ] `@bslt/server-system/observability`
+
+### 4. Clean up double-casts in `App` constructor
+
+`main/apps/server/src/app.ts` lines 72-85 use `as unknown as` double-casts to force
+incompatible types. This is a symptom of `SystemContext` and `AppContext` having divergent
+shapes. Fix by aligning the context interfaces properly after the `bootstrapSystem()` move.
+
+- [ ] Audit `App.constructor()` double-casts
+- [ ] Align `SystemContext` and `AppContext` interfaces
+- [ ] Remove `as unknown as` casts
 
 ---
 

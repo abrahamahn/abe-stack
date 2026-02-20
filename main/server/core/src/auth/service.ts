@@ -480,7 +480,13 @@ export async function authenticateUser(
         userAgent,
         LOGIN_FAILURE_REASON.ACCOUNT_LOCKED,
       );
-      throw new AccountLockedError();
+      const lockOpts: { retryAfter?: number; lockReason?: string; lockedUntil?: string } = {
+        lockedUntil: user.lockedUntil.toISOString(),
+      };
+      if (user.lockReason !== null) {
+        lockOpts.lockReason = user.lockReason;
+      }
+      throw new AccountLockedError(lockOpts);
     }
     // Lock expired — auto-unlock (fire-and-forget)
     repos.users.unlockAccount(user.id).catch(() => {});
@@ -1073,9 +1079,7 @@ export async function resendVerificationEmail(
     await tx.execute(
       update(AUTH_TOKENS_TABLE)
         .set({ used_at: new Date() })
-        .where(
-          and(eq('type', 'email_verification'), eq('user_id', user.id), isNull('used_at')),
-        )
+        .where(and(eq('type', 'email_verification'), eq('user_id', user.id), isNull('used_at')))
         .toSql(),
     );
 
@@ -1157,9 +1161,7 @@ export async function verifyEmail(
     const updatedTokens = await tx.query(
       update(AUTH_TOKENS_TABLE)
         .set({ used_at: new Date() })
-        .where(
-          and(eq('type', 'email_verification'), eq('id', tokenRecord.id), isNull('used_at')),
-        )
+        .where(and(eq('type', 'email_verification'), eq('id', tokenRecord.id), isNull('used_at')))
         .returningAll()
         .toSql(),
     );

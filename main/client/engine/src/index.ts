@@ -45,8 +45,19 @@ export type {
   UpdateWebhookRequest,
   WebhookClient,
   WebhookClientConfig,
+  WebhookDeliveryItem,
   WebhookItem,
   WebhookWithDeliveries,
+} from '@bslt/api';
+
+export { createLegalClient } from '@bslt/api';
+export type {
+  LegalClient,
+  LegalClientConfig,
+  LegalDocumentItem,
+  PublishLegalDocumentRequest,
+  PublishLegalDocumentResponse,
+  UserAgreementItem,
 } from '@bslt/api';
 
 // In-Memory Cache

@@ -20,6 +20,7 @@ import {
 } from './securityHandlers';
 
 import type { AdminAppContext } from './types';
+import type { HttpReply, HttpRequest } from '../../../system/src';
 import type {
   SecurityEvent,
   SecurityEventsExportRequest,
@@ -27,7 +28,6 @@ import type {
   SecurityEventsListRequest,
   SecurityMetrics,
 } from '@bslt/shared';
-import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
 // Mocks
@@ -161,29 +161,27 @@ function createMockContext(): AdminAppContext {
 }
 
 /**
- * Create a mock FastifyRequest for testing
+ * Create a mock HttpRequest for testing
  */
 function createMockRequest(
-  overrides: Partial<
-    FastifyRequest & { user?: { userId: string; email: string; role: string } }
-  > = {},
+  overrides: Partial<HttpRequest & { user?: { userId: string; email: string; role: string } }> = {},
   params: Record<string, string> = {},
   query: Record<string, unknown> = {},
-): FastifyRequest & { user?: { userId: string; email: string; role: string } } {
+): HttpRequest & { user?: { userId: string; email: string; role: string } } {
   return {
     user: { userId: 'admin-123', email: 'admin@example.com', role: 'admin' },
     params,
     query,
     headers: {},
     ...overrides,
-  } as FastifyRequest & { user?: { userId: string; email: string; role: string } };
+  } as HttpRequest & { user?: { userId: string; email: string; role: string } };
 }
 
 /**
- * Create a mock FastifyReply for testing
+ * Create a mock HttpReply for testing
  */
-function createMockReply(): FastifyReply {
-  return {} as FastifyReply;
+function createMockReply(): HttpReply {
+  return {} as HttpReply;
 }
 
 // ============================================================================
@@ -339,7 +337,7 @@ describe('Security Handlers', () => {
           params: {},
           query: {},
           headers: {},
-        } as FastifyRequest & { user?: { userId: string; email: string; role: string } };
+        } as HttpRequest & { user?: { userId: string; email: string; role: string } };
         const body: SecurityEventsListRequest = { page: 1, limit: 20, sortOrder: 'desc' };
         const result = await handleListSecurityEvents(mockCtx, body, req, createMockReply());
 
@@ -405,7 +403,7 @@ describe('Security Handlers', () => {
           params: { id: 'event-123' },
           query: {},
           headers: {},
-        } as unknown as FastifyRequest;
+        } as unknown as HttpRequest;
         const result = await handleGetSecurityEvent(mockCtx, undefined, req, createMockReply());
 
         expect(result.status).toBe(401);
@@ -545,7 +543,7 @@ describe('Security Handlers', () => {
           params: {},
           query: {},
           headers: {},
-        } as FastifyRequest & { user?: { userId: string; email: string; role: string } };
+        } as HttpRequest & { user?: { userId: string; email: string; role: string } };
         const result = await handleGetSecurityMetrics(mockCtx, undefined, req, createMockReply());
 
         expect(result.status).toBe(401);
@@ -670,7 +668,7 @@ describe('Security Handlers', () => {
           params: {},
           query: {},
           headers: {},
-        } as FastifyRequest & { user?: { userId: string; email: string; role: string } };
+        } as HttpRequest & { user?: { userId: string; email: string; role: string } };
         const body: SecurityEventsExportRequest = { format: 'json' };
         const result = await handleExportSecurityEvents(mockCtx, body, req, createMockReply());
 

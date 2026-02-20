@@ -1,4 +1,4 @@
-// main/server/system/src/mailer/smtp.ts
+// main/server/system/src/email/smtp.ts
 /**
  * SMTP Email Service (Production)
  *
@@ -50,6 +50,9 @@ export class SmtpEmailService implements EmailService {
     }
     if (options.html !== undefined) {
       message.html = options.html;
+    }
+    if (options.headers !== undefined) {
+      message.headers = options.headers;
     }
     const result = await this.client.send(message);
 

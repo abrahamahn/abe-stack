@@ -1,4 +1,4 @@
-// main/server/system/src/queue/memory-store.ts
+// main/server/system/src/queue/memory.store.ts
 /**
  * In-Memory Queue Store
  *

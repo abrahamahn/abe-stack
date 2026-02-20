@@ -11,10 +11,12 @@ export {
   useInvoices,
   usePaymentMethods,
   usePlans,
+  useProrationPreview,
   useSubscription,
   type InvoicesState,
   type PaymentMethodsState,
   type PlansState,
+  type ProrationPreviewState,
   type SubscriptionState,
 } from './hooks';
 

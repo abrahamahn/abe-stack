@@ -21,7 +21,7 @@ import type {
   ImpersonationStartResult,
 } from './impersonation';
 import type { AdminAppContext } from './types';
-import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { HttpReply, HttpRequest } from '../../../system/src';
 
 const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));
@@ -39,8 +39,8 @@ const toError = (error: unknown): Error =>
 export async function handleStartImpersonation(
   ctx: AdminAppContext,
   _body: undefined,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<{ status: number; body: ImpersonationStartResult | { message: string } }> {
   const authUser = (request as unknown as { user?: { userId: string; role: string } }).user;
   if (authUser === undefined) {
@@ -125,8 +125,8 @@ export async function handleStartImpersonation(
 export async function handleEndImpersonation(
   ctx: AdminAppContext,
   body: { targetUserId?: string } | undefined,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<{ status: number; body: ImpersonationEndResult | { message: string } }> {
   const authUser = (request as unknown as { user?: { userId: string; role: string } }).user;
   if (authUser === undefined) {

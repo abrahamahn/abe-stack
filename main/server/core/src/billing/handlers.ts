@@ -39,6 +39,7 @@ import type {
   CheckoutResponse,
   Invoice,
   InvoiceResponse,
+  InvoiceStatus,
   InvoicesListResponse,
   PaymentMethod,
   PaymentMethodResponse,
@@ -151,7 +152,7 @@ function formatSubscription(subscription: DbSubscription & { plan: DbPlan }): Su
  */
 function formatInvoice(invoice: {
   id: string;
-  status: 'draft' | 'open' | 'paid' | 'void' | 'uncollectible';
+  status: InvoiceStatus;
   amountDue: number;
   amountPaid: number;
   currency: string;

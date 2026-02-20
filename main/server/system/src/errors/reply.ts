@@ -21,9 +21,9 @@
 import { isOk } from '@bslt/shared/primitives';
 import { getErrorStatusCode, toAppError } from '@bslt/shared/system';
 
+import type { HttpReply, HttpRequest } from '../routing/http.types';
 import type { ApiErrorResponse, ApiSuccessResponse, Result } from '@bslt/shared/primitives';
 import type { AppError } from '@bslt/shared/system';
-import type { HttpReply, HttpRequest } from '../routing/http.types';
 
 // ============================================================================
 // Internal builders

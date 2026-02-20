@@ -8,14 +8,14 @@
  * Moved from @bslt/server-system to keep Fastify coupling in the app layer.
  */
 
+import { getMetricsCollector } from '@bslt/server-system';
+import { createRequestLogger } from '@bslt/server-system/logger';
 import {
   createJobLogger as createSharedJobLogger,
   createLogRequestContext,
   getOrCreateCorrelationId,
 } from '@bslt/shared/system';
 
-import { createRequestLogger } from '@bslt/server-system/logger';
-import { getMetricsCollector } from '@bslt/server-system';
 
 import type { LoggingConfig } from '@bslt/shared/config';
 import type { UserRole } from '@bslt/shared/core';

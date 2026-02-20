@@ -62,5 +62,9 @@ export type {
   UseUpdateWorkspaceOptions,
   UseUpdateWorkspaceResult,
 } from './useWorkspaceMutations';
+export { useWorkspaceInvoices } from './useWorkspaceInvoices';
+export type { UseWorkspaceInvoicesResult } from './useWorkspaceInvoices';
+export { useStripePortal } from './useStripePortal';
+export type { UseStripePortalResult } from './useStripePortal';
 export { useWorkspaces } from './useWorkspaces';
 export type { UseWorkspacesResult } from './useWorkspaces';

@@ -15,13 +15,14 @@ import {
   getApiKeyContext,
 } from '@bslt/core/api-keys';
 import { createAuthGuard } from '@bslt/core/auth';
-import { registerRouteMap } from '@/http';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createTestJwt, createTestServer, parseJsonResponse, type TestServer } from './test-utils';
 
 import type { AuthGuardFactory } from '@bslt/server-system';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+
+import { registerRouteMap } from '@/http';
 
 interface ApiKeyRecord {
   id: string;

@@ -8,7 +8,6 @@
 
 import { createAuthGuard } from '@bslt/core/auth';
 import { notificationRoutes } from '@bslt/core/notifications';
-import { registerRouteMap } from '@/http';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
@@ -21,6 +20,8 @@ import {
 } from './test-utils';
 
 import type { AuthGuardFactory } from '@bslt/server-system';
+
+import { registerRouteMap } from '@/http';
 
 // ============================================================================
 // Mock Repositories

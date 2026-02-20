@@ -15,6 +15,7 @@ import { createRoot } from 'react-dom/client';
 
 import { App } from './app/App';
 import { onTosRequired } from './app/tosHandler';
+import { initSentry } from './lib/sentry';
 import { registerServiceWorker } from './utils/registerServiceWorker';
 
 import type { ClientEnvironment } from '@app/ClientEnvironment';
@@ -22,6 +23,12 @@ import type { ClientEnvironment } from '@app/ClientEnvironment';
 import { clientConfig } from '@/config';
 
 import '@bslt/ui/styles/elements.css';
+
+// ============================================================================
+// Sentry Initialization (before anything else)
+// ============================================================================
+
+void initSentry();
 
 // ============================================================================
 // Service Creation (module level, before React renders)

@@ -198,11 +198,18 @@ describe('Billing Schema - Enums and Constants', () => {
 
   describe('InvoiceStatus', () => {
     it('should have all invoice statuses', () => {
-      expect(INVOICE_STATUSES).toEqual(['draft', 'open', 'paid', 'void', 'uncollectible']);
+      expect(INVOICE_STATUSES).toEqual([
+        'draft',
+        'open',
+        'paid',
+        'past_due',
+        'void',
+        'uncollectible',
+      ]);
     });
 
-    it('should contain exactly 5 statuses', () => {
-      expect(INVOICE_STATUSES).toHaveLength(5);
+    it('should contain exactly 6 statuses', () => {
+      expect(INVOICE_STATUSES).toHaveLength(6);
     });
 
     it('should have unique status values', () => {
@@ -215,11 +222,13 @@ describe('Billing Schema - Enums and Constants', () => {
       const openStatus: InvoiceStatus = 'open';
       const paidStatus: InvoiceStatus = 'paid';
       const voidStatus: InvoiceStatus = 'void';
+      const pastDueStatus: InvoiceStatus = 'past_due';
       const uncollectibleStatus: InvoiceStatus = 'uncollectible';
 
       expect(draftStatus).toBe('draft');
       expect(openStatus).toBe('open');
       expect(paidStatus).toBe('paid');
+      expect(pastDueStatus).toBe('past_due');
       expect(voidStatus).toBe('void');
       expect(uncollectibleStatus).toBe('uncollectible');
     });
@@ -322,8 +331,16 @@ describe('Billing Schema - Plan Types', () => {
     });
 
     it('should allow boolean included flag', () => {
-      const includedFeature: PlanFeature = { key: 'team:invite', name: 'Feature A', included: true };
-      const excludedFeature: PlanFeature = { key: 'branding:custom', name: 'Feature B', included: false };
+      const includedFeature: PlanFeature = {
+        key: 'team:invite',
+        name: 'Feature A',
+        included: true,
+      };
+      const excludedFeature: PlanFeature = {
+        key: 'branding:custom',
+        name: 'Feature B',
+        included: false,
+      };
 
       expect(includedFeature.included).toBe(true);
       expect(excludedFeature.included).toBe(false);
@@ -1564,7 +1581,7 @@ describe('Billing Schema - Type Consistency', () => {
 
     it('should have INVOICE_STATUSES match InvoiceStatus type', () => {
       const statuses: InvoiceStatus[] = [...INVOICE_STATUSES];
-      expect(statuses).toHaveLength(5);
+      expect(statuses).toHaveLength(6);
       expect(statuses).toContain('paid');
       expect(statuses).toContain('void');
     });
