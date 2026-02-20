@@ -6,11 +6,15 @@
  * - RecordCache for in-memory state
  * - SubscriptionCache for ref-counted WebSocket subscriptions
  * - RecordStorage for persistent IndexedDB fallback
+ * - Permission-aware error handling (403 and permission_revoked events)
  *
  * Uses useSyncExternalStore for tear-free reads compatible with concurrent React.
  */
 
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
+
+import type { PermissionError, PermissionEventListener } from './usePermissionError';
+import { isPermissionError, createPermissionError } from './usePermissionError';
 
 // ============================================================================
 // Types — inline to avoid cross-package resolution issues at lint time
@@ -28,6 +32,7 @@ interface RecordCacheLike {
   subscribe(table: string, id: string, listener: () => void): () => void;
   get(table: string, id: string): RecordShape | undefined;
   set(table: string, id: string, record: RecordShape, opts: { force: boolean }): void;
+  delete(table: string, id: string): RecordShape | undefined;
 }
 
 /** Minimal interface for the ref-counted WebSocket subscription cache. */
@@ -53,6 +58,8 @@ export interface UseRecordResult<T> {
   data: T | undefined;
   isLoading: boolean;
   error: Error | undefined;
+  /** True when access was denied due to insufficient permissions (403 or permission_revoked). */
+  permissionDenied: boolean;
 }
 
 /** Dependencies injected into useRecord. */
@@ -60,6 +67,12 @@ export interface UseRecordDeps {
   recordCache: RecordCacheLike;
   subscriptionCache: SubscriptionCacheLike;
   recordStorage?: RecordStorageLike;
+  /**
+   * Optional listener for permission_revoked events from the WebSocket.
+   * When provided, the hook registers to receive permission revocation
+   * notifications and clears cached records for the affected tenant.
+   */
+  permissionEvents?: PermissionEventListener;
 }
 
 // ============================================================================
@@ -69,7 +82,11 @@ export interface UseRecordDeps {
 /**
  * React hook that subscribes to a single record by table and ID.
  *
- * @param deps - Injected dependencies (recordCache, subscriptionCache, recordStorage)
+ * Handles permission errors gracefully:
+ * - 403 responses set `permissionDenied: true` instead of crashing
+ * - `permission_revoked` events clear the record from cache and set the error
+ *
+ * @param deps - Injected dependencies (recordCache, subscriptionCache, recordStorage, permissionEvents)
  * @param table - The table name
  * @param id - The record ID
  * @param options - Additional options
@@ -81,10 +98,11 @@ export function useRecord<T extends RecordShape = RecordShape>(
   options: UseRecordOptions = {},
 ): UseRecordResult<T> {
   const { skipSubscription = false, fallbackToStorage = true } = options;
-  const { recordCache, subscriptionCache, recordStorage } = deps;
+  const { recordCache, subscriptionCache, recordStorage, permissionEvents } = deps;
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | undefined>(undefined);
+  const [permissionDenied, setPermissionDenied] = useState(false);
 
   const subscribeToStore = useCallback(
     (onStoreChange: () => void): (() => void) => {
@@ -107,9 +125,41 @@ export function useRecord<T extends RecordShape = RecordShape>(
     return unsubscribe;
   }, [subscriptionCache, table, id, skipSubscription]);
 
+  // Listen for permission_revoked events
+  useEffect(() => {
+    if (permissionEvents === undefined) return;
+
+    const unsubscribe = permissionEvents.onPermissionRevoked((event) => {
+      // The record's tenantId is embedded in the cached data.
+      // If we have data and it belongs to the revoked tenant, clear it.
+      const currentRecord = recordCache.get(table, id);
+      if (currentRecord !== undefined && 'tenantId' in currentRecord) {
+        if (currentRecord['tenantId'] === event.tenantId) {
+          recordCache.delete(table, id);
+          setPermissionDenied(true);
+          setError(createPermissionError(event.tenantId, event.reason));
+        }
+      }
+
+      // If we don't have data but the event is for our tenant context,
+      // still mark as denied so re-fetches don't attempt to load
+      if (currentRecord === undefined && event.tenantId !== undefined) {
+        setPermissionDenied(true);
+        setError(createPermissionError(event.tenantId, event.reason));
+      }
+    });
+
+    return unsubscribe;
+  }, [permissionEvents, recordCache, table, id]);
+
   // Fallback: load from RecordStorage if not in RecordCache
   useEffect(() => {
     if (data !== undefined || !fallbackToStorage || recordStorage === undefined) {
+      return;
+    }
+
+    // Don't attempt to load if permission was already denied
+    if (permissionDenied) {
       return;
     }
 
@@ -126,6 +176,16 @@ export function useRecord<T extends RecordShape = RecordShape>(
       })
       .catch((err: unknown) => {
         if (cancelled) return;
+
+        // Handle 403 permission errors gracefully
+        if (isPermissionError(err)) {
+          setPermissionDenied(true);
+          const message =
+            err instanceof Error ? err.message : 'Permission denied';
+          setError(new Error(message));
+          return;
+        }
+
         const message =
           err instanceof Error ? err.message : 'Failed to load record from storage';
         setError(new Error(message));
@@ -137,7 +197,7 @@ export function useRecord<T extends RecordShape = RecordShape>(
     return (): void => {
       cancelled = true;
     };
-  }, [data, fallbackToStorage, recordCache, recordStorage, table, id]);
+  }, [data, fallbackToStorage, permissionDenied, recordCache, recordStorage, table, id]);
 
-  return { data, isLoading, error };
+  return { data, isLoading, error, permissionDenied };
 }

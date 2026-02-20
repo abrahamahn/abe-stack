@@ -784,4 +784,95 @@ describe('RedisQueueStore', () => {
       expect(store.getClient()).toBeDefined();
     });
   });
+
+  // --------------------------------------------------------------------------
+  // idempotency
+  // --------------------------------------------------------------------------
+
+  describe('idempotency', () => {
+    test('should skip enqueue when duplicate idempotency key is detected', async () => {
+      const task = makeTask({
+        scheduledAt: new Date(Date.now() - 1000).toISOString(),
+        idempotencyKey: 'idem-1',
+      });
+
+      // First enqueue: SET NX succeeds (returns 'OK')
+      mockRedisInstance.set.mockResolvedValueOnce('OK');
+      let firstPipeline: ReturnType<typeof createMockPipeline> | undefined;
+      mockRedisInstance.pipeline.mockImplementationOnce(() => {
+        firstPipeline = createMockPipeline();
+        return firstPipeline;
+      });
+
+      await store.enqueue(task);
+
+      expect(mockRedisInstance.set).toHaveBeenCalledWith('q:idem:idem-1', task.id, 'NX');
+      expect(firstPipeline).toBeDefined();
+      expect(firstPipeline!.set).toHaveBeenCalled();
+
+      // Second enqueue with same idempotency key: SET NX returns null (key exists)
+      mockRedisInstance.set.mockResolvedValueOnce(null);
+      let secondPipeline: ReturnType<typeof createMockPipeline> | undefined;
+      mockRedisInstance.pipeline.mockImplementationOnce(() => {
+        secondPipeline = createMockPipeline();
+        return secondPipeline;
+      });
+
+      const duplicateTask = makeTask({ id: 'task-2', idempotencyKey: 'idem-1' });
+      await store.enqueue(duplicateTask);
+
+      // Pipeline should NOT have been created for the duplicate
+      expect(secondPipeline).toBeUndefined();
+    });
+
+    test('should enqueue normally when no idempotency key is provided', async () => {
+      const task = makeTask({ scheduledAt: new Date(Date.now() - 1000).toISOString() });
+      let capturedPipeline: ReturnType<typeof createMockPipeline> | undefined;
+      mockRedisInstance.pipeline.mockImplementation(() => {
+        capturedPipeline = createMockPipeline();
+        return capturedPipeline;
+      });
+
+      await store.enqueue(task);
+
+      // SET NX should not have been called (no idempotency key)
+      const setNxCalls = mockRedisInstance.set.mock.calls.filter(
+        (call: unknown[]) => call.length === 3 && call[2] === 'NX',
+      );
+      expect(setNxCalls).toHaveLength(0);
+
+      // Pipeline should have been used for normal enqueue
+      expect(mockRedisInstance.pipeline).toHaveBeenCalled();
+      expect(capturedPipeline).toBeDefined();
+    });
+
+    test('should allow enqueue when idempotency keys differ', async () => {
+      const taskA = makeTask({
+        id: 'task-a',
+        scheduledAt: new Date(Date.now() - 1000).toISOString(),
+        idempotencyKey: 'key-a',
+      });
+      const taskB = makeTask({
+        id: 'task-b',
+        scheduledAt: new Date(Date.now() - 1000).toISOString(),
+        idempotencyKey: 'key-b',
+      });
+
+      // Both SET NX calls succeed
+      mockRedisInstance.set.mockResolvedValueOnce('OK');
+      mockRedisInstance.pipeline.mockImplementationOnce(() => createMockPipeline());
+      await store.enqueue(taskA);
+
+      mockRedisInstance.set.mockResolvedValueOnce('OK');
+      let capturedPipeline: ReturnType<typeof createMockPipeline> | undefined;
+      mockRedisInstance.pipeline.mockImplementationOnce(() => {
+        capturedPipeline = createMockPipeline();
+        return capturedPipeline;
+      });
+      await store.enqueue(taskB);
+
+      expect(capturedPipeline).toBeDefined();
+      expect(capturedPipeline!.set).toHaveBeenCalled();
+    });
+  });
 });

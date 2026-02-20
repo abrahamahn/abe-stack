@@ -171,10 +171,26 @@ export class RedisQueueStore implements QueueStore {
   /**
    * Enqueue a new task.
    *
+   * If the task carries an idempotency key that has already been seen, the
+   * enqueue is silently skipped (SET NX is used to atomically guard the key).
+   *
    * If the task's scheduledAt is in the future, it is placed in the scheduled
    * sorted set. Otherwise it is pushed directly to the ready list.
    */
   async enqueue(task: Task): Promise<void> {
+    // Idempotency guard — use SET NX so the check is atomic in Redis
+    if (task.idempotencyKey != null && task.idempotencyKey !== '') {
+      const idempotencyRedisKey = this.key(`idem:${task.idempotencyKey}`);
+      const wasSet = await this.client.set(idempotencyRedisKey, task.id, 'NX');
+      if (wasSet === null) {
+        this.logger?.debug('Duplicate idempotency key, skipping enqueue', {
+          taskId: task.id,
+          idempotencyKey: task.idempotencyKey,
+        });
+        return;
+      }
+    }
+
     const storedTask: StoredTask = { ...task, status: 'pending' };
     const taskKey = this.taskKey(task.id);
     const serialized = JSON.stringify(storedTask);

@@ -61,6 +61,27 @@ export const fr: FlatTranslationMap = {
   'settings.passkeys.title': 'Passkeys',
   'settings.dangerZone.title': 'Zone dangereuse',
 
+  // Settings - Preferences
+  'settings.preferences.title': 'Préférences',
+  'settings.preferences.description': "Personnalisez l'apparence et le comportement de l'application.",
+  'settings.preferences.theme.title': 'Thème',
+  'settings.preferences.theme.description':
+    "Choisissez l'apparence de l'application. Sélectionnez un thème ou laissez-le suivre les paramètres du système.",
+  'settings.preferences.theme.light': 'Clair',
+  'settings.preferences.theme.dark': 'Sombre',
+  'settings.preferences.theme.system': 'Système',
+  'settings.preferences.theme.lightDescription': 'Toujours utiliser le thème clair',
+  'settings.preferences.theme.darkDescription': 'Toujours utiliser le thème sombre',
+  'settings.preferences.theme.systemDescription': "Suivre les paramètres du système d'exploitation",
+  'settings.preferences.theme.currentSelection': 'Sélection actuelle :',
+  'settings.preferences.timezone.title': 'Fuseau horaire',
+  'settings.preferences.timezone.description':
+    'Définissez votre fuseau horaire préféré pour afficher les dates et heures.',
+  'settings.preferences.language.title': 'Langue',
+  'settings.preferences.language.description':
+    "Choisissez votre langue préférée pour l'interface de l'application.",
+  'settings.preferences.language.saved': 'Préférence de langue enregistrée.',
+
   // Workspace
   'workspace.create': 'Cr\u00e9er un espace de travail',
   'workspace.members': 'Membres',

@@ -552,6 +552,127 @@ describe('MemoryQueueStore', () => {
     });
   });
 
+  describe('idempotency', () => {
+    test('should skip enqueue when duplicate idempotency key is provided', async () => {
+      const now = new Date().toISOString();
+
+      await store.enqueue({
+        id: 'task-1',
+        name: 'test',
+        args: { order: 1 },
+        scheduledAt: now,
+        attempts: 0,
+        maxAttempts: 3,
+        createdAt: now,
+        idempotencyKey: 'unique-op-1',
+      });
+
+      await store.enqueue({
+        id: 'task-2',
+        name: 'test',
+        args: { order: 2 },
+        scheduledAt: now,
+        attempts: 0,
+        maxAttempts: 3,
+        createdAt: now,
+        idempotencyKey: 'unique-op-1', // duplicate key
+      });
+
+      expect(await store.getPendingCount()).toBe(1);
+
+      const retrieved = await store.get('task-1');
+      expect(retrieved).not.toBeNull();
+
+      const duplicate = await store.get('task-2');
+      expect(duplicate).toBeNull();
+    });
+
+    test('should allow enqueue when idempotency keys differ', async () => {
+      const now = new Date().toISOString();
+
+      await store.enqueue({
+        id: 'task-1',
+        name: 'test',
+        args: {},
+        scheduledAt: now,
+        attempts: 0,
+        maxAttempts: 3,
+        createdAt: now,
+        idempotencyKey: 'key-a',
+      });
+
+      await store.enqueue({
+        id: 'task-2',
+        name: 'test',
+        args: {},
+        scheduledAt: now,
+        attempts: 0,
+        maxAttempts: 3,
+        createdAt: now,
+        idempotencyKey: 'key-b',
+      });
+
+      expect(await store.getPendingCount()).toBe(2);
+    });
+
+    test('should allow enqueue when no idempotency key is provided', async () => {
+      const now = new Date().toISOString();
+
+      await store.enqueue({
+        id: 'task-1',
+        name: 'test',
+        args: {},
+        scheduledAt: now,
+        attempts: 0,
+        maxAttempts: 3,
+        createdAt: now,
+      });
+
+      await store.enqueue({
+        id: 'task-2',
+        name: 'test',
+        args: {},
+        scheduledAt: now,
+        attempts: 0,
+        maxAttempts: 3,
+        createdAt: now,
+      });
+
+      expect(await store.getPendingCount()).toBe(2);
+    });
+
+    test('should reset idempotency keys on clear', async () => {
+      const now = new Date().toISOString();
+
+      await store.enqueue({
+        id: 'task-1',
+        name: 'test',
+        args: {},
+        scheduledAt: now,
+        attempts: 0,
+        maxAttempts: 3,
+        createdAt: now,
+        idempotencyKey: 'key-x',
+      });
+
+      store.clear();
+
+      // Same key should now be accepted again after clear
+      await store.enqueue({
+        id: 'task-2',
+        name: 'test',
+        args: {},
+        scheduledAt: now,
+        attempts: 0,
+        maxAttempts: 3,
+        createdAt: now,
+        idempotencyKey: 'key-x',
+      });
+
+      expect(await store.getPendingCount()).toBe(1);
+    });
+  });
+
   describe('factory function', () => {
     test('should create MemoryQueueStore instance', () => {
       const newStore = createMemoryQueueStore();

@@ -120,7 +120,7 @@ export class QueueServer {
   async enqueue(
     name: string,
     args: Task['args'],
-    options?: { scheduledAt?: Date; maxAttempts?: number },
+    options?: { scheduledAt?: Date; maxAttempts?: number; idempotencyKey?: string },
   ): Promise<string> {
     const taskId = crypto.randomUUID();
     const now = new Date().toISOString();
@@ -134,6 +134,10 @@ export class QueueServer {
       maxAttempts: options?.maxAttempts ?? this.config.defaultMaxAttempts,
       createdAt: now,
     };
+
+    if (options?.idempotencyKey != null) {
+      task.idempotencyKey = options.idempotencyKey;
+    }
 
     await this.store.enqueue(task);
     this.metrics.recordJobEnqueued(name);

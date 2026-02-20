@@ -27,6 +27,8 @@ export { EmailChangeForm } from './EmailChangeForm';
 export type { EmailChangeFormProps } from './EmailChangeForm';
 export { ForgotPasswordShortcut } from './ForgotPasswordShortcut';
 export type { ForgotPasswordShortcutProps } from './ForgotPasswordShortcut';
+export { LanguageSelector } from './LanguageSelector';
+export type { LanguageSelectorProps } from './LanguageSelector';
 export { NotificationPreferencesForm } from './NotificationPreferencesForm';
 export type { NotificationPreferencesFormProps } from './NotificationPreferencesForm';
 export { NotificationPreferencesSection } from './NotificationPreferencesSection';

@@ -36,14 +36,24 @@ interface StoredTask extends Task {
  */
 export class MemoryQueueStore implements QueueStore {
   private readonly tasks = new Map<string, StoredTask>();
+  private readonly idempotencyKeys = new Set<string>();
 
   /**
-   * Enqueue a new task
+   * Enqueue a new task.
+   * If the task carries an idempotency key that has already been seen,
+   * the enqueue is silently skipped (no error, no duplicate job).
    *
    * @param task - The task to enqueue
    * @complexity O(1)
    */
   enqueue(task: Task): Promise<void> {
+    if (task.idempotencyKey != null && task.idempotencyKey !== '') {
+      if (this.idempotencyKeys.has(task.idempotencyKey)) {
+        return Promise.resolve();
+      }
+      this.idempotencyKeys.add(task.idempotencyKey);
+    }
+
     this.tasks.set(task.id, { ...task, status: 'pending' });
     return Promise.resolve();
   }
@@ -211,6 +221,7 @@ export class MemoryQueueStore implements QueueStore {
    */
   clear(): void {
     this.tasks.clear();
+    this.idempotencyKeys.clear();
   }
 
   /**

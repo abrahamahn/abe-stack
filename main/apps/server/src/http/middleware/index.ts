@@ -33,6 +33,14 @@ export {
   type ForwardedInfo,
   type ProxyValidationConfig,
 } from './proxyValidation';
+export {
+  DEFAULT_LOCALE,
+  parseAcceptLanguage,
+  registerLocaleHook,
+  resolveLocale,
+  SUPPORTED_LOCALES,
+  type SupportedLocale,
+} from './locale';
 export { registerRequestInfoHook, type RequestInfo } from './requestInfo';
 export {
   applyApiCacheHeaders,
