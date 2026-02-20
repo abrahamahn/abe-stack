@@ -416,13 +416,21 @@ export {
 // ============================================================================
 
 export {
+  API_VERSIONS,
+  CURRENT_API_VERSION,
+  SUPPORTED_API_VERSIONS,
+  apiVersioningPlugin,
   clearRegistry,
   createRouteMap,
+  extractApiVersion,
   getRegisteredRoutes,
   protectedRoute,
   publicRoute,
   registerRoute,
   registerRouteMap,
+  type ApiVersion,
+  type ApiVersionInfo,
+  type ApiVersionSource,
   type AuthGuardFactory,
   type HandlerContext,
   type HttpMethod,
@@ -439,6 +447,20 @@ export {
   type RouterOptions,
   type ValidationSchema,
 } from './routing';
+
+// ============================================================================
+// Middleware
+// ============================================================================
+
+export {
+  addTiming,
+  createEnrichedContext,
+  requestContextPlugin,
+  severityFromStatus,
+  type EnrichedRequestContext,
+  type RequestSeverity,
+  type TimingEntry,
+} from './middleware';
 
 // ============================================================================
 // Observability
@@ -458,6 +480,22 @@ export {
   type ErrorTrackingConfig,
   type ErrorTrackingProvider,
 } from './observability';
+
+// ============================================================================
+// Scaling
+// ============================================================================
+
+export {
+  getInstanceId,
+  getInstanceMetadata,
+  registerGracefulShutdown,
+  type CloseableResource,
+  type GracefulShutdownOptions,
+  type InstanceMetadata,
+  type ShutdownHandle,
+  type ShutdownLogger,
+  type ShutdownMetrics,
+} from './scaling';
 
 // ============================================================================
 // Utils

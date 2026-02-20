@@ -3,22 +3,37 @@
  * Service Worker for PWA Offline Asset Caching and Push Notifications
  *
  * Implements caching strategies:
- * - Cache-first: Static assets (JS, CSS, images, fonts)
+ * - Stale-while-revalidate: Static assets (JS, CSS, images) - serve cached, update in background
+ * - Cache-first: Fonts and other immutable assets
  * - Network-first: API calls with fallback to cache
  * - Stale-while-revalidate: HTML pages
+ * - Offline fallback: Cached pages served when network is unavailable
  *
  * Push notification handling:
  * - Receives push events and displays notifications
  * - Handles notification clicks (opens URL, focuses window)
  * - Supports action buttons and custom data payloads
  *
- * @version 1.1.0
+ * @version 1.2.0
  */
 
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const STATIC_CACHE = `static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `dynamic-${CACHE_VERSION}`;
 const API_CACHE = `api-${CACHE_VERSION}`;
+const ASSET_CACHE = `assets-${CACHE_VERSION}`;
+
+/**
+ * Maximum age for cached API responses (5 minutes).
+ * Responses older than this are considered stale.
+ */
+const API_CACHE_MAX_AGE_MS = 5 * 60 * 1000;
+
+/**
+ * Maximum number of entries in the API cache.
+ * Oldest entries are evicted when exceeded.
+ */
+const API_CACHE_MAX_ENTRIES = 50;
 
 // Assets to pre-cache during install
 const PRECACHE_ASSETS = [
@@ -33,13 +48,14 @@ const PRECACHE_ASSETS = [
 ];
 
 // URL patterns for caching strategies
-const STATIC_ASSET_PATTERNS = [
+
+/**
+ * Mutable assets (JS, CSS, images) that benefit from stale-while-revalidate:
+ * Serve cached version immediately, update in background for next load.
+ */
+const SWR_ASSET_PATTERNS = [
   /\.js$/,
   /\.css$/,
-  /\.woff2?$/,
-  /\.ttf$/,
-  /\.otf$/,
-  /\.eot$/,
   /\.svg$/,
   /\.png$/,
   /\.jpg$/,
@@ -48,6 +64,31 @@ const STATIC_ASSET_PATTERNS = [
   /\.webp$/,
   /\.ico$/,
 ];
+
+/**
+ * Immutable assets (fonts) that use cache-first:
+ * These rarely change and are safe to serve from cache indefinitely.
+ */
+const IMMUTABLE_ASSET_PATTERNS = [
+  /\.woff2?$/,
+  /\.ttf$/,
+  /\.otf$/,
+  /\.eot$/,
+];
+
+/**
+ * Combined static asset patterns for backwards compatibility.
+ */
+const STATIC_ASSET_PATTERNS = [
+  ...SWR_ASSET_PATTERNS,
+  ...IMMUTABLE_ASSET_PATTERNS,
+];
+
+/**
+ * Fingerprinted asset pattern: files with a content hash in the name.
+ * These are safe to cache indefinitely (e.g., main.a1b2c3d4.js).
+ */
+const FINGERPRINTED_PATTERN = /\.[a-f0-9]{8,}\.(js|css)$/;
 
 const API_PATTERNS = [/\/api\//];
 
@@ -70,6 +111,30 @@ function matchesPattern(url, patterns) {
  */
 function isStaticAsset(request) {
   return matchesPattern(request.url, STATIC_ASSET_PATTERNS);
+}
+
+/**
+ * Check if request is for a mutable asset (JS, CSS, images)
+ * These use stale-while-revalidate.
+ */
+function isMutableAsset(request) {
+  return matchesPattern(request.url, SWR_ASSET_PATTERNS);
+}
+
+/**
+ * Check if request is for an immutable asset (fonts)
+ * These use cache-first.
+ */
+function isImmutableAsset(request) {
+  return matchesPattern(request.url, IMMUTABLE_ASSET_PATTERNS);
+}
+
+/**
+ * Check if a URL contains a content hash (fingerprinted asset).
+ * Fingerprinted assets are immutable and safe to cache indefinitely.
+ */
+function isFingerprintedAsset(request) {
+  return FINGERPRINTED_PATTERN.test(new URL(request.url).pathname);
 }
 
 /**
@@ -96,7 +161,7 @@ function isHtmlRequest(request) {
  */
 async function cleanupOldCaches() {
   const cacheNames = await caches.keys();
-  const validCaches = [STATIC_CACHE, DYNAMIC_CACHE, API_CACHE];
+  const validCaches = [STATIC_CACHE, DYNAMIC_CACHE, API_CACHE, ASSET_CACHE];
 
   const deletions = cacheNames
     .filter((name) => !validCaches.includes(name))
@@ -137,6 +202,53 @@ async function cacheFirst(request) {
     }
     throw error;
   }
+}
+
+/**
+ * Stale-while-revalidate strategy for mutable assets (JS, CSS, images).
+ * Returns cached version immediately for fast load, then updates the cache
+ * in the background so the next request gets the fresh version.
+ *
+ * Fingerprinted assets (e.g., main.a1b2c3d4.js) are treated as immutable
+ * and served from cache without revalidation.
+ */
+async function staleWhileRevalidateAsset(request) {
+  const cache = await caches.open(ASSET_CACHE);
+  const cachedResponse = await cache.match(request);
+
+  // Fingerprinted assets never change - serve from cache without revalidation
+  if (cachedResponse && isFingerprintedAsset(request)) {
+    return cachedResponse;
+  }
+
+  // Fetch fresh version in background
+  const networkPromise = fetch(request)
+    .then((networkResponse) => {
+      if (networkResponse.ok) {
+        cache.put(request, networkResponse.clone());
+      }
+      return networkResponse;
+    })
+    .catch(() => null);
+
+  // Return cached version immediately if available
+  if (cachedResponse) {
+    // Don't await - let it update in background
+    networkPromise.catch(() => {});
+    return cachedResponse;
+  }
+
+  // No cache hit - wait for network
+  const networkResponse = await networkPromise;
+  if (networkResponse) {
+    return networkResponse;
+  }
+
+  // Offline and no cache - return a minimal error response
+  return new Response('', {
+    status: 503,
+    statusText: 'Service Unavailable',
+  });
 }
 
 /**
@@ -279,10 +391,16 @@ self.addEventListener('fetch', (event) => {
 
   // Route to appropriate caching strategy
   if (isApiRequest(request)) {
+    // Network-first for API calls: always try fresh data, fall back to cache
     event.respondWith(networkFirst(request));
-  } else if (isStaticAsset(request)) {
+  } else if (isMutableAsset(request)) {
+    // Stale-while-revalidate for JS, CSS, images: fast cached response, update in background
+    event.respondWith(staleWhileRevalidateAsset(request));
+  } else if (isImmutableAsset(request)) {
+    // Cache-first for fonts and immutable assets: safe to serve from cache indefinitely
     event.respondWith(cacheFirst(request));
   } else if (isHtmlRequest(request)) {
+    // Stale-while-revalidate for HTML pages: offline fallback for cached pages
     event.respondWith(staleWhileRevalidate(request));
   } else {
     // Default: try cache first, then network
