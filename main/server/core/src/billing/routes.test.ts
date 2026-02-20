@@ -34,6 +34,8 @@ describe('billingRoutes', () => {
       'billing/invoices',
       'billing/invoices/:id',
       'billing/usage',
+      'tenants/:id/usage',
+      'tenants/:id/usage/record',
       'billing/payment-methods',
       'billing/payment-methods/add',
       'billing/setup-intent',
@@ -46,10 +48,10 @@ describe('billingRoutes', () => {
     }
   });
 
-  it('should have exactly 15 routes', () => {
+  it('should have exactly 17 routes', () => {
     const routeCount = Object.keys(billingRoutes).length;
 
-    expect(routeCount).toBe(15);
+    expect(routeCount).toBe(17);
   });
 });
 
@@ -235,13 +237,14 @@ describe('authentication requirements', () => {
       ([, route]) => route.auth === 'user',
     );
 
-    expect(protectedRoutes).toHaveLength(14);
+    expect(protectedRoutes).toHaveLength(15);
   });
 
-  it('should not have any admin-only routes', () => {
+  it('should have one admin-only route', () => {
     const adminRoutes = Object.entries(billingRoutes).filter(([, route]) => route.auth === 'admin');
 
-    expect(adminRoutes).toHaveLength(0);
+    expect(adminRoutes).toHaveLength(1);
+    expect(adminRoutes[0]?.[0]).toBe('tenants/:id/usage/record');
   });
 });
 

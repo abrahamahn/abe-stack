@@ -70,7 +70,7 @@ function createMockRepos(): Repositories {
       findByOwnerId: vi.fn().mockResolvedValue([]),
     },
     invoices: {
-      findByUserId: vi.fn().mockResolvedValue([]),
+      findByUserId: vi.fn().mockResolvedValue({ data: [] }),
     },
     subscriptions: {
       findByUserId: vi.fn().mockResolvedValue([]),
@@ -462,9 +462,9 @@ describe('ensureForeignKeySafety', () => {
   });
 
   test('should detect unpaid invoices as blocking', async () => {
-    vi.mocked(repos.invoices.findByUserId).mockResolvedValueOnce([
-      { id: 'inv-1', status: 'open' },
-    ] as never);
+    vi.mocked(repos.invoices.findByUserId).mockResolvedValueOnce({
+      data: [{ id: 'inv-1', status: 'open' }],
+    } as never);
 
     const result = await ensureForeignKeySafety(repos, 'user-1', log);
 
@@ -498,9 +498,9 @@ describe('ensureForeignKeySafety', () => {
   });
 
   test('should not block on paid invoices', async () => {
-    vi.mocked(repos.invoices.findByUserId).mockResolvedValueOnce([
-      { id: 'inv-1', status: 'paid' },
-    ] as never);
+    vi.mocked(repos.invoices.findByUserId).mockResolvedValueOnce({
+      data: [{ id: 'inv-1', status: 'paid' }],
+    } as never);
 
     const result = await ensureForeignKeySafety(repos, 'user-1', log);
 

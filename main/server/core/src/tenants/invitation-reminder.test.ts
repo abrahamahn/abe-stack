@@ -205,8 +205,8 @@ describe('InvitationReminderService', () => {
       repos.tenants.findById.mockResolvedValue({ id: 'tenant-1', name: 'Test Workspace' });
       repos.users.findById.mockResolvedValue({
         id: 'user-inviter',
-        firstName: null,
-        lastName: null,
+        firstName: '',
+        lastName: '',
         email: 'inviter@example.com',
       });
       repos.invitations.updateReminderSentAt.mockResolvedValue(undefined);

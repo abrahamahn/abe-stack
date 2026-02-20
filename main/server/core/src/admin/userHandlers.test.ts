@@ -394,6 +394,19 @@ describe('Admin User Handlers', () => {
   });
 
   describe('handleHardBan', () => {
+    function createSudoRequest(
+      overrides: Partial<AdminRequest> = {},
+      params: Record<string, string> = {},
+    ): AdminRequest & HttpRequest {
+      return createMockRequest(
+        {
+          headers: { 'x-sudo-token': 'valid-sudo-token' },
+          ...overrides,
+        } as unknown as Partial<AdminRequest>,
+        params,
+      );
+    }
+
     test('should return 200 with ban result', async () => {
       const gracePeriodEnds = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
       vi.mocked(userService.hardBanUser).mockResolvedValue({
@@ -401,7 +414,7 @@ describe('Admin User Handlers', () => {
         gracePeriodEnds,
       });
 
-      const req = createMockRequest({}, { id: 'user-123' });
+      const req = createSudoRequest({}, { id: 'user-123' });
       const result = await handleHardBan(
         mockCtx,
         { reason: 'Severe ToS violation' },
@@ -413,8 +426,20 @@ describe('Admin User Handlers', () => {
       expect('body' in result && 'gracePeriodEnds' in result.body).toBe(true);
     });
 
+    test('should return 403 when sudo token is missing', async () => {
+      const req = createMockRequest({}, { id: 'user-123' });
+      const result = await handleHardBan(
+        mockCtx,
+        { reason: 'Severe ToS violation' },
+        req,
+        createMockReply(),
+      );
+
+      expect(result.status).toBe(403);
+    });
+
     test('should return 400 when trying to ban self', async () => {
-      const req = createMockRequest(
+      const req = createSudoRequest(
         { user: { userId: 'user-123', email: 'admin@example.com', role: 'admin' } },
         { id: 'user-123' },
       );
@@ -430,7 +455,7 @@ describe('Admin User Handlers', () => {
         new MockUserNotFoundError('User not found'),
       );
 
-      const req = createMockRequest({}, { id: 'nonexistent' });
+      const req = createSudoRequest({}, { id: 'nonexistent' });
       const result = await handleHardBan(mockCtx, { reason: 'Test' }, req, createMockReply());
 
       expect(result.status).toBe(404);
@@ -450,7 +475,7 @@ describe('Admin User Handlers', () => {
         gracePeriodEnds,
       });
 
-      const req = createMockRequest({}, { id: 'target-user' });
+      const req = createSudoRequest({}, { id: 'target-user' });
       await handleHardBan(mockCtx, { reason: 'Spam and abuse' }, req, createMockReply());
 
       expect(userService.hardBanUser).toHaveBeenCalledWith(
@@ -459,6 +484,7 @@ describe('Admin User Handlers', () => {
         'target-user',
         'admin-123',
         'Spam and abuse',
+        expect.objectContaining({ emailService: mockCtx.email }),
       );
     });
   });
