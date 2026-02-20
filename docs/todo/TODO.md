@@ -232,7 +232,7 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 - [ ] 3.13 System admin gaps (webhook monitor/replay, health dashboard, per-tenant overrides)
 - [ ] 3.12 Workspace admin remaining UI and invitation hardening (logo, danger zone, regenerate/reminder flow)
-- [ ] 3.8 Compliance gaps (legal current/agreements endpoints, legal publish, consent banner, deletion status UI)
+- [x] 3.8 Compliance gaps (legal current/agreements endpoints, legal publish, consent banner, deletion status UI)
 - [x] 3.15 Ban flows completion (lock reason UX/email, hard-ban confirmation/cascade/anonymization)
 
 **P2 (UX + Verification Backfill):**
@@ -241,7 +241,7 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 - [ ] 3.4 Notifications remaining email templates/bounce/unsubscribe + test coverage
 - [ ] 3.5 Avatar/file pipeline verification + tests
 - [x] 3.6 Activities contracts + tests
-- [ ] 3.7 Usage metering + workspace override UI + tests
+- [x] 3.7 Usage metering + workspace override UI + tests
 - [ ] 3.9 Realtime reconnection/offline queue/delta sync + tests
 - [ ] 3.10 Media library/gallery + tests
 - [x] 3.11 Settings completeness (preferences/API keys/backup codes tabs + E2E)
@@ -453,7 +453,7 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 - [x] Unit: flag evaluation (global, tenant override, rollout %), usage recording + querying
 - [x] Integration: flag CRUD, tenant override, metering record → query → snapshot
-- [ ] E2E: admin toggles flag → feature gated/ungated; usage bar updates after action
+- [x] E2E: admin toggles flag → feature gated/ungated; usage bar updates after action
 
 ---
 
@@ -487,7 +487,7 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 - [x] Unit: deletion logic (grace period, anonymization rules), export aggregation, consent versioning
 - [x] Integration: export request → job queued → archive generated; ToS gating + acceptance; consent CRUD
-- [ ] E2E: request export → receive download; accept ToS modal; toggle consent preferences
+- [x] E2E: request export → receive download; accept ToS modal; toggle consent preferences
 
 ---
 
