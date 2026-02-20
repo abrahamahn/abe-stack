@@ -293,11 +293,15 @@ export {
 export {
   MemoryQueueStore,
   QueueServer,
+  // Redis Store
+  RedisQueueStore,
   WriteService,
   // Memory Store
   createMemoryQueueStore,
   // Queue Server
   createQueueServer,
+  // Redis Queue Store
+  createRedisQueueStore,
   // Write Service
   createWriteService,
   // Write Types
@@ -311,9 +315,11 @@ export {
   type OperationResult,
   type OperationType,
   type QueueConfig,
+  type QueueLogger,
   type QueueServerOptions,
   type QueueStats,
   type QueueStore,
+  type RedisQueueStoreOptions,
   type Task,
   type TaskError,
   type TaskHandler,
@@ -327,6 +333,19 @@ export {
   type WriteResult,
   type WriteServiceOptions,
 } from './queue';
+
+// ============================================================================
+// Session
+// ============================================================================
+
+export {
+  RedisSessionStore,
+  createRedisSessionStore,
+  type RedisSessionStoreOptions,
+  type SessionData,
+  type SessionLogger,
+  type SessionStore,
+} from './session';
 
 // ============================================================================
 // Search

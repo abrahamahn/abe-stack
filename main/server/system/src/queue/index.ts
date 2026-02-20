@@ -30,6 +30,17 @@ export { createWriteService, WriteService, type WriteServiceOptions } from '@bsl
 export { createMemoryQueueStore, MemoryQueueStore } from './memory.store';
 
 // ============================================================================
+// Redis Store
+// ============================================================================
+
+export {
+  createRedisQueueStore,
+  RedisQueueStore,
+  type QueueLogger,
+  type RedisQueueStoreOptions,
+} from './redis-queue-store';
+
+// ============================================================================
 // Queue & Write Types (canonical in @bslt/db)
 // ============================================================================
 

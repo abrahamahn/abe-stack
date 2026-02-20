@@ -162,6 +162,8 @@ function run(): void {
       '  GeneratedRouteModule,',
       '  MethodsForPath,',
       "} from './client';",
+      "export { queryKeys, queryOptions, mutationOptions } from './hooks';",
+      "export type { GeneratedClient } from './hooks';",
       '',
     ].join('\n'),
     'utf8',

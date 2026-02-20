@@ -23,7 +23,10 @@ const mockRedisInstance = {
 };
 
 vi.mock('ioredis', () => {
-  const MockRedis = vi.fn(() => mockRedisInstance);
+  // Use a real function so `new` works without vitest warnings
+  function MockRedis() {
+    return mockRedisInstance;
+  }
   return { default: MockRedis };
 });
 
