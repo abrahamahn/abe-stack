@@ -41,4 +41,8 @@ export {
   type VersionConflict,
   type VersionedRecord,
   type WriteResponse,
+  // Sprint 7.1 type aliases
+  type ConflictError,
+  type ReadTransaction,
+  type WriteTransaction,
 } from './realtime';
