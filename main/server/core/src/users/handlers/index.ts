@@ -52,5 +52,6 @@ export {
   updateProfile,
   uploadAvatar,
   type ProfileUser,
+  type StorageProvider,
   type UpdateProfileData,
 } from './avatar';

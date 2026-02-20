@@ -25,12 +25,17 @@ export {
 
 // Profile & avatar service functions
 export {
+  cacheBustAvatarUrl,
   changePassword,
   deleteAvatar,
+  getAvatarFallbackUrl,
   getAvatarUrl,
+  getGravatarUrl,
+  getInitialsAvatarUrl,
   updateProfile,
   uploadAvatar,
   type ProfileUser,
+  type StorageProvider,
   type UpdateProfileData,
 } from './handlers';
 

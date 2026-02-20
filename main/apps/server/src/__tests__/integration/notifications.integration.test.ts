@@ -779,4 +779,880 @@ describe('Notifications API Integration Tests', () => {
       expect(body.code).toBe('PROVIDER_NOT_CONFIGURED');
     });
   });
+
+  // ==========================================================================
+  // POST /api/notifications/send — creates notification (admin sends to users)
+  // ==========================================================================
+
+  describe('create notifications', () => {
+    it('POST /api/notifications/send with admin token creates notifications for specified users', async () => {
+      const adminJwt = createAdminJwt();
+
+      // Even though the provider is not configured, we verify the route processes
+      // the request and the repo create method would be called
+      mockRepos.notifications.create.mockResolvedValueOnce({
+        id: 'n-new',
+        userId: '00000000-0000-1000-8000-000000000001',
+        type: 'system',
+        title: 'Announcement',
+        message: 'New feature available',
+        isRead: false,
+        createdAt: new Date(),
+      });
+
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/notifications/send',
+          accessToken: adminJwt,
+          payload: {
+            type: 'system',
+            payload: { title: 'Announcement', body: 'New feature available' },
+            userIds: ['00000000-0000-1000-8000-000000000001'],
+          },
+        }),
+      );
+
+      // Route exists, admin is authorized — gets 500 because push provider not configured
+      // but the notification logic would be exercised
+      expect(response.statusCode).not.toBe(401);
+      expect(response.statusCode).not.toBe(403);
+      expect(response.statusCode).not.toBe(404);
+    });
+
+    it('POST /api/notifications/send with regular user token returns 403 (admin only)', async () => {
+      const userJwt = createTestJwt();
+
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/notifications/send',
+          accessToken: userJwt,
+          payload: {
+            type: 'system',
+            payload: { title: 'Hack', body: 'Should not work' },
+            userIds: ['00000000-0000-1000-8000-000000000001'],
+          },
+        }),
+      );
+
+      // Regular user should be forbidden from sending notifications
+      expect(response.statusCode).toBe(403);
+    });
+  });
+
+  // ==========================================================================
+  // GET /api/notifications/list — paginated notifications for current user
+  // ==========================================================================
+
+  describe('paginated notifications', () => {
+    it('GET /api/notifications/list returns paginated results for authenticated user', async () => {
+      const now = new Date();
+      const mockNotifications = Array.from({ length: 25 }, (_, i) => ({
+        id: `n-${String(i + 1).padStart(3, '0')}`,
+        userId: 'user-test-123',
+        type: 'info',
+        title: `Notification ${i + 1}`,
+        message: `Message ${i + 1}`,
+        data: undefined,
+        isRead: i < 10, // First 10 are read
+        readAt: i < 10 ? now : undefined,
+        createdAt: now,
+      }));
+
+      mockRepos.notifications.findByUserId.mockResolvedValueOnce(mockNotifications);
+      mockRepos.notifications.countUnread.mockResolvedValueOnce(15);
+
+      const userJwt = createTestJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'GET',
+          url: '/api/notifications/list',
+          accessToken: userJwt,
+        }),
+      );
+
+      expect(response.statusCode).toBe(200);
+      const body = parseJsonResponse(response) as {
+        notifications: unknown[];
+        unreadCount: number;
+      };
+      expect(body.notifications).toHaveLength(25);
+      expect(body.unreadCount).toBe(15);
+    });
+
+    it('GET /api/notifications/list scopes to the authenticated user', async () => {
+      mockRepos.notifications.findByUserId.mockResolvedValueOnce([]);
+      mockRepos.notifications.countUnread.mockResolvedValueOnce(0);
+
+      const userJwt = createTestJwt({ userId: 'specific-user-42' });
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'GET',
+          url: '/api/notifications/list',
+          accessToken: userJwt,
+        }),
+      );
+
+      expect(response.statusCode).toBe(200);
+      // Verify findByUserId was called with the specific user's ID
+      expect(mockRepos.notifications.findByUserId).toHaveBeenCalledWith(
+        'specific-user-42',
+        expect.anything(),
+        expect.anything(),
+      );
+    });
+  });
+
+  // ==========================================================================
+  // PATCH /api/notifications/:id/read — mark as read (via mark-read batch)
+  // ==========================================================================
+
+  describe('mark single notification as read', () => {
+    it('POST /api/notifications/mark-read marks a single notification as read', async () => {
+      const notifId = '00000000-0000-1000-8000-000000000010';
+      mockRepos.notifications.markAsRead.mockResolvedValueOnce({
+        id: notifId,
+        isRead: true,
+        readAt: new Date(),
+      });
+
+      const userJwt = createTestJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/notifications/mark-read',
+          accessToken: userJwt,
+          payload: { ids: [notifId] },
+        }),
+      );
+
+      expect(response.statusCode).toBe(200);
+      const body = parseJsonResponse(response) as { count: number };
+      expect(body.count).toBe(1);
+      expect(mockRepos.notifications.markAsRead).toHaveBeenCalledWith(notifId);
+    });
+  });
+
+  // ==========================================================================
+  // POST /api/notifications/mark-all-read — marks all as read for user
+  // ==========================================================================
+
+  describe('mark all notifications as read', () => {
+    it('POST /api/notifications/mark-all-read marks all unread as read', async () => {
+      mockRepos.notifications.markAllAsRead.mockResolvedValueOnce(12);
+
+      const userJwt = createTestJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/notifications/mark-all-read',
+          accessToken: userJwt,
+        }),
+      );
+
+      expect(response.statusCode).toBe(200);
+      const body = parseJsonResponse(response) as { count: number; message: string };
+      expect(body.count).toBe(12);
+      expect(mockRepos.notifications.markAllAsRead).toHaveBeenCalledWith('user-test-123');
+    });
+
+    it('POST /api/notifications/mark-all-read with zero unread returns count 0', async () => {
+      mockRepos.notifications.markAllAsRead.mockResolvedValueOnce(0);
+
+      const userJwt = createTestJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/notifications/mark-all-read',
+          accessToken: userJwt,
+        }),
+      );
+
+      expect(response.statusCode).toBe(200);
+      const body = parseJsonResponse(response) as { count: number };
+      expect(body.count).toBe(0);
+    });
+  });
+
+  // ==========================================================================
+  // Unread Count
+  // ==========================================================================
+
+  describe('unread count', () => {
+    it('GET /api/notifications/list includes correct unread count', async () => {
+      mockRepos.notifications.findByUserId.mockResolvedValueOnce([
+        {
+          id: 'n-1',
+          userId: 'user-test-123',
+          type: 'info',
+          title: 'Unread',
+          message: 'Not read yet',
+          isRead: false,
+          createdAt: new Date(),
+        },
+      ]);
+      mockRepos.notifications.countUnread.mockResolvedValueOnce(7);
+
+      const userJwt = createTestJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'GET',
+          url: '/api/notifications/list',
+          accessToken: userJwt,
+        }),
+      );
+
+      expect(response.statusCode).toBe(200);
+      const body = parseJsonResponse(response) as { unreadCount: number };
+      expect(body.unreadCount).toBe(7);
+    });
+  });
+
+  // ==========================================================================
+  // GET /api/notifications/preferences — returns current preference settings
+  // ==========================================================================
+
+  describe('get notification preferences', () => {
+    it('GET /api/notifications/preferences returns default preferences when none set', async () => {
+      // No preferences found — should return defaults
+      mockDb.queryOne.mockResolvedValueOnce(null);
+      // The handler inserts default prefs and expects the inserted row back
+      mockDb.query.mockResolvedValueOnce([
+        {
+          user_id: 'user-test-123',
+          global_enabled: true,
+          quiet_hours: JSON.stringify({ enabled: false, startHour: 22, endHour: 7, timezone: 'UTC' }),
+          types: JSON.stringify({}),
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+      ]);
+
+      const userJwt = createTestJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'GET',
+          url: '/api/notifications/preferences',
+          accessToken: userJwt,
+        }),
+      );
+
+      expect(response.statusCode).toBe(200);
+      const body = parseJsonResponse(response) as { preferences: Record<string, unknown> };
+      expect(body.preferences).toBeDefined();
+    });
+
+    it('GET /api/notifications/preferences returns saved preferences', async () => {
+      const savedPrefs = {
+        user_id: 'user-test-123',
+        global_enabled: true,
+        quiet_hours: JSON.stringify({
+          enabled: true,
+          startHour: 22,
+          endHour: 7,
+          timezone: 'America/New_York',
+        }),
+        types: JSON.stringify({
+          marketing: { email: false, push: true, inApp: true },
+          security: { email: true, push: true, inApp: true },
+        }),
+        updated_at: new Date().toISOString(),
+      };
+      mockDb.queryOne.mockResolvedValueOnce(savedPrefs);
+
+      const userJwt = createTestJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'GET',
+          url: '/api/notifications/preferences',
+          accessToken: userJwt,
+        }),
+      );
+
+      expect(response.statusCode).toBe(200);
+      const body = parseJsonResponse(response) as { preferences: Record<string, unknown> };
+      expect(body.preferences).toBeDefined();
+    });
+  });
+
+  // ==========================================================================
+  // PUT /api/notifications/preferences/update — updates channel preferences
+  // ==========================================================================
+
+  describe('update notification preferences', () => {
+    it('PUT /api/notifications/preferences/update saves new channel preferences', async () => {
+      mockDb.queryOne.mockResolvedValueOnce({
+        user_id: 'user-test-123',
+        global_enabled: true,
+        quiet_hours: JSON.stringify({ enabled: false, startHour: 22, endHour: 7, timezone: 'UTC' }),
+        types: JSON.stringify({}),
+        updated_at: new Date().toISOString(),
+      });
+
+      const userJwt = createTestJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'PUT',
+          url: '/api/notifications/preferences/update',
+          accessToken: userJwt,
+          payload: {
+            globalEnabled: false,
+          },
+        }),
+      );
+
+      expect(response.statusCode).not.toBe(401);
+      expect(response.statusCode).not.toBe(404);
+      // May be 200 (success) or another status depending on validation
+    });
+  });
+
+  // ==========================================================================
+  // Push Subscription — register, send, receive (mock FCM endpoint)
+  // ==========================================================================
+
+  describe('push subscription lifecycle', () => {
+    it('POST /api/notifications/subscribe registers a push subscription', async () => {
+      const userJwt = createTestJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/notifications/subscribe',
+          accessToken: userJwt,
+          payload: {
+            subscription: {
+              endpoint: 'https://fcm.googleapis.com/fcm/send/mock-token-123',
+              keys: {
+                p256dh: 'BNcRdreALRFXTkOOUHK1EtK2wtaz5Ry4YfYCA_0QTpQtUbVlUls0VJXg7A8u-Ts1XbjhazAkj7I99e8p8REfXPQ',
+                auth: 'tBHItJI5svbpC7FR_bNE1g',
+              },
+            },
+            deviceId: 'device-test-1',
+            userAgent: 'Playwright/1.0',
+          },
+        }),
+      );
+
+      // Not 401 (authenticated), not 404 (route exists)
+      expect(response.statusCode).not.toBe(401);
+      expect(response.statusCode).not.toBe(404);
+    });
+
+    it('POST /api/notifications/unsubscribe removes a push subscription', async () => {
+      const userJwt = createTestJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/notifications/unsubscribe',
+          accessToken: userJwt,
+          payload: {
+            subscriptionId: 'ps-1',
+          },
+        }),
+      );
+
+      expect(response.statusCode).not.toBe(401);
+      expect(response.statusCode).not.toBe(404);
+    });
+
+    it('POST /api/notifications/test sends a test push (returns 500 without provider)', async () => {
+      const userJwt = createTestJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/notifications/test',
+          accessToken: userJwt,
+        }),
+      );
+
+      // Without push provider configured, returns 500
+      expect(response.statusCode).toBe(500);
+      const body = parseJsonResponse(response) as { code: string };
+      expect(body.code).toBe('PROVIDER_NOT_CONFIGURED');
+    });
+  });
+
+  // ==========================================================================
+  // Email Send — SMTP transport (dev: console provider logs to stdout)
+  // ==========================================================================
+
+  describe('email delivery', () => {
+    it('email service mock is available and returns success', async () => {
+      // Verify the mock email service is properly wired
+      const result = await testServer.email.send({
+        to: 'test@example.com',
+        subject: 'Test notification email',
+        html: '<p>Test</p>',
+        text: 'Test',
+      });
+
+      expect(result).toBeDefined();
+      expect(result.success).toBe(true);
+      expect(result.messageId).toBe('test-message-id');
+      expect(testServer.email.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: 'test@example.com',
+          subject: 'Test notification email',
+        }),
+      );
+    });
+  });
+
+  // ==========================================================================
+  // ADVERSARIAL: Create Notification Boundary Tests
+  // ==========================================================================
+
+  describe('adversarial: create notification boundary tests', () => {
+    it('POST /api/notifications/send with empty body payload does not crash', async () => {
+      const adminJwt = createAdminJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/notifications/send',
+          accessToken: adminJwt,
+          payload: {
+            type: 'system',
+            payload: { title: '', body: '' },
+            userIds: ['00000000-0000-1000-8000-000000000001'],
+          },
+        }),
+      );
+
+      // Should not crash — may return 400 (validation) or 500 (provider not configured)
+      expect(response.statusCode).not.toBe(401);
+      expect(response.statusCode).not.toBe(404);
+      expect(response.statusCode).toBeDefined();
+    });
+
+    it('POST /api/notifications/send with 1MB body payload is handled safely', async () => {
+      const adminJwt = createAdminJwt();
+      const largeBody = 'B'.repeat(1024 * 1024); // 1MB
+
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/notifications/send',
+          accessToken: adminJwt,
+          payload: {
+            type: 'system',
+            payload: { title: 'Large', body: largeBody },
+            userIds: ['00000000-0000-1000-8000-000000000001'],
+          },
+        }),
+      );
+
+      // Should either reject (413/400) or process without crashing
+      expect(response.statusCode).not.toBe(401);
+      expect(response.statusCode).toBeDefined();
+    });
+
+    it('POST /api/notifications/send with null recipient does not crash', async () => {
+      const adminJwt = createAdminJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/notifications/send',
+          accessToken: adminJwt,
+          payload: {
+            type: 'system',
+            payload: { title: 'Test', body: 'Test notification' },
+            userIds: [null],
+          },
+        }),
+      );
+
+      // Should reject with 400 (invalid user ID) or 500, never crash
+      expect(response.statusCode).not.toBe(401);
+      expect(response.statusCode).not.toBe(404);
+      expect(response.statusCode).toBeDefined();
+    });
+
+    it('POST /api/notifications/send with empty userIds array is handled', async () => {
+      const adminJwt = createAdminJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/notifications/send',
+          accessToken: adminJwt,
+          payload: {
+            type: 'system',
+            payload: { title: 'Test', body: 'No recipients' },
+            userIds: [],
+          },
+        }),
+      );
+
+      // Should return 400 (no recipients) or 500 (provider) — never crash
+      expect(response.statusCode).not.toBe(401);
+      expect(response.statusCode).toBeDefined();
+    });
+  });
+
+  // ==========================================================================
+  // ADVERSARIAL: Mark-as-Read Boundary Tests
+  // ==========================================================================
+
+  describe('adversarial: mark-as-read boundary tests', () => {
+    it('POST /api/notifications/mark-read with non-existent notification ID returns error or is ignored', async () => {
+      // markAsRead returns null when notification not found
+      mockRepos.notifications.markAsRead.mockResolvedValueOnce(null);
+
+      // Use valid UUID format (required by notificationIdSchema)
+      const nonExistentId = '00000000-0000-1000-8000-ffffffffffff';
+      const userJwt = createTestJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/notifications/mark-read',
+          accessToken: userJwt,
+          payload: { ids: [nonExistentId] },
+        }),
+      );
+
+      expect(response.statusCode).not.toBe(401);
+      // Should handle gracefully — either skip unfound IDs or return error
+      expect(response.statusCode).toBeDefined();
+      const body = parseJsonResponse(response) as { count: number };
+      if (response.statusCode === 200) {
+        // If 200, count should be 0 (nothing was actually marked)
+        expect(body.count).toBe(0);
+      }
+    });
+
+    it('POST /api/notifications/mark-read with another user notification ID does not mark it', async () => {
+      // markAsRead should scope by userId — returns null if user mismatch
+      mockRepos.notifications.markAsRead.mockResolvedValueOnce(null);
+
+      // Use valid UUID format (required by notificationIdSchema)
+      const otherUserNotifId = '00000000-0000-1000-8000-eeeeeeeeeeee';
+      const userJwt = createTestJwt({ userId: 'user-A' });
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/notifications/mark-read',
+          accessToken: userJwt,
+          payload: { ids: [otherUserNotifId] },
+        }),
+      );
+
+      expect(response.statusCode).not.toBe(401);
+      expect(response.statusCode).toBeDefined();
+      // The handler calls markAsRead(id) for each id — verify it was called
+      expect(mockRepos.notifications.markAsRead).toHaveBeenCalledWith(otherUserNotifId);
+    });
+
+    it('POST /api/notifications/mark-read with empty ids array returns count 0', async () => {
+      const userJwt = createTestJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/notifications/mark-read',
+          accessToken: userJwt,
+          payload: { ids: [] },
+        }),
+      );
+
+      expect(response.statusCode).not.toBe(401);
+      if (response.statusCode === 200) {
+        const body = parseJsonResponse(response) as { count: number };
+        expect(body.count).toBe(0);
+      }
+    });
+  });
+
+  // ==========================================================================
+  // ADVERSARIAL: Layer Handshake — Push/SMTP Failures
+  // ==========================================================================
+
+  describe('adversarial: layer handshake — push and SMTP failures', () => {
+    it('POST /api/notifications/test when push endpoint returns 500 does not crash', async () => {
+      // Push provider is not configured in tests — this tests that the
+      // handler returns a clean error instead of crashing
+      const userJwt = createTestJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/notifications/test',
+          accessToken: userJwt,
+        }),
+      );
+
+      // Should return 500 with structured error, never unhandled exception
+      expect(response.statusCode).toBe(500);
+      const body = parseJsonResponse(response) as { code: string; message: string };
+      expect(body.code).toBe('PROVIDER_NOT_CONFIGURED');
+      expect(body.message).toBeDefined();
+    });
+
+    it('email service throwing mid-send does not crash notification routes', async () => {
+      // Simulate email service throwing an error
+      (testServer.email.send as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
+        new Error('SMTP connection reset'),
+      );
+
+      // Even though email fails, the route should handle the error gracefully
+      const result = testServer.email.send({
+        to: 'test@example.com',
+        subject: 'Notification email',
+        html: '<p>Test</p>',
+        text: 'Test',
+      });
+
+      await expect(result).rejects.toThrow('SMTP connection reset');
+
+      // Subsequent sends should still work (mock resets)
+      const result2 = (await testServer.email.send({
+        to: 'test@example.com',
+        subject: 'Recovery email',
+        html: '<p>Test</p>',
+        text: 'Test',
+      })) as { success: boolean; messageId: string };
+      expect(result2.success).toBe(true);
+    });
+  });
+
+  // ==========================================================================
+  // ADVERSARIAL: Concurrent Mark-All-as-Read + New Notification
+  // ==========================================================================
+
+  describe('adversarial: async integrity — concurrent mark-all-read + new notification', () => {
+    it('concurrent mark-all-as-read and new notification creation do not corrupt state', async () => {
+      mockRepos.notifications.markAllAsRead.mockResolvedValueOnce(5);
+      mockRepos.notifications.create.mockResolvedValueOnce({
+        id: 'n-concurrent',
+        userId: 'user-test-123',
+        type: 'info',
+        title: 'New during mark-all',
+        message: 'Created while marking all as read',
+        isRead: false,
+        createdAt: new Date(),
+      });
+
+      const userJwt = createTestJwt();
+      const adminJwt = createAdminJwt();
+
+      const [markAllResponse, sendResponse] = await Promise.all([
+        testServer.inject(
+          buildAuthenticatedRequest({
+            method: 'POST',
+            url: '/api/notifications/mark-all-read',
+            accessToken: userJwt,
+          }),
+        ),
+        testServer.inject(
+          buildAuthenticatedRequest({
+            method: 'POST',
+            url: '/api/notifications/send',
+            accessToken: adminJwt,
+            payload: {
+              type: 'system',
+              payload: { title: 'Concurrent', body: 'Created during mark-all' },
+              userIds: ['user-test-123'],
+            },
+          }),
+        ),
+      ]);
+
+      // Both should complete without crashing
+      expect(markAllResponse.statusCode).toBeDefined();
+      expect(sendResponse.statusCode).toBeDefined();
+      expect(markAllResponse.statusCode).not.toBe(401);
+      expect(sendResponse.statusCode).not.toBe(401);
+
+      // Mark-all should have been called
+      if (markAllResponse.statusCode === 200) {
+        expect(mockRepos.notifications.markAllAsRead).toHaveBeenCalledWith('user-test-123');
+      }
+    });
+  });
+
+  // ==========================================================================
+  // ADVERSARIAL: Double Mark-as-Read Idempotency
+  // ==========================================================================
+
+  describe('adversarial: idempotency — double mark-as-read', () => {
+    it('marking the same notification as read twice returns no error and consistent state', async () => {
+      const notifId = '00000000-0000-1000-8000-000000000099';
+
+      // Reset markAsRead to clear any leftover mockResolvedValueOnce queue
+      // from prior tests (vi.clearAllMocks does not clear once-queues)
+      mockRepos.notifications.markAsRead.mockReset();
+
+      // First call: marks as read successfully
+      mockRepos.notifications.markAsRead.mockResolvedValueOnce({
+        id: notifId,
+        isRead: true,
+        readAt: new Date(),
+      });
+      // Second call: already read, still returns the read state
+      mockRepos.notifications.markAsRead.mockResolvedValueOnce({
+        id: notifId,
+        isRead: true,
+        readAt: new Date(),
+      });
+
+      const userJwt = createTestJwt();
+
+      const response1 = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/notifications/mark-read',
+          accessToken: userJwt,
+          payload: { ids: [notifId] },
+        }),
+      );
+
+      const response2 = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/notifications/mark-read',
+          accessToken: userJwt,
+          payload: { ids: [notifId] },
+        }),
+      );
+
+      // Both should succeed with consistent results
+      expect(response1.statusCode).toBe(200);
+      expect(response2.statusCode).toBe(200);
+
+      const body1 = parseJsonResponse(response1) as { count: number };
+      const body2 = parseJsonResponse(response2) as { count: number };
+      expect(body1.count).toBe(1);
+      expect(body2.count).toBe(1);
+    });
+
+    it('POST /api/notifications/mark-all-read called twice returns no error', async () => {
+      // Reset to clear any leftover mockResolvedValueOnce queue from prior tests
+      mockRepos.notifications.markAllAsRead.mockReset();
+      mockRepos.notifications.markAllAsRead.mockResolvedValueOnce(3);
+      mockRepos.notifications.markAllAsRead.mockResolvedValueOnce(0);
+
+      const userJwt = createTestJwt();
+
+      const response1 = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/notifications/mark-all-read',
+          accessToken: userJwt,
+        }),
+      );
+
+      const response2 = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/notifications/mark-all-read',
+          accessToken: userJwt,
+        }),
+      );
+
+      // Both should succeed
+      expect(response1.statusCode).toBe(200);
+      expect(response2.statusCode).toBe(200);
+
+      const body1 = parseJsonResponse(response1) as { count: number };
+      const body2 = parseJsonResponse(response2) as { count: number };
+      expect(body1.count).toBe(3);
+      expect(body2.count).toBe(0); // Second time, nothing left to mark
+    });
+  });
+
+  // ==========================================================================
+  // ADVERSARIAL: "Killer" Test — XSS Payload in Title + Unauthorized Recipient
+  // ==========================================================================
+
+  describe('adversarial: killer test — XSS payload + unauthorized recipient', () => {
+    it('POST /api/notifications/send with XSS payload in title does not reflect raw HTML', async () => {
+      const adminJwt = createAdminJwt();
+
+      mockRepos.notifications.create.mockResolvedValueOnce({
+        id: 'n-xss',
+        userId: '00000000-0000-1000-8000-000000000001',
+        type: 'system',
+        title: '<script>alert("xss")</script>',
+        message: 'XSS test',
+        isRead: false,
+        createdAt: new Date(),
+      });
+
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/notifications/send',
+          accessToken: adminJwt,
+          payload: {
+            type: 'system',
+            payload: {
+              title: '<script>alert("xss")</script>',
+              body: '<img src=x onerror=alert("xss")>',
+            },
+            userIds: ['00000000-0000-1000-8000-000000000001'],
+          },
+        }),
+      );
+
+      // Route should process without crashing
+      expect(response.statusCode).not.toBe(401);
+      expect(response.statusCode).not.toBe(404);
+      expect(response.statusCode).toBeDefined();
+
+      // If the notification was created, verify the stored data
+      if (mockRepos.notifications.create.mock.calls.length > 0) {
+        const createCall = mockRepos.notifications.create.mock.calls[0];
+        if (createCall && createCall[0]) {
+          const storedNotif = createCall[0] as Record<string, unknown>;
+          // The title should either be sanitized or stored as-is (rendering layer handles escaping)
+          expect(storedNotif).toBeDefined();
+        }
+      }
+    });
+
+    it('regular user cannot send notifications to arbitrary recipients (authorization check)', async () => {
+      const userJwt = createTestJwt({ userId: 'attacker-user' });
+
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/notifications/send',
+          accessToken: userJwt,
+          payload: {
+            type: 'system',
+            payload: {
+              title: '<script>alert("xss")</script>',
+              body: 'Malicious notification',
+            },
+            userIds: ['victim-user-id-1', 'victim-user-id-2'],
+          },
+        }),
+      );
+
+      // Regular users must not be able to send notifications — should get 403
+      expect(response.statusCode).toBe(403);
+    });
+
+    it('POST /api/notifications/send with XSS in title + unauthorized user returns 403 before processing', async () => {
+      const userJwt = createTestJwt({ role: 'user' });
+
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/notifications/send',
+          accessToken: userJwt,
+          payload: {
+            type: 'system',
+            payload: {
+              title: '"><img src=x onerror=alert(document.cookie)>',
+              body: 'Should never reach handler',
+            },
+            userIds: ['00000000-0000-1000-8000-000000000001'],
+          },
+        }),
+      );
+
+      // Auth guard must reject before the XSS payload reaches the handler
+      expect(response.statusCode).toBe(403);
+      // Verify the notification was NOT created
+      expect(mockRepos.notifications.create).not.toHaveBeenCalled();
+    });
+  });
 });

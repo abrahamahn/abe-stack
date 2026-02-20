@@ -1252,3 +1252,757 @@ describe('Integration: Window Security Settings', () => {
     });
   });
 });
+
+// ============================================================================
+// Integration Test Suite: IPC Handler Registration — Channel Names
+// ============================================================================
+
+describe('Integration: IPC Handler Registration — All Channel Names', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.resetModules();
+    integrationMocks.clearAll();
+
+    vi.doMock('electron', () => ({
+      app: {
+        getVersion: vi.fn().mockReturnValue('1.0.0'),
+      },
+      dialog: {
+        showOpenDialog: vi.fn().mockResolvedValue({ canceled: false, filePaths: [] }),
+        showSaveDialog: vi.fn().mockResolvedValue({ canceled: false, filePath: '' }),
+      },
+      ipcMain: {
+        handle: vi.fn((channel: string, handler: (...args: unknown[]) => unknown) => {
+          integrationMocks.ipcHandlers.set(channel, handler);
+        }),
+        on: vi.fn((channel: string, listener: (...args: unknown[]) => void) => {
+          integrationMocks.ipcListeners.set(channel, listener);
+        }),
+      },
+      Notification: class {
+        show() {}
+        static isSupported = vi.fn().mockReturnValue(true);
+      },
+    }));
+  });
+
+  afterEach(() => {
+    vi.doUnmock('electron');
+  });
+
+  it('should register get-app-version handler', async () => {
+    const { registerIPCHandlers } = await import('../electron/ipc/handlers');
+    const mockWindow = new integrationMocks.MockBrowserWindow({});
+    registerIPCHandlers(() => mockWindow as unknown as import('electron').BrowserWindow);
+
+    expect(integrationMocks.ipcHandlers.has('get-app-version')).toBe(true);
+  });
+
+  it('should register show-open-dialog handler', async () => {
+    const { registerIPCHandlers } = await import('../electron/ipc/handlers');
+    const mockWindow = new integrationMocks.MockBrowserWindow({});
+    registerIPCHandlers(() => mockWindow as unknown as import('electron').BrowserWindow);
+
+    expect(integrationMocks.ipcHandlers.has('show-open-dialog')).toBe(true);
+  });
+
+  it('should register show-save-dialog handler', async () => {
+    const { registerIPCHandlers } = await import('../electron/ipc/handlers');
+    const mockWindow = new integrationMocks.MockBrowserWindow({});
+    registerIPCHandlers(() => mockWindow as unknown as import('electron').BrowserWindow);
+
+    expect(integrationMocks.ipcHandlers.has('show-save-dialog')).toBe(true);
+  });
+
+  it('should register show-notification listener', async () => {
+    const { registerIPCHandlers } = await import('../electron/ipc/handlers');
+    const mockWindow = new integrationMocks.MockBrowserWindow({});
+    registerIPCHandlers(() => mockWindow as unknown as import('electron').BrowserWindow);
+
+    expect(integrationMocks.ipcListeners.has('show-notification')).toBe(true);
+  });
+
+  it('should have exactly 3 handle-based channels and 1 on-based listener', async () => {
+    const { registerIPCHandlers } = await import('../electron/ipc/handlers');
+    const mockWindow = new integrationMocks.MockBrowserWindow({});
+    registerIPCHandlers(() => mockWindow as unknown as import('electron').BrowserWindow);
+
+    expect(integrationMocks.ipcHandlers.size).toBe(3);
+    expect(integrationMocks.ipcListeners.size).toBe(1);
+  });
+});
+
+// ============================================================================
+// Integration Test Suite: Auth Flow — Token Storage / Refresh
+// ============================================================================
+
+describe('Integration: Auth Flow — Token Storage via Preload Bridge', () => {
+  let exposedAPI: NativeBridge;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.resetModules();
+    integrationMocks.clearAll();
+
+    const mockExposeInMainWorld = vi.fn((name: string, api: NativeBridge) => {
+      if (name === 'electronAPI') {
+        exposedAPI = api;
+      }
+    });
+
+    vi.doMock('electron', () => ({
+      app: {
+        getVersion: vi.fn().mockReturnValue('2.0.0'),
+      },
+      contextBridge: {
+        exposeInMainWorld: mockExposeInMainWorld,
+      },
+      ipcRenderer: {
+        invoke: vi.fn((channel: string) => {
+          integrationMocks.invokedChannels.push({ channel, args: [] });
+          if (channel === 'get-app-version') {
+            return Promise.resolve('2.0.0');
+          }
+          return Promise.resolve(null);
+        }),
+        send: vi.fn((channel: string, ...args: unknown[]) => {
+          integrationMocks.sentChannels.push({ channel, args });
+        }),
+      },
+      shell: {
+        openExternal: vi.fn().mockResolvedValue(undefined),
+      },
+    }));
+  });
+
+  afterEach(() => {
+    vi.doUnmock('electron');
+  });
+
+  it('preload bridge provides isNative() === true for detecting secure context', async () => {
+    await import('../electron/preload');
+
+    expect(exposedAPI).toBeDefined();
+    expect(exposedAPI.isNative()).toBe(true);
+  });
+
+  it('preload bridge provides getPlatform() === "electron" for platform detection', async () => {
+    await import('../electron/preload');
+
+    const platform = await exposedAPI.getPlatform();
+    expect(platform).toBe('electron');
+  });
+
+  it('app version is retrievable through the secure bridge for token context', async () => {
+    await import('../electron/preload');
+
+    const version = await exposedAPI.getAppVersion();
+    expect(version).toBe('2.0.0');
+    expect(integrationMocks.invokedChannels).toContainEqual({
+      channel: 'get-app-version',
+      args: [],
+    });
+  });
+
+  it('sendNotification uses secure IPC channel (not direct Node access)', async () => {
+    await import('../electron/preload');
+
+    exposedAPI.sendNotification('Auth Success', 'You are now logged in');
+
+    expect(integrationMocks.sentChannels).toContainEqual({
+      channel: 'show-notification',
+      args: [{ title: 'Auth Success', body: 'You are now logged in' }],
+    });
+  });
+});
+
+// ============================================================================
+// Integration Test Suite: Deep Link Handling
+// ============================================================================
+
+describe('Integration: Deep Link Protocol Handling', () => {
+  const appEventHandlers = new Map<string, ((...args: unknown[]) => void)[]>();
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.resetModules();
+    integrationMocks.clearAll();
+    appEventHandlers.clear();
+
+    vi.doMock('../electron/auto-updater', () => ({ initAutoUpdater: vi.fn() }));
+    vi.doMock('../electron/deep-links', () => ({
+      registerDeepLinkProtocol: vi.fn(),
+      handleDeepLink: vi.fn(),
+    }));
+    vi.doMock('../electron/menu', () => ({ createApplicationMenu: vi.fn() }));
+    vi.doMock('../electron/tray', () => ({ createTray: vi.fn() }));
+
+    vi.doMock('electron', () => ({
+      app: {
+        getVersion: vi.fn().mockReturnValue('1.0.0'),
+        disableHardwareAcceleration: vi.fn(),
+        quit: vi.fn(),
+        requestSingleInstanceLock: vi.fn().mockReturnValue(true),
+        isDefaultProtocolClient: vi.fn().mockReturnValue(true),
+        setAsDefaultProtocolClient: vi.fn().mockReturnValue(true),
+        on: vi.fn((event: string, handler: (...args: unknown[]) => void) => {
+          const handlers = appEventHandlers.get(event) ?? [];
+          handlers.push(handler);
+          appEventHandlers.set(event, handlers);
+        }),
+      },
+      BrowserWindow: integrationMocks.MockBrowserWindow,
+      nativeTheme: mockNativeTheme,
+      dialog: {
+        showOpenDialog: vi.fn().mockResolvedValue({ canceled: false, filePaths: [] }),
+        showSaveDialog: vi.fn().mockResolvedValue({ canceled: false, filePath: '' }),
+      },
+      ipcMain: {
+        handle: vi.fn(),
+        on: vi.fn(),
+      },
+      Notification: class {
+        show() {}
+        static isSupported = vi.fn().mockReturnValue(true);
+      },
+    }));
+
+    vi.doMock('path', () => ({
+      join: vi.fn((...args: string[]) => args.join('/')),
+      default: { join: vi.fn((...args: string[]) => args.join('/')) },
+    }));
+
+    vi.doMock('@bslt/server-system', () => ({
+      waitForPort: vi.fn().mockResolvedValue(5174),
+    }));
+  });
+
+  afterEach(() => {
+    vi.doUnmock('electron');
+    vi.doUnmock('path');
+    vi.doUnmock('@bslt/server-system');
+  });
+
+  it('should register bslt:// deep link protocol on startup', async () => {
+    await import('../electron/main');
+
+    const { registerDeepLinkProtocol } = await import('../electron/deep-links');
+    expect(registerDeepLinkProtocol).toHaveBeenCalledWith('bslt');
+  });
+
+  it('should register open-url handler for macOS deep links', async () => {
+    await import('../electron/main');
+
+    // The open-url event handler should have been registered
+    expect(appEventHandlers.has('open-url')).toBe(true);
+    expect(appEventHandlers.get('open-url')!.length).toBeGreaterThan(0);
+  });
+
+  it('should register second-instance handler for Windows/Linux deep links', async () => {
+    await import('../electron/main');
+
+    expect(appEventHandlers.has('second-instance')).toBe(true);
+    expect(appEventHandlers.get('second-instance')!.length).toBeGreaterThan(0);
+  });
+
+  it('open-url event triggers handleDeepLink when window exists', async () => {
+    process.env['NODE_ENV'] = 'production';
+    await import('../electron/main');
+
+    // Create window first
+    const readyHandlers = appEventHandlers.get('ready') ?? [];
+    await (readyHandlers[0] as () => Promise<void>)();
+
+    // Trigger open-url
+    const openUrlHandlers = appEventHandlers.get('open-url') ?? [];
+    const mockEvent = { preventDefault: vi.fn() };
+    openUrlHandlers[0]?.(mockEvent, 'bslt://settings/profile?tab=security');
+
+    const { handleDeepLink } = await import('../electron/deep-links');
+    expect(handleDeepLink).toHaveBeenCalledWith(
+      'bslt://settings/profile?tab=security',
+      expect.anything(),
+    );
+
+    delete process.env['NODE_ENV'];
+  });
+});
+
+// ============================================================================
+// Integration Test Suite: Auto-Update Lifecycle
+// ============================================================================
+
+describe('Integration: Auto-Update Lifecycle', () => {
+  const appEventHandlers = new Map<string, ((...args: unknown[]) => void)[]>();
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.resetModules();
+    integrationMocks.clearAll();
+    appEventHandlers.clear();
+
+    const initAutoUpdaterMock = vi.fn();
+
+    vi.doMock('../electron/auto-updater', () => ({ initAutoUpdater: initAutoUpdaterMock }));
+    vi.doMock('../electron/deep-links', () => ({
+      registerDeepLinkProtocol: vi.fn(),
+      handleDeepLink: vi.fn(),
+    }));
+    vi.doMock('../electron/menu', () => ({ createApplicationMenu: vi.fn() }));
+    vi.doMock('../electron/tray', () => ({ createTray: vi.fn() }));
+
+    vi.doMock('electron', () => ({
+      app: {
+        getVersion: vi.fn().mockReturnValue('1.0.0'),
+        disableHardwareAcceleration: vi.fn(),
+        quit: vi.fn(),
+        requestSingleInstanceLock: vi.fn().mockReturnValue(true),
+        isDefaultProtocolClient: vi.fn().mockReturnValue(true),
+        setAsDefaultProtocolClient: vi.fn().mockReturnValue(true),
+        on: vi.fn((event: string, handler: (...args: unknown[]) => void) => {
+          const handlers = appEventHandlers.get(event) ?? [];
+          handlers.push(handler);
+          appEventHandlers.set(event, handlers);
+        }),
+      },
+      BrowserWindow: integrationMocks.MockBrowserWindow,
+      nativeTheme: mockNativeTheme,
+      dialog: {
+        showOpenDialog: vi.fn().mockResolvedValue({ canceled: false, filePaths: [] }),
+        showSaveDialog: vi.fn().mockResolvedValue({ canceled: false, filePath: '' }),
+      },
+      ipcMain: {
+        handle: vi.fn(),
+        on: vi.fn(),
+      },
+      Notification: class {
+        show() {}
+        static isSupported = vi.fn().mockReturnValue(true);
+      },
+    }));
+
+    vi.doMock('path', () => ({
+      join: vi.fn((...args: string[]) => args.join('/')),
+      default: { join: vi.fn((...args: string[]) => args.join('/')) },
+    }));
+
+    vi.doMock('@bslt/server-system', () => ({
+      waitForPort: vi.fn().mockResolvedValue(5174),
+    }));
+  });
+
+  afterEach(() => {
+    vi.doUnmock('electron');
+    vi.doUnmock('path');
+    vi.doUnmock('@bslt/server-system');
+  });
+
+  it('should initialize auto-updater in production mode after window creation', async () => {
+    process.env['NODE_ENV'] = 'production';
+
+    await import('../electron/main');
+
+    const readyHandlers = appEventHandlers.get('ready') ?? [];
+    await (readyHandlers[0] as () => Promise<void>)();
+
+    const { initAutoUpdater } = await import('../electron/auto-updater');
+    expect(initAutoUpdater).toHaveBeenCalledTimes(1);
+    expect(initAutoUpdater).toHaveBeenCalledWith(expect.anything());
+
+    delete process.env['NODE_ENV'];
+  });
+
+  it('should NOT initialize auto-updater in development mode', async () => {
+    process.env['NODE_ENV'] = 'development';
+
+    await import('../electron/main');
+
+    const readyHandlers = appEventHandlers.get('ready') ?? [];
+    await (readyHandlers[0] as () => Promise<void>)();
+
+    const { initAutoUpdater } = await import('../electron/auto-updater');
+    expect(initAutoUpdater).not.toHaveBeenCalled();
+
+    delete process.env['NODE_ENV'];
+  });
+});
+
+// ============================================================================
+// Integration Test Suite: Menu Construction Per Platform
+// ============================================================================
+
+describe('Integration: Menu Construction in App Lifecycle', () => {
+  const appEventHandlers = new Map<string, ((...args: unknown[]) => void)[]>();
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.resetModules();
+    integrationMocks.clearAll();
+    appEventHandlers.clear();
+
+    vi.doMock('../electron/auto-updater', () => ({ initAutoUpdater: vi.fn() }));
+    vi.doMock('../electron/deep-links', () => ({
+      registerDeepLinkProtocol: vi.fn(),
+      handleDeepLink: vi.fn(),
+    }));
+    vi.doMock('../electron/menu', () => ({
+      createApplicationMenu: vi.fn().mockReturnValue({ items: [] }),
+    }));
+    vi.doMock('../electron/tray', () => ({ createTray: vi.fn() }));
+
+    vi.doMock('electron', () => ({
+      app: {
+        getVersion: vi.fn().mockReturnValue('1.0.0'),
+        disableHardwareAcceleration: vi.fn(),
+        quit: vi.fn(),
+        requestSingleInstanceLock: vi.fn().mockReturnValue(true),
+        isDefaultProtocolClient: vi.fn().mockReturnValue(true),
+        setAsDefaultProtocolClient: vi.fn().mockReturnValue(true),
+        on: vi.fn((event: string, handler: (...args: unknown[]) => void) => {
+          const handlers = appEventHandlers.get(event) ?? [];
+          handlers.push(handler);
+          appEventHandlers.set(event, handlers);
+        }),
+      },
+      BrowserWindow: integrationMocks.MockBrowserWindow,
+      nativeTheme: mockNativeTheme,
+      dialog: {
+        showOpenDialog: vi.fn().mockResolvedValue({ canceled: false, filePaths: [] }),
+        showSaveDialog: vi.fn().mockResolvedValue({ canceled: false, filePath: '' }),
+      },
+      ipcMain: {
+        handle: vi.fn(),
+        on: vi.fn(),
+      },
+      Notification: class {
+        show() {}
+        static isSupported = vi.fn().mockReturnValue(true);
+      },
+    }));
+
+    vi.doMock('path', () => ({
+      join: vi.fn((...args: string[]) => args.join('/')),
+      default: { join: vi.fn((...args: string[]) => args.join('/')) },
+    }));
+
+    vi.doMock('@bslt/server-system', () => ({
+      waitForPort: vi.fn().mockResolvedValue(5174),
+    }));
+  });
+
+  afterEach(() => {
+    vi.doUnmock('electron');
+    vi.doUnmock('path');
+    vi.doUnmock('@bslt/server-system');
+  });
+
+  it('should call createApplicationMenu with the main window on ready', async () => {
+    process.env['NODE_ENV'] = 'production';
+
+    await import('../electron/main');
+
+    const readyHandlers = appEventHandlers.get('ready') ?? [];
+    await (readyHandlers[0] as () => Promise<void>)();
+
+    const { createApplicationMenu } = await import('../electron/menu');
+    expect(createApplicationMenu).toHaveBeenCalledTimes(1);
+    expect(createApplicationMenu).toHaveBeenCalledWith(expect.anything());
+
+    delete process.env['NODE_ENV'];
+  });
+});
+
+// ============================================================================
+// Integration Test Suite: System Tray
+// ============================================================================
+
+describe('Integration: System Tray in App Lifecycle', () => {
+  const appEventHandlers = new Map<string, ((...args: unknown[]) => void)[]>();
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.resetModules();
+    integrationMocks.clearAll();
+    appEventHandlers.clear();
+
+    vi.doMock('../electron/auto-updater', () => ({ initAutoUpdater: vi.fn() }));
+    vi.doMock('../electron/deep-links', () => ({
+      registerDeepLinkProtocol: vi.fn(),
+      handleDeepLink: vi.fn(),
+    }));
+    vi.doMock('../electron/menu', () => ({ createApplicationMenu: vi.fn() }));
+    vi.doMock('../electron/tray', () => ({ createTray: vi.fn() }));
+
+    vi.doMock('electron', () => ({
+      app: {
+        getVersion: vi.fn().mockReturnValue('1.0.0'),
+        disableHardwareAcceleration: vi.fn(),
+        quit: vi.fn(),
+        requestSingleInstanceLock: vi.fn().mockReturnValue(true),
+        isDefaultProtocolClient: vi.fn().mockReturnValue(true),
+        setAsDefaultProtocolClient: vi.fn().mockReturnValue(true),
+        on: vi.fn((event: string, handler: (...args: unknown[]) => void) => {
+          const handlers = appEventHandlers.get(event) ?? [];
+          handlers.push(handler);
+          appEventHandlers.set(event, handlers);
+        }),
+      },
+      BrowserWindow: integrationMocks.MockBrowserWindow,
+      nativeTheme: mockNativeTheme,
+      dialog: {
+        showOpenDialog: vi.fn().mockResolvedValue({ canceled: false, filePaths: [] }),
+        showSaveDialog: vi.fn().mockResolvedValue({ canceled: false, filePath: '' }),
+      },
+      ipcMain: {
+        handle: vi.fn(),
+        on: vi.fn(),
+      },
+      Notification: class {
+        show() {}
+        static isSupported = vi.fn().mockReturnValue(true);
+      },
+    }));
+
+    vi.doMock('path', () => ({
+      join: vi.fn((...args: string[]) => args.join('/')),
+      default: { join: vi.fn((...args: string[]) => args.join('/')) },
+    }));
+
+    vi.doMock('@bslt/server-system', () => ({
+      waitForPort: vi.fn().mockResolvedValue(5174),
+    }));
+  });
+
+  afterEach(() => {
+    vi.doUnmock('electron');
+    vi.doUnmock('path');
+    vi.doUnmock('@bslt/server-system');
+  });
+
+  it('should create system tray with the main window on ready', async () => {
+    process.env['NODE_ENV'] = 'production';
+
+    await import('../electron/main');
+
+    const readyHandlers = appEventHandlers.get('ready') ?? [];
+    await (readyHandlers[0] as () => Promise<void>)();
+
+    const { createTray } = await import('../electron/tray');
+    expect(createTray).toHaveBeenCalledTimes(1);
+    expect(createTray).toHaveBeenCalledWith(expect.anything());
+
+    delete process.env['NODE_ENV'];
+  });
+});
+
+// ============================================================================
+// Integration Test Suite: Offline Detection — Network Transitions
+// ============================================================================
+
+describe('Integration: Offline Detection and IPC Communication', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.resetModules();
+    integrationMocks.clearAll();
+
+    vi.doMock('electron', () => ({
+      app: {
+        getVersion: vi.fn().mockReturnValue('1.0.0'),
+      },
+      dialog: {
+        showOpenDialog: vi.fn().mockResolvedValue({ canceled: false, filePaths: [] }),
+        showSaveDialog: vi.fn().mockResolvedValue({ canceled: false, filePath: '' }),
+      },
+      ipcMain: {
+        handle: vi.fn((channel: string, handler: (...args: unknown[]) => unknown) => {
+          integrationMocks.ipcHandlers.set(channel, handler);
+        }),
+        on: vi.fn((channel: string, listener: (...args: unknown[]) => void) => {
+          integrationMocks.ipcListeners.set(channel, listener);
+        }),
+      },
+      ipcRenderer: {
+        invoke: vi.fn((channel: string, ...args: unknown[]) => {
+          integrationMocks.invokedChannels.push({ channel, args });
+          const handler = integrationMocks.ipcHandlers.get(channel);
+          if (handler !== undefined) {
+            return Promise.resolve(handler(null, ...args));
+          }
+          return Promise.reject(new Error(`No handler for channel: ${channel}`));
+        }),
+        send: vi.fn((channel: string, ...args: unknown[]) => {
+          integrationMocks.sentChannels.push({ channel, args });
+          const listener = integrationMocks.ipcListeners.get(channel);
+          if (listener !== undefined) {
+            listener(null, ...args);
+          }
+        }),
+      },
+      Notification: class MockNotification {
+        title: string;
+        body: string;
+        constructor({ title, body }: { title: string; body: string }) {
+          this.title = title;
+          this.body = body;
+        }
+        show() {
+          integrationMocks.shownNotifications.push({ title: this.title, body: this.body });
+        }
+        static isSupported = vi.fn().mockReturnValue(true);
+      },
+    }));
+  });
+
+  afterEach(() => {
+    vi.doUnmock('electron');
+  });
+
+  it('IPC handlers remain responsive when invoked (simulating post-reconnect sync)', async () => {
+    const { registerIPCHandlers } = await import('../electron/ipc/handlers');
+    const mockWindow = new integrationMocks.MockBrowserWindow({});
+    registerIPCHandlers(() => mockWindow as unknown as import('electron').BrowserWindow);
+
+    // Simulate a series of IPC calls as would happen during online → reconnect → sync
+    const { ipcRenderer } = await import('electron');
+
+    // First: get version (as a health check after reconnect)
+    const version = await ipcRenderer.invoke('get-app-version');
+    expect(version).toBe('1.0.0');
+
+    // Second: trigger a notification that queued operations have synced
+    ipcRenderer.send('show-notification', {
+      title: 'Back Online',
+      body: 'Your changes have been synced.',
+    });
+
+    expect(integrationMocks.sentChannels).toContainEqual({
+      channel: 'show-notification',
+      args: [{ title: 'Back Online', body: 'Your changes have been synced.' }],
+    });
+    expect(integrationMocks.shownNotifications).toContainEqual({
+      title: 'Back Online',
+      body: 'Your changes have been synced.',
+    });
+  });
+
+  it('multiple rapid IPC invocations succeed (queue replay scenario)', async () => {
+    const { registerIPCHandlers } = await import('../electron/ipc/handlers');
+    const mockWindow = new integrationMocks.MockBrowserWindow({});
+    registerIPCHandlers(() => mockWindow as unknown as import('electron').BrowserWindow);
+
+    const { ipcRenderer } = await import('electron');
+
+    // Simulate 5 rapid-fire invocations as would happen when replaying a queue
+    const promises = Array.from({ length: 5 }, () => ipcRenderer.invoke('get-app-version'));
+    const results = await Promise.all(promises);
+
+    expect(results).toHaveLength(5);
+    results.forEach((version) => {
+      expect(version).toBe('1.0.0');
+    });
+    expect(integrationMocks.invokedChannels.filter((c) => c.channel === 'get-app-version')).toHaveLength(5);
+  });
+});
+
+// ============================================================================
+// Integration Test Suite: IPC Renderer Data Request Flow
+// ============================================================================
+
+describe('Integration: IPC Renderer → Main → Renderer Data Flow', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.resetModules();
+    integrationMocks.clearAll();
+
+    vi.doMock('electron', () => ({
+      app: {
+        getVersion: vi.fn().mockReturnValue('4.0.0'),
+      },
+      dialog: {
+        showOpenDialog: vi.fn().mockResolvedValue({
+          canceled: false,
+          filePaths: ['/data/report.csv', '/data/report2.csv'],
+        }),
+        showSaveDialog: vi.fn().mockResolvedValue({
+          canceled: false,
+          filePath: '/exports/output.pdf',
+        }),
+      },
+      ipcMain: {
+        handle: vi.fn((channel: string, handler: (...args: unknown[]) => unknown) => {
+          integrationMocks.ipcHandlers.set(channel, handler);
+        }),
+        on: vi.fn((channel: string, listener: (...args: unknown[]) => void) => {
+          integrationMocks.ipcListeners.set(channel, listener);
+        }),
+      },
+      ipcRenderer: {
+        invoke: vi.fn((channel: string, ...args: unknown[]) => {
+          integrationMocks.invokedChannels.push({ channel, args });
+          const handler = integrationMocks.ipcHandlers.get(channel);
+          if (handler !== undefined) {
+            return Promise.resolve(handler(null, ...args));
+          }
+          return Promise.reject(new Error(`No handler for channel: ${channel}`));
+        }),
+        send: vi.fn((channel: string, ...args: unknown[]) => {
+          integrationMocks.sentChannels.push({ channel, args });
+        }),
+      },
+      Notification: class {
+        show() {}
+        static isSupported = vi.fn().mockReturnValue(true);
+      },
+    }));
+  });
+
+  afterEach(() => {
+    vi.doUnmock('electron');
+  });
+
+  it('renderer requests data via IPC → main processes → result returned to renderer', async () => {
+    const { registerIPCHandlers } = await import('../electron/ipc/handlers');
+    const mockWindow = new integrationMocks.MockBrowserWindow({});
+    registerIPCHandlers(() => mockWindow as unknown as import('electron').BrowserWindow);
+
+    const { ipcRenderer } = await import('electron');
+
+    // Renderer requests app version
+    const version = await ipcRenderer.invoke('get-app-version');
+    expect(version).toBe('4.0.0');
+
+    // Renderer requests file open dialog
+    const files = await ipcRenderer.invoke('show-open-dialog', {
+      title: 'Select Reports',
+      filters: [{ name: 'CSV', extensions: ['csv'] }],
+      multiple: true,
+    });
+    expect(files).toEqual(['/data/report.csv', '/data/report2.csv']);
+
+    // Renderer requests save dialog
+    const savePath = await ipcRenderer.invoke('show-save-dialog', {
+      title: 'Export Report',
+      defaultPath: '/exports/output.pdf',
+    });
+    expect(savePath).toBe('/exports/output.pdf');
+  });
+
+  it('menu action triggers IPC message → expected action performed', async () => {
+    const { registerIPCHandlers } = await import('../electron/ipc/handlers');
+    const mockWindow = new integrationMocks.MockBrowserWindow({});
+    registerIPCHandlers(() => mockWindow as unknown as import('electron').BrowserWindow);
+
+    const { ipcRenderer } = await import('electron');
+
+    // Simulate a menu action that sends notification via IPC
+    ipcRenderer.send('show-notification', {
+      title: 'Export Complete',
+      body: 'Report has been saved.',
+    });
+
+    expect(integrationMocks.sentChannels).toContainEqual({
+      channel: 'show-notification',
+      args: [{ title: 'Export Complete', body: 'Report has been saved.' }],
+    });
+  });
+});

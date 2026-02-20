@@ -444,19 +444,19 @@ export function createTest(overrides: Partial<AppConfig> = {}): AppConfig {
         ...overrides.auth?.rateLimit,
         login: {
           ...base.auth.rateLimit.login,
-          ...overrides.auth?.rateLimit.login,
+          ...overrides.auth?.rateLimit?.login,
         },
         register: {
           ...base.auth.rateLimit.register,
-          ...overrides.auth?.rateLimit.register,
+          ...overrides.auth?.rateLimit?.register,
         },
         forgotPassword: {
           ...base.auth.rateLimit.forgotPassword,
-          ...overrides.auth?.rateLimit.forgotPassword,
+          ...overrides.auth?.rateLimit?.forgotPassword,
         },
         verifyEmail: {
           ...base.auth.rateLimit.verifyEmail,
-          ...overrides.auth?.rateLimit.verifyEmail,
+          ...overrides.auth?.rateLimit?.verifyEmail,
         },
       },
       cookie: {
