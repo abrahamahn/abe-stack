@@ -133,10 +133,10 @@ describe('Auth Routes', () => {
 
     test('should define all expected routes', () => {
       const routeKeys = Array.from(authRoutes.keys());
-      // Core auth routes (19) + ToS routes (2) + Device routes (3) + Phone routes (2*)
-      // + SMS routes (2) + Magic-link routes (2) + OAuth routes (14) + WebAuthn routes (9) = 53
+      // Core auth routes (20) + ToS routes (2) + Device routes (3) + Phone routes (2*)
+      // + SMS routes (2) + Magic-link routes (2) + OAuth routes (14) + WebAuthn routes (9) = 54
       // *Note: users/me/phone POST is overwritten by DELETE in the Map, so only 2 unique phone entries
-      expect(routeKeys).toHaveLength(53);
+      expect(routeKeys).toHaveLength(54);
 
       // Core auth routes
       expect(routeKeys).toContain('auth/register');
@@ -147,6 +147,7 @@ describe('Auth Routes', () => {
       expect(routeKeys).toContain('auth/forgot-password');
       expect(routeKeys).toContain('auth/reset-password');
       expect(routeKeys).toContain('auth/set-password');
+      expect(routeKeys).toContain('auth/password/change');
       expect(routeKeys).toContain('auth/verify-email');
       expect(routeKeys).toContain('auth/resend-verification');
       expect(routeKeys).toContain('auth/magic-link/request');
@@ -945,13 +946,13 @@ describe('Route Protection', () => {
   test('should have expected protected routes', () => {
     const protectedRoutes = Array.from(authRoutes.entries()).filter(([_, def]) => !def.isPublic);
 
-    // 8 core protected (logout-all, set-password, totp/setup, totp/enable, totp/disable, totp/status, sudo, change-email)
+    // 9 core protected (logout-all, set-password, password/change, totp/setup, totp/enable, totp/disable, totp/status, sudo, change-email)
     // + 2 ToS protected (tos/status, tos/accept)
     // + 3 device protected (devices, devices/:id/trust, devices/:id)
     // + 2 phone protected (phone, phone/verify) — phone POST overwritten by DELETE in Map
     // + 7 OAuth protected (3 link + 3 unlink + 1 connections)
     // + 7 WebAuthn protected (register options/verify + passkey management)
-    expect(protectedRoutes).toHaveLength(29);
+    expect(protectedRoutes).toHaveLength(30);
 
     const protectedRouteNames = protectedRoutes.map(([name]) => name);
     // Core protected routes
@@ -963,6 +964,7 @@ describe('Route Protection', () => {
     expect(protectedRouteNames).toContain('auth/totp/status');
     expect(protectedRouteNames).toContain('auth/sudo');
     expect(protectedRouteNames).toContain('auth/change-email');
+    expect(protectedRouteNames).toContain('auth/password/change');
     // ToS protected routes
     expect(protectedRouteNames).toContain('auth/tos/status');
     expect(protectedRouteNames).toContain('auth/tos/accept');

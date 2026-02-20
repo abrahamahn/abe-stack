@@ -55,15 +55,15 @@
   },
   "sideEffects": false,
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.994.0",
+    "@aws-sdk/credential-providers": "^3.994.0",
+    "@aws-sdk/s3-request-presigner": "^3.994.0",
     "@bslt/db": "workspace:*",
     "@bslt/shared": "workspace:*",
-    "@aws-sdk/client-s3": "^3.600.0",
-    "@aws-sdk/credential-providers": "^3.600.0",
-    "@aws-sdk/s3-request-presigner": "^3.600.0",
     "@simplewebauthn/server": "^13.2.2",
     "ioredis": "^5.9.2"
   },
-  "devDependencies": {
-    "fastify": "^5.7.4"
+  "optionalDependencies": {
+    "@sentry/node": "^9.47.1"
   }
 }

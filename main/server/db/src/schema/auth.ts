@@ -307,17 +307,15 @@ export const WEBAUTHN_CREDENTIAL_COLUMNS = {
 
 /**
  * SMS verification code record (SELECT result).
- * Single-use OTP codes for phone-based 2FA verification.
- * Append-only with short expiry — codes are consumed by setting `verified = true`.
+ * Stores phone verification codes for 2FA.
  *
- * @see 0001_auth_extensions.sql
+ * @see 0023_sms_verification.sql
  */
 export interface SmsVerificationCode {
   id: string;
   userId: string;
   phone: string;
-  /** SHA-256 hash of the 6-digit OTP — never store plaintext. */
-  codeHash: string;
+  code: string;
   expiresAt: Date;
   verified: boolean;
   attempts: number;
@@ -331,8 +329,7 @@ export interface NewSmsVerificationCode {
   id?: string;
   userId: string;
   phone: string;
-  /** SHA-256 hash of the 6-digit OTP — never store plaintext. */
-  codeHash: string;
+  code: string;
   expiresAt: Date;
   verified?: boolean;
   attempts?: number;
@@ -341,7 +338,6 @@ export interface NewSmsVerificationCode {
 
 /**
  * Fields for updating an SMS verification code (UPDATE).
- * Only verification state and attempt count can change after creation.
  */
 export interface UpdateSmsVerificationCode {
   verified?: boolean;
@@ -352,7 +348,7 @@ export const SMS_VERIFICATION_CODE_COLUMNS = {
   id: 'id',
   userId: 'user_id',
   phone: 'phone',
-  codeHash: 'code_hash',
+  code: 'code',
   expiresAt: 'expires_at',
   verified: 'verified',
   attempts: 'attempts',

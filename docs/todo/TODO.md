@@ -331,7 +331,7 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 - [x] Unit: entitlements resolution, plan validation, webhook signature verification, state transitions
 - [x] Integration: plan CRUD, webhook processing → DB state, checkout session creation, entitlement enforcement
-- [ ] E2E: view pricing → select plan → checkout → active subscription; upgrade/downgrade; view invoices; cancel
+- [x] E2E: view pricing → select plan → checkout → active subscription; upgrade/downgrade; view invoices; cancel
 
 ---
 
@@ -351,9 +351,9 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 **Tests:**
 
-- [ ] Unit: audit event creation (typed events), metrics aggregation, retention logic
-- [ ] Integration: events written on actions, admin listing/filtering/export, tenant-scoped isolation
-- [ ] E2E: admin → security events dashboard → filter → export; workspace admin → audit log
+- [x] Unit: audit event creation (typed events), metrics aggregation, retention logic
+- [x] Integration: events written on actions, admin listing/filtering/export, tenant-scoped isolation
+- [x] E2E: admin → security events dashboard → filter → export; workspace admin → audit log
 
 ---
 
@@ -389,7 +389,7 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 - [x] Unit: notification service (create, mark read, delete), template rendering, preference evaluation
 - [x] Integration: notification CRUD, email delivery (console provider), push lifecycle, preferences
-- [ ] E2E: trigger action → bell shows alert → click → navigate; toggle preferences; transactional email
+- [x] E2E: trigger action → bell shows alert → click → navigate; toggle preferences; transactional email
 
 ---
 
@@ -409,9 +409,9 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 **Tests:**
 
-- [ ] Unit: file type validation, size limits, presigned URL generation
-- [ ] Integration: upload → store → retrieve → delete lifecycle; avatar upload pipeline
-- [ ] E2E: upload file → see in list → download → delete
+- [x] Unit: file type validation, size limits, presigned URL generation
+- [x] Integration: upload → store → retrieve → delete lifecycle; avatar upload pipeline
+- [x] E2E: upload file → see in list → download → delete
 
 ---
 
@@ -505,8 +505,8 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 **Tests:**
 
 - [x] Unit: reconnection logic, offline queue buffering, delta sync request
-- [ ] Integration: WebSocket connect → auth → subscribe → receive published message
-- [ ] E2E: two browser tabs → action in tab A → real-time update in tab B; disconnect → reconnect → sync
+- [x] Integration: WebSocket connect → auth → subscribe → receive published message
+- [x] E2E: two browser tabs → action in tab A → real-time update in tab B; disconnect → reconnect → sync
 
 ---
 
@@ -525,8 +525,8 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 **Tests:**
 
 - [ ] Unit: upload validation, processing job creation, status transitions
-- [ ] Integration: upload → queue → process → retrieve processed media; reject invalid types
-- [ ] E2E: upload image → see processing → see thumbnail; upload invalid file → see error
+- [x] Integration: upload → queue → process → retrieve processed media; reject invalid types
+- [x] E2E: upload image → see processing → see thumbnail; upload invalid file → see error
 
 ---
 
@@ -606,8 +606,8 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 **Tests:**
 
-- [ ] E2E: invite member → accept → appears in list; change role; remove member; edit workspace settings
-- [ ] Integration: accept expired invitation → rejected; regenerate invitation → new token works; exceed max pending → rejected
+- [x] E2E: invite member → accept → appears in list; change role; remove member; edit workspace settings
+- [x] Integration: accept expired invitation → rejected; regenerate invitation → new token works; exceed max pending → rejected
 
 ---
 
@@ -644,7 +644,7 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 - [ ] Unit: multi-field search, tenant suspension logic
 - [x] Integration: admin user CRUD, tenant CRUD, webhook replay, health endpoint
-- [ ] E2E: admin searches user → views detail → locks; admin manages tenants; admin views health
+- [x] E2E: admin searches user → views detail → locks; admin manages tenants; admin views health
 
 ---
 
@@ -1061,15 +1061,15 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Integration Tests (`apps/server/src/__tests__/integration/sessions.integration.test.ts`):**
 
-- [ ] Login creates `user_sessions` record with parsed UA fields
-- [ ] Session record includes IP, user agent, device label
+- [x] Login creates `user_sessions` record with parsed UA fields
+- [x] Session record includes IP, user agent, device label
 
 **E2E Tests (`apps/web/e2e/sessions.spec.ts`):**
 
-- [ ] Login → navigate to settings → see active sessions list with "This device" indicator
-- [ ] Login from two sessions → revoke one → verify revoked session is logged out
-- [ ] "Log out all other devices" → only current session remains active
-- [ ] Session shows human-readable device label (not raw UA string)
+- [x] Login → navigate to settings → see active sessions list with "This device" indicator
+- [x] Login from two sessions → revoke one → verify revoked session is logged out
+- [x] "Log out all other devices" → only current session remains active
+- [x] Session shows human-readable device label (not raw UA string)
 
 ---
 
@@ -1085,12 +1085,12 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **E2E Tests (`apps/web/e2e/account.spec.ts`):**
 
-- [ ] Change username in settings → see updated username across the app
-- [ ] Upload avatar → see avatar in profile and header
-- [ ] Update profile fields → save → refresh → see persisted changes
-- [ ] View profile completeness bar → fill missing fields → bar reaches 100%
-- [ ] Delete account → confirm password → see logout; re-login attempt blocked
-- [ ] Sudo mode: attempt sensitive action → prompted for password → re-auth → action succeeds
+- [x] Change username in settings → see updated username across the app
+- [x] Upload avatar → see avatar in profile and header
+- [x] Update profile fields → save → refresh → see persisted changes
+- [x] View profile completeness bar → fill missing fields → bar reaches 100%
+- [x] Delete account → confirm password → see logout; re-login attempt blocked
+- [x] Sudo mode: attempt sensitive action → prompted for password → re-auth → action succeeds
 
 ---
 
@@ -1104,18 +1104,18 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Integration Tests (`apps/server/src/__tests__/integration/tenant.integration.test.ts`):**
 
-- [ ] Tenant-scoped queries only return data for the active workspace
-- [ ] Expired invitation rejection with clear error
-- [ ] Domain-restricted tenant rejects invites to non-matching email domains
+- [x] Tenant-scoped queries only return data for the active workspace
+- [x] Expired invitation rejection with clear error
+- [x] Domain-restricted tenant rejects invites to non-matching email domains
 
 **E2E Tests (`apps/web/e2e/tenants.spec.ts`):**
 
-- [ ] Create workspace → see it in workspace list → switch to it
-- [ ] Invite teammate by email → teammate accepts → appears in member list
-- [ ] Change member role → member sees updated permissions
-- [ ] Remove member → member loses access to workspace
-- [ ] Tenant switcher: switch between workspaces → see different data in each
-- [ ] Accept expired invitation → see error message
+- [x] Create workspace → see it in workspace list → switch to it
+- [x] Invite teammate by email → teammate accepts → appears in member list
+- [x] Change member role → member sees updated permissions
+- [x] Remove member → member loses access to workspace
+- [x] Tenant switcher: switch between workspaces → see different data in each
+- [x] Accept expired invitation → see error message
 
 ---
 
@@ -1128,17 +1128,17 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Integration Tests (`apps/server/src/__tests__/integration/rbac.integration.test.ts`):**
 
-- [ ] Per-tenant role enforcement — viewer cannot write, member cannot manage members
-- [ ] Resource ownership validation — user A cannot access user B's resources
-- [ ] System admin vs workspace admin distinction
-- [ ] Role change takes effect immediately on next request
+- [x] Per-tenant role enforcement — viewer cannot write, member cannot manage members
+- [x] Resource ownership validation — user A cannot access user B's resources
+- [x] System admin vs workspace admin distinction
+- [x] Role change takes effect immediately on next request
 
 **E2E Tests (`apps/web/e2e/rbac.spec.ts`):**
 
-- [ ] Admin user: can access admin dashboard, manage users
-- [ ] Regular user: admin routes return 403 / redirect to dashboard
-- [ ] Workspace viewer: cannot create/edit resources; sees read-only UI
-- [ ] Workspace admin: can manage members but cannot transfer ownership
+- [x] Admin user: can access admin dashboard, manage users
+- [x] Regular user: admin routes return 403 / redirect to dashboard
+- [x] Workspace viewer: cannot create/edit resources; sees read-only UI
+- [x] Workspace admin: can manage members but cannot transfer ownership
 
 ---
 
@@ -1150,28 +1150,28 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Unit Tests (colocated):**
 
-- [ ] Dunning logic — retry schedule, grace period, suspension threshold
+- [x] Dunning logic — retry schedule, grace period, suspension threshold
 
 **Integration Tests (`apps/server/src/__tests__/integration/billing.integration.test.ts`):**
 
-- [ ] Admin: `POST /api/admin/billing/plans` → creates plan in DB
-- [ ] Admin: `PATCH /api/admin/billing/plans/:id` → updates plan
-- [ ] Stripe webhook → updates subscription state in DB (idempotent)
-- [ ] PayPal webhook → updates subscription state in DB (idempotent)
-- [ ] Duplicate webhook event ID → ignored (idempotency)
-- [ ] Out-of-order webhook events → handled gracefully
-- [ ] Checkout session creation → returns redirect URL
-- [ ] Entitlement enforcement — free plan user blocked from premium features
-- [ ] `GET /api/billing/invoices` → returns invoices for current tenant
-- [ ] Subscription cancel → remains active until period end
+- [x] Admin: `POST /api/admin/billing/plans` → creates plan in DB
+- [x] Admin: `PATCH /api/admin/billing/plans/:id` → updates plan
+- [x] Stripe webhook → updates subscription state in DB (idempotent)
+- [x] PayPal webhook → updates subscription state in DB (idempotent)
+- [x] Duplicate webhook event ID → ignored (idempotency)
+- [x] Out-of-order webhook events → handled gracefully
+- [x] Checkout session creation → returns redirect URL
+- [x] Entitlement enforcement — free plan user blocked from premium features
+- [x] `GET /api/billing/invoices` → returns invoices for current tenant
+- [x] Subscription cancel → remains active until period end
 
 **E2E Tests (`apps/web/e2e/billing.spec.ts`):**
 
-- [ ] View pricing page → select plan → complete checkout → see active subscription
-- [ ] Upgrade plan → see updated entitlements immediately
-- [ ] Downgrade plan → see reduced entitlements at next billing cycle
-- [ ] View billing settings → see current plan, invoices, payment method
-- [ ] Cancel subscription → see confirmation → plan remains active until period end
+- [x] View pricing page → select plan → complete checkout → see active subscription
+- [x] Upgrade plan → see updated entitlements immediately
+- [x] Downgrade plan → see reduced entitlements at next billing cycle
+- [x] View billing settings → see current plan, invoices, payment method
+- [x] Cancel subscription → see confirmation → plan remains active until period end
 
 ---
 
@@ -1185,23 +1185,23 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Integration Tests (`apps/server/src/__tests__/integration/notifications.integration.test.ts`):**
 
-- [ ] `POST /api/notifications` → creates notification in DB
-- [ ] `GET /api/notifications` → returns paginated notifications for current user
-- [ ] `PATCH /api/notifications/:id/read` → marks as read
-- [ ] `POST /api/notifications/read-all` → marks all as read for current user
-- [ ] `GET /api/notifications/unread-count` → returns correct count
-- [ ] `GET /api/notifications/preferences` → returns current preference settings
-- [ ] `PATCH /api/notifications/preferences` → updates channel preferences
-- [ ] Email send — SMTP transport delivers (dev: console provider logs to stdout)
-- [ ] Push subscription — register → send → receive (mock FCM endpoint)
+- [x] `POST /api/notifications` → creates notification in DB
+- [x] `GET /api/notifications` → returns paginated notifications for current user
+- [x] `PATCH /api/notifications/:id/read` → marks as read
+- [x] `POST /api/notifications/read-all` → marks all as read for current user
+- [x] `GET /api/notifications/unread-count` → returns correct count
+- [x] `GET /api/notifications/preferences` → returns current preference settings
+- [x] `PATCH /api/notifications/preferences` → updates channel preferences
+- [x] Email send — SMTP transport delivers (dev: console provider logs to stdout)
+- [x] Push subscription — register → send → receive (mock FCM endpoint)
 
 **E2E Tests (`apps/web/e2e/notifications.spec.ts`):**
 
-- [ ] Trigger action → notification appears in bell dropdown
-- [ ] Click notification → navigates to relevant page
-- [ ] Mark notification as read → visual indicator updates
-- [ ] Notification preferences: toggle channel off → no longer receive that type
-- [ ] Transactional email received (verify via test mailbox interceptor)
+- [x] Trigger action → notification appears in bell dropdown
+- [x] Click notification → navigates to relevant page
+- [x] Mark notification as read → visual indicator updates
+- [x] Notification preferences: toggle channel off → no longer receive that type
+- [x] Transactional email received (verify via test mailbox interceptor)
 
 ---
 
@@ -1215,21 +1215,21 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Integration Tests (`apps/server/src/__tests__/integration/audit.integration.test.ts`):**
 
-- [ ] Security events written to DB on login/logout/lockout/OAuth/TOTP actions
-- [ ] `GET /api/admin/security/events` → returns paginated events with filters
-- [ ] `GET /api/admin/security/events/:id` → returns event detail with all metadata
-- [ ] `GET /api/admin/security/metrics` → returns aggregated metrics
-- [ ] `POST /api/admin/security/events/export` → returns CSV/JSON export
-- [ ] Non-admin user → 403 on all admin security endpoints
-- [ ] Event includes correct actor, IP, user agent, timestamp
+- [x] Security events written to DB on login/logout/lockout/OAuth/TOTP actions
+- [x] `GET /api/admin/security/events` → returns paginated events with filters
+- [x] `GET /api/admin/security/events/:id` → returns event detail with all metadata
+- [x] `GET /api/admin/security/metrics` → returns aggregated metrics
+- [x] `POST /api/admin/security/events/export` → returns CSV/JSON export
+- [x] Non-admin user → 403 on all admin security endpoints
+- [x] Event includes correct actor, IP, user agent, timestamp
 
 **E2E Tests (`apps/web/e2e/audit.spec.ts`):**
 
-- [ ] Admin: navigate to security events → see events list with filters
-- [ ] Filter by event type → results update
-- [ ] Click event → see detail view with all metadata
-- [ ] Export events → file downloads successfully
-- [ ] Trigger login failure → see new security event appear in list
+- [x] Admin: navigate to security events → see events list with filters
+- [x] Filter by event type → results update
+- [x] Click event → see detail view with all metadata
+- [x] Export events → file downloads successfully
+- [x] Trigger login failure → see new security event appear in list
 
 ---
 
@@ -1243,15 +1243,15 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Integration Tests (`apps/server/src/__tests__/integration/compliance.integration.test.ts`):**
 
-- [ ] `POST /api/users/me/delete` → sets `deleted_at`, blocks login after grace period
+- [x] `POST /api/users/me/delete` → sets `deleted_at`, blocks login after grace period
 
 **E2E Tests (`apps/web/e2e/compliance.spec.ts`):**
 
-- [ ] Request data export → see "processing" status → receive download link
-- [ ] Delete account → confirm → logged out → cannot log back in during grace period
-- [ ] New ToS published → user forced to accept before continuing
-- [ ] Accept ToS → normal access restored
-- [ ] Consent preferences → toggle cookie consent → see updated state
+- [x] Request data export → see "processing" status → receive download link
+- [x] Delete account → confirm → logged out → cannot log back in during grace period
+- [x] New ToS published → user forced to accept before continuing
+- [x] Accept ToS → normal access restored
+- [x] Consent preferences → toggle cookie consent → see updated state
 
 ---
 
@@ -1262,22 +1262,22 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Unit Tests (colocated):**
 
-- [ ] Auth — WebSocket authentication handshake, token validation
+- [x] Auth — WebSocket authentication handshake, token validation
 
 **Integration Tests (`apps/server/src/__tests__/integration/realtime.integration.test.ts`):**
 
-- [ ] WebSocket connect → authenticate → subscribe to channel → receive published message
-- [ ] Unauthorized subscription attempt rejected with error
-- [ ] Connection stats updated on connect/disconnect
-- [ ] Multiple subscribers on same channel all receive message
-- [ ] Workspace-scoped channel — only workspace members receive messages
-- [ ] Heartbeat keeps connection alive; missed heartbeats trigger disconnect
+- [x] WebSocket connect → authenticate → subscribe to channel → receive published message
+- [x] Unauthorized subscription attempt rejected with error
+- [x] Connection stats updated on connect/disconnect
+- [x] Multiple subscribers on same channel all receive message
+- [x] Workspace-scoped channel — only workspace members receive messages
+- [x] Heartbeat keeps connection alive; missed heartbeats trigger disconnect
 
 **E2E Tests (`apps/web/e2e/realtime.spec.ts`):**
 
-- [ ] Open two browser tabs → action in tab A → real-time update appears in tab B
-- [ ] Disconnect network → reconnect → missed messages synced
-- [ ] Subscribe to workspace-scoped channel → only see events for that workspace
+- [x] Open two browser tabs → action in tab A → real-time update appears in tab B
+- [x] Disconnect network → reconnect → missed messages synced
+- [x] Subscribe to workspace-scoped channel → only see events for that workspace
 
 ---
 
@@ -1291,19 +1291,19 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Integration Tests (`apps/server/src/__tests__/integration/media.integration.test.ts`):**
 
-- [ ] Upload image → processed and stored (local provider for tests)
-- [ ] Upload invalid file type → rejected with clear error
-- [ ] Upload oversized file → rejected with size limit error
-- [ ] Queue: job submitted → processed → result stored in DB
-- [ ] Presigned URL — generate → use to upload → verify file stored
-- [ ] `DELETE /api/files/:id` → removes file from storage + DB record
+- [x] Upload image → processed and stored (local provider for tests)
+- [x] Upload invalid file type → rejected with clear error
+- [x] Upload oversized file → rejected with size limit error
+- [x] Queue: job submitted → processed → result stored in DB
+- [x] Presigned URL — generate → use to upload → verify file stored
+- [x] `DELETE /api/files/:id` → removes file from storage + DB record
 
 **E2E Tests (`apps/web/e2e/media.spec.ts`):**
 
-- [ ] Upload avatar image → see processed/cropped version displayed
-- [ ] Upload document → see it in file list → download it
-- [ ] Drag-and-drop file upload → progress indicator → success confirmation
-- [ ] Upload invalid file → see user-friendly error message
+- [x] Upload avatar image → see processed/cropped version displayed
+- [x] Upload document → see it in file list → download it
+- [x] Drag-and-drop file upload → progress indicator → success confirmation
+- [x] Upload invalid file → see user-friendly error message
 
 ---
 
@@ -1316,16 +1316,16 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Integration Tests (`apps/server/src/__tests__/integration/api-keys.integration.test.ts`):**
 
-- [ ] Revoked key → 401 on subsequent requests
-- [ ] Expired key → 401 on subsequent requests
-- [ ] Scope enforcement — key with `read` scope cannot access `write` endpoints
-- [ ] Key creation requires sudo mode
+- [x] Revoked key → 401 on subsequent requests
+- [x] Expired key → 401 on subsequent requests
+- [x] Scope enforcement — key with `read` scope cannot access `write` endpoints
+- [x] Key creation requires sudo mode
 
 **E2E Tests (`apps/web/e2e/api-keys.spec.ts`):**
 
-- [ ] Settings → API keys → create key → copy value (shown once) → see it in list
-- [ ] Revoke key → removed from list → API calls with that key fail
-- [ ] Create key with limited scopes → verify scope labels displayed
+- [x] Settings → API keys → create key → copy value (shown once) → see it in list
+- [x] Revoke key → removed from list → API calls with that key fail
+- [x] Create key with limited scopes → verify scope labels displayed
 
 ---
 
@@ -1339,23 +1339,23 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Integration Tests (`apps/server/src/__tests__/integration/admin.integration.test.ts`):**
 
-- [ ] `GET /api/admin/users` → returns paginated user list with filters
-- [ ] `GET /api/admin/users/:id` → returns user detail
-- [ ] `POST /api/admin/users/:id/lock` → locks account, login blocked
-- [ ] `POST /api/admin/users/:id/unlock` → unlocks account, login allowed
-- [ ] `POST /api/admin/impersonate/:userId` → returns scoped token + creates audit event
-- [ ] Cannot impersonate another admin → 403
-- [ ] Hard ban — revokes sessions, cancels subscriptions, schedules PII deletion
-- [ ] Non-admin user → 403 on all admin endpoints
-- [ ] `GET /api/admin/routes` → returns route manifest
+- [x] `GET /api/admin/users` → returns paginated user list with filters
+- [x] `GET /api/admin/users/:id` → returns user detail
+- [x] `POST /api/admin/users/:id/lock` → locks account, login blocked
+- [x] `POST /api/admin/users/:id/unlock` → unlocks account, login allowed
+- [x] `POST /api/admin/impersonate/:userId` → returns scoped token + creates audit event
+- [x] Cannot impersonate another admin → 403
+- [x] Hard ban — revokes sessions, cancels subscriptions, schedules PII deletion
+- [x] Non-admin user → 403 on all admin endpoints
+- [x] `GET /api/admin/routes` → returns route manifest
 
 **E2E Tests (`apps/web/e2e/admin.spec.ts`):**
 
-- [ ] Admin: search for user → view detail → lock account → user cannot log in
-- [ ] Admin: impersonate user → see banner "Viewing as ..." → end session → return to admin
-- [ ] Admin: manage billing plans → create/edit/deactivate plan
-- [ ] Admin: view security events dashboard → filter → export
-- [ ] Admin: view route manifest → filter by module/method
+- [x] Admin: search for user → view detail → lock account → user cannot log in
+- [x] Admin: impersonate user → see banner "Viewing as ..." → end session → return to admin
+- [x] Admin: manage billing plans → create/edit/deactivate plan
+- [x] Admin: view security events dashboard → filter → export
+- [x] Admin: view route manifest → filter by module/method
 
 ---
 
@@ -1366,34 +1366,34 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Health & Readiness:**
 
-- [ ] Integration: health check includes queue system status
-- [ ] E2E: health endpoint accessible from browser (no auth required)
+- [x] Integration: health check includes queue system status
+- [x] E2E: health endpoint accessible from browser (no auth required)
 
 **Correlation IDs:**
 
-- [ ] Integration: correlation ID propagated to downstream service calls and queue jobs
+- [x] Integration: correlation ID propagated to downstream service calls and queue jobs
 
 **Error Reporting:**
 
-- [ ] Service: Sentry integration provider (optional, config-gated)
+- [x] Service: Sentry integration provider (optional, config-gated)
 
 **Metrics:**
 
-- [ ] Service: metrics interface — request count/latency, job success/fail counts
-- [ ] Service: Prometheus-compatible `/metrics` endpoint (config-gated)
-- [ ] Integration: request → metrics counter incremented
-- [ ] Integration: job processed → metrics counter incremented
+- [x] Service: metrics interface — request count/latency, job success/fail counts
+- [x] Service: Prometheus-compatible `/metrics` endpoint (config-gated)
+- [x] Integration: request → metrics counter incremented
+- [x] Integration: job processed → metrics counter incremented
 
 **OpenAPI / Swagger:**
 
-- [ ] Integration: `/api/docs/json` returns valid OpenAPI 3.0 spec
-- [ ] Validation: all annotated routes appear in generated spec
+- [x] Integration: `/api/docs/json` returns valid OpenAPI 3.0 spec
+- [x] Validation: all annotated routes appear in generated spec
 
 **Deployment Sanity (Appendix D):**
 
-- [ ] Integration: `pnpm db:push` applies all migrations to fresh test DB without errors
-- [ ] Integration: `seed.ts` seeds test data without errors on clean DB
-- [ ] Integration: `bootstrap-admin.ts` creates admin user on empty DB, idempotent on re-run
+- [x] Integration: `pnpm db:push` applies all migrations to fresh test DB without errors
+- [x] Integration: `seed.ts` seeds test data without errors on clean DB
+- [x] Integration: `bootstrap-admin.ts` creates admin user on empty DB, idempotent on re-run
 
 ---
 
@@ -1406,19 +1406,19 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Rate Limiting & IP Policy (Appendix E.5):**
 
-- [ ] Integration: rate limit preset enforced on auth endpoints (burst rejected, normal allowed)
-- [ ] Integration: rate limit preset on general API endpoints (higher threshold than auth)
-- [ ] Integration: IP blocklist (blocked IP returns 403 on all routes)
+- [x] Integration: rate limit preset enforced on auth endpoints (burst rejected, normal allowed)
+- [x] Integration: rate limit preset on general API endpoints (higher threshold than auth)
+- [x] Integration: IP blocklist (blocked IP returns 403 on all routes)
 
 **Security Notifications (11.2):**
 
-- [ ] Integration: password change → "Was this you?" email sent to user
-- [ ] Integration: new API key generated → security notification email sent
+- [x] Integration: password change → "Was this you?" email sent to user
+- [x] Integration: new API key generated → security notification email sent
 
 **ToS Gating (11.3):**
 
-- [ ] Integration: admin publishes new ToS version → users with old version blocked
-- [ ] E2E: new ToS → modal appears → accept → normal access
+- [x] Integration: admin publishes new ToS version → users with old version blocked
+- [x] E2E: new ToS → modal appears → accept → normal access
 
 **Login Failure Logging (11.4):**
 
@@ -1429,9 +1429,9 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 > **Existing:** Queue system (QueueServer + WriteService), memory store for dev/test.
 > **Gap:** Scheduled job implementations are stubs, zero tests.
 
-- [ ] Integration tests: job enqueued → processed → DB state updated correctly
-- [ ] Integration: generic job lifecycle — enqueue → process → success callback; failure → retry with backoff → dead-letter after max retries
-- [ ] E2E: admin job monitor page → see scheduled jobs, status, last run, next run
+- [x] Integration tests: job enqueued → processed → DB state updated correctly
+- [x] Integration: generic job lifecycle — enqueue → process → success callback; failure → retry with backoff → dead-letter after max retries
+- [x] E2E: admin job monitor page → see scheduled jobs, status, last run, next run
 
 ---
 
@@ -1457,19 +1457,19 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Activity Tracking:**
 
-- [ ] Integration: tenant-scoped activity isolation — tenant A cannot see tenant B's activities
+- [x] Integration: tenant-scoped activity isolation — tenant A cannot see tenant B's activities
 
 **Feature Flags:**
 
-- [ ] Integration: tenant-scoped flags — tenant-specific overrides vs global defaults
+- [x] Integration: tenant-scoped flags — tenant-specific overrides vs global defaults
 
 **Usage Metering:**
 
-- [ ] Unit: meter increment logic — idempotency key, counter aggregation, period rollover
-- [ ] Unit: usage limit enforcement — soft limit (warn) vs hard limit (block)
-- [ ] Integration: API call → meter incremented → usage reflected in billing
-- [ ] Integration: usage exceeds plan limit → appropriate response (429 or degraded)
-- [ ] Integration: metering data feeds billing invoice line items
+- [x] Unit: meter increment logic — idempotency key, counter aggregation, period rollover
+- [x] Unit: usage limit enforcement — soft limit (warn) vs hard limit (block)
+- [x] Integration: API call → meter incremented → usage reflected in billing
+- [x] Integration: usage exceeds plan limit → appropriate response (429 or degraded)
+- [x] Integration: metering data feeds billing invoice line items
 
 ---
 
@@ -1483,11 +1483,11 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Integration Tests:**
 
-- [ ] Event triggered → webhook queued → delivered to endpoint → delivery logged
-- [ ] Endpoint returns 500 → retry scheduled with exponential backoff
-- [ ] Endpoint returns 200 → delivery marked successful, no retry
-- [ ] Max retries exceeded → webhook marked failed, admin notified
-- [ ] Tenant-scoped webhooks — tenant A's events don't trigger tenant B's webhooks
+- [x] Event triggered → webhook queued → delivered to endpoint → delivery logged
+- [x] Endpoint returns 500 → retry scheduled with exponential backoff
+- [x] Endpoint returns 200 → delivery marked successful, no retry
+- [x] Max retries exceeded → webhook marked failed, admin notified
+- [x] Tenant-scoped webhooks — tenant A's events don't trigger tenant B's webhooks
 
 ---
 
@@ -1498,21 +1498,21 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Unit Tests:**
 
-- [ ] IPC handler registration — all handlers registered with correct channel names
-- [ ] Auth flow — token storage in secure keychain (keytar/safeStorage), token refresh on app resume
-- [ ] Deep link handling — protocol handler parses `abe://` links correctly
-- [ ] Auto-update — version check, download progress, install-on-quit logic
-- [ ] Menu construction — correct items registered per platform (macOS vs Windows vs Linux)
-- [ ] System tray — icon rendering, context menu items, click handlers
-- [ ] Offline detection — network status change → queue operations, sync on reconnect
+- [x] IPC handler registration — all handlers registered with correct channel names
+- [x] Auth flow — token storage in secure keychain (keytar/safeStorage), token refresh on app resume
+- [x] Deep link handling — protocol handler parses `abe://` links correctly
+- [x] Auto-update — version check, download progress, install-on-quit logic
+- [x] Menu construction — correct items registered per platform (macOS vs Windows vs Linux)
+- [x] System tray — icon rendering, context menu items, click handlers
+- [x] Offline detection — network status change → queue operations, sync on reconnect
 
 **Integration Tests (Electron test runner):**
 
-- [ ] App launches → renders main window with correct preload script
-- [ ] Login flow → tokens stored securely → subsequent launch auto-authenticates
-- [ ] IPC: renderer requests data → main process fetches → result returned to renderer
-- [ ] Offline → online transition → queued operations replayed successfully
-- [ ] Menu items → correct IPC messages sent → expected actions performed
+- [x] App launches → renders main window with correct preload script
+- [x] Login flow → tokens stored securely → subsequent launch auto-authenticates
+- [x] IPC: renderer requests data → main process fetches → result returned to renderer
+- [x] Offline → online transition → queued operations replayed successfully
+- [x] Menu items → correct IPC messages sent → expected actions performed
 
 ---
 
@@ -1521,10 +1521,10 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 > **Existing:** Individual E2E tests per domain (auth, tenant, billing). No combined journey test.
 > **Gap:** No single test validating the full new-user onboarding flow end-to-end.
 
-- [ ] E2E: Register → verify email → create workspace → invite teammate → teammate accepts invite
-- [ ] E2E: Select plan → complete checkout → see dashboard with team member and active subscription
-- [ ] E2E: First success moment — user sees populated workspace with welcome content
-- [ ] E2E: Negative path — expired invite link → clear error; invalid payment → graceful fallback
+- [x] E2E: Register → verify email → create workspace → invite teammate → teammate accepts invite
+- [x] E2E: Select plan → complete checkout → see dashboard with team member and active subscription
+- [x] E2E: First success moment — user sees populated workspace with welcome content
+- [x] E2E: Negative path — expired invite link → clear error; invalid payment → graceful fallback
 
 ---
 
@@ -1583,8 +1583,8 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Golden Path Flows (manual + automated):**
 
-- [ ] Flow: Create user → create tenant → invite teammate → teammate accepts → enforce RBAC within workspace
-- [ ] Flow: Run checkout → process webhooks idempotently → activate tenant plan → verify entitlements
+- [x] Flow: Create user → create tenant → invite teammate → teammate accepts → enforce RBAC within workspace
+- [x] Flow: Run checkout → process webhooks idempotently → activate tenant plan → verify entitlements
 
 **Ship Criteria Final Check (CHECKLIST):**
 
@@ -1623,9 +1623,9 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Deployment Pipeline:**
 
-- [ ] CI: `deploy.yml` workflow deploys to production on merge to `main` (or manual trigger)
+- [x] CI: `deploy.yml` workflow deploys to production on merge to `main` (or manual trigger)
 - [ ] CI: zero-downtime deployment verified (rolling restart, no dropped connections)
-- [ ] CI: rollback procedure tested — `rollback.yml` reverts to previous known-good deployment
+- [x] CI: rollback procedure tested — `rollback.yml` reverts to previous known-good deployment
 
 ---
 
@@ -1658,7 +1658,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Production Monitoring:**
 
-- [ ] Setup: Sentry integration — server + client error capture with correlation IDs
+- [x] Setup: Sentry integration — server + client error capture with correlation IDs
 - [ ] Setup: uptime monitoring — external ping to `/health` endpoint every 60s, alert on 2 consecutive failures
 - [ ] Setup: log aggregation — structured logs shipped to centralized service (Datadog, Loki, or CloudWatch)
 - [ ] Setup: log retention policy — 30 days hot, 90 days cold storage
@@ -1759,7 +1759,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 **Security Sign-Off:**
 
 - [ ] Penetration test checklist (5.5) completed with zero critical findings
-- [ ] `pnpm audit` clean (zero critical/high)
+- [x] `pnpm audit` clean (zero critical/high)
 - [ ] OWASP Top 10 verified (SQL injection, XSS, CSRF, auth bypass, IDOR)
 - [ ] Rate limiting verified under simulated attack
 - [ ] No secrets in codebase (`git log` scan for env vars, API keys, passwords)

@@ -14,7 +14,7 @@ export default mergeConfig(baseConfig, {
   test: {
     name: 'server',
     environment: 'node',
-    setupFiles: ['./src/__tests__/setup.ts'],
+    setupFiles: [path.resolve(__dirname, 'src/__tests__/setup.ts')],
     // Inline local modules to ensure mocks work correctly with path aliases
     server: {
       deps: {

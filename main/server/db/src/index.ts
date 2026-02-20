@@ -34,35 +34,35 @@ export {
 // Schema
 export {
   // Activity schema
-  ACTIVITIES_TABLE,
   ACTIVITY_COLUMNS,
-  // API Keys
   API_KEY_COLUMNS,
+  // API Keys
   API_KEYS_TABLE,
-  // System
   AUDIT_EVENT_COLUMNS,
   AUDIT_EVENTS_TABLE,
-  // Auth tokens (unified)
-  AUTH_TOKEN_COLUMNS,
-  AUTH_TOKENS_TABLE,
-  // Billing
   BILLING_EVENT_COLUMNS,
   BILLING_EVENT_TYPES,
+  // Billing
   BILLING_EVENTS_TABLE,
   BILLING_PROVIDERS,
-  // Compliance
-  CONSENT_RECORD_COLUMNS,
-  CONSENT_RECORDS_TABLE,
+  CONSENT_LOG_COLUMNS,
+  CONSENT_LOGS_TABLE,
   CONSENT_TYPES,
   CUSTOMER_MAPPING_COLUMNS,
   CUSTOMER_MAPPINGS_TABLE,
   DATA_EXPORT_REQUEST_COLUMNS,
+  // Compliance
   DATA_EXPORT_REQUESTS_TABLE,
   DATA_EXPORT_STATUSES,
   DATA_EXPORT_TYPES,
   // Push
   DEFAULT_QUIET_HOURS,
   DEFAULT_TYPE_PREFERENCES,
+  EMAIL_CHANGE_TOKEN_COLUMNS,
+  // Auth
+  EMAIL_CHANGE_TOKENS_TABLE,
+  EMAIL_VERIFICATION_TOKEN_COLUMNS,
+  EMAIL_VERIFICATION_TOKENS_TABLE,
   // Feature flag schema
   FEATURE_FLAG_COLUMNS,
   FEATURE_FLAGS_TABLE,
@@ -77,16 +77,21 @@ export {
   LEGAL_DOCUMENTS_TABLE,
   LOGIN_ATTEMPT_COLUMNS,
   LOGIN_ATTEMPTS_TABLE,
+  MAGIC_LINK_TOKEN_COLUMNS,
+  // Magic Link
+  MAGIC_LINK_TOKENS_TABLE,
   MEMBERSHIP_COLUMNS,
   MEMBERSHIPS_TABLE,
   NOTIFICATION_COLUMNS,
   NOTIFICATION_PREFERENCE_COLUMNS,
   NOTIFICATION_PREFERENCES_TABLE,
   NOTIFICATIONS_TABLE,
-  // OAuth
   OAUTH_CONNECTION_COLUMNS,
+  // OAuth
   OAUTH_CONNECTIONS_TABLE,
   OAUTH_PROVIDERS,
+  PASSWORD_RESET_TOKEN_COLUMNS,
+  PASSWORD_RESET_TOKENS_TABLE,
   PAYMENT_METHOD_COLUMNS,
   PAYMENT_METHOD_TYPES,
   PAYMENT_METHODS_TABLE,
@@ -96,13 +101,15 @@ export {
   PUSH_SUBSCRIPTION_COLUMNS,
   PUSH_SUBSCRIPTIONS_TABLE,
   REFRESH_TOKEN_COLUMNS,
+  REFRESH_TOKEN_FAMILIES_TABLE,
+  REFRESH_TOKEN_FAMILY_COLUMNS,
   REFRESH_TOKENS_TABLE,
   SECURITY_EVENT_COLUMNS,
   SECURITY_EVENT_TYPES,
   SECURITY_EVENTS_TABLE,
   SECURITY_SEVERITIES,
-  SMS_VERIFICATION_CODE_COLUMNS,
   SMS_VERIFICATION_CODES_TABLE,
+  SMS_VERIFICATION_CODE_COLUMNS,
   STORAGE_PROVIDERS,
   SUBSCRIPTION_COLUMNS,
   SUBSCRIPTION_STATUSES,
@@ -116,6 +123,8 @@ export {
   TOTP_BACKUP_CODES_TABLE,
   TRUSTED_DEVICE_COLUMNS,
   TRUSTED_DEVICES_TABLE,
+  USER_AGREEMENT_COLUMNS,
+  USER_AGREEMENTS_TABLE,
   USER_COLUMNS,
   USER_SESSION_COLUMNS,
   USER_SESSIONS_TABLE,
@@ -203,6 +212,8 @@ export {
   type SecurityEventType,
   type SecuritySeverity,
   type SmsVerificationCode,
+  type NewSmsVerificationCode,
+  type UpdateSmsVerificationCode,
   type Subscription,
   type SubscriptionStatus,
   type TenantFeatureOverride,
@@ -234,19 +245,6 @@ export {
   type Webhook,
   type WebhookDelivery,
   type WebhookDeliveryStatus,
-  // Metering schema
-  AGGREGATION_TYPES,
-  type AggregationType,
-  type NewUsageMetric,
-  type NewUsageSnapshot,
-  type UpdateUsageMetric,
-  type UpdateUsageSnapshot,
-  USAGE_METRIC_COLUMNS,
-  USAGE_METRICS_TABLE,
-  type UsageMetric,
-  USAGE_SNAPSHOT_COLUMNS,
-  USAGE_SNAPSHOTS_TABLE,
-  type UsageSnapshot,
 } from './schema';
 
 // Repositories (functional-style)
@@ -338,11 +336,6 @@ export {
   type WebauthnCredentialRepository,
   type WebhookDeliveryRepository,
   type WebhookRepository,
-  // Metering
-  createUsageMetricRepository,
-  createUsageSnapshotRepository,
-  type UsageMetricRepository,
-  type UsageSnapshotRepository,
 } from './repositories';
 
 // Factory
@@ -417,7 +410,11 @@ export {
 export { isInTransaction, withTransaction } from './utils';
 
 // Optimistic Locking
-export { isOptimisticLockError, OptimisticLockError, updateUserWithVersion } from './utils';
+export {
+  isOptimisticLockError,
+  OptimisticLockError,
+  updateUserWithVersion,
+} from './utils/optimistic-lock';
 
 // Queue
 export { createPostgresQueueStore, PostgresQueueStore, WriteService, createWriteService } from './queue';
@@ -439,14 +436,7 @@ export {
   type TaskHandler,
   type TaskHandlers,
   type TaskResult,
-  type WriteBatch,
-  type WriteContext,
-  type WriteError,
-  type WriteHooks,
-  type WriteOperation,
-  type WriteResult,
-  type WriteServiceOptions,
-} from './queue';
+} from './queue/types/queue-types';
 
 // Read Replica
 export {
@@ -486,4 +476,4 @@ export type {
   SqlQueryOptions,
   SqlSearchProviderConfig,
   SqlTableConfig,
-} from './search';
+} from './search/types';
