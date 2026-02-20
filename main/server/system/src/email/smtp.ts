@@ -52,7 +52,7 @@ export class SmtpEmailService implements EmailService {
       message.html = options.html;
     }
     if (options.headers !== undefined) {
-      message.headers = options.headers as Record<string, string>;
+      message.headers = options.headers;
     }
     const result = await this.client.send(message);
 

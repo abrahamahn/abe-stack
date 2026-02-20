@@ -416,7 +416,6 @@ export {
 // Routing
 // ============================================================================
 
-// registerRouteMap, AuthGuardFactory, RouterOptions moved to apps/server/src/http/router.ts
 export {
   clearRegistry,
   createRouteMap,
@@ -424,6 +423,8 @@ export {
   protectedRoute,
   publicRoute,
   registerRoute,
+  registerRouteMap,
+  type AuthGuardFactory,
   type HandlerContext,
   type HttpMethod,
   type HttpReply,
@@ -436,6 +437,7 @@ export {
   type RouteRegistryEntry,
   type RouteResult,
   type RouteSchema,
+  type RouterOptions,
   type ValidationSchema,
 } from './routing';
 

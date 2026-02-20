@@ -222,6 +222,8 @@ export class WeakPasswordError extends BadRequestError {
 
 /** Account temporarily locked due to failed attempts or admin action */
 export class AccountLockedError extends TooManyRequestsError {
+  /** Seconds until the client may retry */
+  public readonly retryAfter: number | undefined;
   /** Human-readable reason the account is locked (admin-set, if available) */
   public readonly lockReason: string | undefined;
   /** ISO timestamp when the lock expires (undefined = permanent or rate-limit) */

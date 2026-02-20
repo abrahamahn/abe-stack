@@ -42,7 +42,7 @@ export function useStripePortal(options?: UseStripePortalOptions): UseStripePort
         getToken: getAccessToken,
       });
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      const response = (await billingClient.createPortalSession({
+      const response = (await billingClient.createPortal({
         returnUrl: returnUrl ?? window.location.href,
       })) as PortalSessionResponse;
       return response;
@@ -58,7 +58,7 @@ export function useStripePortal(options?: UseStripePortalOptions): UseStripePort
 
   return {
     openPortal: (returnUrl?: string): void => {
-      mutation.mutate({ returnUrl });
+      mutation.mutate(returnUrl !== undefined ? { returnUrl } : {});
     },
     isLoading: mutation.status === 'pending',
     error: mutation.error,

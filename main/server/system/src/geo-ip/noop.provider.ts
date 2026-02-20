@@ -1,4 +1,4 @@
-// main/server/system/src/geo-ip/noop-provider.ts
+// main/server/system/src/geo-ip/noop.provider.ts
 /**
  * No-Op Geo-IP Provider
  *

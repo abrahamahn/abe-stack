@@ -511,7 +511,7 @@ export class WebsocketPubsubClient {
    */
   private sendOrQueue(message: ClientPubsubMessage): void {
     if (this.ws !== null && this.ws.readyState === WebSocket.OPEN) {
-      this.log('>', message.type, message.key);
+      this.log('>', message.type, 'key' in message ? message.key : undefined);
       this.ws.send(JSON.stringify(message));
     } else {
       this.enqueue(message);
@@ -523,14 +523,14 @@ export class WebsocketPubsubClient {
    * Drops the oldest message if the queue exceeds maxQueueSize.
    */
   private enqueue(message: ClientPubsubMessage): void {
-    this.log('Queued (offline):', message.type, message.key);
+    this.log('Queued (offline):', message.type, 'key' in message ? message.key : undefined);
     this.offlineQueue.push(message);
 
     // Drop oldest if over capacity
     while (this.offlineQueue.length > this.config.maxQueueSize) {
       const dropped = this.offlineQueue.shift();
       if (dropped !== undefined) {
-        this.log('Dropped oldest queued message:', dropped.type, dropped.key);
+        this.log('Dropped oldest queued message:', dropped.type, 'key' in dropped ? dropped.key : undefined);
       }
     }
   }
@@ -547,7 +547,7 @@ export class WebsocketPubsubClient {
     while (this.offlineQueue.length > 0) {
       const message = this.offlineQueue.shift();
       if (message !== undefined && this.ws !== null && this.ws.readyState === WebSocket.OPEN) {
-        this.log('> (flushed)', message.type, message.key);
+        this.log('> (flushed)', message.type, 'key' in message ? message.key : undefined);
         this.ws.send(JSON.stringify(message));
       }
     }

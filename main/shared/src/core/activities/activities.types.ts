@@ -155,15 +155,15 @@ export const activityEventSchema: Schema<ActivityEvent> = createSchema((data: un
  */
 export interface ActivityFeedRequest {
   /** Filter by resource type */
-  readonly resourceType?: string;
+  readonly resourceType?: string | undefined;
   /** Filter by actor ID */
-  readonly actorId?: string;
+  readonly actorId?: string | undefined;
   /** Filter by action type */
-  readonly action?: string;
+  readonly action?: string | undefined;
   /** Cursor for pagination */
-  readonly cursor?: string;
+  readonly cursor?: string | undefined;
   /** Maximum number of results (1-100) */
-  readonly limit?: number;
+  readonly limit?: number | undefined;
 }
 
 /**

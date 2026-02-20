@@ -28,6 +28,7 @@ import {
 import type { AdminAppContext } from './types';
 import type { HardBanResult, SearchUsersResponse } from './userService';
 import type { UserRole } from '../../../db/src';
+import type { HttpReply, HttpRequest } from '../../../system/src';
 import type {
   AdminHardBanRequest,
   AdminLockUserRequest,
@@ -39,7 +40,6 @@ import type {
   AdminUserListResponse,
   UnlockAccountRequest,
 } from '@bslt/shared';
-import type { FastifyReply, FastifyRequest } from 'fastify';
 
 const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));
@@ -54,8 +54,8 @@ const toError = (error: unknown): Error =>
 export async function handleListUsers(
   ctx: AdminAppContext,
   _body: undefined,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<{ status: number; body: AdminUserListResponse | { message: string } }> {
   const user = (request as { user?: { userId: string; role: string } }).user;
   if (user === undefined) {
@@ -64,7 +64,7 @@ export async function handleListUsers(
 
   try {
     // Parse query parameters from the request
-    const query = (request.query ?? {}) as Record<string, unknown>;
+    const query = request.query as Record<string, unknown>;
 
     const filters: AdminUserListFilters = {};
     if (typeof query['search'] === 'string') {
@@ -122,8 +122,8 @@ export async function handleListUsers(
 export async function handleGetUser(
   ctx: AdminAppContext,
   _body: undefined,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<{ status: number; body: AdminUser | { message: string } }> {
   const authUser = (request as unknown as { user?: { userId: string; role: string } }).user;
   if (authUser === undefined) {
@@ -167,8 +167,8 @@ export async function handleGetUser(
 export async function handleUpdateUser(
   ctx: AdminAppContext,
   body: AdminUpdateUserRequest,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<{ status: number; body: AdminUpdateUserResponse | { message: string } }> {
   const authUser = (request as unknown as { user?: { userId: string; role: string } }).user;
   if (authUser === undefined) {
@@ -229,8 +229,8 @@ export async function handleUpdateUser(
 export async function handleLockUser(
   ctx: AdminAppContext,
   body: AdminLockUserRequest,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<{ status: number; body: AdminLockUserResponse | { message: string } }> {
   const authUser = (request as unknown as { user?: { userId: string; role: string } }).user;
   if (authUser === undefined) {
@@ -301,8 +301,8 @@ export async function handleLockUser(
 export async function handleUnlockUser(
   ctx: AdminAppContext,
   body: UnlockAccountRequest,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<{ status: number; body: AdminLockUserResponse | { message: string } }> {
   const authUser = (request as unknown as { user?: { userId: string; role: string } }).user;
   if (authUser === undefined) {
@@ -355,8 +355,8 @@ export async function handleUnlockUser(
 export async function handleSearchUsers(
   ctx: AdminAppContext,
   _body: undefined,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<{ status: number; body: SearchUsersResponse | { message: string } }> {
   const user = (request as { user?: { userId: string; role: string } }).user;
   if (user === undefined) {
@@ -364,7 +364,7 @@ export async function handleSearchUsers(
   }
 
   try {
-    const query = (request.query ?? {}) as Record<string, unknown>;
+    const query = request.query as Record<string, unknown>;
 
     const q = typeof query['q'] === 'string' ? query['q'].trim() : '';
     if (q === '') {
@@ -409,8 +409,8 @@ const SUDO_TOKEN_HEADER = 'x-sudo-token';
 export async function handleHardBan(
   ctx: AdminAppContext,
   body: AdminHardBanRequest,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<{ status: number; body: HardBanResult | { message: string } }> {
   const authUser = (request as unknown as { user?: { userId: string; role: string } }).user;
   if (authUser === undefined) {

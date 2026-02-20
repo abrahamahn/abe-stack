@@ -1,4 +1,4 @@
-// main/server/system/src/mailer/smtp.index.test.ts
+// main/server/system/src/email/smtp.index.test.ts
 import { describe, expect, it } from 'vitest';
 
 import { SmtpClient as Direct } from './smtp.client';

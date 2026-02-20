@@ -15,7 +15,6 @@ import path from 'node:path';
 
 import { RateLimiter } from '@bslt/server-system';
 import { createConsoleLogger } from '@bslt/server-system/logger';
-import { registerLoggingMiddleware } from './middleware/logging';
 import { ERROR_CODES, isAppError, LIMITS } from '@bslt/shared';
 import swagger from '@fastify/swagger';
 import swaggerUI from '@fastify/swagger-ui';
@@ -24,6 +23,7 @@ import fastify from 'fastify';
 import { registerPlugins, type AppErrorInfo } from './http/plugins';
 import { swaggerThemeCss } from './http/swagger-theme';
 import { contextualizeRequest } from './middleware/context';
+import { registerLoggingMiddleware } from './middleware/logging';
 
 import type { HasContext, IServiceContainer, RequestWithCookies } from './types/context';
 import type { DbClient } from '@bslt/db';

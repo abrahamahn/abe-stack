@@ -179,7 +179,7 @@ export class InvitationReminderService {
     // - have not had a reminder sent (reminderSentAt IS NULL)
     const invitations = (await this.repos.invitations.findPendingExpiringBefore(
       windowEnd,
-    )) as PendingInvitation[];
+    )) as unknown as PendingInvitation[];
 
     return invitations.filter((inv) => inv.reminderSentAt === null);
   }

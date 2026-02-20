@@ -17,6 +17,7 @@ import {
 } from './securityService';
 
 import type { AdminAppContext } from './types';
+import type { HttpReply, HttpRequest } from '../../../system/src';
 import type {
   SecurityEvent,
   SecurityEventsExportRequest,
@@ -25,7 +26,6 @@ import type {
   SecurityEventsListResponse,
   SecurityMetrics,
 } from '@bslt/shared';
-import type { FastifyReply, FastifyRequest } from 'fastify';
 
 const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));
@@ -37,8 +37,8 @@ const toError = (error: unknown): Error =>
 export async function handleListSecurityEvents(
   ctx: AdminAppContext,
   body: SecurityEventsListRequest,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<{ status: number; body: SecurityEventsListResponse | { message: string } }> {
   const user = (request as { user?: { userId: string; role: string } }).user;
   if (user === undefined) {
@@ -68,8 +68,8 @@ export async function handleListSecurityEvents(
 export async function handleGetSecurityEvent(
   ctx: AdminAppContext,
   _body: undefined,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<{ status: number; body: SecurityEvent | { message: string } }> {
   const user = (request as { user?: { userId: string; role: string } }).user;
   if (user === undefined) {
@@ -101,8 +101,8 @@ export async function handleGetSecurityEvent(
 export async function handleGetSecurityMetrics(
   ctx: AdminAppContext,
   _body: undefined,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<{ status: number; body: SecurityMetrics | { message: string } }> {
   const user = (request as { user?: { userId: string; role: string } }).user;
   if (user === undefined) {
@@ -140,8 +140,8 @@ export async function handleGetSecurityMetrics(
 export async function handleExportSecurityEvents(
   ctx: AdminAppContext,
   body: SecurityEventsExportRequest,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<{ status: number; body: SecurityEventsExportResponse | { message: string } }> {
   const user = (request as { user?: { userId: string; role: string } }).user;
   if (user === undefined) {

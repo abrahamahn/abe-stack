@@ -219,8 +219,8 @@ export const PreferencesSection = ({ className }: PreferencesSectionProps): Reac
 
           <Select
             value={selectedTimezone}
-            onChange={(e: { target: { value: string } }) => {
-              handleTimezoneChange(e.target.value);
+            onChange={(value: string) => {
+              handleTimezoneChange(value);
             }}
             data-testid="timezone-select"
             className="max-w-md"
@@ -244,8 +244,8 @@ export const PreferencesSection = ({ className }: PreferencesSectionProps): Reac
 
           <Select
             value={selectedLocale}
-            onChange={(e: { target: { value: string } }) => {
-              handleLocaleChange(e.target.value);
+            onChange={(value: string) => {
+              handleLocaleChange(value);
             }}
             data-testid="locale-select"
             className="max-w-md"

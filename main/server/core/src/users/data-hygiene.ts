@@ -146,12 +146,13 @@ export async function anonymizeUserPII(
   // Fetch the current user record
   const rows = await db.query(select(USERS_TABLE).where(eq('id', userId)).toSql());
 
-  if (rows.length === 0) {
+  const firstRow = rows[0];
+  if (rows.length === 0 || firstRow === undefined) {
     log.warn({ userId }, 'Cannot anonymize PII: user not found');
     return { success: false, emailHash: '' };
   }
 
-  const user = toCamelCase<User>(rows[0], USER_COLUMNS);
+  const user = toCamelCase<User>(firstRow, USER_COLUMNS);
 
   // Skip if already anonymized
   if (ANONYMIZED_EMAIL_PATTERN.test(user.email)) {

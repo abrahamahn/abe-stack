@@ -31,7 +31,7 @@ export interface MetricOverride {
 
 export interface TenantUsageOverrideEditorProps extends Omit<
   ComponentPropsWithoutRef<'div'>,
-  'children' | 'onSubmit'
+  'children' | 'onSubmit' | 'onReset'
 > {
   /** Tenant ID being edited */
   tenantId: string;

@@ -7,6 +7,9 @@
  * Captures unhandled exceptions, breadcrumbs for route changes,
  * and provides helpers for manual error reporting.
  *
+ * When @sentry/react is not installed, all exports are safe no-ops
+ * so the rest of the app can import this module unconditionally.
+ *
  * Usage:
  *   import { initSentry } from '@/lib/sentry';
  *   initSentry();  // call once at app startup, before React renders
@@ -19,9 +22,16 @@
  * @module lib/sentry
  */
 
-import * as Sentry from '@sentry/react';
-
 import { clientConfig } from '@/config';
+
+import type { ComponentType, ReactNode } from 'react';
+
+// ============================================================================
+// Lazy Sentry reference — resolved at init-time, stays null when missing
+// ============================================================================
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let Sentry: any = null;
 
 // ============================================================================
 // Types
@@ -65,17 +75,32 @@ const TRACES_SAMPLE_RATE = clientConfig.isProd ? 0.2 : 1.0;
  * Safe to call even when VITE_SENTRY_DSN is not set -- in that case Sentry
  * is effectively a no-op and all calls are silently ignored.
  *
+ * Also safe to call when @sentry/react is not installed -- the dynamic import
+ * will fail silently and all exported helpers become no-ops.
+ *
  * Must be called **before** React renders so the global error handlers
  * are installed as early as possible.
  *
  * @complexity O(1)
  */
-export function initSentry(): void {
+export async function initSentry(): Promise<void> {
   // Skip initialization if no DSN is configured
   if (SENTRY_DSN === '') {
     if (clientConfig.isDev) {
       // eslint-disable-next-line no-console
       console.debug('[Sentry] No DSN configured -- skipping initialization');
+    }
+    return;
+  }
+
+  // Try to dynamically import @sentry/react; silently skip if not installed
+  try {
+    // @ts-expect-error -- @sentry/react may not be installed; the catch block handles that
+    Sentry = await import('@sentry/react');
+  } catch {
+    if (clientConfig.isDev) {
+      // eslint-disable-next-line no-console
+      console.debug('[Sentry] @sentry/react is not installed -- running without Sentry');
     }
     return;
   }
@@ -111,7 +136,8 @@ export function initSentry(): void {
     // -----------------------------------------------------------------------
     // Filtering
     // -----------------------------------------------------------------------
-    beforeSend(event) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    beforeSend(event: any) {
       // Scrub access tokens from breadcrumb data
       if (event.breadcrumbs !== undefined) {
         for (const breadcrumb of event.breadcrumbs) {
@@ -159,6 +185,7 @@ export function initSentry(): void {
  * @complexity O(1)
  */
 export function addRouteChangeBreadcrumb(from: string, to: string): void {
+  if (Sentry === null) return;
   Sentry.addBreadcrumb({
     category: 'navigation',
     message: `Navigated from ${from} to ${to}`,
@@ -181,6 +208,7 @@ export function addRouteChangeBreadcrumb(from: string, to: string): void {
  * @complexity O(1)
  */
 export function captureError(error: unknown, context?: Record<string, unknown>): void {
+  if (Sentry === null) return;
   Sentry.captureException(error, {
     extra: context,
   });
@@ -196,6 +224,8 @@ export function captureError(error: unknown, context?: Record<string, unknown>):
  * @complexity O(1)
  */
 export function setSentryUser(user: { id: string; email?: string; role?: string } | null): void {
+  if (Sentry === null) return;
+
   if (user === null) {
     Sentry.setUser(null);
     return;
@@ -206,7 +236,7 @@ export function setSentryUser(user: { id: string; email?: string; role?: string 
     email: user.email,
     // Store role as a custom field so we can filter in Sentry UI
     ...(user.role !== undefined ? { role: user.role } : {}),
-  } as Sentry.User);
+  });
 }
 
 // ============================================================================
@@ -216,11 +246,37 @@ export function setSentryUser(user: { id: string; email?: string; role?: string 
 /**
  * Sentry ErrorBoundary wrapper component.
  * Re-exported for convenience so consumers don't need to import @sentry/react directly.
+ * Returns a passthrough component when Sentry is not loaded.
+ *
+ * Checks the Sentry reference lazily at render-time so that if the dynamic
+ * import in `initSentry()` resolved after module evaluation, the real
+ * ErrorBoundary will be used.
  */
-export const SentryErrorBoundary = Sentry.ErrorBoundary;
+export function SentryErrorBoundary({
+  children,
+  fallback,
+}: {
+  children?: ReactNode;
+  fallback?: ReactNode;
+}): ReactNode {
+  if (Sentry !== null && Sentry.ErrorBoundary != null) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const Boundary = Sentry.ErrorBoundary as any;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    return Boundary({ children, fallback }) as ReactNode;
+  }
+  return children;
+}
 
 /**
  * HOC that wraps a component with Sentry profiling.
- * Re-exported for convenience.
+ * Re-exported for convenience. Returns the component unchanged when Sentry is not loaded.
  */
-export const withSentryProfiler = Sentry.withProfiler;
+export const withSentryProfiler = <P extends Record<string, unknown>>(
+  component: ComponentType<P>,
+): ComponentType<P> => {
+  if (Sentry !== null && typeof Sentry.withProfiler === 'function') {
+    return Sentry.withProfiler(component) as ComponentType<P>;
+  }
+  return component;
+};

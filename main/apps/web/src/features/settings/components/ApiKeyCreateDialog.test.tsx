@@ -53,8 +53,10 @@ describe('ApiKeyCreateDialog', () => {
     vi.mocked(useCreateApiKey).mockReturnValue({
       createKey: vi.fn(),
       isLoading: false,
+      isSuccess: false,
       isError: false,
       error: null,
+      data: null,
       reset: vi.fn(),
     });
   });
@@ -92,8 +94,10 @@ describe('ApiKeyCreateDialog', () => {
     vi.mocked(useCreateApiKey).mockReturnValue({
       createKey: mockCreateKey,
       isLoading: false,
+      isSuccess: false,
       isError: false,
       error: null,
+      data: null,
       reset: vi.fn(),
     });
 
@@ -109,17 +113,34 @@ describe('ApiKeyCreateDialog', () => {
   });
 
   it('should show copy-once modal after successful key creation', async () => {
-    let onSuccessCallback: ((response: { plaintext: string }) => void) | undefined;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let onSuccessCallback: ((response: any) => void) | undefined;
 
     vi.mocked(useCreateApiKey).mockImplementation((options) => {
       onSuccessCallback = options?.onSuccess;
       return {
         createKey: vi.fn().mockImplementation(() => {
-          onSuccessCallback?.({ plaintext: 'bslt_test_abc123' });
+          onSuccessCallback?.({
+            plaintext: 'bslt_test_abc123',
+            apiKey: {
+              id: 'key-1',
+              tenantId: null,
+              userId: 'user-1',
+              name: 'Test Key',
+              keyPrefix: 'bslt_test',
+              scopes: ['read'],
+              lastUsedAt: null,
+              expiresAt: null,
+              revokedAt: null,
+              createdAt: new Date().toISOString(),
+            },
+          });
         }),
         isLoading: false,
+        isSuccess: false,
         isError: false,
         error: null,
+        data: null,
         reset: vi.fn(),
       };
     });
@@ -141,8 +162,10 @@ describe('ApiKeyCreateDialog', () => {
     vi.mocked(useCreateApiKey).mockReturnValue({
       createKey: vi.fn(),
       isLoading: false,
+      isSuccess: false,
       isError: true,
       error: new Error('Rate limit exceeded'),
+      data: null,
       reset: vi.fn(),
     });
 
@@ -154,8 +177,10 @@ describe('ApiKeyCreateDialog', () => {
     vi.mocked(useCreateApiKey).mockReturnValue({
       createKey: vi.fn(),
       isLoading: true,
+      isSuccess: false,
       isError: false,
       error: null,
+      data: null,
       reset: vi.fn(),
     });
 

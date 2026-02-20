@@ -7,11 +7,10 @@
  * Requires admin role (enforced by route definitions).
  */
 
-import { getMetricsCollector, type MetricsSummary } from '../../../system/src';
+import { getMetricsCollector, type MetricsSummary, HttpReply, HttpRequest  } from '../../../system/src';
 import { ERROR_MESSAGES } from '../auth';
 
 import type { AdminAppContext } from './types';
-import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
 // Response Types
@@ -46,8 +45,8 @@ interface MetricsResponse {
 export async function handleGetMetrics(
   ctx: AdminAppContext,
   _body: undefined,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<{ status: number; body: MetricsResponse | { message: string } }> {
   const user = (request as { user?: { userId: string; role: string } }).user;
   if (user === undefined) {

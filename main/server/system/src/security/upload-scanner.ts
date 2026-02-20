@@ -521,7 +521,7 @@ export class UploadScanner {
             safe: false,
             reason: pluginResult.reason ?? `Rejected by ${plugin.name}`,
             source: plugin.name,
-            metadata: pluginResult.metadata,
+            ...(pluginResult.metadata !== undefined ? { metadata: pluginResult.metadata } : {}),
           };
           this.config.onRejected?.(file, result);
           return result;

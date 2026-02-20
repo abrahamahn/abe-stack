@@ -28,7 +28,7 @@ import '@bslt/ui/styles/elements.css';
 // Sentry Initialization (before anything else)
 // ============================================================================
 
-initSentry();
+void initSentry();
 
 // ============================================================================
 // Service Creation (module level, before React renders)

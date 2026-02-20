@@ -459,7 +459,7 @@ export function createIpBlocklistMiddleware(
     const ip = request.ip;
 
     // Allow per-route policy override via route config
-    const routeConfig = request.routeOptions.config as Record<string, unknown>;
+    const routeConfig = request.routeOptions.config as unknown as Record<string, unknown>;
     const policy = (routeConfig['ipPolicy'] as IpPolicyLevel | undefined) ?? routePolicy;
 
     const reason = await blocklist.check(ip, policy);

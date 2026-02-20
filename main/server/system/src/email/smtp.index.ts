@@ -1,4 +1,4 @@
-// main/server/system/src/mailer/smtp.index.ts
+// main/server/system/src/email/smtp.index.ts
 /**
  * SMTP Client Barrel
  *

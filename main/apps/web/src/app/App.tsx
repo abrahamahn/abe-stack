@@ -305,7 +305,7 @@ export const App = ({ environment }: AppProps): ReactElement => {
   } = useTosAcceptance(environment);
 
   return (
-    <SentryErrorBoundary fallback={<ErrorBoundary />}>
+    <SentryErrorBoundary fallback={<ErrorBoundary>{null}</ErrorBoundary>}>
       <ErrorBoundary>
         <QueryCacheProvider cache={environment.queryCache}>
           <ThemeProvider>

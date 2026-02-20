@@ -14,8 +14,8 @@
  * @module router
  */
 
-import { HTTP_STATUS } from '@bslt/shared/system';
 import { registerRoute } from '@bslt/server-system';
+import { HTTP_STATUS } from '@bslt/shared/system';
 
 import type {
   HandlerContext,
