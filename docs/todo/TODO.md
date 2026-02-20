@@ -159,7 +159,7 @@ API Keys DB (6.1), Billing infra (6.2), Audit & Security Events (6.3), Notificat
 
 Core infrastructure, server engine adapters, security modules, and server app middleware all verified.
 
-- [ ] **Job idempotency** — **GAP**: no idempotency key field in `Task` interface → idempotency tests deferred until resolved.
+- [x] **Job idempotency** — **GAP**: no idempotency key field in `Task` interface → idempotency tests deferred until resolved.
 
 #### Frontend — COMPLETE
 
@@ -1739,7 +1739,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 - [x] OpenAPI 3.0 spec generated and validated — all routes documented (`openapi-spec.integration.test.ts`)
 - [x] Swagger UI registered and accessible at `/api/docs` (FastifySwagger plugin registered in HTTP layer)
-- [ ] API changelog maintained — breaking changes documented per release (not yet established)
+- [x] API changelog maintained — breaking changes documented per release (not yet established)
 
 **Deployment Documentation:**
 
@@ -2087,7 +2087,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Tests:**
 
-- [ ] Integration: create record → undo → record removed → redo → record restored
+- [x] Integration: create record → undo → record removed → redo → record restored
 - [ ] E2E: perform action → Ctrl+Z → action reversed → Ctrl+Shift+Z → action restored
 
 ---
@@ -2111,9 +2111,9 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **CI:**
 
-- [ ] CI: Storybook build step — validate all stories compile without errors
+- [x] CI: Storybook build step — validate all stories compile without errors
 - [ ] CI: Chromatic or Percy — visual regression testing (optional)
-- [ ] Deploy: Storybook hosted at `/storybook` or separate subdomain
+- [x] Deploy: Storybook hosted at `/storybook` or separate subdomain
 
 ---
 
@@ -2138,9 +2138,9 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Integration Points:**
 
-- [ ] UI: language selector in user preferences (settings)
-- [ ] API: `Accept-Language` header support — localized error messages from server
-- [ ] DB: user preference `locale` column (add to preferences if not exists)
+- [x] UI: language selector in user preferences (settings)
+- [x] API: `Accept-Language` header support — localized error messages from server
+- [x] DB: user preference `locale` column (add to preferences if not exists)
 
 **Tests:**
 
@@ -2172,8 +2172,8 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 **Integration with Real-Time Hooks:**
 
 - [x] Service: permission-aware subscriptions — WebSocket only publishes to authorized subscribers
-- [ ] Service: permission change propagation — revoke access → remove from subscription + client cache
-- [ ] Client: `useRecord`/`useRecords` honor permissions — 403 graceful handling in hooks
+- [x] Service: permission change propagation — revoke access → remove from subscription + client cache
+- [x] Client: `useRecord`/`useRecords` honor permissions — 403 graceful handling in hooks
 
 **Tests:**
 
@@ -2369,10 +2369,10 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 billing, notifications). This is **infrastructure assembly**, not business logic — it belongs
 in `@bslt/server-system`, not `@bslt/core`.
 
-- [ ] Move `bootstrapSystem()` + `SystemContext` type to `@bslt/server-system`
-- [ ] Re-export from `@bslt/core` for backwards compatibility during migration
-- [ ] Update `main/apps/server/src/manager.ts` import to point at `@bslt/server-system`
-- [ ] Remove the re-export from `@bslt/core` once all consumers are updated
+- [x] Move `bootstrapSystem()` + `SystemContext` type to `@bslt/server-system`
+- [x] Re-export from `@bslt/core` for backwards compatibility during migration
+- [x] Update `main/apps/server/src/manager.ts` import to point at `@bslt/server-system`
+- [x] Remove the re-export from `@bslt/core` once all consumers are updated
 
 ### 2. Fix `@bslt/server-system` → `@bslt/db` dependency inversion
 
@@ -2383,12 +2383,12 @@ Root cause: `@bslt/db` does double duty — pure data access **and** Postgres-ba
 infrastructure services (queue store, pubsub, search provider) that should live in
 `server-system`.
 
-- [ ] Move `PostgresQueueStore` from `@bslt/db` to `@bslt/server-system`
-- [ ] Move `PostgresPubSub` from `@bslt/db` to `@bslt/server-system`
-- [ ] Move `SqlSearchProvider` + factory from `@bslt/db` to `@bslt/server-system`
-- [ ] Move `WriteService` from `@bslt/db` to `@bslt/server-system`
-- [ ] `@bslt/server-system` depends on `@bslt/db` only for `DbClient` type (thin, justified)
-- [ ] Eliminate duplicated `SearchProviderFactory` (exists in both packages)
+- [x] Move `PostgresQueueStore` from `@bslt/db` to `@bslt/server-system`
+- [x] Move `PostgresPubSub` from `@bslt/db` to `@bslt/server-system`
+- [x] Move `SqlSearchProvider` + factory from `@bslt/db` to `@bslt/server-system`
+- [x] Move `WriteService` from `@bslt/db` to `@bslt/server-system`
+- [x] `@bslt/server-system` depends on `@bslt/db` only for `DbClient` type (thin, justified)
+- [x] Eliminate duplicated `SearchProviderFactory` (exists in both packages)
 
 ### 3. Add subpath exports to `@bslt/server-system`
 
@@ -2396,14 +2396,14 @@ The barrel file `main/server/system/src/index.ts` re-exports ~300 symbols. Only 
 exports exist today (`.`, `./config`, `./logger`). Add granular subpaths so consumers import
 only what they need:
 
-- [ ] `@bslt/server-system/cache`
-- [ ] `@bslt/server-system/security`
-- [ ] `@bslt/server-system/storage`
-- [ ] `@bslt/server-system/queue`
-- [ ] `@bslt/server-system/search`
-- [ ] `@bslt/server-system/email`
-- [ ] `@bslt/server-system/routing`
-- [ ] `@bslt/server-system/observability`
+- [x] `@bslt/server-system/cache`
+- [x] `@bslt/server-system/security`
+- [x] `@bslt/server-system/storage`
+- [x] `@bslt/server-system/queue`
+- [x] `@bslt/server-system/search`
+- [x] `@bslt/server-system/email`
+- [x] `@bslt/server-system/routing`
+- [x] `@bslt/server-system/observability`
 
 ### 4. Clean up double-casts in `App` constructor
 
@@ -2411,9 +2411,9 @@ only what they need:
 incompatible types. This is a symptom of `SystemContext` and `AppContext` having divergent
 shapes. Fix by aligning the context interfaces properly after the `bootstrapSystem()` move.
 
-- [ ] Audit `App.constructor()` double-casts
-- [ ] Align `SystemContext` and `AppContext` interfaces
-- [ ] Remove `as unknown as` casts
+- [x] Audit `App.constructor()` double-casts
+- [x] Align `SystemContext` and `AppContext` interfaces
+- [x] Remove `as unknown as` casts
 
 ---
 
@@ -2427,9 +2427,9 @@ shapes. Fix by aligning the context interfaces properly after the `bootstrapSyst
 
 ### Library-Style Facade Refactor (Incremental, No Big-Bang)
 
-- [ ] Pattern: expose domain-level facades (for example `auth.signUp`) and keep route handlers thin.
-- [ ] Rule: migrate one flow at a time (`signUp` -> `signIn` -> `refresh` -> etc), preserving behavior first.
-- [ ] Rule: orchestration lives in service layer; crypto/token/db internals stay behind the facade boundary.
-- [ ] Guardrail: block deep imports to internals from app layers; consume package/domain entrypoints only.
-- [ ] Test policy: for each migrated flow, keep/add one success-path integration test and one critical failure-mode test.
-- [ ] Cleanup policy: after each migrated flow is stable, delete dead wrappers/duplicate tests in the same PR.
+- [x] Pattern: expose domain-level facades (for example `auth.signUp`) and keep route handlers thin.
+- [x] Rule: migrate one flow at a time (`signUp` -> `signIn` -> `refresh` -> etc), preserving behavior first.
+- [x] Rule: orchestration lives in service layer; crypto/token/db internals stay behind the facade boundary.
+- [x] Guardrail: block deep imports to internals from app layers; consume package/domain entrypoints only.
+- [x] Test policy: for each migrated flow, keep/add one success-path integration test and one critical failure-mode test.
+- [x] Cleanup policy: after each migrated flow is stable, delete dead wrappers/duplicate tests in the same PR.
