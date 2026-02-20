@@ -1940,36 +1940,36 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Backend — WebAuthn Registration + Authentication:**
 
-- [ ] Schema: `webauthn_credentials` table — `id`, `user_id`, `credential_id`, `public_key`, `counter`, `transports`, `device_type`, `backed_up`, `name`, `created_at`, `last_used_at`
-- [ ] Migration: `0024_webauthn_credentials.sql`
-- [ ] Repository: `webauthn_credentials` CRUD — create, findByUserId, findByCredentialId, updateCounter, delete
-- [ ] Service: `core/auth/webauthn/service.ts` — registration challenge, registration verification, authentication challenge, authentication verification
-- [ ] Service: use `@simplewebauthn/server` (or manual CBOR/COSE if preferred) for attestation/assertion
-- [ ] Config: `auth.webauthn` section — `rpName`, `rpId`, `origin`, `attestation` preference
+- [x] Schema: `webauthn_credentials` table — `id`, `user_id`, `credential_id`, `public_key`, `counter`, `transports`, `device_type`, `backed_up`, `name`, `created_at`, `last_used_at`
+- [x] Migration: `0024_webauthn_credentials.sql`
+- [x] Repository: `webauthn_credentials` CRUD — create, findByUserId, findByCredentialId, updateCounter, delete
+- [x] Service: `core/auth/webauthn/service.ts` — registration challenge, registration verification, authentication challenge, authentication verification
+- [x] Service: use `@simplewebauthn/server` (or manual CBOR/COSE if preferred) for attestation/assertion
+- [x] Config: `auth.webauthn` section — `rpName`, `rpId`, `origin`, `attestation` preference
 
 **Routes:**
 
-- [ ] Route: `POST /api/auth/webauthn/register/options` — generate registration challenge (protected)
-- [ ] Route: `POST /api/auth/webauthn/register/verify` — verify attestation, store credential (protected)
-- [ ] Route: `POST /api/auth/webauthn/login/options` — generate authentication challenge (public)
-- [ ] Route: `POST /api/auth/webauthn/login/verify` — verify assertion, issue tokens (public)
-- [ ] Route: `GET /api/users/me/passkeys` — list registered passkeys (protected)
-- [ ] Route: `PATCH /api/users/me/passkeys/:id` — rename passkey (protected)
-- [ ] Route: `DELETE /api/users/me/passkeys/:id` — delete passkey (protected, requires sudo)
+- [x] Route: `POST /api/auth/webauthn/register/options` — generate registration challenge (protected)
+- [x] Route: `POST /api/auth/webauthn/register/verify` — verify attestation, store credential (protected)
+- [x] Route: `POST /api/auth/webauthn/login/options` — generate authentication challenge (public)
+- [x] Route: `POST /api/auth/webauthn/login/verify` — verify assertion, issue tokens (public)
+- [x] Route: `GET /api/users/me/passkeys` — list registered passkeys (protected)
+- [x] Route: `PATCH /api/users/me/passkeys/:id` — rename passkey (protected)
+- [x] Route: `DELETE /api/users/me/passkeys/:id` — delete passkey (protected, requires sudo)
 
 **Client + UI:**
 
-- [ ] Client API: `auth/webauthn/client.ts` + `hooks.ts` — registration, login, management hooks
-- [ ] UI: Passkey registration flow — "Add Passkey" button in Security settings → browser prompt → success
-- [ ] UI: Passkey management list — name, device type, last used, rename/delete actions
-- [ ] UI: Passkey login option on login page — "Sign in with Passkey" button → browser prompt → dashboard
-- [ ] UI: conditional UI — show passkey option only when `PublicKeyCredential` is available in browser
+- [x] Client API: `auth/webauthn/client.ts` + `hooks.ts` — registration, login, management hooks
+- [x] UI: Passkey registration flow — "Add Passkey" button in Security settings → browser prompt → success
+- [x] UI: Passkey management list — name, device type, last used, rename/delete actions
+- [x] UI: Passkey login option on login page — "Sign in with Passkey" button → browser prompt → dashboard
+- [x] UI: conditional UI — show passkey option only when `PublicKeyCredential` is available in browser
 
 **Tests:**
 
-- [ ] Unit: challenge generation, attestation verification mock, assertion verification mock, counter validation
-- [ ] Integration: register passkey → use to authenticate → verify session created; delete passkey → can't login with it
-- [ ] E2E: settings → register passkey → see in list → login with passkey → dashboard (WebAuthn mock in Playwright)
+- [x] Unit: challenge generation, attestation verification mock, assertion verification mock, counter validation
+- [x] Integration: register passkey → use to authenticate → verify session created; delete passkey → can't login with it
+- [x] E2E: settings → register passkey → see in list → login with passkey → dashboard (WebAuthn mock in Playwright)
 
 ---
 
@@ -2099,15 +2099,15 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Configuration:**
 
-- [ ] Config: Storybook 8+ setup — `main.ts`, `preview.ts`, Vite builder
-- [ ] Config: viewport presets — mobile, tablet, desktop
-- [ ] Config: accessibility addon — a11y checks in every story
+- [x] Config: Storybook 8+ setup — `main.ts`, `preview.ts`, Vite builder
+- [x] Config: viewport presets — mobile, tablet, desktop
+- [x] Config: accessibility addon — a11y checks in every story
 
 **Stories:**
 
-- [ ] Stories: layouts — AuthLayout, Container, Modal, AppShell, ResizablePanel, SidePeek
-- [ ] Stories: patterns — forms, navigation, data tables, loading states, error states, empty states
-- [ ] Stories: billing — PlanCard, PricingTable, InvoiceRow, SubscriptionStatus
+- [x] Stories: layouts — AuthLayout, Container, Modal, AppShell, ResizablePanel, SidePeek
+- [x] Stories: patterns — forms, navigation, data tables, loading states, error states, empty states
+- [x] Stories: billing — PlanCard, PricingTable, InvoiceRow, SubscriptionStatus
 
 **CI:**
 
@@ -2124,17 +2124,17 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Foundation:**
 
-- [ ] Service: i18n framework setup — `react-intl`, `react-i18next`, or lightweight custom solution
-- [ ] Service: message extraction — extract all user-facing strings to locale files
-- [ ] Config: default locale (`en-US`), fallback behavior
-- [ ] Config: locale detection — browser preference → user preference → default
+- [x] Service: i18n framework setup — `react-intl`, `react-i18next`, or lightweight custom solution
+- [x] Service: message extraction — extract all user-facing strings to locale files
+- [x] Config: default locale (`en-US`), fallback behavior
+- [x] Config: locale detection — browser preference → user preference → default
 
 **Infrastructure:**
 
-- [ ] Service: locale files structure — `locales/en-US.json`, `locales/es.json`, etc.
-- [ ] Service: lazy-load locale files — only load active locale, not all
-- [ ] Service: date/time/number formatting — use `Intl` APIs with user's locale
-- [ ] Service: pluralization rules — handle singular/plural/zero forms
+- [x] Service: locale files structure — `locales/en-US.json`, `locales/es.json`, etc.
+- [x] Service: lazy-load locale files — only load active locale, not all
+- [x] Service: date/time/number formatting — use `Intl` APIs with user's locale
+- [x] Service: pluralization rules — handle singular/plural/zero forms
 
 **Integration Points:**
 
@@ -2144,7 +2144,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Tests:**
 
-- [ ] Unit: string interpolation, pluralization, date formatting per locale
+- [x] Unit: string interpolation, pluralization, date formatting per locale
 - [ ] Integration: set locale preference → API returns localized messages
 - [ ] E2E: switch language → UI text updates → refresh → preference persisted
 
@@ -2158,26 +2158,26 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Row-Level Validation:**
 
-- [ ] Service: row-level read validation — filter records by user's permission set before returning
-- [ ] Service: row-level write validation — reject writes to records user cannot modify
-- [ ] Service: permission records loading — preload user's permissions on connection/auth
+- [x] Service: row-level read validation — filter records by user's permission set before returning
+- [x] Service: row-level write validation — reject writes to records user cannot modify
+- [x] Service: permission records loading — preload user's permissions on connection/auth
 
 **Permission Patterns:**
 
-- [ ] Service: workspace permission pattern — workspace members see workspace records
-- [ ] Service: board/project permission pattern — per-board access control (viewer, editor, admin)
-- [ ] Service: task/record ownership pattern — owner + shared-with permissions
-- [ ] Service: permission inheritance — workspace admin overrides board-level restrictions
+- [x] Service: workspace permission pattern — workspace members see workspace records
+- [x] Service: board/project permission pattern — per-board access control (viewer, editor, admin)
+- [x] Service: task/record ownership pattern — owner + shared-with permissions
+- [x] Service: permission inheritance — workspace admin overrides board-level restrictions
 
 **Integration with Real-Time Hooks:**
 
-- [ ] Service: permission-aware subscriptions — WebSocket only publishes to authorized subscribers
+- [x] Service: permission-aware subscriptions — WebSocket only publishes to authorized subscribers
 - [ ] Service: permission change propagation — revoke access → remove from subscription + client cache
 - [ ] Client: `useRecord`/`useRecords` honor permissions — 403 graceful handling in hooks
 
 **Tests:**
 
-- [ ] Unit: permission evaluation for read/write across ownership/role/share patterns
+- [x] Unit: permission evaluation for read/write across ownership/role/share patterns
 - [ ] Integration: user A writes record → user B (no permission) does not receive update
 - [ ] Integration: permission revoked → user stops receiving updates immediately
 - [ ] E2E: share record with teammate → teammate sees it; revoke → teammate loses access
