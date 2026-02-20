@@ -1762,7 +1762,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 - [x] `pnpm audit` clean (zero critical/high)
 - [ ] OWASP Top 10 verified (SQL injection, XSS, CSRF, auth bypass, IDOR)
 - [ ] Rate limiting verified under simulated attack
-- [ ] No secrets in codebase (`git log` scan for env vars, API keys, passwords)
+- [x] No secrets in codebase (`git log` scan for env vars, API keys, passwords)
 
 **Operational Readiness:**
 
