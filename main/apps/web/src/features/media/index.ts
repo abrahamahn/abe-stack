@@ -28,8 +28,8 @@ export type {
 
 // Components
 export { MediaGallery, MediaStatusIndicator, MediaUpload } from './components';
-export type {
-  MediaGalleryProps,
-  MediaStatusIndicatorProps,
-  MediaUploadProps,
-} from './components';
+export type { MediaGalleryProps, MediaStatusIndicatorProps, MediaUploadProps } from './components';
+
+// Pages
+export { MediaLibraryPage } from './pages';
+export type { MediaLibraryPageProps } from './pages';

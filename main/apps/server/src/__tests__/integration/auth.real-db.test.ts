@@ -18,6 +18,8 @@ import type { AuthGuardFactory } from '@/http';
 
 import { registerRouteMap } from '@/http';
 
+import { registerRouteMap } from '@/http';
+
 describe.skip('Auth API Integration (Real DB)', () => {
   let testServer: TestServer;
   let dbHarness: DbHarness;

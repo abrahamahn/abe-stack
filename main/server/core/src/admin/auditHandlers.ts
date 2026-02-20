@@ -36,7 +36,7 @@ export async function handleListAuditEvents(
   }
 
   try {
-    const query = (request.query ?? {}) as Record<string, string | undefined>;
+    const query = request.query as Record<string, string | undefined>;
     const parsedLimit = Number(query['limit']);
     const requestedLimit = Number.isFinite(parsedLimit) ? parsedLimit : 100;
     const limit = Math.min(requestedLimit, 500);

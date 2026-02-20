@@ -46,18 +46,29 @@ export { UndoRedoToolbar, type UndoRedoToolbarProps } from './UndoRedoToolbar';
 export { UndoHistoryPanel, type UndoHistoryPanelProps } from './UndoHistoryPanel';
 export { PeekLink, type PeekLinkProps } from './PeekLink';
 
+// Media components
+export { MediaGallery, type MediaGalleryItem, type MediaGalleryProps } from './media';
+
 // Billing components
 export {
   InvoiceList,
   InvoiceRow,
   PaymentMethodCard,
   PlanCard,
+  PlanChangeDialog,
   PricingTable,
   SubscriptionStatus,
+  UsageBar,
+  UsageSummary,
+  buildDefaultUsageMetrics,
   type InvoiceListProps,
   type InvoiceRowProps,
   type PaymentMethodCardProps,
   type PlanCardProps,
+  type PlanChangeDialogProps,
   type PricingTableProps,
   type SubscriptionStatusProps,
+  type UsageBarProps,
+  type UsageMetric,
+  type UsageSummaryProps,
 } from './billing';

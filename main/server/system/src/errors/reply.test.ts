@@ -24,8 +24,8 @@ import { describe, expect, test, vi, type Mock } from 'vitest';
 
 import { replyError, replyOk, sendResult } from './reply';
 
-import type { AppError } from '@bslt/shared';
 import type { HttpReply, HttpRequest } from '../routing/http.types';
+import type { AppError } from '@bslt/shared';
 
 // ============================================================================
 // Helpers

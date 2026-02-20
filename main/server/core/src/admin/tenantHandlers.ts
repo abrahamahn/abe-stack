@@ -22,8 +22,8 @@ import type {
   TenantSuspendResult,
 } from './tenantService';
 import type { AdminAppContext } from './types';
-import type { AdminSuspendTenantRequest } from '@bslt/shared';
 import type { HttpReply, HttpRequest } from '../../../system/src';
+import type { AdminSuspendTenantRequest } from '@bslt/shared';
 
 const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));
@@ -47,7 +47,7 @@ export async function handleListAllTenants(
   }
 
   try {
-    const query = (request.query ?? {}) as Record<string, unknown>;
+    const query = request.query as Record<string, unknown>;
 
     const limit =
       query['limit'] !== undefined && query['limit'] !== null ? Number(query['limit']) : 20;

@@ -10,7 +10,7 @@ import { ERROR_MESSAGES } from '../auth';
 
 import type { AdminAppContext } from './types';
 import type { Repositories } from '../../../db/src';
-import type { HttpReply, HttpRequest } from '../../../system/src';
+import type { HttpReply, HttpRequest } from '@bslt/server-system';
 
 type AdminWebhook = {
   id: string;

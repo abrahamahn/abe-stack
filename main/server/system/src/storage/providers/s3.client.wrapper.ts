@@ -1,4 +1,4 @@
-// main/server/system/src/storage/providers/s3-client-wrapper.ts
+// main/server/system/src/storage/providers/s3.client.wrapper.ts
 /**
  * S3 Client Wrapper
  *

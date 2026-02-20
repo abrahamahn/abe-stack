@@ -1,4 +1,4 @@
-// main/server/system/src/mailer/templates/index.ts
+// main/server/system/src/email/templates/index.ts
 /**
  * Email Templates Barrel
  *

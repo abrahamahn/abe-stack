@@ -78,7 +78,18 @@ export {
 } from './billing.admin.schemas';
 
 // --- billing.logic ---
-export { calculateProration, PLAN_FEES, type BillingStats } from './billing.logic';
+export {
+  calculateProration,
+  canChangePlan,
+  getEntitlements,
+  getFeatureValue,
+  getLimitUsagePercentage,
+  isOverLimit,
+  isSubscriptionActive,
+  PLAN_FEES,
+  type BillingStats,
+  type Entitlements,
+} from './billing.logic';
 
 // --- billing.display ---
 export {

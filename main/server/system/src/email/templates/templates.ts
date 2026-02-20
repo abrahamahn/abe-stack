@@ -1,9 +1,18 @@
-// main/server/system/src/mailer/templates/templates.ts
+// main/server/system/src/email/templates/templates.ts
 /**
  * Email Templates
  *
  * Pre-built email templates for common use cases.
- * Uses shared styles and a layout helper to maintain consistency.
+ * Uses a responsive base layout with header/footer branding.
+ *
+ * Layout structure:
+ * - Outer wrapper table (background color, centering)
+ * - Inner content table (max-width 600px, white background)
+ * - Header with product branding
+ * - Content section (template-specific)
+ * - Footer with company info and optional unsubscribe
+ *
+ * All styles are inline for maximum email client compatibility.
  */
 
 import type { EmailOptions } from '../types';
@@ -26,19 +35,117 @@ const styles = {
 } as const;
 
 // ============================================================================
-// Layout Helper
+// Responsive Base Layout
 // ============================================================================
 
-function renderLayout(title: string, content: string): string {
+/**
+ * Render a responsive HTML email layout with header and footer branding.
+ *
+ * Uses table-based layout for maximum email client compatibility
+ * (Outlook, Gmail, Yahoo, Apple Mail, etc.).
+ *
+ * @param title - Email title (used in `<title>` and preheader)
+ * @param content - Inner HTML content for the email body
+ * @param options - Optional footer customization
+ * @returns Complete HTML email string
+ * @complexity O(1)
+ */
+function renderLayout(
+  title: string,
+  content: string,
+  options?: { unsubscribeUrl?: string },
+): string {
+  const unsubscribeLink =
+    options?.unsubscribeUrl !== undefined && options.unsubscribeUrl !== ''
+      ? `<a href="${options.unsubscribeUrl}" style="color: #9ca3af; text-decoration: underline;">Unsubscribe</a>`
+      : '';
+
+  const footerSeparator = unsubscribeLink !== '' ? ' &middot; ' : '';
+
   return `
 <!DOCTYPE html>
-<html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="x-apple-disable-message-reformatting">
   <title>${title}</title>
+  <!--[if mso]>
+  <noscript>
+    <xml>
+      <o:OfficeDocumentSettings>
+        <o:PixelsPerInch>96</o:PixelsPerInch>
+      </o:OfficeDocumentSettings>
+    </xml>
+  </noscript>
+  <![endif]-->
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 0; width: 100% !important; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table { border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { border: 0; display: block; outline: none; text-decoration: none; -ms-interpolation-mode: bicubic; }
+    @media only screen and (max-width: 620px) {
+      .email-container { width: 100% !important; max-width: 100% !important; }
+      .email-content { padding: 24px 16px !important; }
+    }
+  </style>
 </head>
-<body style="${styles.body}">
-  ${content}
+<body style="margin: 0; padding: 0; background-color: #f4f5f7; -webkit-font-smoothing: antialiased;">
+  <!-- Preheader text (hidden, shows in inbox preview) -->
+  <div style="display: none; max-height: 0px; overflow: hidden;">${title}</div>
+  <div style="display: none; max-height: 0px; overflow: hidden;">&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;</div>
+
+  <!-- Outer wrapper -->
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f4f5f7;">
+    <tr>
+      <td align="center" style="padding: 24px 12px;">
+
+        <!-- Email container -->
+        <table role="presentation" class="email-container" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+
+          <!-- Header -->
+          <tr>
+            <td style="padding: 28px 40px 20px 40px; border-bottom: 1px solid #e5e7eb;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 20px; font-weight: 700; color: #111827; letter-spacing: -0.025em;">
+                    Abe Stack
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Content -->
+          <tr>
+            <td class="email-content" style="padding: 32px 40px;">
+              ${content}
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 20px 40px 28px 40px; border-top: 1px solid #e5e7eb;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 12px; color: #9ca3af; line-height: 1.6; text-align: center;">
+                    &copy; ${String(new Date().getFullYear())} Abe Stack. All rights reserved.${footerSeparator}${unsubscribeLink}
+                    <br>
+                    <span style="color: #d1d5db;">This is an automated message. Please do not reply directly.</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+        </table>
+        <!-- /Email container -->
+
+      </td>
+    </tr>
+  </table>
+  <!-- /Outer wrapper -->
 </body>
 </html>
   `.trim();
@@ -71,13 +178,19 @@ If you did not request this, please ignore this email.
         'Reset Your Password',
         `
         <h2 style="${styles.heading}">Reset Your Password</h2>
-        <p style="${styles.text}">You requested to reset your password.</p>
-        <p>
-          <a href="${resetUrl}" style="${styles.button}">
-            Reset Password
-          </a>
-        </p>
+        <p style="${styles.text}">You requested to reset your password. Click the button below to choose a new one.</p>
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin: 24px 0;">
+          <tr>
+            <td align="center" style="border-radius: 6px; background-color: #0066cc;">
+              <a href="${resetUrl}" target="_blank" style="${styles.button}">
+                Reset Password
+              </a>
+            </td>
+          </tr>
+        </table>
         <p style="${styles.subtext}">This link will expire in ${expiry} minutes.</p>
+        <p style="${styles.text}; font-size: 14px;">If you can't click the button, copy and paste this URL into your browser:</p>
+        <p style="color: #6b7280; font-size: 13px; word-break: break-all;">${resetUrl}</p>
         <p style="${styles.footer}">If you did not request this, please ignore this email.</p>
         `,
       ),
@@ -105,11 +218,15 @@ If you did not request this, please ignore this email.
         `
         <h2 style="${styles.heading}">Sign in to your account</h2>
         <p style="${styles.text}">Click the button below to sign in:</p>
-        <p>
-          <a href="${loginUrl}" style="${styles.button}">
-            Sign In
-          </a>
-        </p>
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin: 24px 0;">
+          <tr>
+            <td align="center" style="border-radius: 6px; background-color: #0066cc;">
+              <a href="${loginUrl}" target="_blank" style="${styles.button}">
+                Sign In
+              </a>
+            </td>
+          </tr>
+        </table>
         <p style="${styles.subtext}">This link will expire in ${expiry} minutes and can only be used once.</p>
         <p style="${styles.footer}">If you did not request this, please ignore this email.</p>
         `,
@@ -140,12 +257,18 @@ If you did not create an account, please ignore this email.
         `
         <h2 style="${styles.heading}">Verify Your Email Address</h2>
         <p style="${styles.text}">Welcome! Please verify your email address to complete your registration.</p>
-        <p>
-          <a href="${verifyUrl}" style="${styles.buttonSuccess}">
-            Verify Email
-          </a>
-        </p>
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin: 24px 0;">
+          <tr>
+            <td align="center" style="border-radius: 6px; background-color: #16a34a;">
+              <a href="${verifyUrl}" target="_blank" style="${styles.buttonSuccess}">
+                Verify Email
+              </a>
+            </td>
+          </tr>
+        </table>
         <p style="${styles.subtext}">This link will expire in ${expiry} minutes.</p>
+        <p style="${styles.text}; font-size: 14px;">If you can't click the button, copy and paste this URL into your browser:</p>
+        <p style="color: #6b7280; font-size: 13px; word-break: break-all;">${verifyUrl}</p>
         <p style="${styles.footer}">If you did not create an account, please ignore this email.</p>
         `,
       ),
@@ -517,21 +640,21 @@ If you have any questions, reply to this email. We're happy to help.
         <h2 style="${styles.heading}">Welcome to BSLT!</h2>
         <p style="${styles.text}">Hi <strong>${firstName}</strong>, your email has been verified and your account is ready to go.</p>
         <p style="${styles.text}">BSLT gives you a complete, production-ready foundation for building modern applications &mdash; authentication, billing, notifications, and more, all out of the box.</p>
-        <p>
-          <a href="${loginUrl}" style="${styles.buttonSuccess}">
-            Get Started
-          </a>
-        </p>
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin: 24px 0;">
+          <tr>
+            <td align="center" style="border-radius: 6px; background-color: #16a34a;">
+              <a href="${loginUrl}" target="_blank" style="${styles.buttonSuccess}">
+                Get Started
+              </a>
+            </td>
+          </tr>
+        </table>
         <p style="${styles.footer}">If you have any questions, reply to this email. We're happy to help.</p>
         `,
       ),
     };
   },
 
-  /**
-   * Workspace invitation email
-   * Sent when a user is invited to join a workspace.
-   */
   /**
    * Generic security notification email
    * Used for: password changed from new device, 2FA disabled, new device login, etc.
@@ -565,17 +688,25 @@ ${actionUrl}
         </div>
 
         <p style="${styles.alert}">If you did not perform this action, please secure your account immediately:</p>
-        <p>
-          <a href="${actionUrl}" style="${styles.button}">
-            Secure My Account
-          </a>
-        </p>
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin: 24px 0;">
+          <tr>
+            <td align="center" style="border-radius: 6px; background-color: #0066cc;">
+              <a href="${actionUrl}" target="_blank" style="${styles.button}">
+                Secure My Account
+              </a>
+            </td>
+          </tr>
+        </table>
         <p style="${styles.footer}">If you need help, please contact our support team.</p>
         `,
       ),
     };
   },
 
+  /**
+   * Workspace invitation email
+   * Sent when a user is invited to join a workspace.
+   */
   workspaceInvitation(
     acceptUrl: string,
     workspaceName: string,
@@ -604,11 +735,15 @@ If you did not expect this invitation, you can safely ignore this email.
         `
         <h2 style="${styles.heading}">You've been invited to join ${workspaceName}</h2>
         <p style="${styles.text}"><strong>${inviterName}</strong> has invited you to join the <strong>${workspaceName}</strong> workspace as a <strong>${role}</strong>.</p>
-        <p>
-          <a href="${acceptUrl}" style="${styles.buttonSuccess}">
-            Accept Invitation
-          </a>
-        </p>
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin: 24px 0;">
+          <tr>
+            <td align="center" style="border-radius: 6px; background-color: #16a34a;">
+              <a href="${acceptUrl}" target="_blank" style="${styles.buttonSuccess}">
+                Accept Invitation
+              </a>
+            </td>
+          </tr>
+        </table>
         <p style="${styles.subtext}">This invitation will expire in ${expiry} days.</p>
         <p style="${styles.footer}">If you did not expect this invitation, you can safely ignore this email.</p>
         `,

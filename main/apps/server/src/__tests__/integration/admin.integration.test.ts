@@ -24,6 +24,8 @@ import type { RouteMap as DbRouteMap } from '@bslt/server-system';
 
 import { registerRouteMap } from '@/http';
 
+import { registerRouteMap } from '@/http';
+
 // ============================================================================
 // Mock Repositories
 // ============================================================================

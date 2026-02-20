@@ -91,7 +91,7 @@ describe('registerScheduledTasks', () => {
     registerScheduledTasks(repos, log);
 
     // Should log registration
-    expect(log.info).toHaveBeenCalledWith({ taskCount: 10 }, 'Scheduled tasks registered');
+    expect(log.info).toHaveBeenCalledWith({ taskCount: 12 }, 'Scheduled tasks registered');
   });
 
   it('should start executing tasks immediately', () => {
@@ -134,6 +134,6 @@ describe('stopScheduledTasks', () => {
     // Should be able to register again
     registerScheduledTasks(repos, log);
 
-    expect(log.info).toHaveBeenCalledWith({ taskCount: 10 }, 'Scheduled tasks registered');
+    expect(log.info).toHaveBeenCalledWith({ taskCount: 12 }, 'Scheduled tasks registered');
   });
 });

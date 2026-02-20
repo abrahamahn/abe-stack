@@ -10,14 +10,18 @@
 
 import { DAYS_PER_WEEK, MS_PER_DAY, MS_PER_HOUR, RETENTION_PERIODS } from '@bslt/shared';
 
+import { runRetentionCycle, type AuditRetentionConfig } from '../audit/retention';
 import { refreshExpiringOAuthTokens } from '../auth/oauth/refresh';
+import { createUsageSnapshot } from '../billing/usage-metering';
 import { expireStaleInvitations } from '../tenants/invitation-cleanup';
-import { hardDeleteAnonymizedUsers } from '../users/data-hygiene';
+import { cleanupUserFiles, hardDeleteAnonymizedUsers } from '../users/data-hygiene';
 
+import { anonymizeHardBannedUsers } from './hard-ban-anonymization';
 import { anonymizeDeletedUsers } from './pii-anonymization';
 
 import type { ScheduledTask, ScheduledTaskLogger, TaskTracker } from './types';
 import type { DbClient, QueueStore, Repositories } from '../../../db/src';
+import type { FileStorageProvider } from '../files/types';
 import type { AuthConfig } from '@bslt/shared/config';
 
 // ============================================================================
@@ -47,6 +51,22 @@ const activeTaskTrackers: TaskTracker[] = [];
 // ============================================================================
 
 /**
+ * Optional configuration for scheduled task registration.
+ */
+export interface ScheduledTaskOptions {
+  /** Database client (enables hard-delete task) */
+  db?: DbClient;
+  /** Queue store (enables completed-task cleanup) */
+  queueStore?: QueueStore;
+  /** Auth configuration (enables oauth-refresh task) */
+  config?: AuthConfig;
+  /** Storage provider for file cleanup and audit archiving */
+  storage?: FileStorageProvider;
+  /** Audit retention configuration (archive-before-delete, retention days) */
+  auditRetention?: AuditRetentionConfig;
+}
+
+/**
  * Register and start all scheduled cleanup tasks
  *
  * @param repos - Repository container
@@ -54,6 +74,8 @@ const activeTaskTrackers: TaskTracker[] = [];
  * @param db - Database client (optional, enables hard-delete task)
  * @param queueStore - Queue store (optional, enables completed-task cleanup)
  * @param config - Auth configuration (optional, enables oauth-refresh task)
+ * @param storage - Storage provider (optional, enables file cleanup and audit archiving)
+ * @param auditRetention - Audit retention config (optional, enables archive-before-delete)
  */
 export function registerScheduledTasks(
   repos: Repositories,
@@ -61,6 +83,8 @@ export function registerScheduledTasks(
   db?: DbClient,
   queueStore?: QueueStore,
   config?: AuthConfig,
+  storage?: FileStorageProvider,
+  auditRetention?: AuditRetentionConfig,
 ): void {
   // Clear any existing tasks (for hot reload in development)
   stopScheduledTasks();
@@ -108,6 +132,43 @@ export function registerScheduledTasks(
           }
         }
         return affected;
+      },
+    },
+
+    // Hourly job: Snapshot usage metrics for all tenants
+    {
+      name: 'usage-snapshot',
+      description: 'Create hourly snapshots of usage metrics for all tenants',
+      schedule: 'hourly',
+      execute: async (): Promise<number> => {
+        let snapshotCount = 0;
+        try {
+          const meteringRepos = {
+            usageMetrics: repos.usageMetrics,
+            usageSnapshots: repos.usageSnapshots,
+          };
+          // Collect unique tenant IDs from recent snapshots
+          const tenantIds = new Set<string>();
+          const allSnapshots = await repos.usageSnapshots.findByTenantId('', 100);
+          for (const s of allSnapshots) {
+            tenantIds.add(s.tenantId);
+          }
+          // Snapshot each tenant
+          for (const tenantId of tenantIds) {
+            try {
+              const snapshots = await createUsageSnapshot(meteringRepos, tenantId);
+              snapshotCount += snapshots.length;
+            } catch (err) {
+              log.error(
+                { err, tenantId, task: 'usage-snapshot' },
+                'Failed to snapshot usage for tenant',
+              );
+            }
+          }
+        } catch (err) {
+          log.error({ err, task: 'usage-snapshot' }, 'Usage snapshot task failed');
+        }
+        return snapshotCount;
       },
     },
 
@@ -161,19 +222,19 @@ export function registerScheduledTasks(
       },
     },
 
-    // Daily cleanup: Audit events older than retention period
+    // Daily cleanup: Audit retention cycle (archive + purge) — Sprint 3.3
     {
-      name: 'audit-cleanup',
-      description: 'Delete audit events older than 90 days',
+      name: 'audit-retention',
+      description: 'Archive (if enabled) and purge audit events older than retention period',
       schedule: 'daily',
       execute: async (): Promise<number> => {
-        const cutoff = new Date(Date.now() - RETENTION_PERIODS.AUDIT_DAYS * ONE_DAY_MS);
-        const count = await repos.auditEvents.deleteOlderThan(cutoff.toISOString());
-        log.info(
-          { task: 'audit-cleanup', deleted: count, retentionDays: RETENTION_PERIODS.AUDIT_DAYS },
-          'Audit events cleanup completed',
+        const result = await runRetentionCycle(
+          repos.auditEvents,
+          log,
+          auditRetention ?? {},
+          storage,
         );
-        return count;
+        return (result.archive?.archivedCount ?? 0) + result.purge.purgedCount;
       },
     },
 
@@ -211,6 +272,16 @@ export function registerScheduledTasks(
       schedule: 'daily',
       execute: async (): Promise<number> => {
         return anonymizeDeletedUsers(repos, RETENTION_PERIODS.PII_GRACE_DAYS, log);
+      },
+    },
+
+    // Daily job: Anonymize PII for hard-banned users past grace period (Sprint 3.15)
+    {
+      name: 'hard-ban-anonymization',
+      description: 'Anonymize PII for hard-banned users past grace period',
+      schedule: 'daily',
+      execute: async (): Promise<number> => {
+        return anonymizeHardBannedUsers(repos, log);
       },
     },
 
@@ -263,6 +334,44 @@ export function registerScheduledTasks(
                 RETENTION_PERIODS.HARD_DELETE_DAYS,
               );
               return result.deletedCount;
+            },
+          },
+        ]
+      : []),
+
+    // Daily job: Clean up files for anonymized users — Sprint 3.16
+    ...(storage !== undefined
+      ? [
+          {
+            name: 'data-hygiene-files',
+            description: 'Delete stored files (avatars, uploads) for anonymized users',
+            schedule: 'daily' as const,
+            execute: async (): Promise<number> => {
+              // Find recently anonymized users who may still have orphaned files
+              const allUsers = await repos.users.listWithFilters({ limit: 10000 });
+              const anonymizedUsers = allUsers.data.filter(
+                (user) =>
+                  user.deletedAt !== null &&
+                  user.avatarUrl === null &&
+                  user.email.includes('@anonymized.local'),
+              );
+
+              let cleanedCount = 0;
+              for (const user of anonymizedUsers) {
+                try {
+                  const result = await cleanupUserFiles(repos, storage, user.id, log);
+                  cleanedCount += result.deletedRecordCount;
+                } catch (error) {
+                  log.error(
+                    {
+                      userId: user.id,
+                      error: error instanceof Error ? error.message : String(error),
+                    },
+                    'Failed to clean up files for anonymized user',
+                  );
+                }
+              }
+              return cleanedCount;
             },
           },
         ]

@@ -47,7 +47,12 @@ export type { ApiClient, ApiClientConfig, TosRequiredPayload, ApiClientOptions }
 
 // Billing
 export { createAdminBillingClient, createBillingClient } from './billing';
-export type { AdminBillingClient, AdminBillingClientConfig, BillingClient, BillingClientConfig } from './billing';
+export type {
+  AdminBillingClient,
+  AdminBillingClientConfig,
+  BillingClient,
+  BillingClientConfig,
+} from './billing';
 
 // Admin
 export { createAdminClient } from './admin';
@@ -55,7 +60,12 @@ export type { AdminClient, AdminClientConfig } from './admin';
 
 // Activities
 export { createActivitiesClient } from './activities';
-export type { ActivitiesClient, ActivitiesClientConfig, ActivityListResponse, ActivityLocal } from './activities';
+export type {
+  ActivitiesClient,
+  ActivitiesClientConfig,
+  ActivityListResponse,
+  ActivityLocal,
+} from './activities';
 
 // Errors
 export {
@@ -120,6 +130,8 @@ export type { PhoneClient, PhoneClientConfig } from './phone';
 export { createWebhookClient } from './webhooks';
 export type {
   CreateWebhookRequest,
+  DeliveryListResponse,
+  DeliveryReplayResponse,
   UpdateWebhookRequest,
   WebhookClient,
   WebhookClientConfig,
@@ -153,3 +165,16 @@ export type {
   ListApiKeysResponse as SettingsListApiKeysResponse,
   RevokeApiKeyResponse as SettingsRevokeApiKeyResponse,
 } from './settings';
+
+// Legal
+export { createLegalClient } from './legal';
+export type {
+  CurrentLegalResponse,
+  LegalClient,
+  LegalClientConfig,
+  LegalDocumentItem,
+  PublishLegalDocumentRequest,
+  PublishLegalDocumentResponse,
+  UserAgreementItem,
+  UserAgreementsResponse,
+} from './legal';

@@ -8,11 +8,15 @@ import {
   listUsers,
   lockUser,
   searchUsers,
+  sendAccountLockedEmail,
+  sendAccountUnlockedEmail,
+  sendHardBanEmail,
   unlockUser,
   updateUser,
 } from './userService';
 
 import type { DbClient, User as DbUser, UserRepository } from '../../../db/src';
+import type { EmailService } from '@bslt/shared';
 
 // Mock external dependencies used by hardBanUser
 vi.mock('../auth/utils', () => ({
@@ -84,6 +88,13 @@ function createMockUserRepository(): UserRepository {
     unlockAccount: vi.fn(),
     verifyEmail: vi.fn(),
   } as unknown as UserRepository;
+}
+
+function createMockEmailService(): EmailService {
+  return {
+    send: vi.fn().mockResolvedValue({ success: true }),
+    healthCheck: vi.fn().mockResolvedValue(true),
+  };
 }
 
 // ============================================================================
@@ -248,6 +259,10 @@ describe('Admin User Service', () => {
     });
   });
 
+  // ===========================================================================
+  // Sprint 3.15: Soft Ban lock reason + timed lock expiry
+  // ===========================================================================
+
   describe('lockUser', () => {
     test('should lock user with duration', async () => {
       const mockUser = createMockUser();
@@ -284,6 +299,68 @@ describe('Admin User Service', () => {
         'User not found',
       );
     });
+
+    test('should pass lock reason to lockAccount', async () => {
+      const mockUser = createMockUser();
+      const lockedUser = createMockUser({
+        lockedUntil: new Date('2099-12-31'),
+        lockReason: 'Spam activity',
+      });
+      vi.mocked(mockRepo.findById)
+        .mockResolvedValueOnce(mockUser)
+        .mockResolvedValueOnce(lockedUser);
+      vi.mocked(mockRepo.lockAccount).mockResolvedValue();
+
+      const result = await lockUser(mockRepo, 'user-123', 'Spam activity', 1440);
+
+      expect(result.lockReason).toBe('Spam activity');
+      expect(mockRepo.lockAccount).toHaveBeenCalledWith(
+        'user-123',
+        expect.any(Date) as Date,
+        'Spam activity',
+      );
+    });
+
+    test('should calculate correct lock expiry for timed lock (1 hour)', async () => {
+      const mockUser = createMockUser();
+      vi.mocked(mockRepo.findById)
+        .mockResolvedValueOnce(mockUser)
+        .mockResolvedValueOnce(
+          createMockUser({ lockedUntil: new Date(Date.now() + 60 * 60 * 1000) }),
+        );
+      vi.mocked(mockRepo.lockAccount).mockResolvedValue();
+
+      const before = Date.now();
+      await lockUser(mockRepo, 'user-123', 'Test', 60);
+      const after = Date.now();
+
+      const lockCall = vi.mocked(mockRepo.lockAccount).mock.calls[0];
+      const lockedUntil = (lockCall as unknown[])[1] as Date;
+      const expectedMin = before + 60 * 60 * 1000;
+      const expectedMax = after + 60 * 60 * 1000;
+      expect(lockedUntil.getTime()).toBeGreaterThanOrEqual(expectedMin);
+      expect(lockedUntil.getTime()).toBeLessThanOrEqual(expectedMax);
+    });
+
+    test('should send notification email when emailService provided', async () => {
+      const mockUser = createMockUser();
+      const lockedUser = createMockUser({ lockedUntil: new Date('2099-12-31') });
+      vi.mocked(mockRepo.findById)
+        .mockResolvedValueOnce(mockUser)
+        .mockResolvedValueOnce(lockedUser);
+      vi.mocked(mockRepo.lockAccount).mockResolvedValue();
+
+      const mockEmail = createMockEmailService();
+
+      await lockUser(mockRepo, 'user-123', 'Terms violation', undefined, mockEmail);
+
+      // Fire-and-forget, but we can check send was called
+      // Wait for the microtask to settle
+      await new Promise((resolve) => {
+        setTimeout(resolve, 10);
+      });
+      expect(mockEmail.send).toHaveBeenCalled();
+    });
   });
 
   describe('unlockUser', () => {
@@ -307,6 +384,24 @@ describe('Admin User Service', () => {
       await expect(unlockUser(mockRepo, 'nonexistent', 'Test reason')).rejects.toThrow(
         'User not found',
       );
+    });
+
+    test('should send unlock notification email when emailService provided', async () => {
+      const lockedUser = createMockUser({ lockedUntil: new Date('2099-12-31') });
+      const unlockedUser = createMockUser({ lockedUntil: null });
+      vi.mocked(mockRepo.findById)
+        .mockResolvedValueOnce(lockedUser)
+        .mockResolvedValueOnce(unlockedUser);
+      vi.mocked(mockRepo.unlockAccount).mockResolvedValue();
+
+      const mockEmail = createMockEmailService();
+
+      await unlockUser(mockRepo, 'user-123', 'Identity verified', mockEmail);
+
+      await new Promise((resolve) => {
+        setTimeout(resolve, 10);
+      });
+      expect(mockEmail.send).toHaveBeenCalled();
     });
   });
 
@@ -496,6 +591,10 @@ describe('Admin User Service', () => {
     });
   });
 
+  // ===========================================================================
+  // Sprint 3.15: Hard Ban cascade rules
+  // ===========================================================================
+
   describe('hardBanUser', () => {
     const mockDb = {} as DbClient;
 
@@ -556,6 +655,135 @@ describe('Admin User Service', () => {
       await expect(
         hardBanUser(mockDb, mockRepo, 'nonexistent', 'admin-456', 'Test'),
       ).rejects.toThrow('User not found');
+    });
+
+    test('should send hard ban email notification when emailService provided', async () => {
+      const mockUser = createMockUser();
+      vi.mocked(mockRepo.findById).mockResolvedValue(mockUser);
+      vi.mocked(mockRepo.lockAccount).mockResolvedValue();
+      vi.mocked(mockRepo.update).mockResolvedValue(mockUser);
+
+      const mockEmail = createMockEmailService();
+
+      await hardBanUser(mockDb, mockRepo, 'user-123', 'admin-456', 'Severe violation', {
+        emailService: mockEmail,
+      });
+
+      await new Promise((resolve) => {
+        setTimeout(resolve, 10);
+      });
+      expect(mockEmail.send).toHaveBeenCalled();
+      const sendCall = vi.mocked(mockEmail.send).mock.calls[0]?.[0];
+      expect(sendCall?.subject).toBe('Your account has been permanently suspended');
+    });
+
+    test('should call cancelSubscriptions when provided', async () => {
+      const mockUser = createMockUser();
+      vi.mocked(mockRepo.findById).mockResolvedValue(mockUser);
+      vi.mocked(mockRepo.lockAccount).mockResolvedValue();
+      vi.mocked(mockRepo.update).mockResolvedValue(mockUser);
+
+      const cancelSubscriptions = vi.fn().mockResolvedValue(undefined);
+
+      await hardBanUser(mockDb, mockRepo, 'user-123', 'admin-456', 'Spam', {
+        cancelSubscriptions,
+      });
+
+      expect(cancelSubscriptions).toHaveBeenCalledWith('user-123');
+    });
+
+    test('should call removeMemberships when provided', async () => {
+      const mockUser = createMockUser();
+      vi.mocked(mockRepo.findById).mockResolvedValue(mockUser);
+      vi.mocked(mockRepo.lockAccount).mockResolvedValue();
+      vi.mocked(mockRepo.update).mockResolvedValue(mockUser);
+
+      const removeMemberships = vi.fn().mockResolvedValue(undefined);
+
+      await hardBanUser(mockDb, mockRepo, 'user-123', 'admin-456', 'Spam', {
+        removeMemberships,
+      });
+
+      expect(removeMemberships).toHaveBeenCalledWith('user-123');
+    });
+
+    test('should not fail when cancelSubscriptions throws', async () => {
+      const mockUser = createMockUser();
+      vi.mocked(mockRepo.findById).mockResolvedValue(mockUser);
+      vi.mocked(mockRepo.lockAccount).mockResolvedValue();
+      vi.mocked(mockRepo.update).mockResolvedValue(mockUser);
+
+      const cancelSubscriptions = vi.fn().mockRejectedValue(new Error('Billing unavailable'));
+
+      const result = await hardBanUser(mockDb, mockRepo, 'user-123', 'admin-456', 'Spam', {
+        cancelSubscriptions,
+      });
+
+      // Should still succeed despite billing failure
+      expect(result.message).toBe('User has been permanently banned');
+    });
+  });
+
+  // ===========================================================================
+  // Sprint 3.15: Email notification helpers
+  // ===========================================================================
+
+  describe('sendAccountLockedEmail', () => {
+    test('should send lock notification with reason and duration', async () => {
+      const mockEmail = createMockEmailService();
+      const lockedUntil = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+      await sendAccountLockedEmail(mockEmail, 'user@test.com', 'Spam detected', lockedUntil);
+
+      expect(mockEmail.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: 'user@test.com',
+          subject: 'Your account has been locked',
+        }),
+      );
+    });
+
+    test('should indicate permanent lock for far-future dates', async () => {
+      const mockEmail = createMockEmailService();
+
+      await sendAccountLockedEmail(mockEmail, 'user@test.com', 'Ban', new Date('2099-12-31'));
+
+      const sendCall = vi.mocked(mockEmail.send).mock.calls[0]?.[0];
+      expect(sendCall?.html).toContain('permanently');
+    });
+  });
+
+  describe('sendAccountUnlockedEmail', () => {
+    test('should send unlock notification', async () => {
+      const mockEmail = createMockEmailService();
+
+      await sendAccountUnlockedEmail(mockEmail, 'user@test.com');
+
+      expect(mockEmail.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: 'user@test.com',
+          subject: 'Your account has been unlocked',
+        }),
+      );
+    });
+  });
+
+  describe('sendHardBanEmail', () => {
+    test('should send hard ban notification with reason and grace period', async () => {
+      const mockEmail = createMockEmailService();
+      const gracePeriodEnds = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+      await sendHardBanEmail(mockEmail, 'user@test.com', 'Severe ToS violation', gracePeriodEnds);
+
+      expect(mockEmail.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: 'user@test.com',
+          subject: 'Your account has been permanently suspended',
+        }),
+      );
+      const sendCall = vi.mocked(mockEmail.send).mock.calls[0]?.[0];
+      expect(sendCall?.html).toContain('Severe ToS violation');
+      expect(sendCall?.html).toContain(gracePeriodEnds.toISOString());
     });
   });
 });

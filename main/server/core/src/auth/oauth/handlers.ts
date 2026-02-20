@@ -35,11 +35,15 @@ import {
   unlinkOAuthAccount,
 } from './service';
 
+import type { HttpReply, HttpRequest } from '../../../../system/src';
 import type { AppContext, ReplyWithCookies } from '../types';
 import type { OAuthConnectionInfo } from './types';
 import type { HttpReply, HttpRequest } from '../../../../system/src';
 import type { AuthResponse, HttpErrorResponse } from '@bslt/shared';
+<<<<<<< HEAD
 import type { FastifyReply } from 'fastify';
+=======
+>>>>>>> 22aa2927d22407c44f3265bfe62d5e644c3895b5
 
 // ============================================================================
 // Types
@@ -59,6 +63,12 @@ export interface OAuthInitiateParams {
 export interface OAuthCallbackParams {
   /** OAuth provider name */
   provider: string;
+}
+
+/** Extract a single-value header string from potentially multi-value header. */
+function headerAsString(value: string | string[] | undefined): string | undefined {
+  if (Array.isArray(value)) return value[0];
+  return value;
 }
 
 /**
@@ -301,7 +311,7 @@ export async function handleOAuthCallbackRequest(
           '', // Email not available in link flow
           provider,
           request.ip,
-          request.headers['user-agent'],
+          headerAsString(request.headers['user-agent']),
         );
       }
 
@@ -326,11 +336,15 @@ export async function handleOAuthCallbackRequest(
       provider,
       result.auth.isNewUser,
       request.ip,
-      request.headers['user-agent'],
+      headerAsString(request.headers['user-agent']),
     );
 
     // Set refresh token cookie
+<<<<<<< HEAD
     const replyWithCookies = reply as unknown as FastifyReply & ReplyWithCookies;
+=======
+    const replyWithCookies = reply as unknown as ReplyWithCookies;
+>>>>>>> 22aa2927d22407c44f3265bfe62d5e644c3895b5
     setRefreshTokenCookie(replyWithCookies, result.auth.refreshToken, ctx.config.auth);
 
     return {
@@ -358,7 +372,7 @@ export async function handleOAuthCallbackRequest(
       errorMessage,
       undefined,
       request.ip,
-      request.headers['user-agent'],
+      headerAsString(request.headers['user-agent']),
     );
 
     return mapErrorToHttpResponse(error, createErrorMapperLogger(ctx.log));
@@ -450,7 +464,7 @@ export async function handleOAuthUnlink(
       '', // Email not directly available
       provider,
       request.ip,
-      request.headers['user-agent'],
+      headerAsString(request.headers['user-agent']),
     );
 
     return {
@@ -469,7 +483,7 @@ export async function handleOAuthUnlink(
         params.provider,
         errorMessage,
         request.ip,
-        request.headers['user-agent'],
+        headerAsString(request.headers['user-agent']),
       );
     }
 

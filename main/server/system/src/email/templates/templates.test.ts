@@ -1,4 +1,4 @@
-// main/server/system/src/mailer/templates/templates.test.ts
+// main/server/system/src/email/templates/templates.test.ts
 import { describe, expect, test } from 'vitest';
 
 import { emailTemplates } from './templates';
@@ -154,7 +154,7 @@ describe('emailTemplates', () => {
       const result = emailTemplates.welcome('Eve', 'https://example.com/login');
 
       expect(result.html).toContain('<!DOCTYPE html>');
-      expect(result.html).toContain('<html>');
+      expect(result.html).toContain('<html');
       expect(result.html).toContain('</html>');
     });
   });
@@ -164,7 +164,7 @@ describe('emailTemplates', () => {
       const result = emailTemplates.passwordReset('https://example.com');
 
       expect(result.html).toContain('<!DOCTYPE html>');
-      expect(result.html).toContain('<html>');
+      expect(result.html).toContain('<html');
       expect(result.html).toContain('</html>');
     });
 
@@ -186,6 +186,48 @@ describe('emailTemplates', () => {
 
       expect(result.html).toContain('<head>');
       expect(result.html).toContain('</head>');
+    });
+
+    test('should include responsive viewport meta tag', () => {
+      const result = emailTemplates.passwordReset('https://example.com');
+
+      expect(result.html).toContain('name="viewport"');
+      expect(result.html).toContain('width=device-width');
+    });
+
+    test('should include branded header with product name', () => {
+      const result = emailTemplates.emailVerification('https://example.com');
+
+      expect(result.html).toContain('Abe Stack');
+    });
+
+    test('should include footer with copyright', () => {
+      const result = emailTemplates.welcome('Alice', 'https://example.com');
+      const year = String(new Date().getFullYear());
+
+      expect(result.html).toContain(year);
+      expect(result.html).toContain('All rights reserved');
+    });
+
+    test('should use table-based layout for email client compatibility', () => {
+      const result = emailTemplates.passwordReset('https://example.com');
+
+      expect(result.html).toContain('role="presentation"');
+      expect(result.html).toContain('cellpadding="0"');
+      expect(result.html).toContain('cellspacing="0"');
+    });
+
+    test('should include responsive CSS media query', () => {
+      const result = emailTemplates.magicLink('https://example.com');
+
+      expect(result.html).toContain('@media only screen');
+      expect(result.html).toContain('max-width: 620px');
+    });
+
+    test('should include preheader text for inbox preview', () => {
+      const result = emailTemplates.passwordReset('https://example.com');
+
+      expect(result.html).toContain('display: none; max-height: 0px; overflow: hidden;');
     });
   });
 
@@ -218,6 +260,70 @@ describe('emailTemplates', () => {
       const result = emailTemplates.passwordChanged();
 
       expect(result.text).not.toMatch(/<[a-z]+/i);
+    });
+  });
+
+  describe('workspaceInvitation', () => {
+    test('should generate workspace invitation email with correct subject', () => {
+      const result = emailTemplates.workspaceInvitation(
+        'https://example.com/invite/accept',
+        'Acme Corp',
+        'Alice',
+        'editor',
+      );
+
+      expect(result.subject).toBe("You've been invited to join Acme Corp");
+      expect(result.to).toBe('');
+    });
+
+    test('should include inviter name, workspace name, and role', () => {
+      const result = emailTemplates.workspaceInvitation(
+        'https://example.com/invite/accept',
+        'Acme Corp',
+        'Alice',
+        'editor',
+      );
+
+      expect(result.text).toContain('Alice');
+      expect(result.text).toContain('Acme Corp');
+      expect(result.text).toContain('editor');
+      expect(result.html).toContain('Alice');
+      expect(result.html).toContain('Acme Corp');
+      expect(result.html).toContain('editor');
+    });
+
+    test('should include accept URL as clickable button', () => {
+      const acceptUrl = 'https://example.com/invite/accept?token=xyz';
+      const result = emailTemplates.workspaceInvitation(acceptUrl, 'Acme Corp', 'Alice', 'editor');
+
+      expect(result.html).toContain(`href="${acceptUrl}"`);
+      expect(result.html).toContain('Accept Invitation');
+      expect(result.text).toContain(acceptUrl);
+    });
+
+    test('should include default expiry of 7 days', () => {
+      const result = emailTemplates.workspaceInvitation(
+        'https://example.com/invite/accept',
+        'Acme Corp',
+        'Alice',
+        'editor',
+      );
+
+      expect(result.text).toContain('7 days');
+      expect(result.html).toContain('7 days');
+    });
+
+    test('should accept custom expiry', () => {
+      const result = emailTemplates.workspaceInvitation(
+        'https://example.com/invite/accept',
+        'Acme Corp',
+        'Alice',
+        'editor',
+        14,
+      );
+
+      expect(result.text).toContain('14 days');
+      expect(result.html).toContain('14 days');
     });
   });
 
@@ -284,7 +390,7 @@ describe('emailTemplates', () => {
       const result = emailTemplates.tokenReuseAlert(testIp, testUserAgent, testTimestamp);
 
       expect(result.html).toContain('<!DOCTYPE html>');
-      expect(result.html).toContain('<html>');
+      expect(result.html).toContain('<html');
       expect(result.html).toContain('</html>');
       expect(result.html).toContain('Security Alert');
     });

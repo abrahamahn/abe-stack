@@ -8,7 +8,6 @@
  *
  * Moved from @bslt/server-system to keep Fastify coupling in the app layer.
  */
-
 import {
   AppError,
   BadRequestError,

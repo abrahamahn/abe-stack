@@ -1,4 +1,4 @@
-// main/server/system/src/mailer/index.ts
+// main/server/system/src/email/index.ts
 export { MailerClient } from './client';
 export { SmtpClient } from './smtp.client';
 export type { SmtpConfig, SmtpMessage, SmtpResult } from './smtp.client';

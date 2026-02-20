@@ -22,8 +22,8 @@ import {
 } from './jobsService';
 
 import type { AdminAppContext } from './types';
-import type { JobActionResponse, JobDetails, JobListResponse, QueueStats } from '@bslt/shared';
 import type { HttpReply, HttpRequest } from '../../../system/src';
+import type { JobActionResponse, JobDetails, JobListResponse, QueueStats } from '@bslt/shared';
 
 const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));

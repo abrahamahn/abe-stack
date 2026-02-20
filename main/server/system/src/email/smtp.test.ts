@@ -1,4 +1,4 @@
-// main/server/system/src/mailer/smtp.test.ts
+// main/server/system/src/email/smtp.test.ts
 import { describe, expect, it, vi } from 'vitest';
 
 const hoisted = vi.hoisted(() => {

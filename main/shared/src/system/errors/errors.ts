@@ -220,10 +220,27 @@ export class WeakPasswordError extends BadRequestError {
   }
 }
 
-/** Account temporarily locked due to failed attempts */
+/** Account temporarily locked due to failed attempts or admin action */
 export class AccountLockedError extends TooManyRequestsError {
-  constructor(public readonly retryAfter?: number) {
+  /** Seconds until the client may retry */
+  public readonly retryAfter: number | undefined;
+  /** Human-readable reason the account is locked (admin-set, if available) */
+  public readonly lockReason: string | undefined;
+  /** ISO timestamp when the lock expires (undefined = permanent or rate-limit) */
+  public readonly lockedUntil: string | undefined;
+
+  constructor(
+    retryAfterOrOptions?:
+      | number
+      | { retryAfter?: number; lockReason?: string; lockedUntil?: string },
+  ) {
+    const opts = typeof retryAfterOrOptions === 'object' ? retryAfterOrOptions : undefined;
+    const retryAfter =
+      typeof retryAfterOrOptions === 'number' ? retryAfterOrOptions : opts?.retryAfter;
     super('Account temporarily locked due to too many failed attempts', ERROR_CODES.ACCOUNT_LOCKED);
+    this.retryAfter = retryAfter;
+    this.lockReason = opts?.lockReason;
+    this.lockedUntil = opts?.lockedUntil;
   }
 }
 

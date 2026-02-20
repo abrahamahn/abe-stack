@@ -334,8 +334,8 @@ describe('Generic Error → 500', () => {
     capturedHandler()(error, request, reply);
 
     expect(requestLogger.error).toHaveBeenCalledWith(
-      error,
-      expect.objectContaining({ statusCode: 500 }),
+      expect.objectContaining({ err: error, statusCode: 500 }),
+      'Server error',
     );
   });
 });

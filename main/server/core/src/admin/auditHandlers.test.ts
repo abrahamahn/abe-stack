@@ -5,7 +5,7 @@ import { handleListAuditEvents } from './auditHandlers';
 
 import type { AdminAppContext } from './types';
 import type { AuditEvent } from '../../../db/src';
-import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { HttpReply, HttpRequest } from '../../../system/src';
 
 // ============================================================================
 // Test Helpers
@@ -69,14 +69,14 @@ function createMockAuditEvent(overrides?: Partial<AuditEvent>): AuditEvent {
 function createMockRequest(overrides?: {
   user?: { userId: string; role: string };
   query?: Record<string, string>;
-}): FastifyRequest {
+}): HttpRequest {
   return {
     user: overrides?.user,
     query: overrides?.query ?? {},
-  } as unknown as FastifyRequest;
+  } as unknown as HttpRequest;
 }
 
-const mockReply = {} as FastifyReply;
+const mockReply = {} as HttpReply;
 
 // ============================================================================
 // handleListAuditEvents

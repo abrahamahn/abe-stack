@@ -20,6 +20,8 @@ import type { AuthGuardFactory } from '@/http';
 
 import { registerRouteMap } from '@/http';
 
+import { registerRouteMap } from '@/http';
+
 // ============================================================================
 // Mock Repositories
 // ============================================================================
@@ -467,6 +469,69 @@ describe('Webhooks API Integration Tests', () => {
       const response = await testServer.inject({
         method: 'GET',
         url: '/api/webhooks/wh-123/rotate-secret',
+      });
+      expect(response.statusCode).toBe(404);
+    });
+  });
+
+  // ==========================================================================
+  // GET /api/webhooks/:id/deliveries -- List Deliveries
+  // ==========================================================================
+
+  describe('GET /api/webhooks/:id/deliveries', () => {
+    it('responds (not 404)', async () => {
+      const response = await testServer.inject({
+        method: 'GET',
+        url: '/api/webhooks/wh-123/deliveries',
+      });
+      expect(response.statusCode).not.toBe(404);
+    });
+
+    it('returns 401 without token', async () => {
+      const response = await testServer.inject({
+        method: 'GET',
+        url: '/api/webhooks/wh-123/deliveries',
+      });
+      expect(response.statusCode).toBe(401);
+    });
+
+    it('returns 404 for POST method', async () => {
+      const response = await testServer.inject({
+        method: 'POST',
+        url: '/api/webhooks/wh-123/deliveries',
+        payload: {},
+      });
+      expect(response.statusCode).toBe(404);
+    });
+  });
+
+  // ==========================================================================
+  // POST /api/webhooks/deliveries/:deliveryId/replay -- Replay Delivery
+  // ==========================================================================
+
+  describe('POST /api/webhooks/deliveries/:deliveryId/replay', () => {
+    it('responds (not 404)', async () => {
+      const response = await testServer.inject({
+        method: 'POST',
+        url: '/api/webhooks/deliveries/wd-123/replay',
+        payload: {},
+      });
+      expect(response.statusCode).not.toBe(404);
+    });
+
+    it('returns 401 without token', async () => {
+      const response = await testServer.inject({
+        method: 'POST',
+        url: '/api/webhooks/deliveries/wd-123/replay',
+        payload: {},
+      });
+      expect(response.statusCode).toBe(401);
+    });
+
+    it('returns 404 for GET method', async () => {
+      const response = await testServer.inject({
+        method: 'GET',
+        url: '/api/webhooks/deliveries/wd-123/replay',
       });
       expect(response.statusCode).toBe(404);
     });

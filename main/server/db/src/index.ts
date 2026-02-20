@@ -234,6 +234,19 @@ export {
   type Webhook,
   type WebhookDelivery,
   type WebhookDeliveryStatus,
+  // Metering schema
+  AGGREGATION_TYPES,
+  type AggregationType,
+  type NewUsageMetric,
+  type NewUsageSnapshot,
+  type UpdateUsageMetric,
+  type UpdateUsageSnapshot,
+  USAGE_METRIC_COLUMNS,
+  USAGE_METRICS_TABLE,
+  type UsageMetric,
+  USAGE_SNAPSHOT_COLUMNS,
+  USAGE_SNAPSHOTS_TABLE,
+  type UsageSnapshot,
 } from './schema';
 
 // Repositories (functional-style)
@@ -325,6 +338,11 @@ export {
   type WebauthnCredentialRepository,
   type WebhookDeliveryRepository,
   type WebhookRepository,
+  // Metering
+  createUsageMetricRepository,
+  createUsageSnapshotRepository,
+  type UsageMetricRepository,
+  type UsageSnapshotRepository,
 } from './repositories';
 
 // Factory

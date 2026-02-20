@@ -9,6 +9,8 @@ export {
   createRouteMap,
   protectedRoute,
   publicRoute,
+  registerRouteMap,
+  type AuthGuardFactory,
   type HandlerContext,
   type HttpMethod,
   type JsonSchemaObject,
@@ -19,6 +21,7 @@ export {
   type RouteOpenApiMeta,
   type RouteResult,
   type RouteSchema,
+  type RouterOptions,
   type ValidationSchema,
 } from './routing';
 export { type HttpReply, type HttpRequest } from './http.types';

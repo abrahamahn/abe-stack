@@ -497,6 +497,8 @@ export {
   calculateRetryDelay,
   createWebhookDeliverySchema,
   createWebhookSchema,
+  deliveryListResponseSchema,
+  deliveryReplayResponseSchema,
   isDeliveryTerminal,
   matchesEventFilter,
   rotateSecretResponseSchema,
@@ -514,6 +516,8 @@ export {
   webhookWithDeliveriesSchema,
   type CreateWebhook,
   type CreateWebhookDelivery,
+  type DeliveryListResponse,
+  type DeliveryReplayResponse,
   type RotateSecretResponse,
   type UpdateWebhook,
   type UpdateWebhookDelivery,
@@ -864,7 +868,12 @@ export {
 } from './system';
 
 // Crypto (browser-safe token storage only — import from ./system/crypto/token to avoid bundling jwt.ts)
-export { addAuthHeader, createTokenStore, tokenStore, type TokenStore } from './system/crypto/token';
+export {
+  addAuthHeader,
+  createTokenStore,
+  tokenStore,
+  type TokenStore,
+} from './system/crypto/token';
 
 // Usage metering
 export {

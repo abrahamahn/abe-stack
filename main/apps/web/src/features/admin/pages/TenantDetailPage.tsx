@@ -20,6 +20,7 @@ import {
 } from '@bslt/ui';
 import { useCallback, useState, type ChangeEvent, type JSX } from 'react';
 
+import { PlanOverrideSelector } from '../components/PlanOverrideSelector';
 import { useTenant } from '../hooks';
 
 export const TenantDetailPage = (): JSX.Element => {
@@ -207,6 +208,15 @@ export const TenantDetailPage = (): JSX.Element => {
                   </div>
                 </Card.Body>
               </Card>
+
+              {/* Plan Override Card */}
+              <PlanOverrideSelector
+                tenantId={tenant.id}
+                currentSubscriptionId={tenant.subscriptionId}
+                onPlanAssigned={() => {
+                  void refresh();
+                }}
+              />
 
               {/* Metadata Card */}
               {tenant.metadata !== null && Object.keys(tenant.metadata).length > 0 && (

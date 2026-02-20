@@ -14,7 +14,9 @@ export {
   handleCreateWebhook,
   handleDeleteWebhook,
   handleGetWebhook,
+  handleListDeliveries,
   handleListWebhooks,
+  handleReplayDelivery,
   handleRotateSecret,
   handleUpdateWebhook,
 } from './handlers';
@@ -25,7 +27,9 @@ export {
   deleteWebhook,
   generateWebhookSecret,
   getWebhook,
+  listDeliveries,
   listWebhooks,
+  replayDelivery,
   rotateWebhookSecret,
   updateWebhook,
 } from './service';

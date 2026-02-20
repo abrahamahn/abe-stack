@@ -1,4 +1,4 @@
-// main/server/system/src/geo-ip/ip-api-provider.test.ts
+// main/server/system/src/geo-ip/ip.api.provider.test.ts
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { IpApiGeoIpProvider } from './ip.api.provider';

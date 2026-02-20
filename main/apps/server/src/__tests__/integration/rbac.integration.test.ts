@@ -20,6 +20,8 @@ import type { AuthGuardFactory } from '@/http';
 
 import { registerRouteMap } from '@/http';
 
+import { registerRouteMap } from '@/http';
+
 // ============================================================================
 // Mock Repositories (minimal set for tenant routes)
 // ============================================================================

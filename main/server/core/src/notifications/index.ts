@@ -31,7 +31,9 @@ export type { NotificationModuleDeps, NotificationRequest } from './types';
 
 // Service - Subscription management
 export {
-  cleanupExpiredSubscriptions, clearAllData, createNotificationForEvent,
+  cleanupExpiredSubscriptions,
+  clearAllData,
+  createNotificationForEvent,
   getActiveSubscriptionCount,
   getAllActiveSubscriptions,
   getPreferences,
@@ -44,12 +46,13 @@ export {
   subscribe,
   unsubscribe,
   updatePreferences,
-  type NotificationEventType
+  type NotificationEventType,
 } from './service';
 
 // Handlers
 export {
   handleDeleteNotification,
+  handleEmailUnsubscribe,
   handleGetPreferences,
   handleGetVapidKey,
   handleListNotifications,
@@ -59,8 +62,34 @@ export {
   handleSubscribe,
   handleTestNotification,
   handleUnsubscribe,
-  handleUpdatePreferences
+  handleUpdatePreferences,
 } from './handlers';
+
+// Bounce handler
+export {
+  getDeliveryRecord,
+  isUndeliverable,
+  MAX_SOFT_BOUNCES,
+  processBounce,
+  recordDelivery,
+  resetBounceStatus,
+} from './bounce-handler';
+export type { BounceEvent, BounceType, DeliveryRecord, DeliveryStatus } from './bounce-handler';
+
+// Email unsubscribe
+export {
+  generateUnsubscribeHeaders,
+  generateUnsubscribeToken,
+  getUnsubscribedCategories,
+  isUnsubscribed,
+  NON_SUPPRESSIBLE_TYPES,
+  resubscribeUser,
+  shouldSendEmail,
+  UNSUBSCRIBE_CATEGORIES,
+  unsubscribeUser,
+  validateUnsubscribeToken,
+} from './unsubscribe';
+export type { UnsubscribeCategory } from './unsubscribe';
 
 // Routes
 export { notificationRoutes } from './routes';
@@ -70,7 +99,10 @@ export {
   InvalidPreferencesError,
   InvalidSubscriptionError,
   NOTIFICATION_PAYLOAD_MAX_SIZE,
-  NotificationRateLimitError, NotificationsDisabledError, NotificationSendError, PayloadTooLargeError,
+  NotificationRateLimitError,
+  NotificationsDisabledError,
+  NotificationSendError,
+  PayloadTooLargeError,
   PreferencesNotFoundError,
   ProviderError,
   ProviderNotConfiguredError,
@@ -81,7 +113,7 @@ export {
   SubscriptionExistsError,
   SubscriptionExpiredError,
   SubscriptionNotFoundError,
-  VapidNotConfiguredError
+  VapidNotConfiguredError,
 } from '@bslt/shared';
 
 // Provider types
@@ -92,7 +124,7 @@ export type {
   ProviderConfig,
   PushNotificationProvider,
   SendOptions,
-  SubscriptionWithId
+  SubscriptionWithId,
 } from './providers';
 
 // Provider implementations
@@ -101,6 +133,5 @@ export { createFcmProvider, FcmProvider } from './providers';
 // Provider factory
 export {
   createNotificationProviderService,
-  createNotificationProviderServiceFromEnv
+  createNotificationProviderServiceFromEnv,
 } from './providers';
-

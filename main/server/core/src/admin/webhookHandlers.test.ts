@@ -9,7 +9,7 @@ import {
 } from './webhookHandlers';
 
 import type { AdminAppContext } from './types';
-import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { HttpReply, HttpRequest } from '../../../system/src';
 
 function createMockContext(): AdminAppContext {
   const repos = {
@@ -56,17 +56,17 @@ function createRequest(
   overrides: Record<string, unknown> = {},
   params: Record<string, string> = {},
   query: Record<string, unknown> = {},
-): FastifyRequest {
+): HttpRequest {
   return {
     user: { userId: 'admin-1', email: 'admin@example.com', role: 'admin' },
     params,
     query,
     ...overrides,
-  } as unknown as FastifyRequest;
+  } as unknown as HttpRequest;
 }
 
-function createReply(): FastifyReply {
-  return {} as FastifyReply;
+function createReply(): HttpReply {
+  return {} as HttpReply;
 }
 
 describe('webhookHandlers', () => {

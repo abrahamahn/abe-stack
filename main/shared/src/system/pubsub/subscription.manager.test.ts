@@ -106,6 +106,7 @@ describe('SubscriptionManager', () => {
         type: 'update',
         key,
         version: 5,
+        timestamp: expect.any(Number),
       });
     });
 
@@ -328,6 +329,201 @@ describe('SubscriptionManager', () => {
       expect(call).toBeDefined();
       const message = JSON.parse(call![0] as string) as Record<string, unknown>;
       expect(message['key']).toEqual(key);
+    });
+  });
+
+  // ==========================================================================
+  // Delta Sync Support
+  // ==========================================================================
+
+  describe('Delta Sync', () => {
+    it('should record messages in history buffer on publishLocal', () => {
+      const key = SubKeys.record('users', '123');
+      manager.subscribe(key, mockSocket);
+
+      manager.publishLocal(key, 1);
+      manager.publishLocal(key, 2);
+
+      expect(manager.getHistorySize()).toBe(2);
+    });
+
+    it('should include timestamp in published messages', () => {
+      const key = SubKeys.record('users', '123');
+      manager.subscribe(key, mockSocket);
+
+      manager.publishLocal(key, 5);
+
+      expect(sendSpy).toHaveBeenCalled();
+      const call = sendSpy.mock.calls[0];
+      const message = JSON.parse(call![0] as string) as Record<string, unknown>;
+      expect(message['timestamp']).toBeDefined();
+      expect(typeof message['timestamp']).toBe('number');
+    });
+
+    it('should retrieve messages since a given timestamp', () => {
+      const key = SubKeys.record('users', '123');
+      manager.subscribe(key, mockSocket);
+
+      // Mock Date.now to control timestamps
+      const originalDateNow = Date.now;
+      let mockTime = 1000;
+      Date.now = (): number => mockTime;
+
+      try {
+        mockTime = 1000;
+        manager.publishLocal(key, 1);
+        mockTime = 2000;
+        manager.publishLocal(key, 2);
+        mockTime = 3000;
+        manager.publishLocal(key, 3);
+
+        // Get messages since timestamp 1000 (should include 2000 and 3000)
+        const missed = manager.getMessagesSince(1000);
+        expect(missed.length).toBe(2);
+        expect(missed[0]?.version).toBe(2);
+        expect(missed[1]?.version).toBe(3);
+
+        // Get messages since timestamp 2500 (should include only 3000)
+        const missed2 = manager.getMessagesSince(2500);
+        expect(missed2.length).toBe(1);
+        expect(missed2[0]?.version).toBe(3);
+      } finally {
+        Date.now = originalDateNow;
+      }
+    });
+
+    it('should filter messages by subscription keys', () => {
+      const key1 = SubKeys.record('users', '1');
+      const key2 = SubKeys.record('posts', '1');
+      manager.subscribe(key1, mockSocket);
+      manager.subscribe(key2, mockSocket);
+
+      const originalDateNow = Date.now;
+      let mockTime = 1000;
+      Date.now = (): number => mockTime;
+
+      try {
+        mockTime = 1000;
+        manager.publishLocal(key1, 1);
+        mockTime = 2000;
+        manager.publishLocal(key2, 1);
+        mockTime = 3000;
+        manager.publishLocal(key1, 2);
+
+        // Filter to only key1
+        const missed = manager.getMessagesSince(0, new Set([key1]));
+        expect(missed.length).toBe(2);
+        expect(missed.every((m) => m.key === key1)).toBe(true);
+      } finally {
+        Date.now = originalDateNow;
+      }
+    });
+
+    it('should evict old messages when history exceeds maxHistorySize', () => {
+      const smallManager = new SubscriptionManager({ maxHistorySize: 10 });
+      const key = SubKeys.record('users', '1');
+      const { socket } = createMockWebSocket();
+      smallManager.subscribe(key, socket);
+
+      for (let i = 0; i < 20; i++) {
+        smallManager.publishLocal(key, i);
+      }
+
+      // Should have evicted some entries
+      expect(smallManager.getHistorySize()).toBeLessThanOrEqual(20);
+      expect(smallManager.getHistorySize()).toBeGreaterThan(0);
+    });
+
+    it('should handle sync_request client message', () => {
+      const key1 = SubKeys.record('users', '1');
+      const key2 = SubKeys.record('posts', '1');
+      const { socket: subscriber } = createMockWebSocket();
+      manager.subscribe(key1, subscriber);
+      manager.subscribe(key2, subscriber);
+
+      const originalDateNow = Date.now;
+      let mockTime = 1000;
+      Date.now = (): number => mockTime;
+
+      try {
+        // Publish some messages
+        mockTime = 1000;
+        manager.publishLocal(key1, 1);
+        mockTime = 2000;
+        manager.publishLocal(key2, 1);
+        mockTime = 3000;
+        manager.publishLocal(key1, 2);
+
+        // Now a new socket sends sync_request
+        const { socket: reconnecting, sendSpy: reconnectSendSpy } = createMockWebSocket();
+
+        manager.handleMessage(
+          reconnecting,
+          JSON.stringify({
+            type: 'sync_request',
+            lastTimestamp: 1500,
+            keys: [key1, key2],
+          }),
+        );
+
+        // Should have received a sync_response with messages since timestamp 1500
+        expect(reconnectSendSpy).toHaveBeenCalledTimes(1);
+        const response = JSON.parse(reconnectSendSpy.mock.calls[0]![0] as string) as Record<
+          string,
+          unknown
+        >;
+        expect(response['type']).toBe('sync_response');
+        const messages = response['messages'] as Array<Record<string, unknown>>;
+        // Should have the latest version per key (deduplicated)
+        expect(messages.length).toBe(2);
+      } finally {
+        Date.now = originalDateNow;
+      }
+    });
+
+    it('should ignore sync_request with invalid lastTimestamp', () => {
+      const { socket, sendSpy: spy } = createMockWebSocket();
+
+      manager.handleMessage(
+        socket,
+        JSON.stringify({
+          type: 'sync_request',
+          lastTimestamp: 'invalid',
+          keys: [],
+        }),
+      );
+
+      expect(spy).not.toHaveBeenCalled();
+    });
+
+    it('should return empty sync_response when no messages match', () => {
+      const { socket, sendSpy: spy } = createMockWebSocket();
+
+      manager.handleMessage(
+        socket,
+        JSON.stringify({
+          type: 'sync_request',
+          lastTimestamp: Date.now() + 99999,
+          keys: [],
+        }),
+      );
+
+      expect(spy).toHaveBeenCalledTimes(1);
+      const response = JSON.parse(spy.mock.calls[0]![0] as string) as Record<string, unknown>;
+      expect(response['type']).toBe('sync_response');
+      const messages = response['messages'] as unknown[];
+      expect(messages.length).toBe(0);
+    });
+
+    it('should record history even when no subscribers exist', () => {
+      const key = SubKeys.record('users', '1');
+      // No subscribers
+      manager.publishLocal(key, 1);
+      manager.publishLocal(key, 2);
+
+      expect(manager.getHistorySize()).toBe(2);
+      const missed = manager.getMessagesSince(0);
+      expect(missed.length).toBe(2);
     });
   });
 });

@@ -12,10 +12,10 @@ import { mkdir, open } from 'node:fs/promises';
 import path from 'node:path';
 import { pipeline } from 'node:stream/promises';
 
+import { verifyFileSignature, type FileSignatureData } from '@bslt/server-system';
 import { MS_PER_MINUTE, SECONDS_PER_DAY } from '@bslt/shared/primitives';
 import { HTTP_STATUS } from '@bslt/shared/system';
 
-import { verifyFileSignature, type FileSignatureData } from '@bslt/server-system';
 
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 

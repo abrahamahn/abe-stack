@@ -10,7 +10,7 @@ import {
 import * as tenantService from './tenantService';
 
 import type { AdminAppContext, AdminRequest } from './types';
-import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { HttpReply, HttpRequest } from '../../../system/src';
 
 // ============================================================================
 // Mocks
@@ -101,7 +101,7 @@ function createMockRequest(
   overrides: Partial<AdminRequest> = {},
   params: Record<string, string> = {},
   query: Record<string, unknown> = {},
-): AdminRequest & FastifyRequest {
+): AdminRequest & HttpRequest {
   return {
     cookies: {},
     headers: {},
@@ -110,24 +110,24 @@ function createMockRequest(
     params,
     query,
     ...overrides,
-  } as unknown as AdminRequest & FastifyRequest;
+  } as unknown as AdminRequest & HttpRequest;
 }
 
 function createUnauthenticatedRequest(
   params: Record<string, string> = {},
   query: Record<string, unknown> = {},
-): AdminRequest & FastifyRequest {
+): AdminRequest & HttpRequest {
   return {
     cookies: {},
     headers: {},
     requestInfo: { ipAddress: '127.0.0.1', userAgent: 'test' },
     params,
     query,
-  } as unknown as AdminRequest & FastifyRequest;
+  } as unknown as AdminRequest & HttpRequest;
 }
 
-function createMockReply(): FastifyReply {
-  return {} as FastifyReply;
+function createMockReply(): HttpReply {
+  return {} as HttpReply;
 }
 
 // ============================================================================

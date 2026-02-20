@@ -1,4 +1,4 @@
-// main/server/system/src/mailer/console.test.ts
+// main/server/system/src/email/console.test.ts
 import { describe, expect, it } from 'vitest';
 
 import { ConsoleEmailService } from './console';

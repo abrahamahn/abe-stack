@@ -3,6 +3,8 @@
 export { createWebhookClient } from './client';
 export type {
   CreateWebhookRequest,
+  DeliveryListResponse,
+  DeliveryReplayResponse,
   RotateSecretResponse,
   UpdateWebhookRequest,
   WebhookClient,

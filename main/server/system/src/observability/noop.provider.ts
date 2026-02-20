@@ -1,4 +1,4 @@
-// main/server/system/src/observability/noop-provider.ts
+// main/server/system/src/observability/noop.provider.ts
 /**
  * No-Op Error Tracking Provider
  *

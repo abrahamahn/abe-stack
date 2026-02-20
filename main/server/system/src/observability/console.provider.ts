@@ -1,4 +1,4 @@
-// main/server/system/src/observability/console-provider.ts
+// main/server/system/src/observability/console.provider.ts
 /**
  * Console Error Tracking Provider (Development)
  *

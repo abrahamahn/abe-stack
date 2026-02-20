@@ -200,7 +200,7 @@ export const tenantRoutes: RouteMap = createRouteMap([
       async (ctx: HandlerContext, _body: undefined, req: HttpRequest): Promise<RouteResult> => {
         const deps = asTenantsDeps(ctx);
         const tenantId = (req.params as { id: string }).id;
-        const query = (req.query ?? {}) as Record<string, string | undefined>;
+        const query = req.query as Record<string, string | undefined>;
         return handleListTenantAuditEvents(
           deps,
           tenantId,

@@ -209,7 +209,7 @@ export function buildAuthContext(
     .user;
   const workspaceCtx = getRequestWorkspaceContext(request);
 
-  const appRole = user?.role ?? 'user';
+  const appRole = (user?.role ?? 'user') as 'admin' | 'moderator' | 'user';
   const tenantRole: TenantRole | undefined =
     workspaceCtx?.role !== undefined ? (workspaceCtx.role as TenantRole) : undefined;
   const ownerFlag = isOwner !== undefined ? isOwner(request) : undefined;

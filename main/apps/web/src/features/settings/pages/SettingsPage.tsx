@@ -13,12 +13,14 @@ import { useMemo, type ReactElement } from 'react';
 import {
   ApiKeysManagement,
   AvatarUpload,
+  BackupCodesDisplay,
   DangerZone,
   DataControlsSection,
   DevicesList,
   EmailChangeForm,
   ForgotPasswordShortcut,
   NotificationPreferencesForm,
+  NotificationPreferencesSection,
   OAuthConnectionsList,
   PasskeyManagement,
   PasswordChangeForm,
@@ -88,6 +90,16 @@ const SecurityTab = ({ user }: { user: UserLocal }): ReactElement => {
           Two-Factor Authentication
         </Heading>
         <TotpManagement />
+      </div>
+
+      <div className="border-t pt-6">
+        <Heading as="h3" size="md" className="mb-4">
+          Backup Codes
+        </Heading>
+        <Text tone="muted" size="sm" className="mb-4">
+          Backup codes provide account recovery when your authenticator is unavailable.
+        </Text>
+        <BackupCodesDisplay />
       </div>
 
       <div className="border-t pt-6">
@@ -168,14 +180,20 @@ const SessionsTab = (): ReactElement => {
 
 const NotificationsTab = (): ReactElement => {
   return (
-    <div>
-      <Heading as="h3" size="md" className="mb-4">
-        Notification Preferences
-      </Heading>
-      <Text tone="muted" size="sm" className="mb-4">
-        Control how and when you receive notifications.
-      </Text>
-      <NotificationPreferencesForm />
+    <div className="space-y-6">
+      <div>
+        <Heading as="h3" size="md" className="mb-4">
+          Notification Preferences
+        </Heading>
+        <Text tone="muted" size="sm" className="mb-4">
+          Control how and when you receive notifications.
+        </Text>
+        <NotificationPreferencesForm />
+      </div>
+
+      <div className="border-t pt-6">
+        <NotificationPreferencesSection />
+      </div>
     </div>
   );
 };

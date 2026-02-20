@@ -57,6 +57,8 @@ export { useSudo } from './useSudo';
 export type { UseSudoOptions, UseSudoResult } from './useSudo';
 export { useTotpManagement } from './useTotpManagement';
 export type { TotpState, UseTotpManagementResult } from './useTotpManagement';
+export { useBackupCodes } from './useBackupCodes';
+export type { BackupCodesStatus, UseBackupCodesResult } from './useBackupCodes';
 export { useUndoHandler } from './useUndoHandler';
 export { useUsernameUpdate } from './useUsername';
 export type { UseUsernameUpdateOptions, UseUsernameUpdateResult } from './useUsername';

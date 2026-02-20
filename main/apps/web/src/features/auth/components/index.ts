@@ -1,4 +1,6 @@
 // main/apps/web/src/features/auth/components/index.ts
+export { AccountLockedMessage } from './AccountLockedMessage';
+export type { AccountLockedMessageProps } from './AccountLockedMessage';
 export { AuthForm } from './AuthForms';
 export type { AuthFormProps } from './AuthForms';
 export { AuthModal } from './AuthModal';
