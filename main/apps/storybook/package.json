@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "storybook": "storybook dev -p 6006",
+    "build": "storybook build -o dist",
     "build-storybook": "storybook build -o dist"
   },
   "dependencies": {

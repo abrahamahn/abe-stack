@@ -15,6 +15,8 @@ export {
   useRecords,
   useWrite,
   useUndoRedo,
+  isPermissionError,
+  createPermissionError,
   type UseRecordDeps,
   type UseRecordOptions,
   type UseRecordResult,
@@ -27,6 +29,10 @@ export {
   type WriteOptions,
   type UseUndoRedoDeps,
   type UseUndoRedoResult,
+  type PermissionError,
+  type PermissionRevokedEventPayload,
+  type PermissionRevokedCallback,
+  type PermissionEventListener,
 } from './hooks/index';
 
 // Engine-level RealtimeProvider

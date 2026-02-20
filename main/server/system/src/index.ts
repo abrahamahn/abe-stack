@@ -9,6 +9,12 @@
  */
 
 // ============================================================================
+// Bootstrap (System Context Assembly)
+// ============================================================================
+
+export { bootstrapSystem, type SystemContext } from './bootstrap';
+
+// ============================================================================
 // Errors
 // ============================================================================
 
@@ -292,12 +298,16 @@ export {
 
 export {
   MemoryQueueStore,
+  // Postgres Queue Store (canonical here)
+  PostgresQueueStore,
   QueueServer,
   // Redis Store
   RedisQueueStore,
   WriteService,
   // Memory Store
   createMemoryQueueStore,
+  // Postgres Queue Store Factory
+  createPostgresQueueStore,
   // Queue Server
   createQueueServer,
   // Redis Queue Store
@@ -348,10 +358,21 @@ export {
 } from './session';
 
 // ============================================================================
+// PubSub (canonical here)
+// ============================================================================
+
+export {
+  PostgresPubSub,
+  createPostgresPubSub,
+  type PostgresPubSubOptions,
+  type PubSubMessage,
+} from './pubsub';
+
+// ============================================================================
 // Search
 // ============================================================================
 
-// Factory (SearchProviderFactory, ProviderOptions, SqlSearchProviderOptions) canonical in @bslt/db
+// SearchProviderFactory, SqlSearchProvider canonical in @bslt/server-system
 export {
   SearchProviderFactory,
   SearchQueryBuilder,

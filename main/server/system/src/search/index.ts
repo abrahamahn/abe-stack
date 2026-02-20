@@ -3,14 +3,15 @@
  * Search Module
  *
  * Server-side search providers for PostgreSQL.
- * Canonical types, SQL provider, and factory live in @bslt/db;
- * system re-exports them for backwards-compatible access.
+ * SearchProviderFactory, SqlSearchProvider, and types are canonical
+ * in @bslt/server-system. The underlying implementations live in @bslt/db
+ * due to tight coupling with database internals.
  *
  * @module @bslt/server-system/search
  */
 
 // ============================================================================
-// Types (re-exported from @bslt/db)
+// Types
 // ============================================================================
 
 export type {
@@ -31,23 +32,28 @@ export type {
   SqlQueryOptions,
   SqlSearchProviderConfig,
   SqlTableConfig,
-} from '@bslt/db';
+} from './types';
 
 // ============================================================================
-// SQL Provider (re-exported from @bslt/db)
+// SQL Provider
 // ============================================================================
 
-export { createSqlSearchProvider, SqlSearchProvider } from '@bslt/db';
+export { createSqlSearchProvider, SqlSearchProvider } from './sql-provider';
 
 // ============================================================================
-// Factory (canonical in @bslt/db)
+// Factory
 // ============================================================================
 
 export {
   getSearchProviderFactory,
   resetSearchProviderFactory,
   SearchProviderFactory,
-} from '@bslt/db';
+} from './search-factory';
+
+export type {
+  ProviderOptions,
+  SqlSearchProviderOptions,
+} from './search-factory';
 
 // ============================================================================
 // Query Builder (unique to system)

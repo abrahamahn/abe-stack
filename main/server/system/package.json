@@ -101,8 +101,7 @@
     "@bslt/db": "workspace:*",
     "@bslt/shared": "workspace:*",
     "@simplewebauthn/server": "^13.2.2",
-    "ioredis": "^5.9.2",
-    "postgres": "^3.4.4"
+    "ioredis": "^5.9.2"
   },
   "optionalDependencies": {
     "@sentry/node": "^9.47.1"

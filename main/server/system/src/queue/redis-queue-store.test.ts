@@ -827,11 +827,6 @@ describe('RedisQueueStore', () => {
 
     test('should enqueue normally when no idempotency key is provided', async () => {
       const task = makeTask({ scheduledAt: new Date(Date.now() - 1000).toISOString() });
-      let capturedPipeline: ReturnType<typeof createMockPipeline> | undefined;
-      mockRedisInstance.pipeline.mockImplementation(() => {
-        capturedPipeline = createMockPipeline();
-        return capturedPipeline;
-      });
 
       await store.enqueue(task);
 
@@ -843,7 +838,6 @@ describe('RedisQueueStore', () => {
 
       // Pipeline should have been used for normal enqueue
       expect(mockRedisInstance.pipeline).toHaveBeenCalled();
-      expect(capturedPipeline).toBeDefined();
     });
 
     test('should allow enqueue when idempotency keys differ', async () => {

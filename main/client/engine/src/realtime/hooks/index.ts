@@ -27,3 +27,11 @@ export type {
   UseUndoRedoDeps,
   UseUndoRedoResult,
 } from './useUndoRedo';
+
+export { isPermissionError, createPermissionError } from './usePermissionError';
+export type {
+  PermissionError,
+  PermissionRevokedEventPayload,
+  PermissionRevokedCallback,
+  PermissionEventListener,
+} from './usePermissionError';

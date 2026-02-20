@@ -8,7 +8,7 @@
 
 import { HTTP_STATUS, jobListQuerySchema } from '@bslt/shared';
 
-import { PostgresQueueStore, type JobListOptions } from '../../../db/src';
+import { PostgresQueueStore, type JobListOptions } from '@bslt/db';
 import { ERROR_MESSAGES } from '../auth';
 
 import {
