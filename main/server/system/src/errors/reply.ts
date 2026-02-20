@@ -1,9 +1,10 @@
 // main/server/system/src/errors/reply.ts
 /**
- * Fastify Reply Helpers
+ * Reply Helpers
  *
- * Bridges the shared error and Result primitives to Fastify's reply mechanism.
- * Enforces the canonical { ok, error/data } wire shape on every response.
+ * Bridges the shared error and Result primitives to the abstract HttpReply
+ * interface. Enforces the canonical { ok, error/data } wire shape on every
+ * response.
  *
  * Usage:
  *   // Service returns Result<T, AppError>
@@ -11,7 +12,7 @@
  *   return sendResult(result, reply, request, 201);
  *
  *   // Direct error reply
- *   return replyError(reply, new NotFoundError(), request.correlationId);
+ *   return replyError(reply, new NotFoundError(), correlationId);
  *
  *   // Direct success reply
  *   return replyOk(reply, { id: '123' }, 201);
@@ -22,7 +23,7 @@ import { getErrorStatusCode, toAppError } from '@bslt/shared/system';
 
 import type { ApiErrorResponse, ApiSuccessResponse, Result } from '@bslt/shared/primitives';
 import type { AppError } from '@bslt/shared/system';
-import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { HttpReply, HttpRequest } from '../routing/http.types';
 
 // ============================================================================
 // Internal builders
@@ -68,7 +69,7 @@ function buildErrorBody(error: AppError, correlationId?: string): ApiErrorRespon
 // ============================================================================
 
 /**
- * Converts a `Result<T, AppError>` into a Fastify reply.
+ * Converts a `Result<T, AppError>` into an HTTP reply.
  *
  * On `Ok`  → sends `{ ok: true, data }` at `successStatus` (default 200).
  * On `Err` → sends `{ ok: false, error: { code, message, correlationId } }`
@@ -78,14 +79,14 @@ function buildErrorBody(error: AppError, correlationId?: string): ApiErrorRespon
  * so callers never need to guard against raw Error instances.
  *
  * @param result - The Result to send
- * @param reply - Fastify reply instance
- * @param request - Fastify request (used to read correlationId)
+ * @param reply - HTTP reply instance
+ * @param request - HTTP request (used to read correlationId)
  * @param successStatus - HTTP status for the success case (default: 200)
  */
 export function sendResult<T>(
   result: Result<T, AppError>,
-  reply: FastifyReply,
-  request: FastifyRequest,
+  reply: HttpReply,
+  request: HttpRequest,
   successStatus = 200,
 ): void {
   if (isOk(result)) {
@@ -103,21 +104,21 @@ export function sendResult<T>(
  * Useful in handlers that want to return an error response directly instead
  * of relying on the global error handler.
  *
- * @param reply - Fastify reply instance
+ * @param reply - HTTP reply instance
  * @param error - The AppError to send
  * @param correlationId - Optional correlation ID for client-side tracing
  */
-export function replyError(reply: FastifyReply, error: AppError, correlationId?: string): void {
+export function replyError(reply: HttpReply, error: AppError, correlationId?: string): void {
   void reply.status(getErrorStatusCode(error)).send(buildErrorBody(error, correlationId));
 }
 
 /**
  * Sends a typed `ApiSuccessResponse<T>`.
  *
- * @param reply - Fastify reply instance
+ * @param reply - HTTP reply instance
  * @param data - The response payload
  * @param status - HTTP status code (default: 200)
  */
-export function replyOk(reply: FastifyReply, data: unknown, status = 200): void {
+export function replyOk(reply: HttpReply, data: unknown, status = 200): void {
   void reply.status(status).send(buildOkBody(data));
 }

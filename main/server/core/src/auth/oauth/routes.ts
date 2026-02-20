@@ -20,6 +20,8 @@ import {
   protectedRoute,
   publicRoute,
   type HandlerContext,
+  type HttpReply,
+  type HttpRequest,
   type RouteDefinition,
   type RouteResult,
 } from '../../../../system/src';
@@ -34,7 +36,6 @@ import {
 } from './handlers';
 
 import type { AppContext } from '../types';
-import type { FastifyReply, FastifyRequest } from 'fastify';
 
 /**
  * Narrow HandlerContext to AppContext.
@@ -82,8 +83,8 @@ export const oauthRouteEntries: [string, RouteDefinition][] = [
       async (
         ctx: HandlerContext,
         _body: undefined,
-        req: FastifyRequest,
-        reply: FastifyReply,
+        req: HttpRequest,
+        reply: HttpReply,
       ): Promise<RouteResult> => {
         return handleOAuthInitiate(asAppContext(ctx), { provider: 'google' }, req, reply);
       },
@@ -99,8 +100,8 @@ export const oauthRouteEntries: [string, RouteDefinition][] = [
       async (
         ctx: HandlerContext,
         _body: undefined,
-        req: FastifyRequest,
-        reply: FastifyReply,
+        req: HttpRequest,
+        reply: HttpReply,
       ): Promise<RouteResult> => {
         return handleOAuthInitiate(asAppContext(ctx), { provider: 'github' }, req, reply);
       },
@@ -116,8 +117,8 @@ export const oauthRouteEntries: [string, RouteDefinition][] = [
       async (
         ctx: HandlerContext,
         _body: undefined,
-        req: FastifyRequest,
-        reply: FastifyReply,
+        req: HttpRequest,
+        reply: HttpReply,
       ): Promise<RouteResult> => {
         return handleOAuthInitiate(asAppContext(ctx), { provider: 'apple' }, req, reply);
       },
@@ -134,8 +135,8 @@ export const oauthRouteEntries: [string, RouteDefinition][] = [
       async (
         ctx: HandlerContext,
         _body: unknown,
-        req: FastifyRequest,
-        reply: FastifyReply,
+        req: HttpRequest,
+        reply: HttpReply,
       ): Promise<RouteResult> => {
         const query: OAuthCallbackQuery = oauthCallbackQuerySchema.parse(req.query);
         return handleOAuthCallbackRequest(
@@ -163,8 +164,8 @@ export const oauthRouteEntries: [string, RouteDefinition][] = [
       async (
         ctx: HandlerContext,
         _body: unknown,
-        req: FastifyRequest,
-        reply: FastifyReply,
+        req: HttpRequest,
+        reply: HttpReply,
       ): Promise<RouteResult> => {
         const query: OAuthCallbackQuery = oauthCallbackQuerySchema.parse(req.query);
         return handleOAuthCallbackRequest(
@@ -192,8 +193,8 @@ export const oauthRouteEntries: [string, RouteDefinition][] = [
       async (
         ctx: HandlerContext,
         _body: unknown,
-        req: FastifyRequest,
-        reply: FastifyReply,
+        req: HttpRequest,
+        reply: HttpReply,
       ): Promise<RouteResult> => {
         const query: OAuthCallbackQuery = oauthCallbackQuerySchema.parse(req.query);
         return handleOAuthCallbackRequest(
@@ -222,8 +223,8 @@ export const oauthRouteEntries: [string, RouteDefinition][] = [
       async (
         ctx: HandlerContext,
         _body: undefined,
-        req: FastifyRequest,
-        reply: FastifyReply,
+        req: HttpRequest,
+        reply: HttpReply,
       ): Promise<RouteResult> => {
         return handleOAuthLink(asAppContext(ctx), { provider: 'google' }, req, reply);
       },
@@ -240,8 +241,8 @@ export const oauthRouteEntries: [string, RouteDefinition][] = [
       async (
         ctx: HandlerContext,
         _body: undefined,
-        req: FastifyRequest,
-        reply: FastifyReply,
+        req: HttpRequest,
+        reply: HttpReply,
       ): Promise<RouteResult> => {
         return handleOAuthLink(asAppContext(ctx), { provider: 'github' }, req, reply);
       },
@@ -258,8 +259,8 @@ export const oauthRouteEntries: [string, RouteDefinition][] = [
       async (
         ctx: HandlerContext,
         _body: undefined,
-        req: FastifyRequest,
-        reply: FastifyReply,
+        req: HttpRequest,
+        reply: HttpReply,
       ): Promise<RouteResult> => {
         return handleOAuthLink(asAppContext(ctx), { provider: 'apple' }, req, reply);
       },
@@ -277,8 +278,8 @@ export const oauthRouteEntries: [string, RouteDefinition][] = [
       async (
         ctx: HandlerContext,
         _body: undefined,
-        req: FastifyRequest,
-        reply: FastifyReply,
+        req: HttpRequest,
+        reply: HttpReply,
       ): Promise<RouteResult> => {
         return handleOAuthUnlink(asAppContext(ctx), { provider: 'google' }, req, reply);
       },
@@ -295,8 +296,8 @@ export const oauthRouteEntries: [string, RouteDefinition][] = [
       async (
         ctx: HandlerContext,
         _body: undefined,
-        req: FastifyRequest,
-        reply: FastifyReply,
+        req: HttpRequest,
+        reply: HttpReply,
       ): Promise<RouteResult> => {
         return handleOAuthUnlink(asAppContext(ctx), { provider: 'github' }, req, reply);
       },
@@ -313,8 +314,8 @@ export const oauthRouteEntries: [string, RouteDefinition][] = [
       async (
         ctx: HandlerContext,
         _body: undefined,
-        req: FastifyRequest,
-        reply: FastifyReply,
+        req: HttpRequest,
+        reply: HttpReply,
       ): Promise<RouteResult> => {
         return handleOAuthUnlink(asAppContext(ctx), { provider: 'apple' }, req, reply);
       },
@@ -332,8 +333,8 @@ export const oauthRouteEntries: [string, RouteDefinition][] = [
       async (
         ctx: HandlerContext,
         _body: unknown,
-        req: FastifyRequest,
-        reply: FastifyReply,
+        req: HttpRequest,
+        reply: HttpReply,
       ): Promise<RouteResult> => {
         return handleGetConnections(asAppContext(ctx), req, reply);
       },

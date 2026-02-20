@@ -45,11 +45,11 @@ export {
   type SignedUrlData
 } from './signing';
 
-// HTTP Server
+// HTTP Signing helpers (registerFileServer/FilesConfig moved to apps/server/src/http/file-server.ts)
 export {
   createSignature as createFileSignature,
   normalizeFilename,
-  registerFileServer,
-  verifySignature as verifyFileSignature, type FilesConfig, type FileSignatureData
+  verifySignature as verifyFileSignature,
+  type FileSignatureData,
 } from './http';
 

@@ -863,8 +863,8 @@ export {
   type ValidationOptions,
 } from './system';
 
-// Crypto (browser-safe token storage only — jwt.ts is server-only, import from ./system/crypto directly)
-export { addAuthHeader, createTokenStore, tokenStore, type TokenStore } from './system';
+// Crypto (browser-safe token storage only — import from ./system/crypto/token to avoid bundling jwt.ts)
+export { addAuthHeader, createTokenStore, tokenStore, type TokenStore } from './system/crypto/token';
 
 // Usage metering
 export {

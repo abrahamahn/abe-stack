@@ -353,7 +353,7 @@ See `docs/dev/ci-cd.md` for the full CI/CD workflow documentation.
 | CI/CD & infrastructure   | `docs/dev/ci-cd.md`          |
 | Testing strategy         | `docs/dev/testing.md`        |
 | Current sprint / backlog | `docs/todo/TODO.md`          |
-| Future roadmap           | `docs/todo/ROADMAP.md`       |
+| Future roadmap           | `docs/todo/TODO.md` (Sprint 7) |
 | Configuration system     | `config/README.md`           |
 
 ---

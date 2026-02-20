@@ -14,6 +14,7 @@ import {
   createRouteMap,
   protectedRoute,
   type HandlerContext,
+  type HttpRequest,
   type RouteMap,
   type RouteResult,
 } from '../../../system/src';
@@ -33,7 +34,6 @@ import type {
   WebhooksModuleDeps,
   WebhooksRequest,
 } from './types';
-import type { FastifyRequest } from 'fastify';
 
 // ============================================================================
 // Context Bridge
@@ -68,7 +68,7 @@ export const webhookRoutes: RouteMap = createRouteMap([
     'webhooks',
     protectedRoute(
       'POST',
-      async (ctx: HandlerContext, body: unknown, req: FastifyRequest): Promise<RouteResult> => {
+      async (ctx: HandlerContext, body: unknown, req: HttpRequest): Promise<RouteResult> => {
         const deps = asWebhooksDeps(ctx);
         const tenantId = (req.headers['x-tenant-id'] as string | undefined) ?? '';
         return handleCreateWebhook(
@@ -89,7 +89,7 @@ export const webhookRoutes: RouteMap = createRouteMap([
     'webhooks/list',
     protectedRoute(
       'GET',
-      async (ctx: HandlerContext, _body: undefined, req: FastifyRequest): Promise<RouteResult> => {
+      async (ctx: HandlerContext, _body: undefined, req: HttpRequest): Promise<RouteResult> => {
         const deps = asWebhooksDeps(ctx);
         const tenantId = (req.headers['x-tenant-id'] as string | undefined) ?? '';
         return handleListWebhooks(deps, tenantId, req as unknown as WebhooksRequest);
@@ -105,7 +105,7 @@ export const webhookRoutes: RouteMap = createRouteMap([
     'webhooks/:id',
     protectedRoute(
       'GET',
-      async (ctx: HandlerContext, _body: undefined, req: FastifyRequest): Promise<RouteResult> => {
+      async (ctx: HandlerContext, _body: undefined, req: HttpRequest): Promise<RouteResult> => {
         const deps = asWebhooksDeps(ctx);
         const tenantId = (req.headers['x-tenant-id'] as string | undefined) ?? '';
         const webhookId = (req.params as { id: string }).id;
@@ -122,7 +122,7 @@ export const webhookRoutes: RouteMap = createRouteMap([
     'webhooks/:id/update',
     protectedRoute(
       'POST',
-      async (ctx: HandlerContext, body: unknown, req: FastifyRequest): Promise<RouteResult> => {
+      async (ctx: HandlerContext, body: unknown, req: HttpRequest): Promise<RouteResult> => {
         const deps = asWebhooksDeps(ctx);
         const tenantId = (req.headers['x-tenant-id'] as string | undefined) ?? '';
         const webhookId = (req.params as { id: string }).id;
@@ -145,7 +145,7 @@ export const webhookRoutes: RouteMap = createRouteMap([
     'webhooks/:id/delete',
     protectedRoute(
       'POST',
-      async (ctx: HandlerContext, _body: undefined, req: FastifyRequest): Promise<RouteResult> => {
+      async (ctx: HandlerContext, _body: undefined, req: HttpRequest): Promise<RouteResult> => {
         const deps = asWebhooksDeps(ctx);
         const tenantId = (req.headers['x-tenant-id'] as string | undefined) ?? '';
         const webhookId = (req.params as { id: string }).id;
@@ -162,7 +162,7 @@ export const webhookRoutes: RouteMap = createRouteMap([
     'webhooks/:id/rotate-secret',
     protectedRoute(
       'POST',
-      async (ctx: HandlerContext, _body: undefined, req: FastifyRequest): Promise<RouteResult> => {
+      async (ctx: HandlerContext, _body: undefined, req: HttpRequest): Promise<RouteResult> => {
         const deps = asWebhooksDeps(ctx);
         const tenantId = (req.headers['x-tenant-id'] as string | undefined) ?? '';
         const webhookId = (req.params as { id: string }).id;

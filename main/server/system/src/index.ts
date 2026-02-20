@@ -12,22 +12,22 @@
 // Errors
 // ============================================================================
 
-export { registerErrorHandler, replyError, replyOk, sendResult } from './errors';
+// registerErrorHandler moved to apps/server/src/http/error-handler.ts
+export { replyError, replyOk, sendResult } from './errors';
 
 // ============================================================================
 // Logger
 // ============================================================================
 
+// registerLoggingMiddleware and createJobLogger (Fastify-specific) moved to apps/server/src/middleware/logging.ts
 export {
   createBaseLogger,
   createBaseRequestLogger,
   createConsoleLogger,
-  createJobLogger,
   createLogRequestContext,
   createLogger,
   createRequestLogger,
   getOrCreateCorrelationId,
-  registerLoggingMiddleware,
   type BaseLogger,
   type BaseLoggerType,
   type ConsoleLogLevel,
@@ -224,6 +224,7 @@ export {
 // Storage
 // ============================================================================
 
+// registerFileServer and FilesConfig moved to apps/server/src/http/file-server.ts
 export {
   // Providers
   LocalStorageProvider,
@@ -248,14 +249,11 @@ export {
   normalizeStorageFilename,
   normalizeStorageKey,
   parseSignedUrl,
-  // HTTP Server
-  registerFileServer,
   toStorageError,
   validateStorage,
   verifyFileSignature,
   verifyStorageSignature,
   type FileSignatureData,
-  type FilesConfig,
   // Types
   type LocalStorageConfig,
   type S3StorageConfig,
@@ -393,9 +391,10 @@ export {
 } from './geo-ip';
 
 // ============================================================================
-// Routing (Fastify-specific)
+// Routing
 // ============================================================================
 
+// registerRouteMap, AuthGuardFactory, RouterOptions moved to apps/server/src/http/router.ts
 export {
   clearRegistry,
   createRouteMap,
@@ -403,10 +402,10 @@ export {
   protectedRoute,
   publicRoute,
   registerRoute,
-  registerRouteMap,
-  type AuthGuardFactory,
   type HandlerContext,
   type HttpMethod,
+  type HttpReply,
+  type HttpRequest,
   type JsonSchemaObject,
   type RouteDefinition,
   type RouteHandler,
@@ -415,7 +414,6 @@ export {
   type RouteRegistryEntry,
   type RouteResult,
   type RouteSchema,
-  type RouterOptions,
   type ValidationSchema,
 } from './routing';
 

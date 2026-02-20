@@ -8,7 +8,7 @@
 
 import { authRoutes, createAuthGuard } from '@bslt/core/auth';
 import { createRepositories } from '@bslt/db';
-import { registerRouteMap } from '@bslt/server-system';
+import { registerRouteMap } from '@/http';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createDbHarness, type DbHarness } from './db-harness';

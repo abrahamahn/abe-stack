@@ -7,7 +7,7 @@
  */
 
 import { authRoutes, createAuthGuard, hashPassword } from '@bslt/core/auth';
-import { registerRouteMap } from '@bslt/server-system';
+import { registerRouteMap } from '@/http';
 import { AUTH_SUCCESS_MESSAGES, HTTP_ERROR_MESSAGES } from '@bslt/shared';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 

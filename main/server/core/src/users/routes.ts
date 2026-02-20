@@ -31,6 +31,7 @@ import {
   createRouteMap,
   protectedRoute,
   type HandlerContext,
+  type HttpRequest,
   type RouteMap,
   type RouteResult,
 } from '../../../system/src';
@@ -57,7 +58,6 @@ import {
 import { ERROR_MESSAGES, type UsersModuleDeps, type UsersRequest } from './types';
 
 import type { Repositories } from '../../../db/src';
-import type { FastifyRequest } from 'fastify';
 
 // ============================================================================
 // Context Bridge
@@ -93,7 +93,7 @@ function asUsersDeps(ctx: HandlerContext): UsersModuleDeps {
  */
 async function resolveCurrentFamilyId(
   repos: Repositories,
-  req: FastifyRequest,
+  req: HttpRequest,
 ): Promise<string | undefined> {
   const cookies = (req as unknown as UsersRequest).cookies;
   const refreshToken = cookies[REFRESH_COOKIE_NAME];
@@ -134,7 +134,7 @@ export const userRoutes: RouteMap = createRouteMap([
     'users/me',
     protectedRoute(
       'GET',
-      async (ctx: HandlerContext, _body: undefined, req: FastifyRequest): Promise<RouteResult> => {
+      async (ctx: HandlerContext, _body: undefined, req: HttpRequest): Promise<RouteResult> => {
         return handleMe(ctx, req as unknown as UsersRequest);
       },
       'user',
@@ -148,7 +148,7 @@ export const userRoutes: RouteMap = createRouteMap([
     'users/list',
     protectedRoute(
       'GET',
-      (ctx: HandlerContext, _body: undefined, req: FastifyRequest): Promise<RouteResult> => {
+      (ctx: HandlerContext, _body: undefined, req: HttpRequest): Promise<RouteResult> => {
         return handleListUsers(ctx, req as unknown as UsersRequest);
       },
       'admin',
@@ -162,7 +162,7 @@ export const userRoutes: RouteMap = createRouteMap([
     'users/me/profile-completeness',
     protectedRoute(
       'GET',
-      async (ctx: HandlerContext, _body: undefined, req: FastifyRequest): Promise<RouteResult> => {
+      async (ctx: HandlerContext, _body: undefined, req: HttpRequest): Promise<RouteResult> => {
         return handleGetProfileCompleteness(ctx, req as unknown as UsersRequest);
       },
       'user',
@@ -176,7 +176,7 @@ export const userRoutes: RouteMap = createRouteMap([
     'users/me/username',
     protectedRoute(
       'PATCH',
-      async (ctx: HandlerContext, body: unknown, req: FastifyRequest): Promise<RouteResult> => {
+      async (ctx: HandlerContext, body: unknown, req: HttpRequest): Promise<RouteResult> => {
         return handleUpdateUsername(
           ctx,
           body as UpdateUsernameRequest,
@@ -198,7 +198,7 @@ export const userRoutes: RouteMap = createRouteMap([
     'users/me/update',
     protectedRoute(
       'PATCH',
-      async (ctx: HandlerContext, body: unknown, req: FastifyRequest): Promise<RouteResult> => {
+      async (ctx: HandlerContext, body: unknown, req: HttpRequest): Promise<RouteResult> => {
         return handleUpdateProfile(ctx, body as UpdateProfileData, req);
       },
       'user',
@@ -212,7 +212,7 @@ export const userRoutes: RouteMap = createRouteMap([
     'users/me/password',
     protectedRoute(
       'POST',
-      async (ctx: HandlerContext, body: unknown, req: FastifyRequest): Promise<RouteResult> => {
+      async (ctx: HandlerContext, body: unknown, req: HttpRequest): Promise<RouteResult> => {
         return handleChangePassword(ctx, body as ChangePasswordRequest, req);
       },
       'user',
@@ -230,7 +230,7 @@ export const userRoutes: RouteMap = createRouteMap([
     'users/me/avatar',
     protectedRoute(
       'PUT',
-      async (ctx: HandlerContext, body: unknown, req: FastifyRequest): Promise<RouteResult> => {
+      async (ctx: HandlerContext, body: unknown, req: HttpRequest): Promise<RouteResult> => {
         return handleUploadAvatar(ctx, body, req);
       },
       'user',
@@ -244,7 +244,7 @@ export const userRoutes: RouteMap = createRouteMap([
     'users/me/avatar/delete',
     protectedRoute(
       'POST',
-      async (ctx: HandlerContext, _body: unknown, req: FastifyRequest): Promise<RouteResult> => {
+      async (ctx: HandlerContext, _body: unknown, req: HttpRequest): Promise<RouteResult> => {
         return handleDeleteAvatar(ctx, undefined, req);
       },
       'user',
@@ -262,7 +262,7 @@ export const userRoutes: RouteMap = createRouteMap([
     'users/me/sessions',
     protectedRoute(
       'GET',
-      async (ctx: HandlerContext, _body: undefined, req: FastifyRequest): Promise<RouteResult> => {
+      async (ctx: HandlerContext, _body: undefined, req: HttpRequest): Promise<RouteResult> => {
         const deps = asUsersDeps(ctx);
         const request = req as unknown as UsersRequest;
 
@@ -294,7 +294,7 @@ export const userRoutes: RouteMap = createRouteMap([
     'users/me/sessions/count',
     protectedRoute(
       'GET',
-      async (ctx: HandlerContext, _body: undefined, req: FastifyRequest): Promise<RouteResult> => {
+      async (ctx: HandlerContext, _body: undefined, req: HttpRequest): Promise<RouteResult> => {
         const deps = asUsersDeps(ctx);
         const request = req as unknown as UsersRequest;
 
@@ -324,7 +324,7 @@ export const userRoutes: RouteMap = createRouteMap([
     'users/me/sessions/:id',
     protectedRoute(
       'DELETE',
-      async (ctx: HandlerContext, _body: unknown, req: FastifyRequest): Promise<RouteResult> => {
+      async (ctx: HandlerContext, _body: unknown, req: HttpRequest): Promise<RouteResult> => {
         const deps = asUsersDeps(ctx);
         const request = req as unknown as UsersRequest;
 
@@ -361,7 +361,7 @@ export const userRoutes: RouteMap = createRouteMap([
     'users/me/sessions/revoke-all',
     protectedRoute(
       'POST',
-      async (ctx: HandlerContext, _body: unknown, req: FastifyRequest): Promise<RouteResult> => {
+      async (ctx: HandlerContext, _body: unknown, req: HttpRequest): Promise<RouteResult> => {
         const deps = asUsersDeps(ctx);
         const request = req as unknown as UsersRequest;
 
@@ -401,7 +401,7 @@ export const userRoutes: RouteMap = createRouteMap([
     'users/me/deactivate',
     protectedRoute(
       'POST',
-      async (ctx: HandlerContext, body: unknown, req: FastifyRequest): Promise<RouteResult> => {
+      async (ctx: HandlerContext, body: unknown, req: HttpRequest): Promise<RouteResult> => {
         return handleDeactivateAccount(
           ctx,
           body as DeactivateAccountRequest,
@@ -419,7 +419,7 @@ export const userRoutes: RouteMap = createRouteMap([
     'users/me/delete',
     protectedRoute(
       'POST',
-      async (ctx: HandlerContext, body: unknown, req: FastifyRequest): Promise<RouteResult> => {
+      async (ctx: HandlerContext, body: unknown, req: HttpRequest): Promise<RouteResult> => {
         return handleRequestDeletion(
           ctx,
           body as DeleteAccountRequest,
@@ -437,7 +437,7 @@ export const userRoutes: RouteMap = createRouteMap([
     'users/me/reactivate',
     protectedRoute(
       'POST',
-      async (ctx: HandlerContext, _body: unknown, req: FastifyRequest): Promise<RouteResult> => {
+      async (ctx: HandlerContext, _body: unknown, req: HttpRequest): Promise<RouteResult> => {
         return handleReactivateAccount(ctx, undefined, req as unknown as UsersRequest);
       },
       'user',

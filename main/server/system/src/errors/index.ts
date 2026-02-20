@@ -2,9 +2,10 @@
 /**
  * Errors Module
  *
- * Fastify-specific error handler. Error classes, utilities, and mapper types
- * are canonical in @bslt/shared — import them from there directly.
+ * HTTP reply helpers using abstract interfaces. Error classes, utilities,
+ * and mapper types are canonical in @bslt/shared — import them from there.
+ *
+ * registerErrorHandler (Fastify-specific) moved to apps/server/src/http/error-handler.ts.
  */
 
-export { registerErrorHandler } from './handler';
 export { replyError, replyOk, sendResult } from './reply';

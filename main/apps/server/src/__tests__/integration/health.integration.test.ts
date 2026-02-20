@@ -7,7 +7,7 @@
  * the built-in /health route conflict).
  */
 
-import { registerRouteMap } from '@bslt/server-system';
+import { registerRouteMap } from '@/http';
 import fastify from 'fastify';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 

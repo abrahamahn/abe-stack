@@ -23,6 +23,8 @@ import {
   protectedRoute,
   publicRoute,
   type HandlerContext,
+  type HttpReply,
+  type HttpRequest,
   type RouteDefinition,
 } from '../../../../system/src';
 import {
@@ -36,7 +38,6 @@ import {
 } from '../handlers/webauthn';
 
 import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../types';
-import type { FastifyReply, FastifyRequest } from 'fastify';
 
 function asAppContext(ctx: HandlerContext): AppContext {
   return ctx as unknown as AppContext;
@@ -51,7 +52,7 @@ export const webauthnRouteEntries: [string, RouteDefinition][] = [
     'auth/webauthn/register/options',
     protectedRoute(
       'POST',
-      async (ctx: HandlerContext, _body: unknown, req: FastifyRequest) => {
+      async (ctx: HandlerContext, _body: unknown, req: HttpRequest) => {
         return handleWebauthnRegisterOptions(
           asAppContext(ctx),
           undefined,
@@ -68,7 +69,7 @@ export const webauthnRouteEntries: [string, RouteDefinition][] = [
     'auth/webauthn/register/verify',
     protectedRoute(
       'POST',
-      async (ctx: HandlerContext, body: unknown, req: FastifyRequest) => {
+      async (ctx: HandlerContext, body: unknown, req: HttpRequest) => {
         return handleWebauthnRegisterVerify(
           asAppContext(ctx),
           body as WebauthnRegisterVerifyRequest,
@@ -98,7 +99,7 @@ export const webauthnRouteEntries: [string, RouteDefinition][] = [
     'auth/webauthn/login/verify',
     publicRoute(
       'POST',
-      async (ctx: HandlerContext, body: unknown, req: FastifyRequest, reply: FastifyReply) => {
+      async (ctx: HandlerContext, body: unknown, req: HttpRequest, reply: HttpReply) => {
         return handleWebauthnLoginVerify(
           asAppContext(ctx),
           body as WebauthnLoginVerifyRequest,
@@ -116,7 +117,7 @@ export const webauthnRouteEntries: [string, RouteDefinition][] = [
     'users/me/passkeys',
     protectedRoute(
       'GET',
-      async (ctx: HandlerContext, _body: unknown, req: FastifyRequest) => {
+      async (ctx: HandlerContext, _body: unknown, req: HttpRequest) => {
         return handleListPasskeys(
           asAppContext(ctx),
           undefined,
@@ -133,7 +134,7 @@ export const webauthnRouteEntries: [string, RouteDefinition][] = [
     'users/me/passkeys/:id',
     protectedRoute(
       'PATCH',
-      async (ctx: HandlerContext, body: unknown, req: FastifyRequest) => {
+      async (ctx: HandlerContext, body: unknown, req: HttpRequest) => {
         return handleRenamePasskey(
           asAppContext(ctx),
           body as RenamePasskeyRequest,
@@ -150,7 +151,7 @@ export const webauthnRouteEntries: [string, RouteDefinition][] = [
     'users/me/passkeys/:id/delete',
     protectedRoute(
       'DELETE',
-      async (ctx: HandlerContext, _body: unknown, req: FastifyRequest) => {
+      async (ctx: HandlerContext, _body: unknown, req: HttpRequest) => {
         return handleDeletePasskey(
           asAppContext(ctx),
           undefined,

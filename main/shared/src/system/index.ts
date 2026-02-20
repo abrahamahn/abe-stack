@@ -508,31 +508,11 @@ export {
 // Crypto
 // ============================================================================
 
-export {
-  // jwt
-  checkTokenSecret,
-  createJwtRotationHandler,
-  decode,
-  jwtDecode,
-  JwtError,
-  jwtSign,
-  jwtVerify,
-  sign,
-  signWithRotation,
-  verify,
-  verifyWithRotation,
-  type JwtErrorCode,
-  type JwtHeader,
-  type JwtPayload,
-  type JwtRotationConfig,
-  type SignOptions,
-  type VerifyOptions,
-  // token
-  addAuthHeader,
-  createTokenStore,
-  tokenStore,
-  type TokenStore,
-} from './crypto';
+// JWT is server-only (uses node:crypto). Use @bslt/shared/system/crypto for JWT functions.
+// Keeping them here would pull jwt.ts into browser bundles via @bslt/shared root barrel.
+
+// Token storage is browser-safe — does not import node:crypto.
+export { addAuthHeader, createTokenStore, tokenStore, type TokenStore } from './crypto/token';
 
 // ============================================================================
 // API Keys

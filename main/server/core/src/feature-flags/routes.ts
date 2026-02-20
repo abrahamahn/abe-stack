@@ -19,6 +19,8 @@ import {
 import {
   createRouteMap,
   protectedRoute,
+  type HttpReply,
+  type HttpRequest,
   type RouteDefinition,
   type RouteHandler,
   type RouteMap,
@@ -37,7 +39,6 @@ import {
 } from './handlers';
 
 import type { FeatureFlagAppContext } from './types';
-import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
 // Route Helper
@@ -55,8 +56,8 @@ function adminProtectedRoute(
   handler: (
     ctx: FeatureFlagAppContext,
     body: unknown,
-    request: FastifyRequest,
-    reply: FastifyReply,
+    request: HttpRequest,
+    reply: HttpReply,
   ) => Promise<unknown>,
   schema?: ValidationSchema,
   openapi?: import('../../../system/src').RouteOpenApiMeta,
@@ -72,8 +73,8 @@ function userProtectedRoute(
   handler: (
     ctx: FeatureFlagAppContext,
     body: unknown,
-    request: FastifyRequest,
-    reply: FastifyReply,
+    request: HttpRequest,
+    reply: HttpReply,
   ) => Promise<unknown>,
   schema?: ValidationSchema,
   openapi?: import('../../../system/src').RouteOpenApiMeta,

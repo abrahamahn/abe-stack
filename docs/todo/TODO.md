@@ -12,7 +12,7 @@ Last updated: 2026-02-12
 
 - This file tracks **open work only** (`- [ ]`).
 - Completed checklist entries were migrated to `docs/log/2026-W07.md`.
-- Focus order: Sprint 3 -> Sprint 4 -> Sprint 5 -> Sprint 6.
+- Focus order: Sprint 3 -> Sprint 4 -> Sprint 5 -> Sprint 6 -> Sprint 7.
 
 ---
 
@@ -26,6 +26,7 @@ Last updated: 2026-02-12
 - [Sprint 4: Test Backfill + Quality Hardening](#sprint-4-test-backfill--quality-hardening)
 - [Sprint 5: Production Launch Readiness & Polish](#sprint-5-production-launch-readiness--polish)
 - [Sprint 6: Post-Launch Platform Maturity & Growth](#sprint-6-post-launch-platform-maturity--growth)
+- [Sprint 7: Enterprise Platform Growth](#sprint-7-enterprise-platform-growth)
 - [Notes / Guardrails](#notes--guardrails)
 
 ---
@@ -114,154 +115,84 @@ Each verification item is a **vertical slice**, but the output is confidence, no
 - prove client hooks/UI wiring works
 - prove tests cover the critical behaviors
 
-> Archived verification notes (kept for traceability):
+> **Archived verification notes** — kept for traceability.
 
 <details>
-<summary>Expand Verification Queue</summary>
+<summary>Verification Queue — All Modules</summary>
 
-### Auth Verification (CHECKLIST 1.1–1.11) — COMPLETE
+#### Auth & Sessions — COMPLETE
 
-All 11 auth sub-systems verified: Registration, Email Verification, Login, Token Refresh, Logout, Password Reset, Magic Link, OAuth2, Email Change, TOTP, Canonicalization. All contracts, routes, clients, and tests pass.
+- **Auth (1.1–1.11):** Registration, Email Verification, Login, Token Refresh, Logout, Password Reset, Magic Link, OAuth2, Email Change, TOTP, Canonicalization — all contracts, routes, clients, and tests pass.
+- **Sessions (2.3, 2.5):** Sessions API and UA labeling verified. All contracts, routes, clients, and tests pass.
 
-### Sessions Verification (CHECKLIST 2.1–2.5) — COMPLETE
+#### Identity & Database Modules — COMPLETE
 
-Sessions API (2.3) and UA labeling (2.5) verified. All contracts, routes, clients, and tests pass.
+- **Module 1 — Identity DB:** `users`, `tenants`, `memberships`, `invitations`, `user_sessions` — migrations, schema constants, repos, and domain types all present.
+- **Module 2 — Auth & Security DB:** All auth tables verified. ⚠️ `email_change_revert_tokens` uses raw SQL in `email-change.ts`, no dedicated repository → tracked in Sprint 3.18.
+- **Module 3 — Billing DB**
+- **Modules 4–9 — Supporting DB**
 
-### Module 1 Verification: Identity (Appendix A) — COMPLETE
+#### Infrastructure Modules — COMPLETE
 
-All identity tables verified: `users`, `tenants`, `memberships`, `invitations`, `user_sessions`. Migrations, schema constants, repos, and domain types all present.
+Multi-tenant infra (4.1), RBAC definitions (5.1), Realtime server (6.9), WebSocket transport (6.10), Media processing (6.11), Desktop scaffold (12) — all build-time integrity verified.
 
-### Module 2 Verification: Auth & Security (Appendix A)
+#### Account Management — COMPLETE
 
-All auth tables verified except one partial item:
+- Pre-Sprint 2: Username auto-generation (3.2), avatar workflow (3.3), profile (3.4), account locking (3.6).
+- Sprint 2: Sudo mode (3.1), username management with cooldown/blocklist (3.2), profile completeness (3.4), account lifecycle deactivate/delete/reactivate (3.6). Handlers, schemas, client UI (`SudoModal`, `UsernameForm`, `ProfileCompleteness`, `DangerZone`), and tests pass.
 
-- [ ] `email_change_revert_tokens` repo: uses raw SQL in `email-change.ts`, no dedicated repository → **tracked in Sprint 3.18**
+#### Tenant Scoping & RBAC — COMPLETE
 
-### Infra-Complete Domains (Build-Time Integrity) — COMPLETE
+- Pre-Sprint 2: Workspace context utilities (4.9), backend guards (5.2).
+- Sprint 2: Tenant CRUD (4.2), membership management (4.3), invitation flow (4.4), orphan prevention (4.5), role hierarchy (4.6), domain restrictions (4.7), workspace-scope middleware (4.9), per-tenant enforcement (5.2), frontend auth gating — `Can`, `RequireWorkspaceRole`, `usePermissions` (5.3). All handlers, services, client UI, and tests pass.
 
-#### Verify Multi-Tenant Infra (4.1)
+#### Supporting Modules — COMPLETE
 
-#### Verify RBAC Definitions (5.1)
+API Keys DB (6.1), Billing infra (6.2), Audit & Security Events (6.3), Notifications infra (6.4), File Storage infra (6.5), Activity Tracking DB (6.6), Feature Flags & Metering DB (6.7), Compliance DB (6.8), Realtime client (6.9).
 
-#### Verify Realtime (Server) (6.9)
+#### Admin & Support — COMPLETE
 
-#### Verify WebSocket Transport (6.10)
+- **User Settings (7.1):** Existing parts verified.
+- **System Admin + Soft Ban (7.3, 7.5):** Admin UI (user list, detail, actions, security events, job monitor, billing, layout, API, role badge) and soft ban (lock/unlock) verified.
 
-#### Verify Media Processing (Server) (6.11)
+#### Backend Architecture — COMPLETE
 
-#### Verify Desktop Scaffold (12)
+Core infrastructure, server engine adapters, security modules, and server app middleware all verified.
 
-### Account Management Verification (CHECKLIST 3) — COMPLETE
+- [ ] **Job idempotency** — **GAP**: no idempotency key field in `Task` interface → idempotency tests deferred until resolved.
 
-Pre-Sprint-2: Username auto-generation (3.2), avatar workflow (3.3), profile (3.4), account locking (3.6) verified.
-Sprint 2 additions: Sudo mode (3.1), username management with cooldown/blocklist (3.2), profile completeness (3.4), account lifecycle deactivate/delete/reactivate (3.6) all verified. Handlers, schemas, client UI (SudoModal, UsernameForm, ProfileCompleteness, DangerZone), and tests pass.
+#### Frontend — COMPLETE
 
-### Tenant Scoping & RBAC Verification (CHECKLIST 4.2–4.9, 5.2–5.3) — COMPLETE
+Core UI, client engine, client API, PWA support, and web app features all verified.
 
-Pre-Sprint-2: Workspace context utilities (4.9) and backend guards (5.2) verified.
-Sprint 2 additions: Tenant CRUD (4.2), membership management (4.3), invitation flow (4.4), orphan prevention (4.5), role hierarchy (4.6), domain restrictions (4.7), workspace-scope middleware (4.9), per-tenant enforcement (5.2), frontend auth gating — Can, RequireWorkspaceRole, usePermissions (5.3) all verified. All handlers, services, client UI (workspace feature), and tests pass.
+#### Operational Quality & CI/CD — COMPLETE
 
-#### Verify ProtectedRoute Component (5.3)
-
-### Module 3 Verification: Billing DB (Appendix A) — COMPLETE
-
-### Module 4-9 Verification: Supporting DB (Appendix A) — COMPLETE
-
-### Supporting Modules Verification (CHECKLIST 6) — COMPLETE
-
-#### Verify API Keys DB Layer (6.1)
-
-#### Verify Billing Infrastructure (6.2)
-
-#### Verify Audit & Security Events (6.3)
-
-#### Verify Notifications Infrastructure (6.4)
-
-#### Verify File Storage Infrastructure (6.5)
-
-#### Verify Activity Tracking DB (6.6)
-
-#### Verify Feature Flags & Metering DB (6.7)
-
-#### Verify Compliance DB Layer (6.8)
-
-#### Verify Realtime Client (6.9)
-
-### Admin & Support Verification (CHECKLIST 7)
-
-#### Verify User Settings — Existing Parts (7.1) — COMPLETE
-
-#### Verify System Admin (7.3) + Soft Ban (7.5) — COMPLETE
-
-Admin UI (user list, detail, actions, security events, job monitor, billing, layout, API, role badge) and soft ban (lock/unlock) all verified.
-
-### Architecture & Infrastructure Verification (CHECKLIST 8) — COMPLETE
-
-#### Verify Backend Core Infrastructure
-
-#### Verify Server Engine Adapters
-
-#### Verify Security Modules
-
-#### Verify Server App Middleware
-
-#### Verify Job Idempotency
-
-- [ ] Job idempotency keys prevent duplicate execution — **GAP**: no idempotency key field in Task interface
-- [ ] Tests: job idempotency tests pass — deferred until idempotency keys added
-
-### Frontend Verification (CHECKLIST 8 Frontend) — COMPLETE
-
-#### Verify Core UI
-
-#### Verify Client Engine
-
-#### Verify Client API
-
-#### Verify PWA Support
-
-#### Verify Web App Features
-
-### Operational Quality Verification (CHECKLIST 10) — COMPLETE
-
-### Login Attempt Logging Verification (CHECKLIST 11.4) — COMPLETE
-
-### Infrastructure & CI/CD Verification (CHECKLIST 13) — COMPLETE
-
-#### Verify Containerization (13.1)
-
-#### Verify Cloud Deployment (13.2)
-
-#### Verify CI Pipelines (13.3)
-
-#### Verify Dev Tooling (13.4)
-
-- [x] Git hooks: pre-commit, pre-push execute correctly — Verified directory `/infra/git-hooks/` exists and hooks are linked via `pnpm hooks:install`.
-
-#### Verify Engine Queue/Job System (Appendix C)
-
-#### Verify Engine Search (Appendix C)
+Operational quality (10), login attempt logging (11.4), containerization (13.1), cloud deployment (13.2), CI pipelines (13.3), dev tooling (13.4), engine queue/job system, and engine search all verified.
+Git hooks: pre-commit and pre-push execute correctly — `/infra/git-hooks/` exists, hooks linked via `pnpm hooks:install`.
 
 </details>
 
 ---
 
-The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **all** of CHECKLIST sections 1-13. Sprint 4 covers test backfill (CHECKLIST 14). Sprint 5 covers production launch readiness, hardening, and polish. Sprint 6 covers post-launch growth: CHET-Stack real-time, WebAuthn/Passkeys, API tooling, scaling, and i18n.
+Sprints 1–3 cover CHECKLIST sections 1–13. Sprint 4 covers test backfill (section 14). Sprint 5 covers production launch readiness, hardening, and polish. Sprint 6 covers post-launch growth: CHET-Stack real-time, WebAuthn/Passkeys, API tooling, scaling, and i18n.
 
 ---
 
 ### Sprint 1: Ship Blockers + Auth/Session Completeness — COMPLETE (8/8)
 
-> Covers: CHECKLIST 1 (gaps), 2 (all gaps), 11 (all).
-> Completed: 1.1 Session UI wiring, 1.2 Session security hardening, 1.3 Security Intelligence, 1.4 CAPTCHA, 1.5 Security emails, 1.6 ToS gating, 1.7 Login failure logging, 1.8 TOTP QR code.
-> **Note:** Session idle timeout + max concurrent sessions (CHECKLIST 2.4) are implemented in `refresh.ts` and `login.ts` respectively.
+> Covers CHECKLIST 1 (gaps), 2 (all gaps), 11 (all).
+
+Completed: Session UI wiring (1.1), session security hardening (1.2), security intelligence (1.3), CAPTCHA (1.4), security emails (1.5), ToS gating (1.6), login failure logging (1.7), TOTP QR code (1.8).
+
+> **Note:** Session idle timeout + max concurrent sessions (CHECKLIST 2.4) implemented in `refresh.ts` and `login.ts`.
 
 ---
 
 ### Sprint 2: Multi-Tenant + RBAC + Account Management — COMPLETE (15/15)
 
-> Covers: CHECKLIST 3 (all), 4 (all gaps), 5 (all gaps).
-> Completed: 2.1 Sudo mode, 2.2 Username management, 2.3 Avatar workflow, 2.4 Profile management, 2.5 Phone/SMS 2FA, 2.6 Account lifecycle, 2.7 Tenant CRUD, 2.8 Membership management, 2.9 Invitation flow, 2.10 Orphan prevention, 2.11 Role hierarchy, 2.12 Domain restrictions, 2.13 Tenant scoping, 2.14 RBAC backend, 2.15 RBAC frontend.
+> Covers CHECKLIST 3 (all), 4 (all gaps), 5 (all gaps).
+
+Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), profile management (2.4), phone/SMS 2FA (2.5), account lifecycle (2.6), tenant CRUD (2.7), membership management (2.8), invitation flow (2.9), orphan prevention (2.10), role hierarchy (2.11), domain restrictions (2.12), tenant scoping (2.13), RBAC backend (2.14), RBAC frontend (2.15).
 
 ---
 
@@ -340,16 +271,15 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 #### 3.1 API Keys & Programmatic Access (CHECKLIST 6.1 | BUSINESS 1 IAM)
 
-> **Existing:** `api_keys` table, repository with full CRUD, domain types/schemas.
-> **Gap:** Zero HTTP endpoints, zero auth middleware, zero client UI.
-
-**Contract + Service:**
-
-**Routes + Middleware:**
-
-**Client + UI:**
+> **Existing:** `api_keys` table, repository, service, handlers, routes (`GET|POST /api/users/me/api-keys`,
+> `POST ./:id/revoke`, `DELETE ./:id`), bearer-token auth middleware, UI components
+> (`ApiKeysManagement.tsx`, `ApiKeyScopeSelector.tsx`), hook (`useApiKeys.ts`), and colocated unit tests.
+> **Gap:** Integration tests and E2E tests only.
 
 **Tests:**
+
+- [ ] Integration: create key → authenticate with bearer token → revoke → bearer rejected
+- [ ] E2E: settings → create API key → copy → use in API call → revoke → key rejected
 
 ---
 
@@ -529,7 +459,7 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 #### 3.8 Compliance & Data Privacy (CHECKLIST 6.8 | BUSINESS 6)
 
-> **Existing:** `legal_documents`, `user_agreements`, `consent_logs` tables + repos,
+> **Existing:** `legal_documents`, `consent_records` (unified from `user_agreements` + `consent_logs`) tables + repos,
 > `data_export_requests` table + repo, deletion domain logic + schemas.
 > **Gap:** No endpoints, no consent UI, no export workflow, no right-to-be-forgotten implementation.
 
@@ -564,10 +494,12 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 #### 3.9 Realtime Client Completeness (CHECKLIST 6.9)
 
 > **Existing:** Full server module tested + routes registered, client hooks + WebSocketPubSubClient.
-> **Gap:** No reconnection, no offline queue integration.
+> Reconnection with exponential backoff + jitter and offline message queue are implemented in
+> `WebsocketPubsubClient.ts` (max 10 reconnect attempts, FIFO overflow handling, flush on reconnect).
+> **Gap:** Missed-message delta sync after reconnect.
 
-- [ ] Client: automatic reconnection with exponential backoff on disconnect
-- [ ] Client: offline queue — buffer outgoing messages during disconnect, flush on reconnect
+- [x] Client: automatic reconnection with exponential backoff on disconnect
+- [x] Client: offline queue — buffer outgoing messages during disconnect, flush on reconnect
 - [ ] Client: missed-message recovery — request delta sync after reconnect
 
 **Tests:**
@@ -932,7 +864,7 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Backend — Alerts:**
 
-- [ ] Email template: "New login from {location}" alert (already partially wired in `sendNewLoginAlert`)
+- [x] Email template: "New login from {location}" alert — `newLoginAlert()` in `email/templates/templates.ts`, wired via `sendNewLoginAlert` in `auth/security/events.ts`, called in `login.ts`
 
 **Client + UI:**
 
@@ -1886,20 +1818,20 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 > **Goal:** Evolve the platform beyond MVP — add modern auth methods, real-time collaboration
 > primitives, scaling infrastructure, and developer platform features.
-> Covers: ROADMAP.md Milestones 1-2, Infrastructure Improvements (Error Handling + API Versioning).
+> Covers: Milestones 1-2, Infrastructure Improvements (Error Handling + API Versioning).
+> Enterprise-scope extensions are in Sprint 7.
 >
 > **Prerequisite:** Sprints 1-5 (features + tests + launch readiness) must be complete.
 > Sprint 6 is a growth sprint — new capabilities that differentiate the product post-launch
 > and prepare the platform for scale.
 >
-> **ROADMAP completeness:** Every incomplete (`[ ]`) item in ROADMAP.md is tracked in this sprint.
-> Milestone 3 (Security Phase 1) is `[x]` complete — no Sprint 6 work needed.
+> **Milestone 3 (Security Phase 1)** is `[x]` complete — no work needed.
 
 ---
 
 #### 6.1 Passkeys / WebAuthn (ROADMAP Milestone 2)
 
-> **Source:** ROADMAP.md Milestone 2: WebAuthn / Passkeys.
+> **Source:** Milestone 2: WebAuthn / Passkeys (see Sprint 7.2 for enterprise-scope detail).
 > **Purpose:** Add passwordless authentication via FIDO2/WebAuthn, the most secure and
 > user-friendly auth method available. Standalone — no Passport.js dependency.
 
@@ -1940,7 +1872,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 #### 6.2 Real-Time Collaboration Hooks (ROADMAP Milestone 1, Phases 1+2+3+6)
 
-> **Source:** ROADMAP.md Milestone 1: CHET-Stack Real-Time Features.
+> **Source:** Milestone 1: CHET-Stack Real-Time Features (see Sprint 7.1 for enterprise-scope detail).
 > **Purpose:** Expose real-time data subscriptions and optimistic writes to the UI layer
 > via clean React hooks, enabling collaborative features.
 >
@@ -1982,7 +1914,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 #### 6.3 Platform Developer Experience (ROADMAP Infrastructure Improvements)
 
-> **Source:** ROADMAP.md Infrastructure Improvements → Error Handling + API Versioning & Typed Client.
+> **Source:** Infrastructure Improvements → Error Handling + API Versioning & Typed Client (see Sprint 7.3).
 > **Purpose:** Make the platform easier to extend, debug, and operate for teams and external developers.
 >
 > **Already complete (ROADMAP `[x]` items):**
@@ -2046,7 +1978,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 #### 6.5 Undo/Redo UI Integration (ROADMAP Milestone 1, Phase 4)
 
-> **Source:** ROADMAP.md Milestone 1: CHET-Stack → Undo/Redo.
+> **Source:** Milestone 1: CHET-Stack → Undo/Redo (see Sprint 7.1, Phase 4).
 > **Existing:** `UndoRedoStack.ts` (38 tests), `undoRedoStore`, `useUndoRedoShortcuts` hook.
 > **Gap:** Not wired to actual data operations or visible in the UI.
 
@@ -2117,7 +2049,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 #### 6.8 Real-Time Data Permissions (ROADMAP Milestone 1, Phase 5)
 
-> **Source:** ROADMAP.md Milestone 1: CHET-Stack → Permissions.
+> **Source:** Milestone 1: CHET-Stack → Permissions (see Sprint 7.1, Phase 5).
 > **Purpose:** Row-level access control for real-time data sync — users only see/write
 > records they have permission to access.
 
@@ -2151,7 +2083,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 #### Sprint 6 Cross-Reference Summary
 
-> Maps Sprint 6 items to ROADMAP.md milestones and other source documents.
+> Maps Sprint 6 items to their source milestones and documents.
 
 | Source Document  | Source Section                    | Sprint 6 Items                    | Coverage                                                                                     |
 | ---------------- | --------------------------------- | --------------------------------- | -------------------------------------------------------------------------------------------- |
@@ -2176,6 +2108,149 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 | V5 Architecture Migration (was 6.3)                                     | Cosmetic directory restructuring with zero functional benefit — deleted from ROADMAP |
 | Advanced Security: BFF proxy, step-up auth, "remember device" (was 6.4) | Passport.js Phase 5 features — deleted from ROADMAP as over-engineering              |
 | Mobile App Foundation (was 6.8)                                         | Product-Specific features — deleted from ROADMAP as app-specific, not platform       |
+
+---
+
+### Sprint 7: Enterprise Platform Growth
+
+> **Goal:** Platform capabilities that require enterprise customers, dedicated platform engineers,
+> or teams of 5+.
+>
+> **Prerequisite:** Sprints 1–6 complete. These are enterprise differentiators — not MVP features.
+> Activate each milestone when business conditions warrant: enterprise customers signed, platform
+> engineer on staff, or traffic that justifies horizontal scaling.
+
+---
+
+#### 7.1 CHET-Stack Real-Time Collaboration (Milestone 1)
+
+> **Infrastructure already complete (261 tests total):** `RecordCache` (69), `WebSocketServer`,
+> `WebSocketPubSubClient` (20), `SubscriptionCache` (20), `RecordStorage` (31),
+> `TransactionQueue` (26), `LoaderCache` (57), `UndoRedoStack` (38), conflict resolution.
+> `WriteService` (`apps/server/src/infra/write/`) provides transaction handling, version
+> bumping, and auto-pubsub. Sprint 6.2 covers React hook wiring; this sprint captures the
+> remaining foundation, sync, offline, and permission gaps.
+
+**Phase 1 — Foundation:**
+
+- [ ] DB: `version` field on all syncable tables
+- [ ] Infra: `infra/realtime` — transaction types (`WriteTransaction`, `ReadTransaction`, `ConflictError`)
+- [ ] Route: `POST /api/realtime/write` — transactional multi-record write with version bumping
+- [ ] Route: `GET /api/realtime/getRecords` — batch record fetch with version filters
+
+**Phase 2 — Real-Time Sync:**
+
+- [ ] Client: `RealtimeContext` and `RealtimeProvider` — React context wrapping `WebSocketPubSubClient`
+- [ ] Service: version-based update notifications — server pushes version delta on record change
+
+**Phase 3 — Offline Support:**
+
+- [ ] Infra: service worker for asset caching (`RecordStorage`, `TransactionQueue`, `LoaderCache` already exist)
+
+**Phase 4 — Undo/Redo UI:**
+
+> `UndoRedoStack` (38 tests), `undoRedoStore`, and `useUndoRedoShortcuts` already exist.
+
+- [ ] UI: keyboard shortcuts — Cmd+Z / Cmd+Shift+Z wired to `UndoRedoStack`
+- [ ] UI: undo/redo availability indicators — use `onStateChange` callback
+
+**Phase 5 — Row-Level Permissions:**
+
+- [ ] Service: row-level read validation — filter records by user permission set before returning
+- [ ] Service: row-level write validation — reject writes to records user cannot modify
+- [ ] Service: permission records loading — preload user permissions on connection/auth
+- [ ] Service: workspace permission pattern — workspace members see workspace records
+- [ ] Service: board/project permission pattern — per-board access control (viewer, editor, admin)
+- [ ] Service: task/record ownership pattern — owner + shared-with permissions
+- [ ] Service: permission inheritance — workspace admin overrides board restrictions
+- [ ] Service: permission-aware subscriptions — WebSocket only publishes to authorized subscribers
+- [ ] Service: permission change propagation — revoke → remove from subscription + client cache
+- [ ] Client: `useRecord`/`useRecords` honor permissions — 403 graceful handling in hooks
+
+**Phase 6 — React Hooks:**
+
+- [ ] Hook: `useRecord<T>(table, id)` — single record subscription with real-time updates
+- [ ] Hook: `useRecords<T>(table, filters)` — collection subscription
+- [ ] Hook: `useWrite()` — optimistic write with offline queue
+- [ ] Hook: `useUndoRedo()` — undo/redo controls bound to `UndoRedoStack`
+
+**Tests:**
+
+- [ ] E2E: two browser tabs → edit in tab A → update appears in tab B; offline → online → sync
+- [ ] Integration: permission revoked → user stops receiving updates immediately
+- [ ] Integration: user A writes record → user B (no permission) does not receive update
+- [ ] Integration: create record → undo → record removed → redo → record restored
+
+---
+
+#### 7.2 WebAuthn / Passkeys (Milestone 2)
+
+> Standalone — no Passport.js dependency. See Sprint 6.1 for full implementation detail.
+
+- [ ] DB: `webauthn_credentials` table — migration, schema, repository
+- [ ] Service: registration challenge + attestation verification (`@simplewebauthn/server`)
+- [ ] Service: authentication challenge + assertion verification, counter validation
+- [ ] Config: `auth.webauthn` — `rpName`, `rpId`, `origin`, `attestation` preference
+- [ ] Routes: `POST /api/auth/webauthn/register/*`, `POST /api/auth/webauthn/login/*`
+- [ ] Routes: `GET|PATCH|DELETE /api/users/me/passkeys/:id`
+- [ ] UI: passkey registration flow in Security settings → browser prompt → success
+- [ ] UI: passkey management list — name, device type, last used, rename/delete
+- [ ] UI: passkey login option on login page (conditional on `PublicKeyCredential` availability)
+- [ ] Tests: unit (challenge gen, attestation mock, assertion mock, counter validation), integration, E2E
+
+---
+
+#### 7.3 Infrastructure Improvements
+
+> Already complete: error serialization (`.toJSON()`), correlation IDs, route registry, modular
+> server composition (`QueueServer`). These items close the remaining gaps.
+
+**Error Handling & Logging:**
+
+- [ ] Service: request context logging — IP, HTTP method, path, user agent attached per request
+- [ ] Service: conditional severity logging — `500+` at ERROR level, `4xx` at WARN/DEBUG
+
+**API Versioning & Generated Client:**
+
+- [ ] Infra: API versioning strategy — header-based or path-based (`/api/v1/`)
+- [ ] Tool: `@bslt/api-client` — npm-publishable package generated from ts-rest contracts
+- [ ] Tool: React Query hook generation from client definitions
+- [ ] CI: auto-regenerate client on schema/route change (pre-commit hook or CI step)
+
+---
+
+#### 7.4 Scaling & Performance Infrastructure
+
+> Activate when traffic justifies horizontal deployment.
+
+**Session & Queue:**
+
+- [ ] Service: Redis session store for horizontal scaling (JWT-based today — add when needed)
+- [ ] Infra: Redis-backed shared job queue for multi-instance deployments (`MemoryQueueStore` sufficient until then)
+
+**CDN & Asset Delivery:**
+
+- [ ] Infra: CDN configuration — Cloudflare, CloudFront, or BunnyCDN for static assets
+- [ ] Service: image CDN — on-the-fly resize/optimize via Imgproxy or CDN transform
+- [ ] Service: edge caching rules — 1-year static, no-cache API, short-TTL HTML
+
+**Load Testing:**
+
+- [ ] Test: 500+ concurrent users under multi-instance deployment — no dropped connections
+- [ ] Test: cache hit/miss/invalidation lifecycle
+- [ ] Test: read replica routing — writes → primary, reads → replica
+
+---
+
+#### Sprint 7 Priority Matrix
+
+| Priority   | Area         | Items                                             |
+| ---------- | ------------ | ------------------------------------------------- |
+| **High**   | Real-Time    | React hooks (Phase 6), `RealtimeProvider` (Phase 2) |
+| **Medium** | Security     | WebAuthn / Passkeys (Milestone 2)                 |
+| **Medium** | Backend      | API versioning, generated `@bslt/api-client`      |
+| **Low**    | Observability | Request context logging, severity-conditional logs |
+| **Low**    | Scaling      | Redis, CDN, load testing — activate on demand     |
 
 ---
 

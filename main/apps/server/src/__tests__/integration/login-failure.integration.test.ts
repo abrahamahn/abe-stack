@@ -7,7 +7,7 @@
  */
 
 import { authRoutes, createAuthGuard } from '@bslt/core/auth';
-import { registerRouteMap } from '@bslt/server-system';
+import { registerRouteMap } from '@/http';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createTestServer, parseJsonResponse, type TestServer } from './test-utils';

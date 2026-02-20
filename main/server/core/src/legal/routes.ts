@@ -12,12 +12,18 @@
 
 import { createLegalDocumentSchema } from '@bslt/shared';
 
-import { createRouteMap, protectedRoute, publicRoute, type RouteMap } from '../../../system/src';
+import {
+  createRouteMap,
+  protectedRoute,
+  publicRoute,
+  type HttpReply,
+  type HttpRequest,
+  type RouteMap,
+} from '../../../system/src';
 
 import { handleGetCurrentLegal, handleGetUserAgreements, handlePublishLegal } from './handlers';
 
 import type { LegalAppContext } from './types';
-import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
 // Route Helper
@@ -31,8 +37,8 @@ function adminRoute(
   handler: (
     ctx: LegalAppContext,
     body: unknown,
-    request: FastifyRequest,
-    reply: FastifyReply,
+    request: HttpRequest,
+    reply: HttpReply,
   ) => Promise<unknown>,
   schema?: import('../../../system/src').ValidationSchema,
   openapi?: import('../../../system/src').RouteOpenApiMeta,
@@ -54,8 +60,8 @@ function userRoute(
   handler: (
     ctx: LegalAppContext,
     body: unknown,
-    request: FastifyRequest,
-    reply: FastifyReply,
+    request: HttpRequest,
+    reply: HttpReply,
   ) => Promise<unknown>,
   openapi?: import('../../../system/src').RouteOpenApiMeta,
 ): import('../../../system/src').RouteDefinition {

@@ -10,12 +10,17 @@
 
 import { updateConsentPreferencesRequestSchema } from '@bslt/shared';
 
-import { createRouteMap, protectedRoute, type RouteMap } from '../../../system/src';
+import {
+  createRouteMap,
+  protectedRoute,
+  type HttpReply,
+  type HttpRequest,
+  type RouteMap,
+} from '../../../system/src';
 
 import { handleGetConsent, handleUpdateConsent } from './handlers';
 
 import type { ConsentAppContext } from './types';
-import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
 // Route Helper
@@ -29,8 +34,8 @@ function userRoute(
   handler: (
     ctx: ConsentAppContext,
     body: unknown,
-    request: FastifyRequest,
-    reply: FastifyReply,
+    request: HttpRequest,
+    reply: HttpReply,
   ) => Promise<unknown>,
   openapi?: import('../../../system/src').RouteOpenApiMeta,
 ): import('../../../system/src').RouteDefinition {

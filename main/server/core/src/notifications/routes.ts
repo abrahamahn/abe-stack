@@ -20,7 +20,13 @@ import {
   updatePreferencesRequestSchema,
 } from '@bslt/shared';
 
-import { createRouteMap, type HandlerContext, type RouteDefinition } from '../../../system/src';
+import {
+  createRouteMap,
+  type HandlerContext,
+  type HttpReply,
+  type HttpRequest,
+  type RouteDefinition,
+} from '../../../system/src';
 
 import {
   handleDeleteNotification,
@@ -45,7 +51,6 @@ import type {
   UnsubscribeRequest,
   UpdatePreferencesRequest,
 } from '@bslt/shared';
-import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
 // Local Types
@@ -74,7 +79,7 @@ type NotificationHandler<TBody> = (
   ctx: NotificationModuleDeps,
   body: TBody,
   req: NotificationRequest,
-  reply: FastifyReply,
+  reply: HttpReply,
 ) => unknown;
 
 /**
@@ -101,8 +106,8 @@ function notificationPublicRoute<TBody>(
     handler: (
       ctx: HandlerContext,
       body: unknown,
-      request: FastifyRequest,
-      reply: FastifyReply,
+      request: HttpRequest,
+      reply: HttpReply,
     ): unknown => {
       return handler(
         ctx as unknown as NotificationModuleDeps,
@@ -142,8 +147,8 @@ function notificationProtectedRoute<TBody>(
     handler: (
       ctx: HandlerContext,
       body: unknown,
-      request: FastifyRequest,
-      reply: FastifyReply,
+      request: HttpRequest,
+      reply: HttpReply,
     ): unknown => {
       return handler(
         ctx as unknown as NotificationModuleDeps,

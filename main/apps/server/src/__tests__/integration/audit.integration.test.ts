@@ -8,7 +8,7 @@
 
 import { adminRoutes } from '@bslt/core/admin';
 import { createAuthGuard } from '@bslt/core/auth';
-import { registerRouteMap } from '@bslt/server-system';
+import { registerRouteMap } from '@/http';
 import { SECURITY_SEVERITIES } from '@bslt/shared';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 

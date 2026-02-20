@@ -14,7 +14,8 @@
 import path from 'node:path';
 
 import { RateLimiter } from '@bslt/server-system';
-import { createConsoleLogger, registerLoggingMiddleware } from '@bslt/server-system/logger';
+import { createConsoleLogger } from '@bslt/server-system/logger';
+import { registerLoggingMiddleware } from './middleware/logging';
 import { ERROR_CODES, isAppError, LIMITS } from '@bslt/shared';
 import swagger from '@fastify/swagger';
 import swaggerUI from '@fastify/swagger-ui';
