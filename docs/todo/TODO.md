@@ -1437,13 +1437,25 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 #### 4.18 Client Engine & Search Tests (CHECKLIST Appendix C)
 
-> **Existing:** ~40% unit coverage for client engine (RecordStorage, sync).
-> Search: SQL provider tested, query builder test missing.
-> **Gap:** RecordStorage edge cases, search query builder tests.
+> **Existing:** Full coverage across unit + integration layers.
+> Search: query builder tested. Storage, realtime, offline, undo/redo all covered.
 
 **Client Engine:**
 
+- [x] Unit: RecordStorage — offline cache, versioning, conflict resolution (`RecordStorage.test.ts`, 952 lines)
+- [x] Unit: WebsocketPubsubClient — subscribe/unsubscribe, reconnect, message dispatch (`WebsocketPubsubClient.test.ts`, 1,163 lines)
+- [x] Unit: TransactionQueue — offline transaction queue, retry ordering (`TransactionQueue.test.ts`, 670 lines)
+- [x] Integration: offline workflow — queue mutations while offline, replay on reconnect, conflict resolution (`offline-workflow.integration.test.ts`, 822 lines)
+- [x] Integration: undo/redo operations — multi-step undo, redo after edit, stack boundary conditions (`undo-redo-operations.integration.test.ts`, 779 lines)
+- [x] Integration: WebSocket subscription lifecycle — auth, subscribe, broadcast, reconnect handling (`websocket-subscription.integration.test.ts`, 603 lines)
+- [x] Integration: cache-storage coherence — cache invalidation, stale-while-revalidate, eviction (`cache-storage.integration.test.ts`, 468 lines)
+- [x] Integration: loader-cache — concurrent loads deduplicated, stale entries, TTL expiry (`loader-cache.integration.test.ts`, 493 lines)
+- [x] Integration: API client error handling — retry logic, 4xx vs 5xx differentiation, timeout (`api-client-errors.integration.test.ts`, 501 lines)
+
 **Search:**
+
+- [x] Unit: query builder — filter/sort/aggregate query construction, cursor pagination (`query-builder.test.ts`, 302 lines)
+- [x] Integration: client-engine search — filter, sort, cursor pagination, full-text match (`client-engine-search.integration.test.ts`, 514 lines)
 
 ---
 
@@ -1691,9 +1703,30 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Production Security Verification:**
 
+- [x] Verify: rate limiting enforced on all auth endpoints — burst protection confirmed (`rate-limit-ip-policy.integration.test.ts`)
+- [x] Verify: IP blocklist middleware in place — blocked IPs rejected with 429 (`rate-limit-ip-policy.integration.test.ts`)
+- [x] Verify: CSRF double-submit cookie on all state-mutating routes — missing token → 403 (CSRF integration tests)
+- [x] Verify: account lockout on repeated auth failures — 10 failures → 30-min lockout (`login-failure.integration.test.ts`)
+- [x] Verify: password strength policy enforced — zxcvbn score ≥ 2 required (auth unit tests)
+- [ ] Verify: security headers present in production — CSP, HSTS, X-Frame-Options, X-Content-Type-Options (requires production deployment verification)
+
 **Dependency Security:**
 
+- [x] `pnpm audit --prod` clean — zero critical/high vulnerabilities (minimatch override + AWS SDK update)
+- [x] No hardcoded secrets in codebase — `git log` scan confirms only `.example` env files in history
+
 **Penetration Testing Checklist:**
+
+- [x] SQL injection in query params neutralized — Drizzle ORM parameterized queries + adversarial tests (`audit.integration.test.ts` lines 1246–1271)
+- [x] XSS payload in notification title does not reflect raw HTML — adversarial test (`notifications.integration.test.ts` lines 1566–1635)
+- [x] XSS payload in invitation email field safely handled — adversarial test (`tenant-management.integration.test.ts`)
+- [x] Path traversal in uploaded file names rejected — `../../etc/passwd` and backslash variants → 400 (`media.integration.test.ts` lines 748–776)
+- [x] Cross-tenant data isolation enforced — tenant A cannot read/write tenant B data (webhook, RBAC, activity adversarial tests)
+- [x] Privilege escalation blocked — API key cannot be used to create another API key (`api-keys.integration.test.ts` line 978)
+- [x] Auth bypass: spoofed non-admin JWT rejected on admin routes — adversarial killer test (`admin.integration.test.ts` line 2279)
+- [x] Session fixation: refresh token rotation on each use — family-based invalidation tested (`auth.integration.test.ts`)
+- [ ] Open redirect: `redirect_uri` validated against registered OAuth callback allowlist (OAuth flow exists; redirect validation needs explicit adversarial test)
+- [ ] File upload polyglot detection: MIME type validated against magic bytes, not just extension (MIME validation exists; magic-byte check not explicitly tested)
 
 ---
 
@@ -1704,11 +1737,40 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **API Documentation:**
 
+- [x] OpenAPI 3.0 spec generated and validated — all routes documented (`openapi-spec.integration.test.ts`)
+- [x] Swagger UI registered and accessible at `/api/docs` (FastifySwagger plugin registered in HTTP layer)
+- [ ] API changelog maintained — breaking changes documented per release (not yet established)
+
 **Deployment Documentation:**
+
+- [x] DigitalOcean deployment guide (`docs/deploy/digitalocean.md`)
+- [x] GCP deployment guide (`docs/deploy/gcp.md`)
+- [x] Database migration guide (`docs/deploy/migrations.md`)
+- [x] Production PostgreSQL setup guide (`docs/deploy/production-postgres.md`)
+- [x] Secrets checklist (`docs/deploy/secrets-checklist.md`)
+- [x] Reverse proxy configuration guide (`docs/deploy/reverse-proxy.md`)
+- [x] Backup and restore procedures (`docs/deploy/backup-restore.md`)
+- [x] Trusted proxy setup (`docs/deploy/trusted-proxy-setup.md`)
+- [x] Release checklist (`docs/deploy/release-checklist.md`)
+- [x] Environment variables guide (`docs/deploy/env.md`)
 
 **Developer Documentation:**
 
+- [x] Module creation guide (`docs/dev/module-creation.md`)
+- [x] Testing guide (`docs/dev/testing.md`)
+- [x] Security guide (`docs/dev/security.md`)
+- [x] Performance guide (`docs/dev/performance.md`)
+- [x] Code review guide (`docs/dev/code-review.md`)
+- [x] Development workflow guide (`docs/dev/workflow.md`)
+- [x] Configuration guide (`docs/dev/configuration.md`)
+- [x] Horizontal scaling guide (`docs/dev/horizontal-scaling.md`)
+
 **Operational Runbooks:**
+
+- [x] Auth issues runbook (`docs/runbooks/auth-issues.md`)
+- [x] Database emergency runbook (`docs/runbooks/database-emergency.md`)
+- [x] Deployment rollback runbook (`docs/runbooks/deployment-rollback.md`)
+- [x] Incident response runbook (`docs/runbooks/incident-response.md`)
 
 ---
 
@@ -1718,11 +1780,39 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Empty States:**
 
+- [x] Notifications dropdown: "All caught up — No new notifications" (`NotificationDropdown.tsx`)
+- [x] Activity feed: "No recent activity — Your recent actions will appear here" (`ActivityFeed.tsx`)
+- [x] API keys list: empty state when no keys created (`ApiKeysManagement.tsx`)
+- [x] Media gallery: "No media files — Upload files to see them here" (`MediaGallery.tsx`)
+- [x] Jobs admin table: "No jobs found" empty state (`JobsTable.tsx`)
+- [x] Members list: empty state when workspace has no members (`MembersList.tsx`)
+- [x] Invitations list: empty state when no pending invitations (`InvitationsList.tsx`)
+- [ ] Audit log: empty state when no security events recorded (needs verification)
+
 **Loading States:**
+
+- [x] App layout skeleton: `Skeleton` placeholders for nav/user area during auth load (`AppTopLayout.tsx`)
+- [x] Members list: row-level skeleton loading during member fetch (`MembersList.tsx`)
+- [x] Invitations list: skeleton rows during invitation fetch (`InvitationsList.tsx`)
+- [x] Activity feed: skeleton items during initial load (`ActivityFeed.tsx`)
+- [x] Notification dropdown: `Skeleton` during notification fetch (`NotificationDropdown.tsx`)
+- [x] Media gallery: skeleton grid during upload/load (`MediaGallery.tsx`)
+- [ ] Dashboard page: skeleton for main content area during first load (needs verification)
 
 **Error States:**
 
+- [x] `SectionErrorBoundary` — section-level React error boundary with recovery UI (`SectionErrorBoundary.tsx` + test)
+- [x] `NetworkStatus` — offline/network error indicator component (`NetworkStatus.tsx` + test)
+- [x] `ForbiddenPage` — 403 forbidden route with helpful message (`ForbiddenPage.tsx`)
+- [x] `NotFoundPage` — 404 not found route (`NotFoundPage.tsx`)
+
 **Onboarding Flow (BUSINESS E.8):**
+
+- [x] Onboarding wizard — multi-step flow: workspace creation → invite → plan selection → success (`OnboardingWizard.tsx`)
+- [x] Onboarding page — dedicated `/onboarding` route (`OnboardingPage.tsx` + test)
+- [x] First success moment — "You're all set!" completion step with CTA to dashboard (step 3 in `OnboardingWizard.tsx`)
+- [x] Usage/limits display — `UsageSummary` component shows plan features against current usage (`BillingSettingsPage.tsx`)
+- [ ] Usage bar on main dashboard — quick-glance plan utilisation from the primary dashboard view (not yet on dashboard page)
 
 ---
 
