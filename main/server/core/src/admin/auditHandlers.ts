@@ -9,7 +9,7 @@ import { ERROR_MESSAGES } from '../auth';
 
 import type { AdminAppContext } from './types';
 import type { AuditEvent } from '../../../db/src';
-import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { HttpReply, HttpRequest } from '../../../system/src';
 
 // ============================================================================
 // List Audit Events Handler
@@ -27,8 +27,8 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 export async function handleListAuditEvents(
   ctx: AdminAppContext,
   _body: undefined,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<{ status: number; body: { events: AuditEvent[] } | { message: string } }> {
   const user = (request as { user?: { userId: string; role: string } }).user;
   if (user === undefined) {

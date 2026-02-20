@@ -37,8 +37,9 @@ import {
 
 import type { AppContext, ReplyWithCookies } from '../types';
 import type { OAuthConnectionInfo } from './types';
+import type { HttpReply, HttpRequest } from '../../../../system/src';
 import type { AuthResponse, HttpErrorResponse } from '@bslt/shared';
-import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { FastifyReply } from 'fastify';
 
 // ============================================================================
 // Types
@@ -91,7 +92,7 @@ export interface OAuthUnlinkParams {
 }
 
 // Request with possibly authenticated user
-interface AuthenticatedRequest extends FastifyRequest {
+interface AuthenticatedRequest extends HttpRequest {
   user?: { userId: string; email: string; role: 'user' | 'admin' | 'moderator' };
 }
 
@@ -203,8 +204,8 @@ async function checkRateLimit(endpoint: AuthEndpoint, ip: string): Promise<void>
 export async function handleOAuthInitiate(
   ctx: AppContext,
   params: OAuthInitiateParams,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<{ status: 302; body: { url: string } } | HttpErrorResponse> {
   try {
     // Rate limit check
@@ -247,8 +248,8 @@ export async function handleOAuthCallbackRequest(
   ctx: AppContext,
   params: OAuthCallbackParams,
   query: OAuthCallbackQuery,
-  request: FastifyRequest,
-  reply: FastifyReply,
+  request: HttpRequest,
+  reply: HttpReply,
 ): Promise<
   | { status: 200; body: AuthResponse & { isNewUser: boolean } }
   | { status: 200; body: { linked: boolean; provider: string } }
@@ -329,7 +330,7 @@ export async function handleOAuthCallbackRequest(
     );
 
     // Set refresh token cookie
-    const replyWithCookies = reply as FastifyReply & ReplyWithCookies;
+    const replyWithCookies = reply as unknown as FastifyReply & ReplyWithCookies;
     setRefreshTokenCookie(replyWithCookies, result.auth.refreshToken, ctx.config.auth);
 
     return {
@@ -378,8 +379,8 @@ export async function handleOAuthCallbackRequest(
 export async function handleOAuthLink(
   ctx: AppContext,
   params: OAuthLinkParams,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<{ status: 200; body: { url: string } } | HttpErrorResponse> {
   try {
     // Rate limit check
@@ -423,8 +424,8 @@ export async function handleOAuthLink(
 export async function handleOAuthUnlink(
   ctx: AppContext,
   params: OAuthUnlinkParams,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<{ status: 200; body: { message: string } } | HttpErrorResponse> {
   try {
     // Rate limit check
@@ -488,8 +489,8 @@ export async function handleOAuthUnlink(
  */
 export async function handleGetConnections(
   ctx: AppContext,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<{ status: 200; body: { connections: OAuthConnectionInfo[] } } | HttpErrorResponse> {
   try {
     const user = (request as AuthenticatedRequest).user;

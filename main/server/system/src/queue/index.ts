@@ -5,6 +5,9 @@
  * Background job queue system with write service for atomic operations.
  * Includes in-memory store for dev/test and supports Postgres-backed production stores.
  *
+ * WriteService and queue types are canonical in @bslt/db — re-exported here for
+ * backwards-compatible access via @bslt/server-system.
+ *
  * @module @bslt/server-system/queue
  */
 
@@ -15,10 +18,10 @@
 export { createQueueServer, QueueServer, type QueueServerOptions } from './client';
 
 // ============================================================================
-// Write Service
+// Write Service (canonical in @bslt/db)
 // ============================================================================
 
-export { createWriteService, WriteService, type WriteServiceOptions } from './writer';
+export { createWriteService, WriteService, type WriteServiceOptions } from '@bslt/db';
 
 // ============================================================================
 // Memory Store
@@ -27,14 +30,18 @@ export { createWriteService, WriteService, type WriteServiceOptions } from './wr
 export { createMemoryQueueStore, MemoryQueueStore } from './memory.store';
 
 // ============================================================================
-// Queue Types
+// Queue & Write Types (canonical in @bslt/db)
 // ============================================================================
 
 export type {
+  AfterWriteHook,
+  BeforeValidateHook,
   JobDetails,
   JobListOptions,
   JobListResult,
   JobStatus,
+  OperationResult,
+  OperationType,
   QueueConfig,
   QueueStats,
   QueueStore,
@@ -42,23 +49,11 @@ export type {
   TaskError,
   TaskHandler,
   TaskHandlers,
-  TaskResult
-} from './types';
-
-// ============================================================================
-// Write Types
-// ============================================================================
-
-export type {
-  AfterWriteHook,
-  BeforeValidateHook,
-  OperationResult,
-  OperationType,
+  TaskResult,
   WriteBatch,
   WriteContext,
   WriteError,
   WriteHooks,
   WriteOperation,
-  WriteResult
-} from './types';
-
+  WriteResult,
+} from '@bslt/db';

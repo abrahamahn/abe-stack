@@ -10,7 +10,7 @@ import { createHmac } from 'node:crypto';
 import { AppError } from '@bslt/shared';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { checkTokenSecret, decode, JwtError, sign, verify } from './crypto/jwt';
+import { checkTokenSecret, decode, JwtError, sign, verify } from '@bslt/shared/system/crypto';
 
 describe('JWT Integration', () => {
   const SECRET = 'super-secret-key-for-testing-jwt-123!@#';

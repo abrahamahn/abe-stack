@@ -16,9 +16,9 @@ import {
 import { HTTP_STATUS } from '@bslt/shared';
 import { getWebSocketStats } from '@bslt/websocket';
 
-import type { HandlerContext, HealthContext, RouteMap } from '@bslt/server-system';
+import type { HandlerContext, HealthContext, HttpReply, HttpRequest, RouteMap } from '@bslt/server-system';
 import type { LiveResponse, ReadyResponse } from '@bslt/shared';
-import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { FastifyReply } from 'fastify';
 
 function asHealthContext(ctx: HandlerContext): HealthContext {
   return ctx as unknown as HealthContext;
@@ -29,11 +29,11 @@ export const systemRoutes: RouteMap = createRouteMap([
     'health',
     publicRoute(
       'GET',
-      async (ctx: HandlerContext, _body: undefined, _req: FastifyRequest, reply: FastifyReply) => {
+      async (ctx: HandlerContext, _body: undefined, _req: HttpRequest, reply: HttpReply) => {
         const hCtx = asHealthContext(ctx);
         const dbStatus = await checkDbStatus(hCtx);
         if (dbStatus.status !== 'up') {
-          reply.code(HTTP_STATUS.SERVICE_UNAVAILABLE);
+          (reply as unknown as FastifyReply).code(HTTP_STATUS.SERVICE_UNAVAILABLE);
         }
         return {
           status: dbStatus.status === 'up' ? 'ok' : 'degraded',
@@ -66,8 +66,8 @@ export const systemRoutes: RouteMap = createRouteMap([
       async (
         _ctx: HandlerContext,
         _body: undefined,
-        _req: FastifyRequest,
-        _reply: FastifyReply,
+        _req: HttpRequest,
+        _reply: HttpReply,
       ) => {
         return getMetricsCollector().getMetricsSummary();
       },
@@ -86,15 +86,15 @@ export const systemRoutes: RouteMap = createRouteMap([
       async (
         ctx: HandlerContext,
         _body: undefined,
-        _req: FastifyRequest,
-        reply: FastifyReply,
+        _req: HttpRequest,
+        reply: HttpReply,
       ): Promise<ReadyResponse> => {
         const hCtx = asHealthContext(ctx);
         // Schema check not available at this level — DB connectivity suffices for readiness.
         const dbStatus = await checkDbStatus(hCtx);
         const ready = dbStatus.status === 'up';
         if (!ready) {
-          reply.code(HTTP_STATUS.SERVICE_UNAVAILABLE);
+          (reply as unknown as FastifyReply).code(HTTP_STATUS.SERVICE_UNAVAILABLE);
         }
         return {
           status: ready ? 'ready' : 'not_ready',
@@ -110,8 +110,8 @@ export const systemRoutes: RouteMap = createRouteMap([
       async (
         _ctx: HandlerContext,
         _body: undefined,
-        _req: FastifyRequest,
-        _reply: FastifyReply,
+        _req: HttpRequest,
+        _reply: HttpReply,
       ): Promise<LiveResponse> => {
         return {
           status: 'alive',
@@ -139,11 +139,11 @@ export const systemRoutes: RouteMap = createRouteMap([
     'health/detailed',
     publicRoute(
       'GET',
-      async (ctx: HandlerContext, _body: undefined, _req: FastifyRequest, reply: FastifyReply) => {
+      async (ctx: HandlerContext, _body: undefined, _req: HttpRequest, reply: HttpReply) => {
         const hCtx = asHealthContext(ctx);
         const detailed = await getDetailedHealth(hCtx, { websocketStats: getWebSocketStats() });
         if (detailed.status !== 'healthy') {
-          reply.code(HTTP_STATUS.SERVICE_UNAVAILABLE);
+          (reply as unknown as FastifyReply).code(HTTP_STATUS.SERVICE_UNAVAILABLE);
         }
         return detailed;
       },

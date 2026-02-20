@@ -402,13 +402,17 @@ export { isInTransaction, withTransaction } from './utils';
 export { isOptimisticLockError, OptimisticLockError, updateUserWithVersion } from './utils';
 
 // Queue
-export { createPostgresQueueStore, PostgresQueueStore } from './queue';
+export { createPostgresQueueStore, PostgresQueueStore, WriteService, createWriteService } from './queue';
 
 export {
+  type AfterWriteHook,
+  type BeforeValidateHook,
   type JobDetails,
   type JobListOptions,
   type JobListResult,
   type JobStatus,
+  type OperationResult,
+  type OperationType,
   type QueueConfig,
   type QueueStats,
   type QueueStore,
@@ -417,6 +421,13 @@ export {
   type TaskHandler,
   type TaskHandlers,
   type TaskResult,
+  type WriteBatch,
+  type WriteContext,
+  type WriteError,
+  type WriteHooks,
+  type WriteOperation,
+  type WriteResult,
+  type WriteServiceOptions,
 } from './queue';
 
 // Read Replica
@@ -430,7 +441,14 @@ export {
 export { createPostgresPubSub, PostgresPubSub } from './pubsub';
 
 // Search
-export { createSqlSearchProvider, SqlSearchProvider } from './search';
+export {
+  createSqlSearchProvider,
+  getSearchProviderFactory,
+  resetSearchProviderFactory,
+  SearchProviderFactory,
+  SqlSearchProvider,
+} from './search';
+export type { ProviderOptions, SqlSearchProviderOptions } from './search';
 
 export type {
   ElasticsearchProviderConfig,

@@ -10,7 +10,7 @@ import { ERROR_MESSAGES } from '../auth';
 
 import type { AdminAppContext } from './types';
 import type { Repositories } from '../../../db/src';
-import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { HttpReply, HttpRequest } from '../../../system/src';
 
 type AdminWebhook = {
   id: string;
@@ -35,8 +35,8 @@ type AdminWebhookDelivery = {
 };
 
 function hasUser(
-  request: FastifyRequest,
-): request is FastifyRequest & { user: { userId: string } } {
+  request: HttpRequest,
+): request is HttpRequest & { user: { userId: string } } {
   return Boolean((request as { user?: unknown }).user);
 }
 
@@ -75,8 +75,8 @@ function getWebhookRepos(
 export async function handleListAdminWebhooks(
   ctx: AdminAppContext,
   _body: unknown,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<{ status: number; body: { webhooks: AdminWebhook[] } | { message: string } }> {
   if (!hasUser(request)) {
     return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
@@ -123,8 +123,8 @@ export async function handleListAdminWebhooks(
 export async function handleListAdminWebhookDeliveries(
   ctx: AdminAppContext,
   _body: unknown,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<{ status: number; body: { deliveries: AdminWebhookDelivery[] } | { message: string } }> {
   if (!hasUser(request)) {
     return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
@@ -170,8 +170,8 @@ export async function handleListAdminWebhookDeliveries(
 export async function handleReplayAdminWebhookDelivery(
   ctx: AdminAppContext,
   _body: unknown,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<{ status: number; body: { success: boolean; deliveryId?: string; message?: string } }> {
   if (!hasUser(request)) {
     return { status: 401, body: { success: false, message: ERROR_MESSAGES.UNAUTHORIZED } };

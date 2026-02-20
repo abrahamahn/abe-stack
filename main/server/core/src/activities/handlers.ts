@@ -12,9 +12,8 @@ import { getActivityFeed, getTenantActivityFeed } from './service';
 
 import type { ActivityAppContext } from './types';
 import type { Activity as DbActivity } from '../../../db/src';
-import type { HandlerContext } from '../../../system/src';
+import type { HandlerContext, HttpReply, HttpRequest } from '../../../system/src';
 import type { AuthenticatedUser } from '@bslt/shared';
-import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
 // Response Types
@@ -94,8 +93,8 @@ function toActivityResponse(activity: DbActivity): ActivityResponse {
  * @returns Authenticated user or undefined
  * @complexity O(1)
  */
-function getUser(request: FastifyRequest): AuthenticatedUser | undefined {
-  return (request as FastifyRequest & { user?: AuthenticatedUser }).user;
+function getUser(request: HttpRequest): AuthenticatedUser | undefined {
+  return (request as HttpRequest & { user?: AuthenticatedUser }).user;
 }
 
 // ============================================================================
@@ -118,8 +117,8 @@ function getUser(request: FastifyRequest): AuthenticatedUser | undefined {
 export async function handleListActivities(
   ctx: HandlerContext,
   _body: unknown,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<
   | { status: 200; body: { activities: ActivityResponse[] } }
   | { status: 401; body: { message: string } }
@@ -171,8 +170,8 @@ export async function handleListActivities(
 export async function handleListTenantActivities(
   ctx: HandlerContext,
   _body: unknown,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<
   | { status: 200; body: { activities: ActivityResponse[] } }
   | { status: 400; body: { message: string } }

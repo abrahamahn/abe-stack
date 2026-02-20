@@ -1,4 +1,4 @@
-// main/server/system/src/queue/memory-store.ts
+// main/server/system/src/queue/memory.store.ts
 /**
  * In-Memory Queue Store
  *
@@ -8,7 +8,7 @@
  * @module @bslt/server-system/queue
  */
 
-import type { QueueStore, Task, TaskError, TaskResult } from './types';
+import type { QueueStore, Task, TaskError, TaskResult } from '@bslt/db';
 
 // ============================================================================
 // Types

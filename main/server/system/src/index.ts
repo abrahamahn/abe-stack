@@ -310,6 +310,7 @@ export {
 // Search
 // ============================================================================
 
+// Factory (SearchProviderFactory, ProviderOptions, SqlSearchProviderOptions) canonical in @bslt/db
 export {
   SearchProviderFactory,
   SearchQueryBuilder,
@@ -324,7 +325,6 @@ export {
   resetSearchProviderFactory,
   // Types
   type ElasticsearchProviderConfig,
-  type ProviderOptions,
   type SearchContext,
   type SearchProviderConfig,
   type SearchProviderFactoryOptions,
@@ -333,7 +333,6 @@ export {
   type SqlColumnMapping,
   type SqlQueryOptions,
   type SqlSearchProviderConfig,
-  type SqlSearchProviderOptions,
   type SqlTableConfig,
 } from './search';
 

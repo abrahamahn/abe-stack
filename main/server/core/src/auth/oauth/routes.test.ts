@@ -38,9 +38,8 @@ vi.mock('./handlers', () => ({
 
 import { oauthRoutes } from './routes';
 
-import type { RouteDefinition } from '../../../../system/src';
+import type { HttpReply, HttpRequest, RouteDefinition } from '../../../../system/src';
 import type { AppContext } from '../index';
-import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
 // Test Helpers
@@ -91,13 +90,13 @@ function createMockContext(): AppContext {
 }
 
 /**
- * Create mock FastifyRequest for testing
+ * Create mock HttpRequest for testing
  */
 function createMockRequest(user?: {
   userId: string;
   email: string;
   role: string;
-}): FastifyRequest & {
+}): HttpRequest & {
   user?: { userId: string; email: string; role: string };
   requestInfo: { ipAddress: string; userAgent: string };
 } {
@@ -105,25 +104,32 @@ function createMockRequest(user?: {
     user,
     headers: {},
     query: {},
+    params: {},
+    body: undefined,
+    ip: '127.0.0.1',
+    method: 'GET',
+    url: '/',
+    correlationId: 'test-correlation-id',
+    logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
     requestInfo: {
       ipAddress: '127.0.0.1',
       userAgent: 'test-agent',
     },
-  } as FastifyRequest & {
+  } as unknown as HttpRequest & {
     user?: { userId: string; email: string; role: string };
     requestInfo: { ipAddress: string; userAgent: string };
   };
 }
 
 /**
- * Create mock FastifyReply for testing
+ * Create mock HttpReply for testing
  */
-function createMockReply(): FastifyReply {
+function createMockReply(): HttpReply {
   return {
     status: vi.fn().mockReturnThis(),
-    send: vi.fn().mockReturnThis(),
-    redirect: vi.fn().mockReturnThis(),
-  } as unknown as FastifyReply;
+    send: vi.fn(),
+    header: vi.fn().mockReturnThis(),
+  } as unknown as HttpReply;
 }
 
 // ============================================================================

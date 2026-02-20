@@ -15,7 +15,7 @@ import { pipeline } from 'node:stream/promises';
 import { MS_PER_MINUTE, SECONDS_PER_DAY } from '@bslt/shared/primitives';
 import { HTTP_STATUS } from '@bslt/shared/system';
 
-import { verifySignature, type FileSignatureData } from '@bslt/server-system';
+import { verifyFileSignature, type FileSignatureData } from '@bslt/server-system';
 
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
@@ -121,7 +121,7 @@ function verifyFileRequest(
   const method = request.method.toLowerCase().trim() as 'get' | 'put';
   const data: FileSignatureData = { method, id, filename, expirationMs };
 
-  const validSignature = verifySignature({
+  const validSignature = verifyFileSignature({
     data,
     signature,
     secretKey: config.signatureSecret,

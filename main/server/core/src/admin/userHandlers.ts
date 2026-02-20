@@ -34,7 +34,7 @@ import type {
   AdminUserListResponse,
   UnlockAccountRequest,
 } from '@bslt/shared';
-import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { HttpReply, HttpRequest } from '../../../system/src';
 
 const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));
@@ -49,8 +49,8 @@ const toError = (error: unknown): Error =>
 export async function handleListUsers(
   ctx: AdminAppContext,
   _body: undefined,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<{ status: number; body: AdminUserListResponse | { message: string } }> {
   const user = (request as { user?: { userId: string; role: string } }).user;
   if (user === undefined) {
@@ -117,8 +117,8 @@ export async function handleListUsers(
 export async function handleGetUser(
   ctx: AdminAppContext,
   _body: undefined,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<{ status: number; body: AdminUser | { message: string } }> {
   const authUser = (request as unknown as { user?: { userId: string; role: string } }).user;
   if (authUser === undefined) {
@@ -162,8 +162,8 @@ export async function handleGetUser(
 export async function handleUpdateUser(
   ctx: AdminAppContext,
   body: AdminUpdateUserRequest,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<{ status: number; body: AdminUpdateUserResponse | { message: string } }> {
   const authUser = (request as unknown as { user?: { userId: string; role: string } }).user;
   if (authUser === undefined) {
@@ -222,8 +222,8 @@ export async function handleUpdateUser(
 export async function handleLockUser(
   ctx: AdminAppContext,
   body: AdminLockUserRequest,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<{ status: number; body: AdminLockUserResponse | { message: string } }> {
   const authUser = (request as unknown as { user?: { userId: string; role: string } }).user;
   if (authUser === undefined) {
@@ -286,8 +286,8 @@ export async function handleLockUser(
 export async function handleUnlockUser(
   ctx: AdminAppContext,
   body: UnlockAccountRequest,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<{ status: number; body: AdminLockUserResponse | { message: string } }> {
   const authUser = (request as unknown as { user?: { userId: string; role: string } }).user;
   if (authUser === undefined) {
@@ -340,8 +340,8 @@ export async function handleUnlockUser(
 export async function handleSearchUsers(
   ctx: AdminAppContext,
   _body: undefined,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<{ status: number; body: SearchUsersResponse | { message: string } }> {
   const user = (request as { user?: { userId: string; role: string } }).user;
   if (user === undefined) {
@@ -388,8 +388,8 @@ export async function handleSearchUsers(
 export async function handleHardBan(
   ctx: AdminAppContext,
   body: AdminHardBanRequest,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<{ status: number; body: HardBanResult | { message: string } }> {
   const authUser = (request as unknown as { user?: { userId: string; role: string } }).user;
   if (authUser === undefined) {

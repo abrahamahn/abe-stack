@@ -48,8 +48,7 @@ vi.mock('./handlers', () => ({
 import { notificationRoutes } from './routes';
 
 import type { NotificationModuleDeps, NotificationRequest } from './types';
-import type { RouteDefinition } from '../../../system/src';
-import type { FastifyReply } from 'fastify';
+import type { HttpReply, RouteDefinition } from '../../../system/src';
 
 // ============================================================================
 // Test Helpers
@@ -84,11 +83,12 @@ function createMockRequest(user?: {
   } as NotificationRequest & { user?: { userId: string; email: string; role: string } };
 }
 
-function createMockReply(): FastifyReply {
+function createMockReply(): HttpReply {
   return {
     status: vi.fn().mockReturnThis(),
-    send: vi.fn().mockReturnThis(),
-  } as unknown as FastifyReply;
+    send: vi.fn(),
+    header: vi.fn().mockReturnThis(),
+  } as unknown as HttpReply;
 }
 
 // ============================================================================

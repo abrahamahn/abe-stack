@@ -1,4 +1,4 @@
-// main/server/system/src/errors/handler.test.ts
+// main/apps/server/src/http/error-handler.test.ts
 /**
  * Global Error Handler — Adversarial Unit Tests
  *
@@ -24,7 +24,7 @@ import {
 } from '@bslt/shared';
 import { beforeEach, describe, expect, test, vi, type Mock } from 'vitest';
 
-import { registerErrorHandler } from './handler';
+import { registerErrorHandler } from './error-handler';
 
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 

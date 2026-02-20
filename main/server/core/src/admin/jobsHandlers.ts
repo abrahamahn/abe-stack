@@ -23,7 +23,7 @@ import {
 
 import type { AdminAppContext } from './types';
 import type { JobActionResponse, JobDetails, JobListResponse, QueueStats } from '@bslt/shared';
-import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { HttpReply, HttpRequest } from '../../../system/src';
 
 const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));
@@ -51,8 +51,8 @@ function getQueueStore(ctx: AdminAppContext): PostgresQueueStore {
 export async function handleListJobs(
   ctx: AdminAppContext,
   _body: unknown,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<{ status: number; body: JobListResponse | { message: string } }> {
   const user = (request as { user?: { userId: string; role: string } }).user;
   if (user === undefined) {
@@ -112,8 +112,8 @@ export async function handleListJobs(
 export async function handleGetJobDetails(
   ctx: AdminAppContext,
   _body: unknown,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<{ status: number; body: JobDetails | { message: string } }> {
   const user = (request as { user?: { userId: string; role: string } }).user;
   if (user === undefined) {
@@ -150,8 +150,8 @@ export async function handleGetJobDetails(
 export async function handleGetQueueStats(
   ctx: AdminAppContext,
   _body: unknown,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<{ status: number; body: QueueStats | { message: string } }> {
   const user = (request as { user?: { userId: string; role: string } }).user;
   if (user === undefined) {
@@ -181,8 +181,8 @@ export async function handleGetQueueStats(
 export async function handleRetryJob(
   ctx: AdminAppContext,
   _body: unknown,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<{ status: number; body: JobActionResponse | { message: string } }> {
   const user = (request as { user?: { userId: string; role: string } }).user;
   if (user === undefined) {
@@ -222,8 +222,8 @@ export async function handleRetryJob(
 export async function handleCancelJob(
   ctx: AdminAppContext,
   _body: unknown,
-  request: FastifyRequest,
-  _reply: FastifyReply,
+  request: HttpRequest,
+  _reply: HttpReply,
 ): Promise<{ status: number; body: JobActionResponse | { message: string } }> {
   const user = (request as { user?: { userId: string; role: string } }).user;
   if (user === undefined) {

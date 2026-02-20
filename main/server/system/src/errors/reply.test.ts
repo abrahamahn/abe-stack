@@ -25,7 +25,7 @@ import { describe, expect, test, vi, type Mock } from 'vitest';
 import { replyError, replyOk, sendResult } from './reply';
 
 import type { AppError } from '@bslt/shared';
-import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { HttpReply, HttpRequest } from '../routing/http.types';
 
 // ============================================================================
 // Helpers
@@ -34,12 +34,12 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 function makeSend() {
   const send = vi.fn();
   const status = vi.fn().mockReturnValue({ send });
-  const reply = { status } as unknown as FastifyReply;
+  const reply = { status } as unknown as HttpReply;
   return { reply, status, send };
 }
 
-function makeRequest(correlationId = 'corr-123'): FastifyRequest {
-  return { correlationId } as unknown as FastifyRequest;
+function makeRequest(correlationId = 'corr-123'): HttpRequest {
+  return { correlationId } as unknown as HttpRequest;
 }
 
 // ============================================================================

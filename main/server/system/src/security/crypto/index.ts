@@ -3,16 +3,17 @@
  * Crypto Module
  *
  * JWT signing, verification, and secret rotation utilities.
+ * Base JWT functions are canonical in @bslt/shared/system/crypto.
  *
  * @module @bslt/server-system/security/crypto
  */
 
 // ============================================================================
-// Base JWT
+// Base JWT (canonical in @bslt/shared)
 // ============================================================================
 
-export { decode, JwtError, sign, verify } from './jwt';
-export type { JwtErrorCode, JwtHeader, JwtPayload, SignOptions, VerifyOptions } from './jwt';
+export { decode, JwtError, sign, verify } from '@bslt/shared/system/crypto';
+export type { JwtErrorCode, JwtHeader, JwtPayload, SignOptions, VerifyOptions } from '@bslt/shared/system/crypto';
 
 // ============================================================================
 // JWT Rotation
@@ -22,7 +23,6 @@ export {
   checkTokenSecret,
   createJwtRotationHandler,
   signWithRotation,
-  verifyWithRotation
+  verifyWithRotation,
 } from './jwt.rotation';
 export type { JwtRotationConfig, JwtRotationHandler, RotatingJwtOptions } from './jwt.rotation';
-

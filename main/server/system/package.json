@@ -61,7 +61,9 @@
     "@aws-sdk/credential-providers": "^3.600.0",
     "@aws-sdk/s3-request-presigner": "^3.600.0",
     "@simplewebauthn/server": "^13.2.2",
-    "fastify": "^5.7.4",
     "ioredis": "^5.9.2"
+  },
+  "devDependencies": {
+    "fastify": "^5.7.4"
   }
 }
