@@ -11,8 +11,6 @@ import { authRoutes, createAuthGuard } from '@bslt/core/auth';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
-  buildAuthenticatedRequest,
-  createTestJwt,
   createTestServer,
   type TestServer,
 } from './test-utils';
