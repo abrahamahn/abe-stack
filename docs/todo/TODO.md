@@ -1582,8 +1582,8 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Golden Path Flows (manual + automated):**
 
-- [ ] Flow: Create user → create tenant → invite teammate → teammate accepts → enforce RBAC within workspace
-- [ ] Flow: Run checkout → process webhooks idempotently → activate tenant plan → verify entitlements
+- [x] Flow: Create user → create tenant → invite teammate → teammate accepts → enforce RBAC within workspace
+- [x] Flow: Run checkout → process webhooks idempotently → activate tenant plan → verify entitlements
 
 **Ship Criteria Final Check (CHECKLIST):**
 
@@ -1622,9 +1622,9 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Deployment Pipeline:**
 
-- [ ] CI: `deploy.yml` workflow deploys to production on merge to `main` (or manual trigger)
+- [x] CI: `deploy.yml` workflow deploys to production on merge to `main` (or manual trigger)
 - [ ] CI: zero-downtime deployment verified (rolling restart, no dropped connections)
-- [ ] CI: rollback procedure tested — `rollback.yml` reverts to previous known-good deployment
+- [x] CI: rollback procedure tested — `rollback.yml` reverts to previous known-good deployment
 
 ---
 
@@ -1657,7 +1657,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Production Monitoring:**
 
-- [ ] Setup: Sentry integration — server + client error capture with correlation IDs
+- [x] Setup: Sentry integration — server + client error capture with correlation IDs
 - [ ] Setup: uptime monitoring — external ping to `/health` endpoint every 60s, alert on 2 consecutive failures
 - [ ] Setup: log aggregation — structured logs shipped to centralized service (Datadog, Loki, or CloudWatch)
 - [ ] Setup: log retention policy — 30 days hot, 90 days cold storage
@@ -1758,7 +1758,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 **Security Sign-Off:**
 
 - [ ] Penetration test checklist (5.5) completed with zero critical findings
-- [ ] `pnpm audit` clean (zero critical/high)
+- [x] `pnpm audit` clean (zero critical/high)
 - [ ] OWASP Top 10 verified (SQL injection, XSS, CSRF, auth bypass, IDOR)
 - [ ] Rate limiting verified under simulated attack
 - [ ] No secrets in codebase (`git log` scan for env vars, API keys, passwords)
