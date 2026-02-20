@@ -1,0 +1,27 @@
+{
+  "extends": "../../../config/tsconfig.react.json",
+  "compilerOptions": {
+    "composite": false,
+    "noEmit": true,
+    "declaration": false,
+    "declarationMap": false,
+    "baseUrl": ".",
+    "jsx": "react-jsx",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "paths": {
+      "@bslt/ui": ["../../client/ui/src/index.ts"],
+      "@bslt/ui/*": ["../../client/ui/src/*"],
+      "@bslt/shared": ["../../shared/src/index.ts"],
+      "@bslt/shared/*": ["../../shared/src/*"],
+      "@bslt/react": ["../../client/react/src/index.ts"],
+      "@bslt/react/*": ["../../client/react/src/*"],
+      "@bslt/client-engine": ["../../client/engine/src/index.ts"],
+      "@bslt/client-engine/*": ["../../client/engine/src/*"]
+    },
+    "typeRoots": ["../../client/ui/node_modules/@types", "../../../node_modules/@types"],
+    "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.storybook.tsbuildinfo"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}
