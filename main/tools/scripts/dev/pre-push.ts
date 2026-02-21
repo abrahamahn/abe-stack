@@ -47,7 +47,7 @@ function main(): void {
     run('pnpm lint');
 
     console.log('📚 Building Storybook (CI parity)...');
-    run('pnpm --filter @bslt/storybook build-storybook --quiet');
+    run('STORYBOOK_DISABLE_TELEMETRY=1 pnpm --filter @bslt/storybook build-storybook --quiet');
 
     console.log('\n✅ Pre-push passed (CI parity checks)!\n');
     return;
