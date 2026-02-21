@@ -40,14 +40,6 @@ describe('Server Configuration', () => {
       );
       expect(appUrlConfig.appBaseUrl).toBe('https://public.app');
 
-      const appUrlConfigFallback = loadServerConfig(
-        createBaseEnv({
-          APP_URL: 'https://internal.app',
-          APP_BASE_URL: 'https://base.app',
-        }),
-      );
-      expect(appUrlConfigFallback.appBaseUrl).toBe('https://internal.app');
-
       // API URL
       const apiUrlConfig = loadServerConfig(
         createBaseEnv({
@@ -57,13 +49,12 @@ describe('Server Configuration', () => {
       );
       expect(apiUrlConfig.apiBaseUrl).toBe('https://public.api');
 
-      const apiUrlConfigVite = loadServerConfig(
+      const apiUrlConfigFallback = loadServerConfig(
         createBaseEnv({
-          VITE_API_URL: 'https://vite.api',
           API_BASE_URL: 'https://base.api',
         }),
       );
-      expect(apiUrlConfigVite.apiBaseUrl).toBe('https://vite.api');
+      expect(apiUrlConfigFallback.apiBaseUrl).toBe('https://base.api');
     });
 
     test('should prefer API_PORT over PORT', () => {

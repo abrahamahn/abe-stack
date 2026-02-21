@@ -139,7 +139,7 @@ function validate(config: AppConfig): void {
     }
     if (!config.server.appBaseUrl.startsWith('https://')) {
       errors.push(
-        `Server: APP_BASE_URL must be an HTTPS URL in production (got: ${config.server.appBaseUrl})`,
+        `Server: APP_URL must be an HTTPS URL in production (got: ${config.server.appBaseUrl})`,
       );
     }
   }

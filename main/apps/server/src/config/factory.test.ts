@@ -107,12 +107,12 @@ describe('Configuration Factory', () => {
       const env = {
         ...validEnv,
         NODE_ENV: 'development' as const,
-        VITE_API_URL: 'http://localhost:9000', // Vite-style URL
+        API_BASE_URL: 'http://localhost:9000', // Server canonical API URL
       };
 
       const config = load(env);
 
-      // Server should pick up VITE_API_URL as its apiBaseUrl
+      // Server should pick up API_BASE_URL as its apiBaseUrl
       expect(config.server.apiBaseUrl).toBe('http://localhost:9000');
     });
   });
@@ -169,7 +169,7 @@ describe('Configuration Factory', () => {
       EMAIL_PROVIDER: 'smtp' as const,
       SMTP_HOST: 'smtp.sendgrid.net',
       DB_SSL: 'true',
-      APP_BASE_URL: 'https://my-app.com',
+      APP_URL: 'https://my-app.com',
     };
 
     test('should allow valid production config', () => {
@@ -209,7 +209,7 @@ describe('Configuration Factory', () => {
     });
 
     test('should reject non-HTTPS app base URL in production', () => {
-      const badEnv = { ...prodBaseEnv, APP_BASE_URL: 'http://my-app.com' };
+      const badEnv = { ...prodBaseEnv, APP_URL: 'http://my-app.com' };
       expect(() => load(badEnv)).toThrow(/must be an HTTPS URL in production/);
     });
 

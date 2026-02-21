@@ -36,7 +36,6 @@ describe('ServerEnvSchema', () => {
       expect(result.PUBLIC_APP_URL).toBeUndefined();
       expect(result.APP_URL).toBeUndefined();
       expect(result.API_BASE_URL).toBeUndefined();
-      expect(result.APP_BASE_URL).toBeUndefined();
       expect(result.CORS_ORIGIN).toBeUndefined();
       expect(result.CORS_ORIGINS).toBeUndefined();
       expect(result.AUDIT_RETENTION_DAYS).toBeUndefined();
@@ -220,11 +219,6 @@ describe('ServerEnvSchema', () => {
     it('accepts valid API_BASE_URL', () => {
       const result = ServerEnvSchema.parse({ API_BASE_URL: 'https://api.example.com/v1' });
       expect(result.API_BASE_URL).toBe('https://api.example.com/v1');
-    });
-
-    it('accepts valid APP_BASE_URL', () => {
-      const result = ServerEnvSchema.parse({ APP_BASE_URL: 'https://example.com' });
-      expect(result.APP_BASE_URL).toBe('https://example.com');
     });
 
     it('rejects PUBLIC_API_URL without a protocol', () => {

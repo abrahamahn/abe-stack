@@ -15,7 +15,6 @@ import {
   ERROR_CODES,
   ERROR_MESSAGES,
   getOperationPointers,
-  HTTP_STATUS,
   REALTIME_ERRORS,
   SubKeys,
 } from '@bslt/shared';
@@ -24,6 +23,25 @@ import { isTableAllowed, loadRecords, saveRecords } from '../service';
 
 import type { ConflictResult, RealtimeModuleDeps, RealtimeRequest, WriteResult } from '../types';
 import type { RealtimeTransaction, RecordPointer, RouteResult } from '@bslt/shared';
+
+const HTTP_STATUS = {
+  OK: 200,
+  BAD_REQUEST: 400,
+  FORBIDDEN: 403,
+  CONFLICT: 409,
+  INTERNAL_SERVER_ERROR: 500,
+} as const;
+
+const ERROR_CODES_LOCAL = {
+  BAD_REQUEST: 'BAD_REQUEST',
+  FORBIDDEN: 'FORBIDDEN',
+} as const;
+
+const REALTIME_ERRORS_LOCAL = {
+  AUTHOR_MISMATCH: 'Author ID must match authenticated user',
+  tableNotAllowed: (table: string): string =>
+    `Table '${table}' is not allowed for realtime operations`,
+} as const;
 
 function isAuthenticatedWriteRequest(req: unknown): req is {
   user: { userId: string };
@@ -88,8 +106,8 @@ export async function handleWrite(
   req: RealtimeRequest,
 ): Promise<RouteResult<WriteResult | ConflictResult | { code: string; message: string }>> {
   const safeCtx = ctx as unknown as {
-    db: RealtimeModuleDeps['db'];
-    pubsub: RealtimeModuleDeps['pubsub'];
+    db: Parameters<typeof loadRecords>[0];
+    pubsub: { publish: (key: unknown, version: unknown) => void };
     log: unknown;
   };
   const db = safeCtx.db;
@@ -124,7 +142,7 @@ export async function handleWrite(
     });
     return {
       status: HTTP_STATUS.FORBIDDEN,
-      body: { code: ERROR_CODES.FORBIDDEN, message: REALTIME_ERRORS.AUTHOR_MISMATCH },
+      body: { code: ERROR_CODES_LOCAL.FORBIDDEN, message: REALTIME_ERRORS_LOCAL.AUTHOR_MISMATCH },
     };
   }
 
@@ -133,7 +151,10 @@ export async function handleWrite(
     if (!isTableAllowed(op.table)) {
       return {
         status: HTTP_STATUS.BAD_REQUEST,
-        body: { code: ERROR_CODES.BAD_REQUEST, message: REALTIME_ERRORS.tableNotAllowed(op.table) },
+        body: {
+          code: ERROR_CODES_LOCAL.BAD_REQUEST,
+          message: REALTIME_ERRORS_LOCAL.tableNotAllowed(op.table),
+        },
       };
     }
   }

@@ -79,7 +79,6 @@ export interface ServerEnv {
   PUBLIC_APP_URL?: string | undefined;
   APP_URL?: string | undefined;
   API_BASE_URL?: string | undefined;
-  APP_BASE_URL?: string | undefined;
   CORS_ORIGIN?: string | undefined;
   CORS_ORIGINS?: string | undefined;
   LOG_LEVEL: 'debug' | 'info' | 'warn' | 'error';
@@ -121,9 +120,6 @@ export const ServerEnvSchema: Schema<ServerEnv> = createSchema<ServerEnv>((data:
     ),
     API_BASE_URL: parseOptional(obj['API_BASE_URL'], (v: unknown) =>
       parseString(v, 'API_BASE_URL', { url: true }),
-    ),
-    APP_BASE_URL: parseOptional(obj['APP_BASE_URL'], (v: unknown) =>
-      parseString(v, 'APP_BASE_URL', { url: true }),
     ),
     CORS_ORIGIN: parseOptional(obj['CORS_ORIGIN'], (v: unknown) => parseString(v, 'CORS_ORIGIN')),
     CORS_ORIGINS: parseOptional(obj['CORS_ORIGINS'], (v: unknown) =>

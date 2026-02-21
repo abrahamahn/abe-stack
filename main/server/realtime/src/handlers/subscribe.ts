@@ -114,7 +114,8 @@ export async function handleGetRecords(
       pointerCount: body.pointers.length,
     });
 
-    const recordMap = await loadRecordsTyped(ctx.db, body.pointers);
+    const loadedRecordMap = await loadRecordsTyped(ctx.db, body.pointers);
+    const recordMap = loadedRecordMap as unknown as GetRecordsResult['recordMap'];
 
     return {
       status: HTTP_STATUS.OK,

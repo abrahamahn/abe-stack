@@ -30,18 +30,14 @@ export function loadServerConfig(env: FullEnv): ServerConfig {
       ? env.PUBLIC_APP_URL
       : env.APP_URL != null && env.APP_URL !== ''
         ? env.APP_URL
-        : env.APP_BASE_URL != null && env.APP_BASE_URL !== ''
-          ? env.APP_BASE_URL
-          : `http://localhost:${String(appPort)}`;
+        : `http://localhost:${String(appPort)}`;
 
   const apiBaseUrl =
     env.PUBLIC_API_URL !== undefined && env.PUBLIC_API_URL !== ''
       ? env.PUBLIC_API_URL
-      : env.VITE_API_URL !== undefined && env.VITE_API_URL !== ''
-        ? env.VITE_API_URL
-        : env.API_BASE_URL !== undefined && env.API_BASE_URL !== ''
-          ? env.API_BASE_URL
-          : `http://localhost:${String(port)}`;
+      : env.API_BASE_URL !== undefined && env.API_BASE_URL !== ''
+        ? env.API_BASE_URL
+        : `http://localhost:${String(port)}`;
 
   return {
     host: env.HOST !== '' ? env.HOST : '0.0.0.0',
