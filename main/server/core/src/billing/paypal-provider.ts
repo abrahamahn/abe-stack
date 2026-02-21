@@ -535,30 +535,7 @@ export class PayPalProvider implements BillingService {
     // Format: algo=SHA256withRSA, timestamp=..., transmission_id=..., cert_url=...
 
     try {
-      // Parse the signature header parts (use null-prototype object to prevent pollution)
-      const blockedKeys = new Set(['__proto__', 'prototype', 'constructor']);
-      const initialAcc: Record<string, string | undefined> = Object.create(null) as Record<
-        string,
-        string | undefined
-      >;
-      const parts = signature.split(',').reduce<Record<string, string | undefined>>((acc, part) => {
-        const [key, value] = part.trim().split('=');
-        if (
-          key !== undefined &&
-          key !== '' &&
-          !blockedKeys.has(key) &&
-          value !== undefined &&
-          value !== ''
-        ) {
-          Object.defineProperty(acc, key, {
-            value,
-            writable: true,
-            enumerable: true,
-            configurable: true,
-          });
-        }
-        return acc;
-      }, initialAcc);
+      const parts = parseWebhookSignatureHeader(signature);
 
       // Basic validation that required parts exist
       if (
@@ -672,4 +649,39 @@ export class PayPalProvider implements BillingService {
       createdAt: new Date(event.create_time),
     };
   }
+}
+
+interface PayPalSignatureParts {
+  transmission_id?: string;
+  timestamp?: string;
+  cert_url?: string;
+  auth_algo?: string;
+  transmission_sig?: string;
+  webhook_id?: string;
+}
+
+function parseWebhookSignatureHeader(signature: string): PayPalSignatureParts {
+  const parsed: PayPalSignatureParts = {};
+  const allowed = new Set([
+    'transmission_id',
+    'timestamp',
+    'cert_url',
+    'auth_algo',
+    'transmission_sig',
+    'webhook_id',
+  ]);
+
+  for (const rawPart of signature.split(',')) {
+    const part = rawPart.trim();
+    if (part === '') continue;
+    const eqIdx = part.indexOf('=');
+    if (eqIdx <= 0 || eqIdx === part.length - 1) continue;
+    const key = part.slice(0, eqIdx).trim();
+    if (!allowed.has(key)) continue;
+    const value = part.slice(eqIdx + 1).trim();
+    if (value === '') continue;
+    parsed[key as keyof PayPalSignatureParts] = value;
+  }
+
+  return parsed;
 }

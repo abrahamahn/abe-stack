@@ -1,8 +1,8 @@
 // main/server/system/src/storage/providers/local.ts
 import { randomUUID } from 'node:crypto';
 import { createReadStream } from 'node:fs';
-import { mkdir, open, readFile, unlink } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
+import { mkdir, open, readFile, rename, unlink } from 'node:fs/promises';
+import { basename, dirname, join } from 'node:path';
 
 import { StorageNotFoundError, toStorageError } from '../errors';
 import { normalizeStorageKey } from '../signing';
@@ -18,6 +18,21 @@ export class LocalStorageProvider implements StorageProvider {
     return join(this.config.rootPath, safeKey);
   }
 
+  private async writeFileAtomic(
+    filePath: string,
+    data: Buffer | Uint8Array | string,
+  ): Promise<void> {
+    const dir = dirname(filePath);
+    const tempPath = join(dir, `.${basename(filePath)}.${randomUUID()}.tmp`);
+    const fd = await open(tempPath, 'wx', 0o600);
+    try {
+      await fd.writeFile(data);
+    } finally {
+      await fd.close();
+    }
+    await rename(tempPath, filePath);
+  }
+
   async upload(
     key: string,
     data: Buffer | Uint8Array | string,
@@ -26,13 +41,7 @@ export class LocalStorageProvider implements StorageProvider {
     const finalKey = key !== '' ? key : randomUUID();
     const filePath = this.resolveKey(finalKey);
     await mkdir(dirname(filePath), { recursive: true });
-    // Use open with write+create+truncate flags to set permissions atomically
-    const fd = await open(filePath, 'w', 0o600);
-    try {
-      await fd.writeFile(data);
-    } finally {
-      await fd.close();
-    }
+    await this.writeFileAtomic(filePath, data);
     return finalKey;
   }
 

@@ -15,6 +15,12 @@ import type { RecordPointer, VersionedRecord } from '@bslt/shared';
 
 export type { RecordPointer, VersionedRecord };
 
+const BLOCKED_OBJECT_KEYS = new Set(['__proto__', 'prototype', 'constructor']);
+
+function isSafeObjectKey(key: string): boolean {
+  return key !== '' && !BLOCKED_OBJECT_KEYS.has(key);
+}
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -943,6 +949,9 @@ export function createRecordMap<Tables extends string, R extends VersionedRecord
   const map = Object.create(null) as RecordMap<Tables, R>;
 
   for (const { table, id, record } of records) {
+    if (!isSafeObjectKey(table) || !isSafeObjectKey(id)) {
+      continue;
+    }
     if (!Object.hasOwn(map, table)) {
       const tableMap = Object.create(null) as Record<string, R>;
       (map as Record<Tables, Record<string, R>>)[table] = tableMap;

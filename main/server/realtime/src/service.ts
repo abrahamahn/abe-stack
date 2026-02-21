@@ -36,6 +36,12 @@ const tableNameMap: Record<string, string> = {
   users: USERS_TABLE,
 };
 
+const BLOCKED_OBJECT_KEYS = new Set(['__proto__', 'prototype', 'constructor']);
+
+function isSafeObjectKey(key: string): boolean {
+  return key !== '' && !BLOCKED_OBJECT_KEYS.has(key);
+}
+
 /**
  * Registry of allowed tables for realtime operations.
  * For security, only explicitly registered tables can be accessed.
@@ -65,6 +71,9 @@ export function isTableAllowed(table: string): boolean {
  * @complexity O(1)
  */
 export function registerRealtimeTable(table: string, tableName?: string): void {
+  if (!isSafeObjectKey(table)) {
+    throw new Error(`Invalid realtime table name: ${table}`);
+  }
   ALLOWED_TABLES.add(table);
   if (tableName !== undefined && tableName !== '') {
     tableNameMap[table] = tableName;
@@ -100,7 +109,7 @@ export function resolveTableName(logicalName: string): string | undefined {
  */
 export async function loadRecords(db: DbClient, pointers: RecordPointer[]): Promise<RecordMap> {
   if (pointers.length === 0) {
-    return {};
+    return Object.create(null) as RecordMap;
   }
 
   // Group pointers by table - O(n) where n = pointers.length
@@ -118,10 +127,14 @@ export async function loadRecords(db: DbClient, pointers: RecordPointer[]): Prom
   }
 
   // Load records from each table
-  const recordMap: RecordMap = {};
+  const recordMap = Object.create(null) as RecordMap;
 
   for (const [table, ids] of byTable.entries()) {
-    recordMap[table] = {};
+    if (!isSafeObjectKey(table)) {
+      continue;
+    }
+    const tableRecords = Object.create(null) as Record<string, RealtimeRecord>;
+    recordMap[table] = tableRecords;
     const tableName = tableNameMap[table];
     if (tableName === undefined || tableName === '') {
       continue;
@@ -132,7 +145,8 @@ export async function loadRecords(db: DbClient, pointers: RecordPointer[]): Prom
     );
 
     for (const row of rows) {
-      recordMap[table][row.id] = row as RealtimeRecord;
+      if (!isSafeObjectKey(row.id)) continue;
+      tableRecords[row.id] = row as RealtimeRecord;
     }
   }
 
@@ -155,10 +169,12 @@ export async function saveRecords(
   originalRecordMap: RecordMap,
 ): Promise<void> {
   for (const table in recordMap) {
+    if (!isSafeObjectKey(table) || !isTableAllowed(table)) continue;
     const records = recordMap[table];
     if (records === undefined) continue;
 
     for (const id in records) {
+      if (!isSafeObjectKey(id)) continue;
       const typedRecord = records[id];
       if (typedRecord === undefined) continue;
 

@@ -48,7 +48,7 @@ export type { HttpMethod };
  * Handler context type - placeholder for the actual context interface.
  * In practice, this will be satisfied by BaseContext from contracts/context.
  */
-export type HandlerContext = Record<string, unknown>;
+export type HandlerContext = object;
 
 /**
  * Route handler function type.

@@ -13,6 +13,7 @@ import { parseAudioMetadata } from './audio-metadata';
 // Mock fs module
 vi.mock('fs', () => ({
   promises: {
+    open: vi.fn(),
     readFile: vi.fn(),
   },
 }));
@@ -20,7 +21,7 @@ vi.mock('fs', () => ({
 describe('parseAudioMetadata (I/O wrapper)', () => {
   it('should return empty object for non-existent file', async () => {
     const fs = await import('fs');
-    vi.mocked(fs.promises.readFile).mockRejectedValueOnce(new Error('File not found'));
+    vi.mocked(fs.promises.open).mockRejectedValueOnce(new Error('File not found'));
 
     const result = await parseAudioMetadata('/nonexistent.mp3');
     expect(result).toEqual({});
@@ -28,8 +29,12 @@ describe('parseAudioMetadata (I/O wrapper)', () => {
 
   it('should return empty metadata for files exceeding MAX_AUDIO_FILE_SIZE', async () => {
     const fs = await import('fs');
-    const oversizedBuffer = { length: 201 * 1024 * 1024 } as unknown as Buffer<ArrayBuffer>;
-    vi.mocked(fs.promises.readFile).mockResolvedValueOnce(oversizedBuffer);
+    const mockFd = {
+      stat: vi.fn().mockResolvedValue({ size: 201 * 1024 * 1024 }),
+      readFile: vi.fn(),
+      close: vi.fn().mockResolvedValue(undefined),
+    };
+    vi.mocked(fs.promises.open).mockResolvedValueOnce(mockFd as never);
 
     const result = await parseAudioMetadata('/huge.mp3');
     expect(result).toEqual({});
@@ -39,12 +44,17 @@ describe('parseAudioMetadata (I/O wrapper)', () => {
     const fs = await import('fs');
     const buffer = Buffer.alloc(100);
     buffer.fill(0);
-    vi.mocked(fs.promises.readFile).mockResolvedValueOnce(buffer);
+    const mockFd = {
+      stat: vi.fn().mockResolvedValue({ size: 200 * 1024 * 1024 }),
+      readFile: vi.fn().mockResolvedValue(buffer),
+      close: vi.fn().mockResolvedValue(undefined),
+    };
+    vi.mocked(fs.promises.open).mockResolvedValueOnce(mockFd as never);
 
     const result = await parseAudioMetadata('/borderline.mp3');
     // File is at limit (not over), so it should be parsed (returns empty for unknown format)
     expect(result).toEqual({});
-    expect(fs.promises.readFile).toHaveBeenCalled();
+    expect(mockFd.readFile).toHaveBeenCalled();
   });
 
   it('should delegate to parseAudioMetadataFromBuffer for valid file', async () => {
@@ -54,7 +64,12 @@ describe('parseAudioMetadata (I/O wrapper)', () => {
     buffer[0] = 0x49;
     buffer[1] = 0x44;
     buffer[2] = 0x33;
-    vi.mocked(fs.promises.readFile).mockResolvedValueOnce(buffer);
+    const mockFd = {
+      stat: vi.fn().mockResolvedValue({ size: buffer.length }),
+      readFile: vi.fn().mockResolvedValue(buffer),
+      close: vi.fn().mockResolvedValue(undefined),
+    };
+    vi.mocked(fs.promises.open).mockResolvedValueOnce(mockFd as never);
 
     const result = await parseAudioMetadata('/test.mp3');
     expect(result.format).toBe('mp3');

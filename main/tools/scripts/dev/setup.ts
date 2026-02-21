@@ -675,7 +675,7 @@ function writeFileAtomic(targetPath: string, content: string): void {
   const suffixHex = Buffer.from(suffixBytes).toString('hex');
   const tempPath = resolve(directory, `.tmp-${process.pid}-${suffixHex}.env`);
   // Use openSync with mode to set permissions atomically (no brief window with default perms)
-  const fd = openSync(tempPath, 'w', 0o600);
+  const fd = openSync(tempPath, 'wx', 0o600);
   try {
     writeSync(fd, content);
   } finally {

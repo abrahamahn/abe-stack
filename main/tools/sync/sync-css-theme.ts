@@ -5,7 +5,7 @@
  * This script generates CSS custom properties from the theme source files.
  * All values come from the source files - no hardcoded values here.
  */
-import { createHash } from 'crypto';
+import { createHash, randomUUID } from 'crypto';
 import { promises as fsPromises, watch as fsWatch } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'url';
@@ -42,6 +42,17 @@ async function computeInputHash(paths: string[]): Promise<string> {
   return hash.digest('hex');
 }
 
+async function writeFileAtomic(filePath: string, content: string): Promise<void> {
+  const tempPath = `${filePath}.${process.pid}.${randomUUID()}.tmp`;
+  const fd = await fsPromises.open(tempPath, 'wx', 0o600);
+  try {
+    await fd.writeFile(content, 'utf8');
+  } finally {
+    await fd.close();
+  }
+  await fsPromises.rename(tempPath, filePath);
+}
+
 async function build(): Promise<void> {
   const inputHash = await computeInputHash(themeSourceFiles);
   await fsPromises.mkdir(cacheDir, { recursive: true });
@@ -60,8 +71,8 @@ async function build(): Promise<void> {
 
   const css = generateThemeCss();
   const formatted = await format(css, { parser: 'css' });
-  await fsPromises.writeFile(themeCssPath, formatted, 'utf8');
-  await fsPromises.writeFile(themeHashPath, inputHash, 'utf8');
+  await writeFileAtomic(themeCssPath, formatted);
+  await writeFileAtomic(themeHashPath, inputHash);
 
   log(`Generated theme CSS at ${themeCssPath}`);
 }

@@ -7,15 +7,15 @@
  * Moved from @bslt/server-system to keep Fastify coupling in the app layer.
  */
 
+import { randomUUID } from 'node:crypto';
 import { createReadStream, createWriteStream } from 'node:fs';
-import { mkdir, open } from 'node:fs/promises';
+import { mkdir, open, rename, unlink } from 'node:fs/promises';
 import path from 'node:path';
 import { pipeline } from 'node:stream/promises';
 
 import { verifyFileSignature, type FileSignatureData } from '@bslt/server-system';
 import { MS_PER_MINUTE, SECONDS_PER_DAY } from '@bslt/shared/primitives';
 import { HTTP_STATUS } from '@bslt/shared/system';
-
 
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
@@ -43,6 +43,54 @@ function resolveContainedPath(uploadDir: string, ...segments: string[]): string 
   const resolvedPath = path.resolve(uploadDir, ...segments);
   if (!resolvedPath.startsWith(resolvedRoot)) return null;
   return resolvedPath;
+}
+
+function toAtomicTempPath(targetPath: string): string {
+  return `${targetPath}.${String(process.pid)}.${randomUUID()}.tmp`;
+}
+
+async function writeContentAtomic(
+  targetPath: string,
+  body: Buffer | string,
+  maxFileSize: number,
+): Promise<void> {
+  const tempPath = toAtomicTempPath(targetPath);
+  const fd = await open(tempPath, 'wx', 0o600);
+  try {
+    if (Buffer.isBuffer(body)) {
+      if (body.length > maxFileSize) {
+        throw new Error('PAYLOAD_TOO_LARGE');
+      }
+      await fd.writeFile(body);
+    } else {
+      if (Buffer.byteLength(body) > maxFileSize) {
+        throw new Error('PAYLOAD_TOO_LARGE');
+      }
+      await fd.writeFile(body);
+    }
+  } catch (error) {
+    await fd.close();
+    await unlink(tempPath).catch(() => undefined);
+    throw error;
+  }
+  await fd.close();
+  await rename(tempPath, targetPath);
+}
+
+async function writeRequestStreamAtomic(
+  targetPath: string,
+  source: NodeJS.ReadableStream,
+): Promise<void> {
+  const tempPath = toAtomicTempPath(targetPath);
+  const writeStream = createWriteStream(tempPath, { flags: 'wx', mode: 0o600 });
+  try {
+    await pipeline(source, writeStream);
+    await rename(tempPath, targetPath);
+  } catch (error) {
+    writeStream.destroy();
+    await unlink(tempPath).catch(() => undefined);
+    throw error;
+  }
 }
 
 const RATE_LIMIT_WINDOW_MS = MS_PER_MINUTE;
@@ -199,26 +247,19 @@ export function registerFileServer(config: FilesConfig, app: FastifyInstance): v
         await mkdir(resolvedDir, { recursive: true });
 
         if (Buffer.isBuffer(request.body)) {
-          if (request.body.length > config.maxFileSize) {
-            void reply.status(HTTP_STATUS.PAYLOAD_TOO_LARGE).send('File too large.');
-            return;
-          }
-          const { writeFile } = await import('node:fs/promises');
-          await writeFile(resolvedFile, request.body, { mode: 0o600 });
+          await writeContentAtomic(resolvedFile, request.body, config.maxFileSize);
         } else if (typeof request.body === 'string') {
-          if (Buffer.byteLength(request.body) > config.maxFileSize) {
-            void reply.status(HTTP_STATUS.PAYLOAD_TOO_LARGE).send('File too large.');
-            return;
-          }
-          const { writeFile } = await import('node:fs/promises');
-          await writeFile(resolvedFile, request.body, { mode: 0o600 });
+          await writeContentAtomic(resolvedFile, request.body, config.maxFileSize);
         } else {
-          const writeStream = createWriteStream(resolvedFile, { mode: 0o600 });
-          await pipeline(request.raw, writeStream);
+          await writeRequestStreamAtomic(resolvedFile, request.raw);
         }
 
         void reply.status(HTTP_STATUS.OK).send('File uploaded.');
-      } catch {
+      } catch (error) {
+        if (error instanceof Error && error.message === 'PAYLOAD_TOO_LARGE') {
+          void reply.status(HTTP_STATUS.PAYLOAD_TOO_LARGE).send('File too large.');
+          return;
+        }
         void reply.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).send('File upload failed.');
       }
     },
