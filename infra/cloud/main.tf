@@ -4,11 +4,34 @@
 terraform {
   required_version = ">= 1.0"
 
-  # TODO: Configure backend for state management (recommended for production)
+  # Remote state backend — enable before your first `terraform apply`.
+  # State must never be local on shared/production deployments (no locking, no history).
+  #
+  # DigitalOcean Spaces (S3-compatible — default for DO deployments):
+  #   1. Create a Space and generate a Spaces access key in the DO console.
+  #   2. Export: AWS_ACCESS_KEY_ID=<spaces-key> AWS_SECRET_ACCESS_KEY=<spaces-secret>
+  #
   # backend "s3" {
+  #   bucket                      = "bslt-terraform-state"
+  #   key                         = "infrastructure/terraform.tfstate"
+  #   region                      = "us-east-1"                           # required by AWS SDK, unused by DO
+  #   endpoint                    = "https://nyc3.digitaloceanspaces.com" # change region as needed
+  #   skip_credentials_validation = true
+  #   skip_metadata_api_check     = true
+  #   skip_region_validation      = true
+  #   force_path_style            = true
+  # }
+  #
+  # GCP Cloud Storage (for GCP deployments):
+  # backend "gcs" {
   #   bucket = "bslt-terraform-state"
-  #   key    = "infrastructure/terraform.tfstate"
-  #   region = "us-east-1"
+  #   prefix = "infrastructure"
+  # }
+  #
+  # Terraform Cloud (provider-agnostic):
+  # backend "remote" {
+  #   organization = "your-org"
+  #   workspaces { name = "bslt-production" }
   # }
 }
 

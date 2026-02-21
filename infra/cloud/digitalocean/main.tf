@@ -51,13 +51,7 @@ resource "digitalocean_firewall" "abe_stack" {
   inbound_rule {
     protocol         = "tcp"
     port_range       = "22"
-    source_addresses = ["0.0.0.0/0", "::/0"] # SSH from anywhere (restrict in production)
-  }
-
-  inbound_rule {
-    protocol         = "tcp"
-    port_range       = tostring(var.app_port)
-    source_addresses = ["0.0.0.0/0", "::/0"] # Application port
+    source_addresses = var.ssh_allowed_cidrs
   }
 
   inbound_rule {
@@ -121,7 +115,7 @@ resource "digitalocean_database_cluster" "abe_stack" {
   version    = "16"
   size       = var.database_size
   region     = var.region
-  node_count = 1
+  node_count = var.database_node_count
 
   maintenance_window {
     day  = "sunday"

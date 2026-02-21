@@ -1,14 +1,17 @@
 #!/bin/bash
 # Startup script for BSLT GCP deployment
-# This script runs on first boot to prepare the compute instance
+# Bootstraps the host with Docker, UFW, and security tooling.
+# The application stack is deployed via Docker Compose by CI/CD.
+# Caddy, Node.js, and the app run entirely inside Docker containers —
+# do NOT install them on the host.
 
 set -euo pipefail
 
-# Update system packages
+# ---------------------------------------------------------------------------
+# System packages
+# ---------------------------------------------------------------------------
 apt-get update
 apt-get upgrade -y
-
-# Install essential packages
 apt-get install -y \
     curl \
     wget \
@@ -18,41 +21,41 @@ apt-get install -y \
     jq \
     ufw \
     fail2ban \
-    unattended-upgrades \
-    google-cloud-sdk
+    unattended-upgrades
 
-# Install Node.js (LTS) and pnpm
-curl -fsSL https://deb.nodesource.com/setup_lts.x | bash -
-apt-get install -y nodejs
-npm install -g pnpm
-
-# Install Docker
+# ---------------------------------------------------------------------------
+# Docker
+# ---------------------------------------------------------------------------
 curl -fsSL https://get.docker.com | sh
-usermod -aG docker bslt
+systemctl enable docker
+systemctl start docker
 
-# Install Caddy web server
-apt-get install -y debian-keyring debian-archive-keyring apt-transport-https
-curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
-curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | tee /etc/apt/sources.list.d/caddy-stable.list
-apt-get update
-apt-get install -y caddy
-
-# Create application user and directory
+# ---------------------------------------------------------------------------
+# Application user
+# ---------------------------------------------------------------------------
 useradd -m -s /bin/bash bslt
 mkdir -p /home/bslt/${app_name}
 chown -R bslt:bslt /home/bslt/${app_name}
+# Allow bslt user to manage containers without sudo
+usermod -aG docker bslt
 
-# Set up basic firewall (ufw)
+# ---------------------------------------------------------------------------
+# Firewall (UFW)
+# Caddy (in Docker) owns 80/443 — the app port is internal only.
+# ---------------------------------------------------------------------------
 ufw --force enable
 ufw allow ssh
-ufw allow ${app_port}
 ufw allow 80
 ufw allow 443
 
-# Configure automatic security updates
+# ---------------------------------------------------------------------------
+# Security: automatic security updates + fail2ban
+# ---------------------------------------------------------------------------
 dpkg-reconfigure --frontend=noninteractive unattended-upgrades
 
-# Set up log rotation
+# ---------------------------------------------------------------------------
+# Log rotation
+# ---------------------------------------------------------------------------
 cat > /etc/logrotate.d/${app_name} << EOF
 /home/bslt/${app_name}/logs/*.log {
     daily
@@ -62,41 +65,15 @@ cat > /etc/logrotate.d/${app_name} << EOF
     delaycompress
     notifempty
     create 644 bslt bslt
-    postrotate
-        systemctl reload ${app_name} || true
-    endscript
 }
 EOF
 
-# Create systemd service
-cat > /etc/systemd/system/${app_name}.service << EOF
-[Unit]
-Description=${app_name} Application
-After=network.target
-
-[Service]
-Type=simple
-User=bslt
-WorkingDirectory=/home/bslt/${app_name}
-ExecStart=/usr/bin/node /home/bslt/${app_name}/dist/server.js
-Restart=always
-RestartSec=5
-Environment=NODE_ENV=production
-Environment=PORT=${app_port}
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-# Enable and start services
-systemctl enable ${app_name}
-systemctl enable caddy
-
-# Install Google Cloud Ops Agent for monitoring
+# ---------------------------------------------------------------------------
+# Google Cloud Ops Agent (log + metric collection)
+# ---------------------------------------------------------------------------
 curl -sSO https://dl.google.com/cloudagents/add-google-cloud-ops-agent-repo.sh
 bash add-google-cloud-ops-agent-repo.sh --also-install
 
-# Configure Ops Agent for application logs
 cat > /etc/google-cloud-ops-agent/config.yaml << EOF
 logging:
   receivers:
@@ -113,8 +90,10 @@ EOF
 
 systemctl restart google-cloud-ops-agent
 
-# Clean up
+# ---------------------------------------------------------------------------
+# Cleanup
+# ---------------------------------------------------------------------------
 apt-get autoremove -y
 apt-get clean
 
-echo "BSLT GCP instance initialization complete!"
+echo "BSLT host bootstrap complete. Deploy the application stack with Docker Compose."
