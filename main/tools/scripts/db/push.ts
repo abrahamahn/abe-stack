@@ -557,9 +557,9 @@ export const STATEMENTS: string[] = [
   `ALTER TABLE users ADD COLUMN IF NOT EXISTS deletion_grace_period_ends TIMESTAMPTZ;`,
   // Performance indexes (0000_users.sql)
   `CREATE INDEX IF NOT EXISTS idx_users_active ON users(id) WHERE deleted_at IS NULL AND deactivated_at IS NULL;`,
-  `CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user_expires ON refresh_tokens(user_id, expires_at DESC) WHERE expires_at > NOW();`,
+  `CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user_expires ON refresh_tokens(user_id, expires_at DESC);`,
   // Active API keys (0101_api_keys.sql)
-  `CREATE INDEX IF NOT EXISTS idx_api_keys_active ON api_keys(user_id, created_at DESC) WHERE revoked_at IS NULL AND (expires_at IS NULL OR expires_at > NOW());`,
+  `CREATE INDEX IF NOT EXISTS idx_api_keys_active ON api_keys(user_id, created_at DESC) WHERE revoked_at IS NULL;`,
   // New indexes: 0000_users.sql
   `CREATE INDEX IF NOT EXISTS idx_users_locked_until ON users(locked_until) WHERE locked_until IS NOT NULL;`,
   `CREATE INDEX IF NOT EXISTS idx_users_deletion_grace ON users(deletion_grace_period_ends) WHERE deletion_grace_period_ends IS NOT NULL;`,

@@ -13,7 +13,16 @@ function run(cmd: string): string {
   return execSync(cmd, {
     encoding: 'utf-8',
     stdio: ['ignore', 'pipe', 'pipe'],
+    maxBuffer: 1024 * 1024 * 32,
   }).trim();
+}
+
+function runToFile(cmd: string, filePath: string): void {
+  execSync(`${cmd} > "${filePath}"`, {
+    stdio: ['ignore', 'pipe', 'pipe'],
+    maxBuffer: 1024 * 1024 * 16,
+    shell: '/bin/bash',
+  });
 }
 
 function parseArgs(argv: string[]): Args {
@@ -99,11 +108,13 @@ function main(): void {
   );
   writeFileSync(resolve(baseDir, 'run-meta.json'), `${metaJson}\n`, 'utf-8');
 
-  const failedLogs = run(`gh run view ${runId} --log-failed || true`);
-  writeFileSync(resolve(baseDir, 'run-failed.log'), `${failedLogs}\n`, 'utf-8');
+  const failedLogPath = resolve(baseDir, 'run-failed.log');
+  const fullLogPath = resolve(baseDir, 'run-full.log');
+  runToFile(`gh run view ${runId} --log-failed || true`, failedLogPath);
+  runToFile(`gh run view ${runId} --log`, fullLogPath);
 
-  const fullLogs = run(`gh run view ${runId} --log`);
-  writeFileSync(resolve(baseDir, 'run-full.log'), `${fullLogs}\n`, 'utf-8');
+  const failedLogs = run(`cat "${failedLogPath}"`);
+  const fullLogs = run(`cat "${fullLogPath}"`);
 
   const reviewBundle = [
     '=== RUN META ===',
