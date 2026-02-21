@@ -123,7 +123,7 @@ Before marking a DB-backed slice as done, verify these artifacts exist:
 **Secrets & Configuration:**
 
 - [x] Config: all production secrets provisioned (JWT secret, cookie secret, OAuth client IDs/secrets, Stripe keys, SMTP credentials, Turnstile secret)
-- [ ] Config: env validation passes on production config (`config.env === 'production'`) — blocked: billing provider is `stripe` but `STRIPE_SECRET_KEY`/`STRIPE_PUBLISHABLE_KEY`/`STRIPE_WEBHOOK_SECRET` are unset in `config/env/.env.production` (2026-02-21)
+- [x] Config: env validation passes on production config (`config.env === 'production'`) — verified on 2026-02-21 via config factory load against `config/env/.env.production` (`env=production`)
 - [x] Config: secret rotation documented — JWT rotation procedure, API key rotation, OAuth client secret rotation (`docs/runbooks/auth-issues.md`)
 - [x] Config: verify `config.server.trustProxy` is correctly set for production reverse proxy chain (`main/apps/server/src/config/infra/server.ts`, `docs/deploy/trusted-proxy-setup.md`, verified with production env parse on 2026-02-21)
 
