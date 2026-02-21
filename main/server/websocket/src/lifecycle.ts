@@ -16,7 +16,6 @@ import {
   ERROR_MESSAGES,
   HTTP_STATUS,
   parseCookies,
-  parseRecordKey,
   WEBSOCKET_PATH,
   WS_CLOSE_POLICY_VIOLATION,
 } from '@bslt/shared';
@@ -24,13 +23,7 @@ import { WebSocketServer } from 'ws';
 
 import { decrementConnections, incrementConnections, markPluginRegistered } from './stats';
 
-import type {
-  Logger,
-  WebSocket as PubSubWebSocket,
-  ServerMessage,
-  SubscriptionKey,
-  SubscriptionManager,
-} from '@bslt/shared';
+import type { Logger, WebSocket as PubSubWebSocket, SubscriptionManager } from '@bslt/shared';
 import type { FastifyInstance } from 'fastify';
 import type { IncomingMessage } from 'node:http';
 import type { Duplex } from 'node:stream';
@@ -156,6 +149,14 @@ function isStringRecord(value: unknown): value is Record<string, string> {
   return Object.values(value).every((entry) => typeof entry === 'string');
 }
 
+function parseRecordSubscriptionKey(key: string): { table: string; id: string } | null {
+  const [prefix, table, id] = key.split(':');
+  if (prefix !== 'record' || table == null || id == null || table.length === 0 || id.length === 0) {
+    return null;
+  }
+  return { table, id };
+}
+
 /**
  * Reject WebSocket upgrade with HTTP error response.
  * Writes a raw HTTP response and destroys the socket.
@@ -192,9 +193,11 @@ function rejectUpgrade(socket: Duplex, statusCode: number, message: string): voi
  * @complexity O(1) database query
  */
 async function sendInitialData(ctx: WebSocketDeps, socket: WebSocket, key: string): Promise<void> {
-  const parsed = parseRecordKey(key);
+  const parsed = parseRecordSubscriptionKey(key);
+  const log = ctx.log as { warn: (message: string, meta?: Record<string, unknown>) => void };
+  const ws = socket as { send: (data: string) => void };
   if (parsed == null) {
-    ctx.log.warn('Invalid subscription key format', { key });
+    log.warn('Invalid subscription key format', { key });
     return;
   }
 
@@ -202,11 +205,11 @@ async function sendInitialData(ctx: WebSocketDeps, socket: WebSocket, key: strin
     const version = await getRecordVersion(ctx, parsed.table, parsed.id);
 
     if (version !== undefined) {
-      const msg: ServerMessage = { type: 'update', key: key as SubscriptionKey, version };
-      socket.send(JSON.stringify(msg));
+      const msg = { type: 'update', key, version };
+      ws.send(JSON.stringify(msg));
     }
   } catch (err) {
-    ctx.log.warn('Failed to fetch initial data for subscription', { err, key });
+    log.warn('Failed to fetch initial data for subscription', { err, key });
   }
 }
 
@@ -371,7 +374,8 @@ function handleConnection(
         message = Buffer.from(data).toString();
       }
 
-      pubsub.handleMessage(asPubSubWebSocket(socket), message, (key: SubscriptionKey) => {
+      pubsub.handleMessage(asPubSubWebSocket(socket), message, (key: unknown) => {
+        if (typeof key !== 'string') return;
         void sendInitialData(ctx, socket, key);
       });
     });

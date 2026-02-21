@@ -98,6 +98,43 @@ BSLT supports `JWT_SECRET` and `JWT_SECRET_PREVIOUS` for zero-downtime rotation.
 - Periodically (quarterly recommended)
 - After an employee with access leaves the team
 
+## API Key Rotation
+
+Use this when an API key is leaked, over-scoped, or due for periodic rotation.
+
+### Procedure
+
+1. Create a replacement key with the same required scopes.
+2. Update all clients/integrations to use the new key.
+3. Verify requests are succeeding with the new key.
+4. Revoke the old key immediately after cutover.
+5. Record rotation metadata (owner, reason, affected systems, completion time).
+
+### Operational checks
+
+- Confirm no 401 spikes on API key protected endpoints.
+- Verify audit/security events show successful key creation + revocation.
+- For staged rollout, keep overlap window short and documented.
+
+## OAuth Client Secret Rotation
+
+Use this when an OAuth provider secret is leaked, expiring, or on a scheduled rotation.
+
+### Procedure
+
+1. Generate a new client secret in the provider console (Google/GitHub/Kakao/etc.).
+2. Update env vars (`*_CLIENT_SECRET`) in deployment secrets.
+3. Deploy and verify provider callback flow end-to-end.
+4. Keep old provider secret valid only during a short rollback window (if provider supports overlap).
+5. Remove old provider secret and confirm callback/login still succeeds.
+
+### Provider checklist
+
+- Redirect URI list still matches `*_CALLBACK_URL`.
+- Client ID unchanged unless intentionally rotated.
+- Existing sessions tested (login, refresh, linked account operations).
+- Security event and deployment record captured.
+
 ## OAuth Provider Outage
 
 ### Detection
