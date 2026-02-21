@@ -26,6 +26,7 @@ import {
   update,
   USER_COLUMNS,
   USERS_TABLE,
+  type AuditEvent,
   type DbClient,
   type Repositories,
   type User,
@@ -469,4 +470,38 @@ export async function hardDeleteAnonymizedUsers(
   }
 
   return { deletedCount };
+}
+
+// ============================================================================
+// Audit Trail Preservation
+// ============================================================================
+
+/**
+ * Query audit events for a user, including soft-deleted users.
+ *
+ * Audit events in the `audit_events` table reference users via `actor_id`
+ * with `ON DELETE SET NULL` (not CASCADE). This means:
+ *
+ * - **During soft-delete phase**: `actor_id` still points to the user row,
+ *   so all events remain queryable by the user's ID.
+ * - **During PII anonymization**: the user record is updated but still exists,
+ *   so `actor_id` is unchanged and events remain queryable.
+ * - **After hard-delete**: `actor_id` is set to NULL, but the event rows
+ *   themselves are preserved in the audit trail.
+ *
+ * Use this function in admin contexts to query the full event history for
+ * a user who has been soft-deleted or whose data has been anonymized.
+ *
+ * @param repos - Repository container (needs repos.auditEvents)
+ * @param userId - The ID of the user (may be soft-deleted)
+ * @param limit - Maximum number of events to return (default: 100)
+ * @returns Array of audit events, most recent first
+ * @complexity O(log n) — indexed query on actor_id
+ */
+export async function getAuditEventsForDeletedUser(
+  repos: Pick<Repositories, 'auditEvents'>,
+  userId: string,
+  limit = 100,
+): Promise<AuditEvent[]> {
+  return repos.auditEvents.findByActorId(userId, limit);
 }
