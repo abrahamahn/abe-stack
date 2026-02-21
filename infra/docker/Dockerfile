@@ -30,7 +30,6 @@ FROM base AS deps
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY main/apps/server/package.json main/apps/server/
 COPY main/server/core/package.json main/server/core/
-COPY main/server/engine/package.json main/server/engine/
 COPY main/server/db/package.json main/server/db/
 COPY main/server/realtime/package.json main/server/realtime/
 COPY main/server/websocket/package.json main/server/websocket/
