@@ -13,6 +13,7 @@ import {
   OAuthError,
   TooManyRequestsError,
 } from '@bslt/shared';
+import { isStrategyEnabled } from '@bslt/shared/core';
 
 import { OAUTH_PROVIDERS, type OAuthProvider } from '../../../../db/src';
 import { getMetricsCollector } from '../../../../system/src';
@@ -116,6 +117,22 @@ function isValidProvider(provider: string): provider is OAuthProvider {
   return (OAUTH_PROVIDERS as readonly string[]).includes(provider);
 }
 
+const PROVIDER_TO_STRATEGY = {
+  google: 'google',
+  github: 'github',
+  facebook: 'facebook',
+  microsoft: 'microsoft',
+  apple: 'apple',
+} as const;
+
+function isOAuthStrategyEnabled(ctx: AppContext, provider: OAuthProvider): boolean {
+  if (!Array.isArray(ctx.config.auth.strategies)) {
+    return true;
+  }
+  const strategy = PROVIDER_TO_STRATEGY[provider];
+  return isStrategyEnabled(ctx.config.auth, strategy);
+}
+
 /**
  * Validate and return a typed OAuth provider.
  *
@@ -124,13 +141,16 @@ function isValidProvider(provider: string): provider is OAuthProvider {
  * @throws {OAuthError} If provider is invalid
  * @complexity O(n) where n is the number of supported providers
  */
-function validateProvider(provider: string): OAuthProvider {
+function validateProvider(ctx: AppContext, provider: string): OAuthProvider {
   if (!isValidProvider(provider)) {
     throw new OAuthError(
       `Invalid OAuth provider: ${provider}. Supported: ${OAUTH_PROVIDERS.join(', ')}`,
       provider,
       'INVALID_PROVIDER',
     );
+  }
+  if (!isOAuthStrategyEnabled(ctx, provider)) {
+    throw new OAuthError(`OAuth provider ${provider} is not enabled`, provider, 'NOT_CONFIGURED');
   }
   return provider;
 }
@@ -216,7 +236,7 @@ export async function handleOAuthInitiate(
     // Rate limit check
     await checkRateLimit('oauthInitiate', request.ip);
 
-    const provider = validateProvider(params.provider);
+    const provider = validateProvider(ctx, params.provider);
 
     // Get redirect URI from config (more secure than constructing from headers)
     const redirectUri = getCallbackUrl(ctx, provider);
@@ -267,7 +287,7 @@ export async function handleOAuthCallbackRequest(
     // Rate limit check
     await checkRateLimit('oauthCallback', request.ip);
 
-    const provider = validateProvider(params.provider);
+    const provider = validateProvider(ctx, params.provider);
     metrics.recordLoginAttempt(provider);
 
     // Check for OAuth error from provider
@@ -349,7 +369,7 @@ export async function handleOAuthCallbackRequest(
   } catch (error) {
     // Record login failure if provider is valid
     try {
-      const provider = validateProvider(providerName);
+      const provider = validateProvider(ctx, providerName);
       metrics.recordLoginFailure(provider);
     } catch {
       // Ignore if provider invalid
@@ -391,7 +411,7 @@ export async function handleOAuthLink(
     // Rate limit check
     await checkRateLimit('oauthLink', request.ip);
 
-    const provider = validateProvider(params.provider);
+    const provider = validateProvider(ctx, params.provider);
 
     const user = (request as AuthenticatedRequest).user;
     if (user == null) {
@@ -436,7 +456,7 @@ export async function handleOAuthUnlink(
     // Rate limit check
     await checkRateLimit('oauthUnlink', request.ip);
 
-    const provider = validateProvider(params.provider);
+    const provider = validateProvider(ctx, params.provider);
 
     const user = (request as AuthenticatedRequest).user;
     if (user == null) {
@@ -530,7 +550,7 @@ export function handleGetEnabledProviders(ctx: AppContext): {
   body: { providers: OAuthProvider[] };
 } {
   const enabledProviders = OAUTH_PROVIDERS.filter((provider) => {
-    return ctx.config.auth.oauth[provider] !== undefined;
+    return ctx.config.auth.oauth[provider] !== undefined && isOAuthStrategyEnabled(ctx, provider);
   });
 
   return {

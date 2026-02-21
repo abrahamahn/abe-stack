@@ -8,6 +8,7 @@
  */
 
 import { EmailNotVerifiedError, HTTP_STATUS, mapErrorToHttpResponse } from '@bslt/shared';
+import { isStrategyEnabled } from '@bslt/shared/core';
 
 import { getMetricsCollector } from '../../../../system/src';
 import {
@@ -64,6 +65,16 @@ export async function handleLogin(
   | { status: 202; body: TotpLoginChallengeResponse | SmsChallengeResponse }
   | HttpErrorResponse
 > {
+  if (Array.isArray(ctx.config.auth.strategies) && !isStrategyEnabled(ctx.config.auth, 'local')) {
+    return {
+      status: 404,
+      body: {
+        message: 'Local authentication is not enabled',
+        code: 'NOT_FOUND',
+      },
+    };
+  }
+
   const { ipAddress, userAgent } = request.requestInfo;
   const metrics = getMetricsCollector();
   const provider = 'password';

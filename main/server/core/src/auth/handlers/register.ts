@@ -8,6 +8,7 @@
  */
 
 import { HTTP_STATUS, mapErrorToHttpResponse } from '@bslt/shared';
+import { isStrategyEnabled } from '@bslt/shared/core';
 
 import { isCaptchaRequired, verifyCaptchaToken } from '../security';
 import { registerUser, type RegisterResult } from '../service';
@@ -34,6 +35,16 @@ export async function handleRegister(
 ): Promise<
   { status: 201; body: RegisterResult & { emailSendFailed?: boolean } } | HttpErrorResponse
 > {
+  if (Array.isArray(ctx.config.auth.strategies) && !isStrategyEnabled(ctx.config.auth, 'local')) {
+    return {
+      status: 404,
+      body: {
+        message: 'Local authentication is not enabled',
+        code: 'NOT_FOUND',
+      },
+    };
+  }
+
   try {
     // Verify CAPTCHA token if enabled
     if (isCaptchaRequired(ctx.config.auth)) {

@@ -12,6 +12,7 @@ import {
   mapErrorToHttpResponse,
   AUTH_SUCCESS_MESSAGES as SUCCESS_MESSAGES,
 } from '@bslt/shared';
+import { isStrategyEnabled } from '@bslt/shared/core';
 
 import { resendVerificationEmail, verifyEmail } from '../service';
 import { createErrorMapperLogger } from '../types';
@@ -35,6 +36,13 @@ export async function handleVerifyEmail(
   body: { token: string },
   reply: ReplyWithCookies,
 ): Promise<{ status: 200; body: AuthResponse & { verified: boolean } } | HttpErrorResponse> {
+  if (Array.isArray(ctx.config.auth.strategies) && !isStrategyEnabled(ctx.config.auth, 'local')) {
+    return {
+      status: HTTP_STATUS.NOT_FOUND,
+      body: { message: 'Local authentication is not enabled', code: 'NOT_FOUND' },
+    };
+  }
+
   try {
     const { token } = body;
     const result = await verifyEmail(ctx.db, ctx.repos, ctx.config.auth, token, ctx.log);
@@ -68,6 +76,13 @@ export async function handleResendVerification(
   ctx: AppContext,
   body: { email: string },
 ): Promise<{ status: 200; body: { message: string } } | HttpErrorResponse> {
+  if (Array.isArray(ctx.config.auth.strategies) && !isStrategyEnabled(ctx.config.auth, 'local')) {
+    return {
+      status: HTTP_STATUS.NOT_FOUND,
+      body: { message: 'Local authentication is not enabled', code: 'NOT_FOUND' },
+    };
+  }
+
   try {
     const { email } = body;
     const baseUrl = ctx.config.server.appBaseUrl;

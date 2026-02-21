@@ -13,6 +13,7 @@ import {
   mapErrorToHttpResponse,
   AUTH_SUCCESS_MESSAGES as SUCCESS_MESSAGES,
 } from '@bslt/shared';
+import { isStrategyEnabled } from '@bslt/shared/core';
 
 import { assertUserActive } from '../middleware';
 import { isCaptchaRequired, sendPasswordChangedAlert, verifyCaptchaToken } from '../security';
@@ -36,6 +37,13 @@ export async function handleForgotPassword(
   body: ForgotPasswordRequest,
   request: RequestWithCookies,
 ): Promise<{ status: 200; body: { message: string } } | HttpErrorResponse> {
+  if (Array.isArray(ctx.config.auth.strategies) && !isStrategyEnabled(ctx.config.auth, 'local')) {
+    return {
+      status: HTTP_STATUS.NOT_FOUND,
+      body: { message: 'Local authentication is not enabled', code: 'NOT_FOUND' },
+    };
+  }
+
   try {
     // Verify CAPTCHA token if enabled
     if (isCaptchaRequired(ctx.config.auth)) {
@@ -93,6 +101,13 @@ export async function handleResetPassword(
   body: { token: string; password: string },
   req: RequestWithCookies,
 ): Promise<{ status: 200; body: { message: string } } | HttpErrorResponse> {
+  if (Array.isArray(ctx.config.auth.strategies) && !isStrategyEnabled(ctx.config.auth, 'local')) {
+    return {
+      status: HTTP_STATUS.NOT_FOUND,
+      body: { message: 'Local authentication is not enabled', code: 'NOT_FOUND' },
+    };
+  }
+
   try {
     const { token, password } = body;
     const email = await resetPassword(ctx.db, ctx.repos, ctx.config.auth, token, password);
@@ -131,6 +146,13 @@ export async function handleSetPassword(
   body: { password: string },
   req: RequestWithCookies,
 ): Promise<{ status: 200; body: { message: string } } | HttpErrorResponse> {
+  if (Array.isArray(ctx.config.auth.strategies) && !isStrategyEnabled(ctx.config.auth, 'local')) {
+    return {
+      status: HTTP_STATUS.NOT_FOUND,
+      body: { message: 'Local authentication is not enabled', code: 'NOT_FOUND' },
+    };
+  }
+
   try {
     // User ID comes from the authenticated request
     const userId = req.user?.userId;

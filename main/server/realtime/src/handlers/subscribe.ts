@@ -26,6 +26,10 @@ type SubscribeRequest = {
 type ErrorBody = { code: string; message: string };
 type GetRecordsResult = { recordMap: Awaited<ReturnType<typeof loadRecords>> };
 type RouteResult<TBody> = { status: number; body: TBody };
+const loadRecordsTyped = loadRecords as (
+  db: SubscribeContext['db'],
+  pointers: RecordPointer[],
+) => Promise<GetRecordsResult['recordMap']>;
 
 const HTTP_STATUS = {
   OK: 200,
@@ -109,7 +113,7 @@ export async function handleGetRecords(
       pointerCount: body.pointers.length,
     });
 
-    const recordMap = await loadRecords(ctx.db, body.pointers);
+    const recordMap = await loadRecordsTyped(ctx.db, body.pointers);
 
     return {
       status: HTTP_STATUS.OK,

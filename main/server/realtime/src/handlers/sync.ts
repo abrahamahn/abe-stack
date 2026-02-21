@@ -19,12 +19,20 @@ import {
   REALTIME_ERRORS,
   SubKeys,
 } from '@bslt/shared';
-import { isAuthenticatedRequest } from '@bslt/shared/core';
 
 import { isTableAllowed, loadRecords, saveRecords } from '../service';
 
 import type { ConflictResult, RealtimeModuleDeps, RealtimeRequest, WriteResult } from '../types';
 import type { RealtimeTransaction, RecordPointer, RouteResult } from '@bslt/shared';
+
+function isAuthenticatedWriteRequest(req: RealtimeRequest): req is RealtimeRequest & {
+  user: { userId: string };
+} {
+  return (
+    typeof (req as { user?: { userId?: unknown } }).user?.userId === 'string' &&
+    ((req as { user?: { userId?: string } }).user?.userId?.length ?? 0) > 0
+  );
+}
 
 // ============================================================================
 // Error Classes
@@ -80,13 +88,14 @@ export async function handleWrite(
   body: RealtimeTransaction,
   req: RealtimeRequest,
 ): Promise<RouteResult<WriteResult | ConflictResult | { code: string; message: string }>> {
-  const { db, log } = ctx;
+  const db = ctx.db;
+  const log = ctx.log;
 
   // Require authentication using type guard
-  if (!isAuthenticatedRequest(req)) {
+  if (!isAuthenticatedWriteRequest(req)) {
     return {
-      status: HTTP_STATUS.FORBIDDEN,
-      body: { code: ERROR_CODES.FORBIDDEN, message: ERROR_MESSAGES.AUTHENTICATION_REQUIRED },
+      status: 403,
+      body: { code: 'FORBIDDEN', message: 'Authentication required' },
     };
   }
 

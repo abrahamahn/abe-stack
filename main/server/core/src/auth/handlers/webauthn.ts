@@ -13,6 +13,7 @@ import {
   type PasskeyListItem,
   type RenamePasskeyRequest,
 } from '@bslt/shared';
+import { isStrategyEnabled } from '@bslt/shared/core';
 
 import { withTransaction } from '../../../../db/src';
 import { assertUserActive } from '../middleware';
@@ -35,6 +36,13 @@ import {
   verifyRegistration,
 } from '../webauthn/service';
 
+function strategyDisabledResponse(): HttpErrorResponse {
+  return {
+    status: 404,
+    body: { message: 'WebAuthn authentication is not enabled', code: 'NOT_FOUND' },
+  };
+}
+
 // ============================================================================
 // Registration Handlers
 // ============================================================================
@@ -47,6 +55,13 @@ export async function handleWebauthnRegisterOptions(
   _body: unknown,
   request: RequestWithCookies,
 ): Promise<{ status: 200; body: { options: Record<string, unknown> } } | HttpErrorResponse> {
+  if (
+    Array.isArray(ctx.config.auth.strategies) &&
+    !isStrategyEnabled(ctx.config.auth, 'webauthn')
+  ) {
+    return strategyDisabledResponse();
+  }
+
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {
@@ -72,6 +87,13 @@ export async function handleWebauthnRegisterVerify(
   body: { credential: Record<string, unknown>; name?: string },
   request: RequestWithCookies,
 ): Promise<{ status: 200; body: { credentialId: string; message: string } } | HttpErrorResponse> {
+  if (
+    Array.isArray(ctx.config.auth.strategies) &&
+    !isStrategyEnabled(ctx.config.auth, 'webauthn')
+  ) {
+    return strategyDisabledResponse();
+  }
+
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {
@@ -105,6 +127,13 @@ export async function handleWebauthnLoginOptions(
   ctx: AppContext,
   body: { email?: string },
 ): Promise<{ status: 200; body: { options: Record<string, unknown> } } | HttpErrorResponse> {
+  if (
+    Array.isArray(ctx.config.auth.strategies) &&
+    !isStrategyEnabled(ctx.config.auth, 'webauthn')
+  ) {
+    return strategyDisabledResponse();
+  }
+
   try {
     const { options } = await getAuthenticationOptions(ctx.repos, ctx.config.auth, body.email);
     return { status: 200, body: { options } };
@@ -125,6 +154,13 @@ export async function handleWebauthnLoginVerify(
 ): Promise<
   { status: 200; body: { token: string; user: Record<string, unknown> } } | HttpErrorResponse
 > {
+  if (
+    Array.isArray(ctx.config.auth.strategies) &&
+    !isStrategyEnabled(ctx.config.auth, 'webauthn')
+  ) {
+    return strategyDisabledResponse();
+  }
+
   try {
     const { userId } = await verifyAuthentication(
       ctx.repos,
@@ -193,6 +229,13 @@ export async function handleListPasskeys(
   _body: unknown,
   request: RequestWithCookies,
 ): Promise<{ status: 200; body: PasskeyListItem[] } | HttpErrorResponse> {
+  if (
+    Array.isArray(ctx.config.auth.strategies) &&
+    !isStrategyEnabled(ctx.config.auth, 'webauthn')
+  ) {
+    return strategyDisabledResponse();
+  }
+
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {
@@ -223,6 +266,13 @@ export async function handleRenamePasskey(
   body: RenamePasskeyRequest,
   request: RequestWithCookies,
 ): Promise<{ status: 200; body: { message: string } } | HttpErrorResponse> {
+  if (
+    Array.isArray(ctx.config.auth.strategies) &&
+    !isStrategyEnabled(ctx.config.auth, 'webauthn')
+  ) {
+    return strategyDisabledResponse();
+  }
+
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {
@@ -253,6 +303,13 @@ export async function handleDeletePasskey(
   _body: unknown,
   request: RequestWithCookies,
 ): Promise<{ status: 200; body: { message: string } } | HttpErrorResponse> {
+  if (
+    Array.isArray(ctx.config.auth.strategies) &&
+    !isStrategyEnabled(ctx.config.auth, 'webauthn')
+  ) {
+    return strategyDisabledResponse();
+  }
+
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {
