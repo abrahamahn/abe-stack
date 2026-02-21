@@ -141,8 +141,8 @@ describe('OAuth Routes', () => {
 
     test('should define all expected OAuth routes', () => {
       const routeKeys = Array.from(oauthRoutes.keys());
-      // 1 providers + 3 initiate + 3 callback + 3 link + 3 unlink + 1 connections = 14 routes
-      expect(routeKeys).toHaveLength(14);
+      // 1 providers + 4 initiate + 4 callback + 4 link + 4 unlink + 1 connections = 14 routes
+      expect(routeKeys).toHaveLength(18);
 
       // Providers route
       expect(routeKeys).toContain('auth/oauth/providers');
@@ -150,21 +150,25 @@ describe('OAuth Routes', () => {
       // Initiate routes
       expect(routeKeys).toContain('auth/oauth/google');
       expect(routeKeys).toContain('auth/oauth/github');
+      expect(routeKeys).toContain('auth/oauth/kakao');
       expect(routeKeys).toContain('auth/oauth/apple');
 
       // Callback routes
       expect(routeKeys).toContain('auth/oauth/google/callback');
       expect(routeKeys).toContain('auth/oauth/github/callback');
+      expect(routeKeys).toContain('auth/oauth/kakao/callback');
       expect(routeKeys).toContain('auth/oauth/apple/callback');
 
       // Link routes
       expect(routeKeys).toContain('auth/oauth/google/link');
       expect(routeKeys).toContain('auth/oauth/github/link');
+      expect(routeKeys).toContain('auth/oauth/kakao/link');
       expect(routeKeys).toContain('auth/oauth/apple/link');
 
       // Unlink routes
       expect(routeKeys).toContain('auth/oauth/google/unlink');
       expect(routeKeys).toContain('auth/oauth/github/unlink');
+      expect(routeKeys).toContain('auth/oauth/kakao/unlink');
       expect(routeKeys).toContain('auth/oauth/apple/unlink');
 
       // Connections route
@@ -186,7 +190,7 @@ describe('OAuth Routes', () => {
   // ==========================================================================
 
   describe('OAuth Initiate Routes', () => {
-    const providers = ['google', 'github', 'apple'] as const;
+    const providers = ['google', 'github', 'kakao', 'apple'] as const;
 
     for (const provider of providers) {
       describe(`auth/oauth/${provider}`, () => {
@@ -257,7 +261,7 @@ describe('OAuth Routes', () => {
   // ==========================================================================
 
   describe('OAuth Callback Routes', () => {
-    const providers = ['google', 'github', 'apple'] as const;
+    const providers = ['google', 'github', 'kakao', 'apple'] as const;
 
     for (const provider of providers) {
       describe(`auth/oauth/${provider}/callback`, () => {
@@ -424,7 +428,7 @@ describe('OAuth Routes', () => {
   // ==========================================================================
 
   describe('OAuth Link Routes', () => {
-    const providers = ['google', 'github', 'apple'] as const;
+    const providers = ['google', 'github', 'kakao', 'apple'] as const;
 
     for (const provider of providers) {
       describe(`auth/oauth/${provider}/link`, () => {
@@ -503,7 +507,7 @@ describe('OAuth Routes', () => {
   // ==========================================================================
 
   describe('OAuth Unlink Routes', () => {
-    const providers = ['google', 'github', 'apple'] as const;
+    const providers = ['google', 'github', 'kakao', 'apple'] as const;
 
     for (const provider of providers) {
       describe(`auth/oauth/${provider}/unlink`, () => {
@@ -678,15 +682,17 @@ describe('OAuth Routes', () => {
         ([_, def]: [string, RouteDefinition]) => !def.isPublic,
       );
 
-      // 3 link + 3 unlink + 1 connections = 7 protected routes
-      expect(protectedRoutes).toHaveLength(7);
+      // 4 link + 4 unlink + 1 connections = 9 protected routes
+      expect(protectedRoutes).toHaveLength(9);
 
       const protectedRouteNames = protectedRoutes.map(([name]) => name);
       expect(protectedRouteNames).toContain('auth/oauth/google/link');
       expect(protectedRouteNames).toContain('auth/oauth/github/link');
+      expect(protectedRouteNames).toContain('auth/oauth/kakao/link');
       expect(protectedRouteNames).toContain('auth/oauth/apple/link');
       expect(protectedRouteNames).toContain('auth/oauth/google/unlink');
       expect(protectedRouteNames).toContain('auth/oauth/github/unlink');
+      expect(protectedRouteNames).toContain('auth/oauth/kakao/unlink');
       expect(protectedRouteNames).toContain('auth/oauth/apple/unlink');
       expect(protectedRouteNames).toContain('auth/oauth/connections');
 
@@ -701,16 +707,18 @@ describe('OAuth Routes', () => {
         ([_, def]: [string, RouteDefinition]) => def.isPublic,
       );
 
-      // providers + 3 initiate + 3 callback = 7 public routes
-      expect(publicRoutes).toHaveLength(7);
+      // providers + 4 initiate + 4 callback = 9 public routes
+      expect(publicRoutes).toHaveLength(9);
 
       const publicRouteNames = publicRoutes.map(([name]) => name);
       expect(publicRouteNames).toContain('auth/oauth/providers');
       expect(publicRouteNames).toContain('auth/oauth/google');
       expect(publicRouteNames).toContain('auth/oauth/github');
+      expect(publicRouteNames).toContain('auth/oauth/kakao');
       expect(publicRouteNames).toContain('auth/oauth/apple');
       expect(publicRouteNames).toContain('auth/oauth/google/callback');
       expect(publicRouteNames).toContain('auth/oauth/github/callback');
+      expect(publicRouteNames).toContain('auth/oauth/kakao/callback');
       expect(publicRouteNames).toContain('auth/oauth/apple/callback');
     });
 
@@ -728,7 +736,12 @@ describe('OAuth Routes', () => {
 
   describe('Route Methods', () => {
     test('initiate routes should use GET method', () => {
-      const initiateRoutes = ['auth/oauth/google', 'auth/oauth/github', 'auth/oauth/apple'];
+      const initiateRoutes = [
+        'auth/oauth/google',
+        'auth/oauth/github',
+        'auth/oauth/kakao',
+        'auth/oauth/apple',
+      ];
 
       for (const routeName of initiateRoutes) {
         const route = oauthRoutes.get(routeName);
@@ -741,6 +754,7 @@ describe('OAuth Routes', () => {
       const callbackRoutes = [
         'auth/oauth/google/callback',
         'auth/oauth/github/callback',
+        'auth/oauth/kakao/callback',
         'auth/oauth/apple/callback',
       ];
 
@@ -755,6 +769,7 @@ describe('OAuth Routes', () => {
       const linkRoutes = [
         'auth/oauth/google/link',
         'auth/oauth/github/link',
+        'auth/oauth/kakao/link',
         'auth/oauth/apple/link',
       ];
 
@@ -769,6 +784,7 @@ describe('OAuth Routes', () => {
       const unlinkRoutes = [
         'auth/oauth/google/unlink',
         'auth/oauth/github/unlink',
+        'auth/oauth/kakao/unlink',
         'auth/oauth/apple/unlink',
       ];
 
@@ -791,7 +807,7 @@ describe('OAuth Routes', () => {
   // ==========================================================================
 
   describe('Provider Consistency', () => {
-    const providers = ['google', 'github', 'apple'] as const;
+    const providers = ['google', 'github', 'kakao', 'apple'] as const;
 
     test('should have consistent route structure for all providers', () => {
       for (const provider of providers) {

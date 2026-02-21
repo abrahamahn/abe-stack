@@ -18,6 +18,7 @@ export const AUTH_STRATEGIES = [
   'webauthn',
   'google',
   'github',
+  'kakao',
   'facebook',
   'microsoft',
   'apple',

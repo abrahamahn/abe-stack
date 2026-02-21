@@ -48,6 +48,7 @@ import {
   createAppleProvider,
   createGitHubProvider,
   createGoogleProvider,
+  createKakaoProvider,
   extractAppleUserFromIdToken,
 } from './providers';
 
@@ -286,6 +287,11 @@ export function getProviderClient(
       );
     case 'github':
       return createGitHubProvider(
+        (providerConfig as OAuthProviderConfig).clientId,
+        (providerConfig as OAuthProviderConfig).clientSecret,
+      );
+    case 'kakao':
+      return createKakaoProvider(
         (providerConfig as OAuthProviderConfig).clientId,
         (providerConfig as OAuthProviderConfig).clientSecret,
       );

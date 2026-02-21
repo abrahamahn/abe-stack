@@ -16,7 +16,7 @@ export const APP_ROLES = ['admin', 'moderator', 'user'] as const;
 // OAuth
 // ============================================================================
 
-export const OAUTH_PROVIDERS = ['google', 'github', 'apple'] as const;
+export const OAUTH_PROVIDERS = ['google', 'github', 'kakao', 'apple'] as const;
 
 // ============================================================================
 // Expiry / Timeouts

@@ -9,5 +9,6 @@
 
 export { createGoogleProvider } from './google';
 export { createGitHubProvider } from './github';
+export { createKakaoProvider } from './kakao';
 export { createAppleProvider, extractAppleUserFromIdToken } from './apple';
 export type { AppleProviderConfig } from './apple';

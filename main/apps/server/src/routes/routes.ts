@@ -37,7 +37,14 @@ const LOCAL_AUTH_ROUTES = new Set<string>([
   'auth/password/change',
 ]);
 
-const OAUTH_STRATEGY_KEYS = new Set<string>(['google', 'github', 'facebook', 'microsoft', 'apple']);
+const OAUTH_STRATEGY_KEYS = new Set<string>([
+  'google',
+  'github',
+  'kakao',
+  'facebook',
+  'microsoft',
+  'apple',
+]);
 
 function filterAuthRoutesByStrategies(
   routes: DbRouteMap,

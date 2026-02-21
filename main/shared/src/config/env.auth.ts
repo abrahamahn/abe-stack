@@ -36,6 +36,7 @@ export type AuthStrategy =
   | 'webauthn' // Passkeys/biometric
   | 'google'
   | 'github'
+  | 'kakao'
   | 'facebook'
   | 'microsoft'
   | 'apple';
@@ -306,6 +307,9 @@ export interface AuthEnv {
   GITHUB_CLIENT_ID?: string | undefined;
   GITHUB_CLIENT_SECRET?: string | undefined;
   GITHUB_CALLBACK_URL?: string | undefined;
+  KAKAO_CLIENT_ID?: string | undefined;
+  KAKAO_CLIENT_SECRET?: string | undefined;
+  KAKAO_CALLBACK_URL?: string | undefined;
   FACEBOOK_CLIENT_ID?: string | undefined;
   FACEBOOK_CLIENT_SECRET?: string | undefined;
   FACEBOOK_CALLBACK_URL?: string | undefined;
@@ -417,6 +421,15 @@ export const AuthEnvSchema: Schema<AuthEnv> = createSchema<AuthEnv>((data: unkno
     ),
     GITHUB_CALLBACK_URL: parseOptional(obj['GITHUB_CALLBACK_URL'], (v: unknown) =>
       parseString(v, 'GITHUB_CALLBACK_URL'),
+    ),
+    KAKAO_CLIENT_ID: parseOptional(obj['KAKAO_CLIENT_ID'], (v: unknown) =>
+      parseString(v, 'KAKAO_CLIENT_ID'),
+    ),
+    KAKAO_CLIENT_SECRET: parseOptional(obj['KAKAO_CLIENT_SECRET'], (v: unknown) =>
+      parseString(v, 'KAKAO_CLIENT_SECRET'),
+    ),
+    KAKAO_CALLBACK_URL: parseOptional(obj['KAKAO_CALLBACK_URL'], (v: unknown) =>
+      parseString(v, 'KAKAO_CALLBACK_URL'),
     ),
     FACEBOOK_CLIENT_ID: parseOptional(obj['FACEBOOK_CLIENT_ID'], (v: unknown) =>
       parseString(v, 'FACEBOOK_CLIENT_ID'),

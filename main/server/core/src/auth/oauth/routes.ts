@@ -123,6 +123,23 @@ export const oauthRouteEntries: [string, RouteDefinition][] = [
     ),
   ],
 
+  [
+    'auth/oauth/kakao',
+    publicRoute(
+      'GET',
+      async (
+        ctx: HandlerContext,
+        _body: undefined,
+        req: HttpRequest,
+        reply: HttpReply,
+      ): Promise<RouteResult> => {
+        return handleOAuthInitiate(asAppContext(ctx), { provider: 'kakao' }, req, reply);
+      },
+      undefined,
+      { summary: 'Initiate Kakao OAuth', tags: ['Auth', 'OAuth'] },
+    ),
+  ],
+
   // OAuth callbacks
   [
     'auth/oauth/google/callback',
@@ -211,6 +228,35 @@ export const oauthRouteEntries: [string, RouteDefinition][] = [
     ),
   ],
 
+  [
+    'auth/oauth/kakao/callback',
+    publicRoute(
+      'GET',
+      async (
+        ctx: HandlerContext,
+        _body: unknown,
+        req: HttpRequest,
+        reply: HttpReply,
+      ): Promise<RouteResult> => {
+        const query: OAuthCallbackQuery = oauthCallbackQuerySchema.parse(req.query);
+        return handleOAuthCallbackRequest(
+          asAppContext(ctx),
+          { provider: 'kakao' },
+          {
+            code: query['code'],
+            state: query['state'],
+            error: query['error'],
+            error_description: query['error_description'],
+          },
+          req,
+          reply,
+        );
+      },
+      undefined,
+      { summary: 'Kakao OAuth callback', tags: ['Auth', 'OAuth'] },
+    ),
+  ],
+
   // Link OAuth accounts (authenticated)
   [
     'auth/oauth/google/link',
@@ -266,6 +312,24 @@ export const oauthRouteEntries: [string, RouteDefinition][] = [
     ),
   ],
 
+  [
+    'auth/oauth/kakao/link',
+    protectedRoute(
+      'POST',
+      async (
+        ctx: HandlerContext,
+        _body: undefined,
+        req: HttpRequest,
+        reply: HttpReply,
+      ): Promise<RouteResult> => {
+        return handleOAuthLink(asAppContext(ctx), { provider: 'kakao' }, req, reply);
+      },
+      [],
+      emptyBodySchema,
+      { summary: 'Link Kakao account', tags: ['Auth', 'OAuth'] },
+    ),
+  ],
+
   // Unlink OAuth accounts (authenticated)
   [
     'auth/oauth/google/unlink',
@@ -318,6 +382,24 @@ export const oauthRouteEntries: [string, RouteDefinition][] = [
       [],
       emptyBodySchema,
       { summary: 'Unlink Apple account', tags: ['Auth', 'OAuth'] },
+    ),
+  ],
+
+  [
+    'auth/oauth/kakao/unlink',
+    protectedRoute(
+      'DELETE',
+      async (
+        ctx: HandlerContext,
+        _body: undefined,
+        req: HttpRequest,
+        reply: HttpReply,
+      ): Promise<RouteResult> => {
+        return handleOAuthUnlink(asAppContext(ctx), { provider: 'kakao' }, req, reply);
+      },
+      [],
+      emptyBodySchema,
+      { summary: 'Unlink Kakao account', tags: ['Auth', 'OAuth'] },
     ),
   ],
 

@@ -32,13 +32,14 @@ describe('auth.ts type definitions', () => {
         'facebook',
         'microsoft',
         'apple',
+        'kakao',
       ];
 
       strategies.forEach((strategy) => {
         expectTypeOf(strategy).toEqualTypeOf<AuthStrategy>();
       });
 
-      expect(strategies).toHaveLength(8);
+      expect(strategies).toHaveLength(9);
     });
 
     it('should enforce literal type constraints', () => {

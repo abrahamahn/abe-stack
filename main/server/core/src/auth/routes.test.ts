@@ -136,7 +136,7 @@ describe('Auth Routes', () => {
       // Core auth routes (21) + ToS routes (2) + Device routes (3) + Phone routes (2*)
       // + SMS routes (2) + Magic-link routes (2) + OAuth routes (14) + WebAuthn routes (9) = 55
       // *Note: users/me/phone POST is overwritten by DELETE in the Map, so only 2 unique phone entries
-      expect(routeKeys).toHaveLength(55);
+      expect(routeKeys).toHaveLength(59);
 
       // Core auth routes
       expect(routeKeys).toContain('auth/strategies');
@@ -187,15 +187,19 @@ describe('Auth Routes', () => {
       // OAuth routes
       expect(routeKeys).toContain('auth/oauth/google');
       expect(routeKeys).toContain('auth/oauth/github');
+      expect(routeKeys).toContain('auth/oauth/kakao');
       expect(routeKeys).toContain('auth/oauth/apple');
       expect(routeKeys).toContain('auth/oauth/google/callback');
       expect(routeKeys).toContain('auth/oauth/github/callback');
+      expect(routeKeys).toContain('auth/oauth/kakao/callback');
       expect(routeKeys).toContain('auth/oauth/apple/callback');
       expect(routeKeys).toContain('auth/oauth/google/link');
       expect(routeKeys).toContain('auth/oauth/github/link');
+      expect(routeKeys).toContain('auth/oauth/kakao/link');
       expect(routeKeys).toContain('auth/oauth/apple/link');
       expect(routeKeys).toContain('auth/oauth/google/unlink');
       expect(routeKeys).toContain('auth/oauth/github/unlink');
+      expect(routeKeys).toContain('auth/oauth/kakao/unlink');
       expect(routeKeys).toContain('auth/oauth/apple/unlink');
       expect(routeKeys).toContain('auth/oauth/connections');
       expect(routeKeys).toContain('auth/oauth/providers');
@@ -951,9 +955,9 @@ describe('Route Protection', () => {
     // + 2 ToS protected (tos/status, tos/accept)
     // + 3 device protected (devices, devices/:id/trust, devices/:id)
     // + 2 phone protected (phone, phone/verify) — phone POST overwritten by DELETE in Map
-    // + 7 OAuth protected (3 link + 3 unlink + 1 connections)
-    // + 7 WebAuthn protected (register options/verify + passkey management)
-    expect(protectedRoutes).toHaveLength(30);
+    // + 9 OAuth protected (4 link + 4 unlink + 1 connections)
+    // + 9 WebAuthn protected (register options/verify + passkey management)
+    expect(protectedRoutes).toHaveLength(32);
 
     const protectedRouteNames = protectedRoutes.map(([name]) => name);
     // Core protected routes
@@ -979,9 +983,11 @@ describe('Route Protection', () => {
     // OAuth protected routes
     expect(protectedRouteNames).toContain('auth/oauth/google/link');
     expect(protectedRouteNames).toContain('auth/oauth/github/link');
+    expect(protectedRouteNames).toContain('auth/oauth/kakao/link');
     expect(protectedRouteNames).toContain('auth/oauth/apple/link');
     expect(protectedRouteNames).toContain('auth/oauth/google/unlink');
     expect(protectedRouteNames).toContain('auth/oauth/github/unlink');
+    expect(protectedRouteNames).toContain('auth/oauth/kakao/unlink');
     expect(protectedRouteNames).toContain('auth/oauth/apple/unlink');
     expect(protectedRouteNames).toContain('auth/oauth/connections');
 
@@ -994,9 +1000,9 @@ describe('Route Protection', () => {
   test('should have all other routes as public', () => {
     const publicRoutes = Array.from(authRoutes.entries()).filter(([_, def]) => def.isPublic);
 
-    // 12 core public + 2 SMS public + 2 magic-link + 7 OAuth (3 initiate + 3 callback + providers)
-    // + 2 WebAuthn public (login options/verify)
-    expect(publicRoutes).toHaveLength(25);
+    // 12 core public + 2 SMS public + 2 magic-link + 9 OAuth (4 initiate + 4 callback + providers)
+    // + 4 WebAuthn public (login/register options/verify)
+    expect(publicRoutes).toHaveLength(27);
 
     const publicRouteNames = publicRoutes.map(([name]) => name);
     // Core public routes
@@ -1021,9 +1027,11 @@ describe('Route Protection', () => {
     // OAuth public routes
     expect(publicRouteNames).toContain('auth/oauth/google');
     expect(publicRouteNames).toContain('auth/oauth/github');
+    expect(publicRouteNames).toContain('auth/oauth/kakao');
     expect(publicRouteNames).toContain('auth/oauth/apple');
     expect(publicRouteNames).toContain('auth/oauth/google/callback');
     expect(publicRouteNames).toContain('auth/oauth/github/callback');
+    expect(publicRouteNames).toContain('auth/oauth/kakao/callback');
     expect(publicRouteNames).toContain('auth/oauth/apple/callback');
     expect(publicRouteNames).toContain('auth/oauth/providers');
   });
@@ -1068,9 +1076,11 @@ describe('Route Methods', () => {
     const getRoutes = [
       'auth/oauth/google',
       'auth/oauth/github',
+      'auth/oauth/kakao',
       'auth/oauth/apple',
       'auth/oauth/google/callback',
       'auth/oauth/github/callback',
+      'auth/oauth/kakao/callback',
       'auth/oauth/apple/callback',
       'auth/oauth/connections',
     ];
@@ -1086,6 +1096,7 @@ describe('Route Methods', () => {
     const linkRoutes = [
       'auth/oauth/google/link',
       'auth/oauth/github/link',
+      'auth/oauth/kakao/link',
       'auth/oauth/apple/link',
     ];
 
@@ -1100,6 +1111,7 @@ describe('Route Methods', () => {
     const unlinkRoutes = [
       'auth/oauth/google/unlink',
       'auth/oauth/github/unlink',
+      'auth/oauth/kakao/unlink',
       'auth/oauth/apple/unlink',
     ];
 

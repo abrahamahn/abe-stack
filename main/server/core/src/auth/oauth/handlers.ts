@@ -120,6 +120,7 @@ function isValidProvider(provider: string): provider is OAuthProvider {
 const PROVIDER_TO_STRATEGY = {
   google: 'google',
   github: 'github',
+  kakao: 'kakao',
   facebook: 'facebook',
   microsoft: 'microsoft',
   apple: 'apple',

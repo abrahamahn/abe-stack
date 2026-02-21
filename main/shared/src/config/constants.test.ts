@@ -38,7 +38,8 @@ describe('config constants', () => {
       expect(AUTH_STRATEGIES).toContain('facebook');
       expect(AUTH_STRATEGIES).toContain('microsoft');
       expect(AUTH_STRATEGIES).toContain('apple');
-      expect(AUTH_STRATEGIES).toHaveLength(8);
+      expect(AUTH_STRATEGIES).toContain('kakao');
+      expect(AUTH_STRATEGIES).toHaveLength(9);
     });
 
     it('has no duplicate entries', () => {
