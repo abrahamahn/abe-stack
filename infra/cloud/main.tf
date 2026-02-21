@@ -100,6 +100,6 @@ locals {
 #   enable_managed_database = var.enable_managed_database
 #   database_size           = var.database_size
 #   database_username       = "abe_user"
-#   database_password       = "your-secure-password"
+#   database_password       = var.database_password
 #   ssh_allowed_cidrs       = var.ssh_allowed_cidrs
 # }

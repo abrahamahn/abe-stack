@@ -6,10 +6,11 @@ ARG NODE_VERSION=22
 # =============================================================================
 FROM node:${NODE_VERSION}-alpine AS base
 
-# Install security updates and required packages
+# Install security updates and required packages.
+# `git` is required because workspace `prepare` hooks run during `pnpm install`.
 RUN apk update && \
     apk upgrade && \
-    apk add --no-cache dumb-init && \
+    apk add --no-cache dumb-init git && \
     rm -rf /var/cache/apk/*
 
 # Enable pnpm via corepack

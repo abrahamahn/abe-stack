@@ -56,7 +56,7 @@ database_size = "db-s-1vcpu-1gb"  # DigitalOcean managed DB
 
 # Custom database credentials (optional, will be auto-generated if not provided)
 # database_username = "abe_user"
-# database_password = "super-secret-password"
+# database_password = ""   # Set via TF_VAR_database_password env var or secrets manager
 
 # ============================================================================
 # SECURITY

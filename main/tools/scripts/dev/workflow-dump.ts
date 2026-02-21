@@ -1,6 +1,6 @@
 // main/tools/scripts/dev/workflow-dump.ts
 import { execSync } from 'node:child_process';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 interface Args {
@@ -18,7 +18,7 @@ function run(cmd: string): string {
 }
 
 function runToFile(cmd: string, filePath: string): void {
-  execSync(`${cmd} > "${filePath}"`, {
+  execSync(`{ ${cmd}; } > "${filePath}"`, {
     stdio: ['ignore', 'pipe', 'pipe'],
     maxBuffer: 1024 * 1024 * 16,
     shell: '/bin/bash',
@@ -28,7 +28,7 @@ function runToFile(cmd: string, filePath: string): void {
 function parseArgs(argv: string[]): Args {
   const args: Args = {
     branch: 'main',
-    outDir: '.artifacts/workflow-dumps',
+    outDir: '.tmp/workflow-dumps',
   };
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -113,8 +113,8 @@ function main(): void {
   runToFile(`gh run view ${runId} --log-failed || true`, failedLogPath);
   runToFile(`gh run view ${runId} --log`, fullLogPath);
 
-  const failedLogs = run(`cat "${failedLogPath}"`);
-  const fullLogs = run(`cat "${fullLogPath}"`);
+  const failedLogs = readFileSync(failedLogPath, 'utf-8').trim();
+  const fullLogs = readFileSync(fullLogPath, 'utf-8').trim();
 
   const reviewBundle = [
     '=== RUN META ===',

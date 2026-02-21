@@ -499,6 +499,10 @@ importers:
       ioredis:
         specifier: ^5.9.2
         version: 5.9.3
+    devDependencies:
+      fastify:
+        specifier: ^5.7.4
+        version: 5.7.4
     optionalDependencies:
       '@sentry/node':
         specifier: ^9.47.1

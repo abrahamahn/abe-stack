@@ -105,5 +105,8 @@
   },
   "optionalDependencies": {
     "@sentry/node": "^9.47.1"
+  },
+  "devDependencies": {
+    "fastify": "^5.7.4"
   }
 }

@@ -8,7 +8,15 @@
     "composite": true,
     "declaration": true,
     "declarationMap": true,
-    "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.websocket.tsbuildinfo"
+    "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.websocket.tsbuildinfo",
+    "paths": {
+      "@bslt/shared": ["../../shared/src/index.ts"],
+      "@bslt/shared/*": ["../../shared/src/*"],
+      "@bslt/db": ["../db/src/index.ts"],
+      "@bslt/db/*": ["../db/src/*"],
+      "@bslt/server-system": ["../system/src/index.ts"],
+      "@bslt/server-system/*": ["../system/src/*"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"],
