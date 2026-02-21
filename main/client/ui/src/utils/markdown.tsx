@@ -501,8 +501,19 @@ function parseInlineMarkdown(text: string, options: MarkdownOptions): ReactNode 
   const { sanitize = false } = options;
 
   if (text === '') return '';
+  if (text.length > 8_000) return text;
 
-  const unescaped = text.replace(/\\([`*\\])/g, '$1');
+  let unescaped = '';
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i] as string;
+    const next = text[i + 1];
+    if (char === '\\' && (next === '`' || next === '*' || next === '\\')) {
+      unescaped += next;
+      i++;
+      continue;
+    }
+    unescaped += char;
+  }
   if (unescaped !== text) {
     return unescaped;
   }

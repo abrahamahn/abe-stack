@@ -6,8 +6,17 @@ import { COMMON_PASSWORDS, KEYBOARD_PATTERNS } from '../../constants';
  * Check for repeated characters (e.g., "aaa", "111")
  */
 export function hasRepeatedChars(password: string, minLength = 3): boolean {
-  const regex = new RegExp(`(.)\\1{${String(minLength - 1)},}`);
-  return regex.test(password);
+  if (minLength <= 1) return password.length > 0;
+  let runLength = 1;
+  for (let i = 1; i < password.length; i++) {
+    if (password.charCodeAt(i) === password.charCodeAt(i - 1)) {
+      runLength++;
+      if (runLength >= minLength) return true;
+    } else {
+      runLength = 1;
+    }
+  }
+  return false;
 }
 
 /**
