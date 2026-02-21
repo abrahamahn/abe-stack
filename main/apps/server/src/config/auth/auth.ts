@@ -10,12 +10,7 @@ import {
   getList,
 } from '@bslt/shared/config';
 
-import type {
-  AuthConfig,
-  AuthStrategy,
-  FullEnv,
-  OAuthProviderConfig,
-} from '@bslt/shared/config';
+import type { AuthConfig, AuthStrategy, FullEnv, OAuthProviderConfig } from '@bslt/shared/config';
 
 const VALID_STRATEGIES = new Set<string>(AUTH_STRATEGIES);
 
@@ -109,7 +104,9 @@ export function loadAuthConfig(env: FullEnv, apiBaseUrl: string): AuthConfig {
 
     jwt: {
       secret: jwtSecret,
-      ...(env.JWT_SECRET_PREVIOUS !== undefined && { previousSecret: env.JWT_SECRET_PREVIOUS }),
+      ...(env.JWT_SECRET_PREVIOUS !== undefined && {
+        previousSecret: env.JWT_SECRET_PREVIOUS,
+      }),
       accessTokenExpiry: env.ACCESS_TOKEN_EXPIRY,
       issuer: env.JWT_ISSUER,
       audience: env.JWT_AUDIENCE,
@@ -148,23 +145,33 @@ export function loadAuthConfig(env: FullEnv, apiBaseUrl: string): AuthConfig {
 
     rateLimit: {
       login: {
-        max: env.RATE_LIMIT_LOGIN_MAX ??
+        max:
+          env.RATE_LIMIT_LOGIN_MAX ??
           (isProduction ? RATE_LIMIT_DEFAULTS.LOGIN_MAX_PROD : RATE_LIMIT_DEFAULTS.LOGIN_MAX_DEV),
         windowMs: 15 * MS_PER_MINUTE,
       },
       register: {
-        max: env.RATE_LIMIT_REGISTER_MAX ??
-          (isProduction ? RATE_LIMIT_DEFAULTS.REGISTER_MAX_PROD : RATE_LIMIT_DEFAULTS.REGISTER_MAX_DEV),
+        max:
+          env.RATE_LIMIT_REGISTER_MAX ??
+          (isProduction
+            ? RATE_LIMIT_DEFAULTS.REGISTER_MAX_PROD
+            : RATE_LIMIT_DEFAULTS.REGISTER_MAX_DEV),
         windowMs: MS_PER_HOUR,
       },
       forgotPassword: {
-        max: env.RATE_LIMIT_FORGOT_PASSWORD_MAX ??
-          (isProduction ? RATE_LIMIT_DEFAULTS.FORGOT_PASSWORD_MAX_PROD : RATE_LIMIT_DEFAULTS.FORGOT_PASSWORD_MAX_DEV),
+        max:
+          env.RATE_LIMIT_FORGOT_PASSWORD_MAX ??
+          (isProduction
+            ? RATE_LIMIT_DEFAULTS.FORGOT_PASSWORD_MAX_PROD
+            : RATE_LIMIT_DEFAULTS.FORGOT_PASSWORD_MAX_DEV),
         windowMs: MS_PER_HOUR,
       },
       verifyEmail: {
-        max: env.RATE_LIMIT_VERIFY_EMAIL_MAX ??
-          (isProduction ? RATE_LIMIT_DEFAULTS.VERIFY_EMAIL_MAX_PROD : RATE_LIMIT_DEFAULTS.VERIFY_EMAIL_MAX_DEV),
+        max:
+          env.RATE_LIMIT_VERIFY_EMAIL_MAX ??
+          (isProduction
+            ? RATE_LIMIT_DEFAULTS.VERIFY_EMAIL_MAX_PROD
+            : RATE_LIMIT_DEFAULTS.VERIFY_EMAIL_MAX_DEV),
         windowMs: MS_PER_HOUR,
       },
     },
@@ -180,8 +187,7 @@ export function loadAuthConfig(env: FullEnv, apiBaseUrl: string): AuthConfig {
 
     // Dedicated key for AES-256-GCM encryption of stored OAuth tokens.
     // Falls back to cookie.secret for backwards-compatibility with existing encrypted data.
-    oauthTokenEncryptionKey:
-      env.OAUTH_TOKEN_ENCRYPTION_KEY ?? env.COOKIE_SECRET ?? jwtSecret,
+    oauthTokenEncryptionKey: env.OAUTH_TOKEN_ENCRYPTION_KEY ?? env.COOKIE_SECRET ?? jwtSecret,
 
     oauth: buildOAuthProviders(),
 

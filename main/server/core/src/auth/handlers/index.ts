@@ -12,7 +12,7 @@ export { handleListDevices, handleRevokeDevice, handleTrustDevice } from './devi
 export {
   handleChangeEmail,
   handleConfirmEmailChange,
-  handleRevertEmailChange
+  handleRevertEmailChange,
 } from './email-change';
 export { handleInvalidateSessions } from './invalidate-sessions';
 export { handleLogin } from './login';
@@ -26,7 +26,11 @@ export { handleSendSmsCode, handleVerifySmsCode } from './sms-challenge';
 export { handleSudoElevate, SUDO_TOKEN_TTL_MINUTES, verifySudoToken } from './sudo';
 export { handleAcceptTos, handleTosStatus } from './tos';
 export {
-  handleTotpDisable, handleTotpEnable, handleTotpLoginVerify, handleTotpSetup, handleTotpStatus
+  handleTotpDisable,
+  handleTotpEnable,
+  handleTotpLoginVerify,
+  handleTotpSetup,
+  handleTotpStatus,
 } from './totp';
 export { handleResendVerification, handleVerifyEmail } from './verify';
 export {
@@ -36,6 +40,5 @@ export {
   handleWebauthnLoginOptions,
   handleWebauthnLoginVerify,
   handleWebauthnRegisterOptions,
-  handleWebauthnRegisterVerify
+  handleWebauthnRegisterVerify,
 } from './webauthn';
-

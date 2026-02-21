@@ -100,6 +100,7 @@ Before marking a DB-backed slice as done, verify these artifacts exist:
 - [ ] Notes:
   - Risks:
   - Rollout / config gates:
+
 ```
 
 ---
@@ -481,3 +482,4 @@ Before marking a DB-backed slice as done, verify these artifacts exist:
 - [ ] Test: read replica routing — writes → primary, reads → replica
 
 ---
+```

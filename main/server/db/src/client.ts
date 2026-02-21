@@ -231,8 +231,7 @@ export function createDbFromSql(sql: PostgresClient, session?: SessionContext): 
             await tx.unsafe(`SET LOCAL app.user_id = ${escapeLiteral(session.userId)}`);
           if (session.tenantId)
             await tx.unsafe(`SET LOCAL app.tenant_id = ${escapeLiteral(session.tenantId)}`);
-          if (session.role)
-            await tx.unsafe(`SET LOCAL app.role = ${escapeLiteral(session.role)}`);
+          if (session.role) await tx.unsafe(`SET LOCAL app.role = ${escapeLiteral(session.role)}`);
           const r = await tx.unsafe(query.text, [...query.values] as ParameterOrJSON<never>[]);
           return (r as unknown as { count: number }).count;
         });
@@ -288,7 +287,9 @@ export function createDbFromSql(sql: PostgresClient, session?: SessionContext): 
       if (typeof savepointFn === 'function') {
         // Nested transactions: postgres uses savepoints and does not support SET TRANSACTION.
         const result = (
-          client as unknown as { savepoint: (cb: (tx: TransactionSql) => Promise<T>) => Promise<T> }
+          client as unknown as {
+            savepoint: (cb: (tx: TransactionSql) => Promise<T>) => Promise<T>;
+          }
         ).savepoint(async (tx) => {
           const txDb = createDbFromSql(tx, session);
           return callback(txDb);

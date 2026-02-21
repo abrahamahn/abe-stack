@@ -24,12 +24,7 @@ import {
   type SupportedLocale,
 } from '../../http/middleware/locale';
 
-import {
-  createTestServer,
-  createTestJwt,
-  parseJsonResponse,
-  type TestServer,
-} from './test-utils';
+import { createTestServer, createTestJwt, parseJsonResponse, type TestServer } from './test-utils';
 
 // ============================================================================
 // Part 1: Locale middleware integration with real Fastify instance
@@ -215,7 +210,9 @@ describe('Sprint 6.7 — set locale preference → GET returns persisted languag
       const body = req.body as { language?: string };
       const mockUsers = (req.server as unknown as { mockUsers: { update: typeof updateSpy } })
         .mockUsers;
-      const updated = await mockUsers.update('user-locale-1', { language: body.language });
+      const updated = await mockUsers.update('user-locale-1', {
+        language: body.language,
+      });
       reply.status(200).send({ language: (updated as Record<string, unknown>)['language'] });
     });
 
@@ -252,9 +249,13 @@ describe('Sprint 6.7 — set locale preference → GET returns persisted languag
     testServer.server.patch('/api/test/locale-preference-null', async (req, reply) => {
       const body = req.body as { language?: string | null };
       const mockUsers = (
-        req.server as unknown as { mockUsersNull: { update: typeof updateSpy } }
+        req.server as unknown as {
+          mockUsersNull: { update: typeof updateSpy };
+        }
       ).mockUsersNull;
-      const updated = await mockUsers.update('user-locale-1', { language: body.language });
+      const updated = await mockUsers.update('user-locale-1', {
+        language: body.language,
+      });
       reply.status(200).send({ language: (updated as Record<string, unknown>)['language'] });
     });
 

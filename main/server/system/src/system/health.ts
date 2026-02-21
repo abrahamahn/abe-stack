@@ -22,7 +22,10 @@ import type {
 } from '@bslt/shared/system';
 
 /** Callback that performs the DB-level schema validation. */
-export type SchemaValidatorFn = () => Promise<{ valid: boolean; missingTables: string[] }>;
+export type SchemaValidatorFn = () => Promise<{
+  valid: boolean;
+  missingTables: string[];
+}>;
 
 // ============================================================================
 // Options
@@ -169,13 +172,19 @@ export async function getDetailedHealth(
   ctx: HealthContext,
   options?: DetailedHealthOptions,
 ): Promise<DetailedHealthResponse> {
-  const defaultWsStats: WebSocketStats = { pluginRegistered: false, activeConnections: 0 };
+  const defaultWsStats: WebSocketStats = {
+    pluginRegistered: false,
+    activeConnections: 0,
+  };
   const ws = options?.websocketStats ?? defaultWsStats;
 
   const schemaPromise: Promise<SchemaHealth> =
     options?.schemaValidator !== undefined && options.totalTableCount !== undefined
       ? checkSchemaStatus(ctx, options.schemaValidator, options.totalTableCount)
-      : Promise.resolve({ status: 'up' as const, details: { valid: true, missingTables: [] } });
+      : Promise.resolve({
+          status: 'up' as const,
+          details: { valid: true, missingTables: [] },
+        });
 
   const [database, schema, cache, queue, email, storage, pubsub, websocket, rateLimit] =
     await Promise.all([
@@ -273,11 +282,7 @@ function printDevConfigSummary(
     ['Notifications', config.notifications.enabled ? config.notifications.provider : 'disabled'],
   ];
 
-  const out: string[] = [
-    '',
-    `  BSLT Server`,
-    `  ${line}`,
-  ];
+  const out: string[] = ['', `  BSLT Server`, `  ${line}`];
 
   for (const [label, value] of rows) {
     out.push(`  ${label.padEnd(16)} ${value}`);

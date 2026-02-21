@@ -27,12 +27,21 @@ export function loadRateLimitConfig(env: Record<string, string | undefined>): Ra
       env['RATE_LIMIT_MAX'],
       isProd ? RATE_LIMIT_DEFAULTS.GLOBAL_MAX_PROD : RATE_LIMIT_DEFAULTS.GLOBAL_MAX_DEV,
     ),
-    cleanupIntervalMs: getInt(env['RATE_LIMIT_CLEANUP_INTERVAL_MS'], RATE_LIMIT_DEFAULTS.GLOBAL_WINDOW_MS),
+    cleanupIntervalMs: getInt(
+      env['RATE_LIMIT_CLEANUP_INTERVAL_MS'],
+      RATE_LIMIT_DEFAULTS.GLOBAL_WINDOW_MS,
+    ),
 
     progressiveDelay: {
       enabled: progressiveDelayEnabledValue,
-      baseDelay: getInt(env['RATE_LIMIT_BASE_DELAY_MS'], RATE_LIMIT_DEFAULTS.PROGRESSIVE_BASE_DELAY_MS),
-      maxDelay: getInt(env['RATE_LIMIT_MAX_DELAY_MS'], RATE_LIMIT_DEFAULTS.PROGRESSIVE_MAX_DELAY_MS),
+      baseDelay: getInt(
+        env['RATE_LIMIT_BASE_DELAY_MS'],
+        RATE_LIMIT_DEFAULTS.PROGRESSIVE_BASE_DELAY_MS,
+      ),
+      maxDelay: getInt(
+        env['RATE_LIMIT_MAX_DELAY_MS'],
+        RATE_LIMIT_DEFAULTS.PROGRESSIVE_MAX_DELAY_MS,
+      ),
       backoffFactor: RATE_LIMIT_DEFAULTS.PROGRESSIVE_BACKOFF_FACTOR,
     },
   };

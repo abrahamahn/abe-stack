@@ -317,7 +317,12 @@ export async function verifyMagicLink(
       update(AUTH_TOKENS_TABLE)
         .set({ used_at: now })
         .where(
-          and(eq('token_hash', tokenHash), eq('type', 'magic_link'), gt('expires_at', now), isNull('used_at')),
+          and(
+            eq('token_hash', tokenHash),
+            eq('type', 'magic_link'),
+            gt('expires_at', now),
+            isNull('used_at'),
+          ),
         )
         .returningAll()
         .toSql(),

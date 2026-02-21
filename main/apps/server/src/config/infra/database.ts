@@ -62,7 +62,8 @@ export function loadDatabaseConfig(env: FullEnv): DatabaseConfig {
             : (env.MONGODB_DB ?? DB_DEFAULTS.DEFAULT_DATABASE_NAME),
         options: {
           ssl: env.MONGODB_SSL === 'true',
-          connectTimeoutMs: env.MONGODB_CONNECT_TIMEOUT_MS ?? DB_DEFAULTS.MONGODB_CONNECT_TIMEOUT_MS,
+          connectTimeoutMs:
+            env.MONGODB_CONNECT_TIMEOUT_MS ?? DB_DEFAULTS.MONGODB_CONNECT_TIMEOUT_MS,
           socketTimeoutMs: env.MONGODB_SOCKET_TIMEOUT_MS ?? DB_DEFAULTS.MONGODB_SOCKET_TIMEOUT_MS,
           useUnifiedTopology: env.MONGODB_USE_UNIFIED_TOPOLOGY !== 'false',
         },

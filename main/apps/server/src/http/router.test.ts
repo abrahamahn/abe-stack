@@ -23,7 +23,12 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { registerRouteMap } from './router';
 
 import type { RouterOptions } from './router';
-import type { HandlerContext, RouteHandler, RouteSchema, ValidationSchema } from '@bslt/server-system';
+import type {
+  HandlerContext,
+  RouteHandler,
+  RouteSchema,
+  ValidationSchema,
+} from '@bslt/server-system';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
@@ -68,7 +73,10 @@ function createMockRequest(body?: unknown): FastifyRequest {
   return { body } as FastifyRequest;
 }
 
-function createMockReply(): FastifyReply & { sentStatus: number | null; sentBody: unknown } {
+function createMockReply(): FastifyReply & {
+  sentStatus: number | null;
+  sentBody: unknown;
+} {
   const reply = {
     sentStatus: null as number | null,
     sentBody: undefined as unknown,
@@ -82,7 +90,10 @@ function createMockReply(): FastifyReply & { sentStatus: number | null; sentBody
       };
     },
   };
-  return reply as unknown as FastifyReply & { sentStatus: number | null; sentBody: unknown };
+  return reply as unknown as FastifyReply & {
+    sentStatus: number | null;
+    sentBody: unknown;
+  };
 }
 
 const defaultOptions: RouterOptions = {
@@ -124,7 +135,10 @@ describe('registerRouteMap', () => {
     const handler: RouteHandler = vi.fn(() => Promise.resolve(undefined));
     const routeMap = createRouteMap([['/users/', publicRoute('GET', handler)]]);
 
-    registerRouteMap(app, mockCtx, routeMap, { ...defaultOptions, prefix: '/api/' });
+    registerRouteMap(app, mockCtx, routeMap, {
+      ...defaultOptions,
+      prefix: '/api/',
+    });
 
     const route = routes[0];
     if (route === undefined) throw new Error('Route not registered');
@@ -315,7 +329,10 @@ describe('registerRouteMap', () => {
     const handler: RouteHandler = vi.fn(() => Promise.resolve(undefined));
     const routeMap = createRouteMap([['health', publicRoute('GET', handler)]]);
 
-    registerRouteMap(app, mockCtx, routeMap, { ...defaultOptions, module: 'system' });
+    registerRouteMap(app, mockCtx, routeMap, {
+      ...defaultOptions,
+      module: 'system',
+    });
 
     const registry = getRegisteredRoutes();
     expect(registry).toHaveLength(1);
@@ -330,7 +347,9 @@ describe('registerRouteMap', () => {
         publicRoute('GET', handler, undefined, {
           summary: 'Health check',
           tags: ['system'],
-          response: { 200: { type: 'object', properties: { status: { type: 'string' } } } },
+          response: {
+            200: { type: 'object', properties: { status: { type: 'string' } } },
+          },
         }),
       ],
     ]);
@@ -379,8 +398,14 @@ describe('registerRouteMap', () => {
     const [route0, route1] = [routes[0], routes[1]];
     if (!route0 || !route1) throw new Error('Routes not registered');
 
-    const r1 = await route0.handler(createMockRequest(undefined), reply1 as unknown as FastifyReply);
-    const r2 = await route1.handler(createMockRequest(undefined), reply2 as unknown as FastifyReply);
+    const r1 = await route0.handler(
+      createMockRequest(undefined),
+      reply1 as unknown as FastifyReply,
+    );
+    const r2 = await route1.handler(
+      createMockRequest(undefined),
+      reply2 as unknown as FastifyReply,
+    );
 
     expect(r1).toBeNull();
     expect(r2).toBeUndefined();
@@ -394,7 +419,9 @@ describe('registerRouteMap', () => {
       properties: { body: { type: 'object' } },
     } as unknown as RouteSchema;
 
-    const routeMap = createRouteMap([['schema-route', publicRoute('POST', handler, fastifySchema)]]);
+    const routeMap = createRouteMap([
+      ['schema-route', publicRoute('POST', handler, fastifySchema)],
+    ]);
     registerRouteMap(app, mockCtx, routeMap, defaultOptions);
 
     const route = routes[0];

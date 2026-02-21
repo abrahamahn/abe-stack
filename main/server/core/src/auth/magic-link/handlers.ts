@@ -8,10 +8,7 @@
  * @module magic-link/handlers
  */
 
-import {
-  AUTH_SUCCESS_MESSAGES as SUCCESS_MESSAGES,
-  mapErrorToHttpResponse,
-} from '@bslt/shared';
+import { AUTH_SUCCESS_MESSAGES as SUCCESS_MESSAGES, mapErrorToHttpResponse } from '@bslt/shared';
 import { isStrategyEnabled } from '@bslt/shared/core';
 
 import { getMetricsCollector } from '../../../../system/src';
@@ -54,7 +51,10 @@ export async function handleMagicLinkRequest(
   if (!isStrategyEnabled(ctx.config.auth, 'magic')) {
     return {
       status: 404,
-      body: { message: 'Magic link authentication is not enabled', code: 'NOT_FOUND' },
+      body: {
+        message: 'Magic link authentication is not enabled',
+        code: 'NOT_FOUND',
+      },
     };
   }
 
@@ -135,7 +135,10 @@ export async function handleMagicLinkVerify(
   if (!isStrategyEnabled(ctx.config.auth, 'magic')) {
     return {
       status: 404,
-      body: { message: 'Magic link authentication is not enabled', code: 'NOT_FOUND' },
+      body: {
+        message: 'Magic link authentication is not enabled',
+        code: 'NOT_FOUND',
+      },
     };
   }
 

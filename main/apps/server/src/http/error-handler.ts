@@ -16,7 +16,6 @@ import {
   mapErrorToHttpResponse,
 } from '@bslt/shared/system';
 
-
 import type { FastifyBaseLogger, FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
@@ -28,7 +27,11 @@ import type { FastifyBaseLogger, FastifyInstance, FastifyReply, FastifyRequest }
  * Present on errors thrown by Fastify itself when request body/params fail schema validation.
  */
 interface FastifyValidationError extends Error {
-  validation: Array<{ message?: string; instancePath?: string; schemaPath?: string }>;
+  validation: Array<{
+    message?: string;
+    instancePath?: string;
+    schemaPath?: string;
+  }>;
   validationContext?: string;
 }
 
@@ -37,7 +40,11 @@ interface FastifyValidationError extends Error {
  * hard dependency on Zod in this adapter layer.
  */
 interface ZodLikeError {
-  issues: Array<{ path: ReadonlyArray<string | number>; message: string; code: string }>;
+  issues: Array<{
+    path: ReadonlyArray<string | number>;
+    message: string;
+    code: string;
+  }>;
 }
 
 // ============================================================================
@@ -103,14 +110,22 @@ export function registerErrorHandler(server: FastifyInstance): void {
         },
         'Request schema validation failed',
       );
-      replyError(reply as unknown as HttpReply, new BadRequestError('Request validation failed'), request.correlationId);
+      replyError(
+        reply as unknown as HttpReply,
+        new BadRequestError('Request validation failed'),
+        request.correlationId,
+      );
       return;
     }
 
     // ── 2. Zod duck-typed errors ──────────────────────────────────────────
     if (isZodLikeError(error)) {
       log.warn(
-        { method: request.method, url: request.url, issueCount: error.issues.length },
+        {
+          method: request.method,
+          url: request.url,
+          issueCount: error.issues.length,
+        },
         'Zod validation failed',
       );
       void reply.status(422).send(formatValidationErrors(error.issues));

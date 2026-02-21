@@ -17,9 +17,7 @@ import { createHash } from 'node:crypto';
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import {
-  getAuditEventsForDeletedUser,
-} from '../../../../../server/core/src/users/data-hygiene';
+import { getAuditEventsForDeletedUser } from '../../../../../server/core/src/users/data-hygiene';
 import {
   anonymizeExpiredUsers,
   type AnonymizeResult,
@@ -177,7 +175,10 @@ describe('Sprint 3.16 — soft-delete user → PII anonymized → audit trail in
 
   it('PII anonymization cron anonymizes expired soft-deleted users', async () => {
     const userId = 'user-soft-deleted-1';
-    const userRow = makeSoftDeletedUserRow({ id: userId, email: 'jane@example.com' });
+    const userRow = makeSoftDeletedUserRow({
+      id: userId,
+      email: 'jane@example.com',
+    });
 
     // Cron queries for soft-deleted users past grace period
     vi.mocked(db.query).mockResolvedValueOnce([userRow]);
@@ -207,28 +208,41 @@ describe('Sprint 3.16 — soft-delete user → PII anonymized → audit trail in
     // The audit_events table uses ON DELETE SET NULL — not CASCADE — so
     // events persist until the user is hard-deleted.
     const mockEvents = [
-      { id: 'evt-1', actorId: userId, action: 'user.login', createdAt: new Date() },
-      { id: 'evt-2', actorId: userId, action: 'user.profile_updated', createdAt: new Date() },
+      {
+        id: 'evt-1',
+        actorId: userId,
+        action: 'user.login',
+        createdAt: new Date(),
+      },
+      {
+        id: 'evt-2',
+        actorId: userId,
+        action: 'user.profile_updated',
+        createdAt: new Date(),
+      },
     ];
     mockAuditEvents.findByActorId.mockResolvedValueOnce(mockEvents);
 
-    const repos = { auditEvents: mockAuditEvents } as unknown as Pick<
-      Repositories,
-      'auditEvents'
-    >;
+    const repos = { auditEvents: mockAuditEvents } as unknown as Pick<Repositories, 'auditEvents'>;
     const events = await getAuditEventsForDeletedUser(repos, userId);
 
     // Audit events are intact and queryable
     expect(events).toHaveLength(2);
     expect(events[0]).toMatchObject({ actorId: userId, action: 'user.login' });
-    expect(events[1]).toMatchObject({ actorId: userId, action: 'user.profile_updated' });
+    expect(events[1]).toMatchObject({
+      actorId: userId,
+      action: 'user.profile_updated',
+    });
     expect(mockAuditEvents.findByActorId).toHaveBeenCalledWith(userId, 100);
   });
 
   it('already-anonymized users are skipped by the cron (idempotent)', async () => {
     const userId = 'user-already-anonymized';
     const hashedEmail = `${createHash('sha256').update('already@example.com').digest('hex')}@anonymized.local`;
-    const alreadyAnonymizedRow = makeSoftDeletedUserRow({ id: userId, email: hashedEmail });
+    const alreadyAnonymizedRow = makeSoftDeletedUserRow({
+      id: userId,
+      email: hashedEmail,
+    });
 
     vi.mocked(db.query).mockResolvedValueOnce([alreadyAnonymizedRow]);
 
@@ -250,10 +264,7 @@ describe('Sprint 3.16 — soft-delete user → PII anonymized → audit trail in
 
     mockAuditEvents.findByActorId.mockResolvedValueOnce(mockEvents);
 
-    const repos = { auditEvents: mockAuditEvents } as unknown as Pick<
-      Repositories,
-      'auditEvents'
-    >;
+    const repos = { auditEvents: mockAuditEvents } as unknown as Pick<Repositories, 'auditEvents'>;
     const events = await getAuditEventsForDeletedUser(repos, userId, 50);
 
     expect(events).toHaveLength(50);
@@ -285,7 +296,10 @@ describe('Sprint 3.16 — create unverified user → past threshold → cron del
 
   it('unverified user past expiry threshold is hard-deleted', async () => {
     const userId = 'unverified-user-1';
-    const userRow = makeUnverifiedUserRow({ id: userId, email: 'unverified@example.com' });
+    const userRow = makeUnverifiedUserRow({
+      id: userId,
+      email: 'unverified@example.com',
+    });
 
     // Cron query returns this unverified user
     vi.mocked(db.query).mockResolvedValueOnce([userRow]);
@@ -300,15 +314,15 @@ describe('Sprint 3.16 — create unverified user → past threshold → cron del
 
     expect(result.deletedCount).toBe(1);
     expect(db.execute).toHaveBeenCalledTimes(1);
-    expect(log.info).toHaveBeenCalledWith(
-      { deletedCount: 1 },
-      'Unverified user cleanup completed',
-    );
+    expect(log.info).toHaveBeenCalledWith({ deletedCount: 1 }, 'Unverified user cleanup completed');
   });
 
   it('user with OAuth connection is excluded from cleanup (verified via provider)', async () => {
     const userId = 'oauth-unverified-user';
-    const userRow = makeUnverifiedUserRow({ id: userId, email: 'oauth@example.com' });
+    const userRow = makeUnverifiedUserRow({
+      id: userId,
+      email: 'oauth@example.com',
+    });
 
     vi.mocked(db.query).mockResolvedValueOnce([userRow]);
     vi.mocked(repos.oauthConnections.findByUserId).mockResolvedValueOnce([
@@ -328,7 +342,10 @@ describe('Sprint 3.16 — create unverified user → past threshold → cron del
 
   it('user with active session is excluded from cleanup (registration in progress)', async () => {
     const userId = 'session-unverified-user';
-    const userRow = makeUnverifiedUserRow({ id: userId, email: 'session@example.com' });
+    const userRow = makeUnverifiedUserRow({
+      id: userId,
+      email: 'session@example.com',
+    });
 
     vi.mocked(db.query).mockResolvedValueOnce([userRow]);
     vi.mocked(repos.oauthConnections.findByUserId).mockResolvedValueOnce([]);

@@ -11,7 +11,6 @@
 import { authRoutes, createAuthGuard } from '@bslt/core/auth';
 import { userRoutes } from '@bslt/core/users';
 
-
 import { buildBillingRouteMap } from './billingRouteAdapter';
 import { registerBillingWebhookRoutes } from './billingWebhooks';
 import { appRouteModuleRegistrations } from './routeModules';

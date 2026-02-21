@@ -25,7 +25,10 @@ import type {
   SubscriptionRegistry,
   WebSocketConnection,
 } from '../../../../../server/core/src/realtime/permission.propagation';
-import type { MembershipRepository, PermissionRecord } from '../../../../../server/core/src/realtime/permissions';
+import type {
+  MembershipRepository,
+  PermissionRecord,
+} from '../../../../../server/core/src/realtime/permissions';
 
 // ============================================================================
 // Test record type
@@ -54,7 +57,9 @@ function createMockPermissionMiddleware(userId: string): PermissionMiddleware {
   };
 }
 
-function createMockConnectionRegistry(connections: Map<string, WebSocketConnection>): ConnectionRegistry {
+function createMockConnectionRegistry(
+  connections: Map<string, WebSocketConnection>,
+): ConnectionRegistry {
   return {
     getConnection: vi.fn((id: string) => connections.get(id) ?? null),
     getConnectionIds: vi.fn(() => Array.from(connections.keys())),
@@ -68,9 +73,7 @@ function createMockSubscriptionRegistry(): SubscriptionRegistry & {
 
   return {
     store,
-    getSubscriptions: vi.fn((connectionId: string) =>
-      Array.from(store.get(connectionId) ?? []),
-    ),
+    getSubscriptions: vi.fn((connectionId: string) => Array.from(store.get(connectionId) ?? [])),
     removeSubscription: vi.fn((connectionId: string, key: string) => {
       const subs = store.get(connectionId);
       if (subs !== undefined) {
@@ -93,11 +96,15 @@ function createMockSubscriptionRegistry(): SubscriptionRegistry & {
   };
 }
 
-function createMockWebSocketConnection(): WebSocketConnection & { messages: string[] } {
+function createMockWebSocketConnection(): WebSocketConnection & {
+  messages: string[];
+} {
   const messages: string[] = [];
   return {
     messages,
-    send: vi.fn((data: string) => { messages.push(data); }),
+    send: vi.fn((data: string) => {
+      messages.push(data);
+    }),
     close: vi.fn(),
   };
 }
@@ -147,8 +154,20 @@ describe('Sprint 6.8 — permission-aware record filtering', () => {
     const tenantId = 'tenant-A';
 
     const records: TaskRecord[] = [
-      { id: 'task-1', version: 1, title: 'Team task', ownerId: 'user-A', tenantId },
-      { id: 'task-2', version: 1, title: 'Another task', ownerId: 'user-A', tenantId },
+      {
+        id: 'task-1',
+        version: 1,
+        title: 'Team task',
+        ownerId: 'user-A',
+        tenantId,
+      },
+      {
+        id: 'task-2',
+        version: 1,
+        title: 'Another task',
+        ownerId: 'user-A',
+        tenantId,
+      },
     ];
 
     // User B IS a member of tenant-A
@@ -181,10 +200,11 @@ describe('Sprint 6.8 — permission-aware record filtering', () => {
     ];
 
     // User B is a member of tenant-A but not tenant-X
-    vi.mocked(membershipRepo.findByUserAndTenant)
-      .mockImplementation(async (_tId: string, _uId: string) => {
+    vi.mocked(membershipRepo.findByUserAndTenant).mockImplementation(
+      async (_tId: string, _uId: string) => {
         return null;
-      });
+      },
+    );
 
     const result = await filterRecords(userId, tenantId, records, membershipRepo);
 
@@ -208,11 +228,14 @@ describe('Sprint 7.1 — permission revocation propagation', () => {
     const subRegistry = createMockSubscriptionRegistry();
 
     // User B has active subscriptions for tenant-A
-    subRegistry.store.set(connectionId, new Set([
-      `tenant:${tenantId}:tasks:task-1`,
-      `tenant:${tenantId}:tasks:task-2`,
-      'tenant:other-tenant:tasks:task-3', // different tenant — should NOT be removed
-    ]));
+    subRegistry.store.set(
+      connectionId,
+      new Set([
+        `tenant:${tenantId}:tasks:task-1`,
+        `tenant:${tenantId}:tasks:task-2`,
+        'tenant:other-tenant:tasks:task-3', // different tenant — should NOT be removed
+      ]),
+    );
 
     const permissionMiddleware = createMockPermissionMiddleware(userId);
     vi.mocked(permissionMiddleware.getConnectionPermissions).mockReturnValue({
@@ -330,10 +353,10 @@ describe('Sprint 7.1 — permission revocation propagation', () => {
     const connections = new Map<string, WebSocketConnection>([[connectionId, wsConnection]]);
 
     const subRegistry = createMockSubscriptionRegistry();
-    subRegistry.store.set(connectionId, new Set([
-      `tenant:${tenantId}:admin-logs:log-1`,
-      `tenant:${tenantId}:tasks:task-1`,
-    ]));
+    subRegistry.store.set(
+      connectionId,
+      new Set([`tenant:${tenantId}:admin-logs:log-1`, `tenant:${tenantId}:tasks:task-1`]),
+    );
 
     const permMiddleware = createMockPermissionMiddleware(userId);
     const connectionRegistry = createMockConnectionRegistry(connections);

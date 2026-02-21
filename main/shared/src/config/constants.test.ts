@@ -196,12 +196,8 @@ describe('config constants', () => {
     });
 
     it('is more restrictive in production than dev', () => {
-      expect(RATE_LIMIT_DEFAULTS.GLOBAL_MAX_PROD).toBeLessThan(
-        RATE_LIMIT_DEFAULTS.GLOBAL_MAX_DEV,
-      );
-      expect(RATE_LIMIT_DEFAULTS.LOGIN_MAX_PROD).toBeLessThan(
-        RATE_LIMIT_DEFAULTS.LOGIN_MAX_DEV,
-      );
+      expect(RATE_LIMIT_DEFAULTS.GLOBAL_MAX_PROD).toBeLessThan(RATE_LIMIT_DEFAULTS.GLOBAL_MAX_DEV);
+      expect(RATE_LIMIT_DEFAULTS.LOGIN_MAX_PROD).toBeLessThan(RATE_LIMIT_DEFAULTS.LOGIN_MAX_DEV);
     });
 
     it('has exponential backoff with factor >= 2', () => {

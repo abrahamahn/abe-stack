@@ -13,7 +13,13 @@
 // ============================================================================
 
 export { decode, JwtError, sign, verify } from '@bslt/shared/system/crypto';
-export type { JwtErrorCode, JwtHeader, JwtPayload, SignOptions, VerifyOptions } from '@bslt/shared/system/crypto';
+export type {
+  JwtErrorCode,
+  JwtHeader,
+  JwtPayload,
+  SignOptions,
+  VerifyOptions,
+} from '@bslt/shared/system/crypto';
 
 // ============================================================================
 // JWT Rotation

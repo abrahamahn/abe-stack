@@ -21,9 +21,18 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..', '..', '..', '..', '..');
 
 const CONFIG_TARGETS = [
-  { label: 'apps/server', dir: path.join(REPO_ROOT, 'main', 'apps', 'server', 'src', 'config') },
-  { label: 'server-system', dir: path.join(REPO_ROOT, 'main', 'server', 'system', 'src', 'config') },
-  { label: 'shared', dir: path.join(REPO_ROOT, 'main', 'shared', 'src', 'config') },
+  {
+    label: 'apps/server',
+    dir: path.join(REPO_ROOT, 'main', 'apps', 'server', 'src', 'config'),
+  },
+  {
+    label: 'server-system',
+    dir: path.join(REPO_ROOT, 'main', 'server', 'system', 'src', 'config'),
+  },
+  {
+    label: 'shared',
+    dir: path.join(REPO_ROOT, 'main', 'shared', 'src', 'config'),
+  },
 ] as const;
 
 const ENV_EXAMPLE_DIR = path.join(REPO_ROOT, 'config', 'env');
