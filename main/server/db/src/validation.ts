@@ -17,55 +17,51 @@ import type { RawDb } from './client';
  * Keep in sync with @bslt/db schema
  */
 export const REQUIRED_TABLES = [
-  // 0000_init: Users & Auth
+  // 0000_users.sql: Users & Core Auth
   'users',
   'refresh_tokens',
-  'refresh_token_families',
+  'auth_tokens',
   'login_attempts',
-  'password_reset_tokens',
-  'email_verification_tokens',
   'security_events',
-  // 0001_tenant: Multi-tenancy
+  // 0001_auth_extensions.sql: MFA extensions (TOTP, SMS, WebAuthn, trusted devices)
+  'totp_backup_codes',
+  'sms_verification_codes',
+  'webauthn_credentials',
+  'trusted_devices',
+  // 0002_sessions.sql: Session management
+  'user_sessions',
+  'oauth_connections',
+  // 0100_tenants.sql: Multi-tenancy
   'tenants',
   'memberships',
   'invitations',
-  // 0002_sessions: Session management
-  'user_sessions',
-  'magic_link_tokens',
-  'oauth_connections',
-  // 0003_billing: Billing & subscriptions
+  // 0101_api_keys.sql: Programmatic API access
+  'api_keys',
+  // 0200_billing.sql: Billing & subscriptions
   'plans',
   'subscriptions',
   'customer_mappings',
   'invoices',
   'payment_methods',
   'billing_events',
-  // 0004_notifications: In-app + push
+  // 0300_notifications.sql: In-app + push
   'notifications',
   'push_subscriptions',
   'notification_preferences',
-  // 0005_system: Jobs, audit, webhooks
+  // 0400_system.sql: Jobs, audit, webhooks
   'jobs',
   'audit_events',
   'webhooks',
   'webhook_deliveries',
-  // 0006_features: Feature flags
+  // 0450_features.sql: Feature flags
   'feature_flags',
   'tenant_feature_overrides',
-  // 0007_metering: Usage tracking
+  // 0460_metering.sql: Usage tracking
   'usage_metrics',
   'usage_snapshots',
-  // 0008_compliance: Legal & consent
+  // 0500_compliance.sql: Legal & consent
   'legal_documents',
-  'user_agreements',
-  'consent_logs',
-  // 0009_auth_extensions: TOTP + email change
-  'totp_backup_codes',
-  'email_change_tokens',
-  'email_change_revert_tokens',
-  // 0010_api_keys: Programmatic API access
-  'api_keys',
-  // 0011_data_exports: GDPR data export/deletion
+  'consent_records',
   'data_export_requests',
 ] as const;
 

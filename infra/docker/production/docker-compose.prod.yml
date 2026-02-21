@@ -16,6 +16,8 @@
 #                  +-> /ws      -> api:8080 (WebSocket)
 #                  +-> /api/*   -> api:8080
 #                  +-> /*       -> web:80
+#
+#   api:8080 -> pgbouncer:5432 (pool) -> postgres:5432
 
 name: bslt-prod
 
@@ -89,6 +91,50 @@ services:
           memory: 256M
 
   # ===========================================================================
+  # PgBouncer — Connection Pooler
+  # Sits between the API and Postgres to pool connections. Without this,
+  # each Fastify worker holds a direct Postgres connection; under load
+  # the server hits pg's max_connections limit and drops requests.
+  #
+  # Pool mode: transaction (efficient for request/response workloads).
+  # Note: transaction mode does not support LISTEN/NOTIFY or advisory locks.
+  # Switch to PGBOUNCER_POOL_MODE=session if the app uses those features.
+  # ===========================================================================
+  pgbouncer:
+    image: bitnami/pgbouncer:latest
+    container_name: bslt-pgbouncer
+    environment:
+      POSTGRESQL_HOST: postgres
+      POSTGRESQL_PORT: 5432
+      POSTGRESQL_USERNAME: ${POSTGRES_USER:-postgres}
+      POSTGRESQL_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRESQL_DATABASE: ${POSTGRES_DB:-abe_stack}
+      PGBOUNCER_DATABASE: ${POSTGRES_DB:-abe_stack}
+      PGBOUNCER_POOL_MODE: transaction
+      PGBOUNCER_MAX_CLIENT_CONN: 100
+      PGBOUNCER_DEFAULT_POOL_SIZE: 10
+      PGBOUNCER_PORT: 5432
+    networks:
+      - internal
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -h 127.0.0.1 -p 5432 -U ${POSTGRES_USER:-postgres}']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+          cpus: '0.25'
+        reservations:
+          memory: 32M
+
+  # ===========================================================================
   # API Server (Fastify)
   # ===========================================================================
   api:
@@ -102,7 +148,7 @@ services:
       NODE_ENV: production
       HOST: 0.0.0.0
       PORT: 8080
-      POSTGRES_HOST: postgres
+      POSTGRES_HOST: pgbouncer
       POSTGRES_PORT: 5432
       POSTGRES_DB: ${POSTGRES_DB:-abe_stack}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
@@ -127,7 +173,7 @@ services:
     networks:
       - internal
     depends_on:
-      postgres:
+      pgbouncer:
         condition: service_healthy
     healthcheck:
       test:

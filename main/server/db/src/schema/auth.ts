@@ -315,7 +315,7 @@ export interface SmsVerificationCode {
   id: string;
   userId: string;
   phone: string;
-  code: string;
+  codeHash: string;
   expiresAt: Date;
   verified: boolean;
   attempts: number;
@@ -329,7 +329,7 @@ export interface NewSmsVerificationCode {
   id?: string;
   userId: string;
   phone: string;
-  code: string;
+  codeHash: string;
   expiresAt: Date;
   verified?: boolean;
   attempts?: number;
@@ -348,7 +348,7 @@ export const SMS_VERIFICATION_CODE_COLUMNS = {
   id: 'id',
   userId: 'user_id',
   phone: 'phone',
-  code: 'code',
+  codeHash: 'code_hash',
   expiresAt: 'expires_at',
   verified: 'verified',
   attempts: 'attempts',

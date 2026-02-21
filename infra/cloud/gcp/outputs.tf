@@ -36,19 +36,19 @@ output "name_servers" {
 }
 
 output "database_connection_string" {
-  description = "PostgreSQL connection string (if Cloud SQL enabled)"
-  value       = var.enable_managed_database ? "postgresql://${google_sql_user.abe_stack[0].name}:${google_sql_user.abe_stack[0].password}@${google_sql_database_instance.abe_stack[0].public_ip_address}:${google_sql_database_instance.abe_stack[0].port}/${google_sql_database.abe_stack[0].name}?sslmode=require" : null
+  description = "PostgreSQL connection string via private IP (if Cloud SQL enabled)"
+  value       = var.enable_managed_database ? "postgresql://${google_sql_user.abe_stack[0].name}:${google_sql_user.abe_stack[0].password}@${google_sql_database_instance.abe_stack[0].private_ip_address}:5432/${google_sql_database.abe_stack[0].name}?sslmode=require" : null
   sensitive   = true
 }
 
 output "database_host" {
-  description = "Database host (if Cloud SQL enabled)"
-  value       = var.enable_managed_database ? google_sql_database_instance.abe_stack[0].public_ip_address : null
+  description = "Database private IP (if Cloud SQL enabled)"
+  value       = var.enable_managed_database ? google_sql_database_instance.abe_stack[0].private_ip_address : null
 }
 
 output "database_port" {
   description = "Database port (if Cloud SQL enabled)"
-  value       = var.enable_managed_database ? google_sql_database_instance.abe_stack[0].port : null
+  value       = var.enable_managed_database ? 5432 : null
 }
 
 output "database_name" {

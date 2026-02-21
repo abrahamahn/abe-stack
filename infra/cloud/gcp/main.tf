@@ -37,7 +37,6 @@ resource "google_compute_instance" "abe_stack" {
 
   metadata_startup_script = templatefile("${path.module}/startup-script.sh", {
     app_name = var.app_name
-    app_port = var.app_port
   })
 
   service_account {
@@ -144,6 +143,40 @@ resource "google_dns_record_set" "abe_stack_a" {
   ]
 }
 
+# ---------------------------------------------------------------------------
+# Private Service Access — required for Cloud SQL private IP
+# Allocates a private IP range in the VPC and peers it with Google's
+# managed services network so Cloud SQL is reachable without a public IP.
+# ---------------------------------------------------------------------------
+
+resource "google_project_service" "service_networking" {
+  count   = var.enable_managed_database ? 1 : 0
+  project = var.project_id
+  service = "servicenetworking.googleapis.com"
+
+  disable_on_destroy = false
+}
+
+resource "google_compute_global_address" "private_ip_range" {
+  count = var.enable_managed_database ? 1 : 0
+
+  name          = "${var.app_name}-private-ip-${var.environment}"
+  purpose       = "VPC_PEERING"
+  address_type  = "INTERNAL"
+  prefix_length = 16
+  network       = google_compute_network.abe_stack.id
+}
+
+resource "google_service_networking_connection" "private_vpc_connection" {
+  count = var.enable_managed_database ? 1 : 0
+
+  network                 = google_compute_network.abe_stack.id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.private_ip_range[0].name]
+
+  depends_on = [google_project_service.service_networking]
+}
+
 # Optional Cloud SQL PostgreSQL database
 resource "google_sql_database_instance" "abe_stack" {
   count = var.enable_managed_database ? 1 : 0
@@ -172,9 +205,18 @@ resource "google_sql_database_instance" "abe_stack" {
     insights_config {
       query_insights_enabled = true
     }
+
+    ip_configuration {
+      # Private IP only — no public internet exposure.
+      # The compute instance connects via the VPC private network.
+      ipv4_enabled    = false
+      private_network = google_compute_network.abe_stack.id
+    }
   }
 
   deletion_protection = var.environment == "production"
+
+  depends_on = [google_service_networking_connection.private_vpc_connection]
 }
 
 resource "google_sql_database" "abe_stack" {

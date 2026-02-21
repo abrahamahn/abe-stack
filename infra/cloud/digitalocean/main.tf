@@ -25,7 +25,6 @@ resource "digitalocean_droplet" "abe_stack" {
   # User data for initial server setup
   user_data = templatefile("${path.module}/user-data.sh", {
     app_name = var.app_name
-    app_port = var.app_port
   })
 
   tags = [

@@ -531,6 +531,30 @@ export const STATEMENTS: string[] = [
   );
   `,
   `CREATE INDEX IF NOT EXISTS idx_trusted_devices_user ON trusted_devices(user_id);`,
+  // WebAuthn credentials (0001_auth_extensions.sql)
+  `
+  CREATE TABLE IF NOT EXISTS webauthn_credentials (
+    id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id       uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    credential_id text NOT NULL UNIQUE,
+    public_key    text NOT NULL,
+    counter       integer NOT NULL DEFAULT 0,
+    transports    text,
+    device_type   text,
+    backed_up     boolean NOT NULL DEFAULT false,
+    name          text NOT NULL DEFAULT 'Passkey',
+    created_at    timestamptz NOT NULL DEFAULT now(),
+    last_used_at  timestamptz
+  );
+  `,
+  // User lifecycle columns — added in schema revision (0000_users.sql)
+  // ALTER TABLE is idempotent (IF NOT EXISTS) for instances created before these columns existed
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS lock_reason TEXT;`,
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS token_version INTEGER NOT NULL DEFAULT 0;`,
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS last_username_change TIMESTAMPTZ;`,
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS deactivated_at TIMESTAMPTZ;`,
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ;`,
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS deletion_grace_period_ends TIMESTAMPTZ;`,
   // Performance indexes (0000_users.sql)
   `CREATE INDEX IF NOT EXISTS idx_users_active ON users(id) WHERE deleted_at IS NULL AND deactivated_at IS NULL;`,
   `CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user_expires ON refresh_tokens(user_id, expires_at DESC) WHERE expires_at > NOW();`,

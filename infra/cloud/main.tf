@@ -36,6 +36,27 @@ terraform {
 }
 
 # ============================================================================
+# WORKSPACE → ENVIRONMENT MAPPING
+# ============================================================================
+# Each Terraform workspace is one isolated deployment environment with its own
+# state file. Never deploy from the "default" workspace.
+#
+#   First-time setup:
+#     terraform workspace new staging
+#     terraform workspace new production
+#
+#   Deploy:
+#     terraform workspace select staging    && terraform apply
+#     terraform workspace select production && terraform apply
+#
+#   List workspaces:
+#     terraform workspace list
+# ============================================================================
+locals {
+  environment = terraform.workspace
+}
+
+# ============================================================================
 # PROVIDER MODULES
 # ============================================================================
 # Uncomment and configure ONE of the following provider modules
@@ -49,13 +70,15 @@ terraform {
 #   ssh_public_key = var.ssh_public_key
 #
 #   # Optional variables with defaults
-#   region               = "nyc1"
-#   instance_size        = "s-1vcpu-1gb"
-#   app_name            = var.app_name
-#   environment         = var.environment
-#   app_port            = var.app_port
+#   region                  = "nyc1"
+#   instance_size           = "s-1vcpu-1gb"
+#   app_name                = var.app_name
+#   environment             = local.environment
+#   app_port                = var.app_port
 #   enable_managed_database = var.enable_managed_database
-#   database_size       = var.database_size
+#   database_size           = var.database_size
+#   database_node_count     = var.database_node_count
+#   ssh_allowed_cidrs       = var.ssh_allowed_cidrs
 # }
 
 # Google Cloud Platform Provider Module
@@ -68,14 +91,15 @@ terraform {
 #   ssh_public_key = var.ssh_public_key
 #
 #   # Optional variables with defaults
-#   region               = "us-central1"
-#   zone                 = "us-central1-a"
-#   instance_size        = "e2-small"
-#   app_name            = var.app_name
-#   environment         = var.environment
-#   app_port            = var.app_port
+#   region                  = "us-central1"
+#   zone                    = "us-central1-a"
+#   instance_size           = "e2-small"
+#   app_name                = var.app_name
+#   environment             = local.environment
+#   app_port                = var.app_port
 #   enable_managed_database = var.enable_managed_database
-#   database_size       = var.database_size
-#   database_username   = "abe_user"
-#   database_password   = "your-secure-password"
+#   database_size           = var.database_size
+#   database_username       = "abe_user"
+#   database_password       = "your-secure-password"
+#   ssh_allowed_cidrs       = var.ssh_allowed_cidrs
 # }

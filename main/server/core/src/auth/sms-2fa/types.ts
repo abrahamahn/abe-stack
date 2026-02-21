@@ -56,7 +56,7 @@ export interface SmsVerificationCode {
   id: string;
   userId: string;
   phone: string;
-  code: string;
+  codeHash: string;
   expiresAt: Date;
   verified: boolean;
   attempts: number;
