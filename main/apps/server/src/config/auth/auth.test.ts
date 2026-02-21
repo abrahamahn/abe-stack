@@ -103,13 +103,21 @@ describe('Auth Configuration', () => {
 });
 
 describe('parseStrategies', () => {
-  test('should handle whitespace and filter invalid strategies', () => {
+  test('should handle whitespace and aliases', () => {
     const env = createBaseEnv({
-      ['AUTH_STRATEGIES']: ' local , magic , invalid_provider ',
+      ['AUTH_STRATEGIES']: ' local , magic-link , google ',
       ['JWT_SECRET']: 'a-very-secure-secret-key-at-least-32-chars!',
     });
     const config = load(env);
-    expect(config.strategies).toEqual(['local', 'magic']);
+    expect(config.strategies).toEqual(['local', 'magic', 'google']);
+  });
+
+  test('should throw for invalid strategies instead of silently dropping', () => {
+    const env = createBaseEnv({
+      ['AUTH_STRATEGIES']: 'local,invalid_provider',
+      ['JWT_SECRET']: 'a-very-secure-secret-key-at-least-32-chars!',
+    });
+    expect(() => load(env)).toThrow(/Invalid auth strategies/);
   });
 });
 

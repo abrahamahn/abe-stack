@@ -13,6 +13,34 @@ import {
 import type { AuthConfig, AuthStrategy, FullEnv, OAuthProviderConfig } from '@bslt/shared/config';
 
 const VALID_STRATEGIES = new Set<string>(AUTH_STRATEGIES);
+const STRATEGY_ALIASES: Readonly<Record<string, AuthStrategy>> = {
+  'magic-link': 'magic',
+  passkey: 'webauthn',
+  passkeys: 'webauthn',
+};
+
+function parseAuthStrategies(raw: string): AuthStrategy[] {
+  const normalized = raw
+    .split(',')
+    .map((s) => s.trim().toLowerCase())
+    .filter((s) => s.length > 0)
+    .map((s) => STRATEGY_ALIASES[s] ?? s);
+
+  const invalid = normalized.filter((s) => !VALID_STRATEGIES.has(s));
+  if (invalid.length > 0) {
+    throw new AuthValidationError(
+      `Invalid auth strategies: ${invalid.join(', ')}. Valid values: ${AUTH_STRATEGIES.join(', ')}`,
+      'strategies',
+    );
+  }
+
+  const deduped = [...new Set(normalized)];
+  if (deduped.length === 0) {
+    throw new AuthValidationError('At least one auth strategy must be configured', 'strategies');
+  }
+
+  return deduped as AuthStrategy[];
+}
 
 export class AuthValidationError extends BaseError {
   public readonly code = 'AUTH_VALIDATION_ERROR';
@@ -97,10 +125,7 @@ export function loadAuthConfig(env: FullEnv, apiBaseUrl: string): AuthConfig {
   };
 
   const config: AuthConfig = {
-    strategies: (env.AUTH_STRATEGIES ?? 'local')
-      .split(',')
-      .map((s) => s.trim().toLowerCase())
-      .filter((s): s is AuthStrategy => VALID_STRATEGIES.has(s)),
+    strategies: parseAuthStrategies(env.AUTH_STRATEGIES ?? 'local'),
 
     jwt: {
       secret: jwtSecret,

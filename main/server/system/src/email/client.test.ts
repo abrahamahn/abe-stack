@@ -58,6 +58,7 @@ describe('mailer/client', () => {
 
     const client = new MailerClient({
       NODE_ENV: 'production',
+      EMAIL_PROVIDER: 'smtp',
       SMTP_HOST: 'smtp.example.com',
       SMTP_PORT: 465,
       SMTP_USER: 'u',
@@ -80,6 +81,22 @@ describe('mailer/client', () => {
         auth: { user: 'u' },
       },
     });
+  });
+
+  it('uses ConsoleEmailService when EMAIL_PROVIDER=console even if SMTP_HOST exists', async () => {
+    hoisted.consoleSend.mockClear();
+    hoisted.smtpCtor.mockClear();
+
+    const client = new MailerClient({
+      NODE_ENV: 'production',
+      EMAIL_PROVIDER: 'console',
+      SMTP_HOST: 'smtp.example.com',
+    } as unknown as import('../config').FullEnv);
+
+    const res = await client.send({ to: 'a@b.com', subject: 's', text: 't' });
+    expect(res.success).toBe(true);
+    expect(res.messageId).toBe('console');
+    expect(hoisted.smtpCtor).not.toHaveBeenCalled();
   });
 
   it('throws EmailSendError when the underlying service returns success=false', async () => {
