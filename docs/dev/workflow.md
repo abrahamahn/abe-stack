@@ -65,7 +65,7 @@ Skips if refs are already up-to-date. Otherwise runs:
 
 ## CI Pipeline
 
-CI is defined in `.github/workflows/ci.yml`. It triggers on:
+CI is defined in `.github/workflows/continuous-integration.yml`. It triggers on:
 
 - **Push** to `main` or `dev`
 - **Pull requests** to any branch

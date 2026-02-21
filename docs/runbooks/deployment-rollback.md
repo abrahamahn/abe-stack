@@ -33,7 +33,7 @@ gh api repos/<owner>/<repo>/packages?package_type=container \
   | jq '.[].name'
 
 # Or check recent deployment logs in GitHub Actions
-gh run list --workflow=deploy.yml --limit=5
+gh run list --workflow=application-deploy.yml --limit=5
 ```
 
 ### Option 2: Manual SSH rollback

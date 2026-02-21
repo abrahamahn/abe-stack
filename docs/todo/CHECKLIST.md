@@ -900,12 +900,12 @@ Service: `core/tenants/invitation-service.ts` + test. Client: `InviteMemberDialo
 
 ### 13.3 CI/CD Pipelines
 
-- [x] `ci.yml` — main CI pipeline (lint, type-check, test)
-- [x] `deploy.yml` — deployment workflow
-- [x] `security.yml` — security scanning
-- [x] `audit.yml` — dependency audit
-- [x] `rollback.yml` — rollback workflow
-- [x] `infra-deploy.yml`, `infra-destroy.yml`, `infra-test.yml` — infrastructure management
+- [x] `continuous-integration.yml` — main CI pipeline (lint, type-check, test)
+- [x] `application-deploy.yml` — deployment workflow
+- [x] `security-scanning.yml` — security scanning
+- [x] `dependency-audit.yml` — dependency audit
+- [x] `deployment-rollback.yml` — rollback workflow
+- [x] `infrastructure-deploy.yml`, `infrastructure-destroy.yml`, `infrastructure-test.yml` — infrastructure management
 - [ ] Staging environment workflow
 - [ ] Preview deployments for PRs
 

@@ -1,6 +1,6 @@
 # Security CI
 
-Security scanning pipeline defined in `.github/workflows/security.yml` and `.github/workflows/audit.yml`.
+Security scanning pipeline defined in `.github/workflows/security-scanning.yml` and `.github/workflows/dependency-audit.yml`.
 
 ## Overview
 
@@ -67,7 +67,7 @@ Both results are uploaded to GitHub Security tab as separate categories (`trivy-
 
 ## Daily Audit Workflow
 
-**File:** `.github/workflows/audit.yml`
+**File:** `.github/workflows/dependency-audit.yml`
 
 **Triggers:** Daily at 04:00 UTC + manual dispatch
 
