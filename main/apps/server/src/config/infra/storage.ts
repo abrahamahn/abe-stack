@@ -44,7 +44,8 @@ export function loadStorageConfig(env: FullEnv): StorageConfig {
       // Path-style is required for MinIO and some S3-compatible services
       forcePathStyle: env.S3_FORCE_PATH_STYLE === 'true',
       // Default presigned URLs to 1 hour
-      presignExpiresInSeconds: env.S3_PRESIGN_EXPIRES_IN_SECONDS ?? S3_DEFAULTS.PRESIGN_EXPIRES_SECONDS,
+      presignExpiresInSeconds:
+        env.S3_PRESIGN_EXPIRES_IN_SECONDS ?? S3_DEFAULTS.PRESIGN_EXPIRES_SECONDS,
     };
     // Custom endpoint for S3-compatible services (MinIO, R2, Spaces)
     if (env.S3_ENDPOINT !== undefined) {

@@ -59,13 +59,16 @@ export type {
   ServerConfig,
   SmtpConfig,
   SnsConfig,
-  SqlColumnMapping, SqliteConfig, SqlSearchConfig,
+  SqlColumnMapping,
+  SqliteConfig,
+  SqlSearchConfig,
   SqlSearchProviderConfig,
-  SqlTableConfig, StorageConfig,
+  SqlTableConfig,
+  StorageConfig,
   StorageConfigBase,
   StorageProviderName,
   StripeProviderConfig,
-  YarnConfig
+  YarnConfig,
 } from '@bslt/shared/config';
 
 export {
@@ -90,4 +93,3 @@ export {
 } from '@bslt/shared/config';
 
 export { getRefreshCookieOptions, isStrategyEnabled } from '@bslt/shared/core';
-

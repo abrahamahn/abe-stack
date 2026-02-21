@@ -1,89 +1,113 @@
-# Staging Environment Setup Guide
+# Staging Environment Setup
 
-## Overview
-
-The staging environment mirrors production with smaller resources. It uses the
-same Terraform modules, Docker images, and deployment pipeline — the only
-differences are instance sizes and the `environment = "staging"` flag.
+Staging mirrors production using a separate **Terraform workspace**. Each
+workspace has its own isolated state file — staging and production never share
+state, so a plan in one environment never touches resources in the other.
 
 ## Prerequisites
 
-- Terraform >= 1.0 installed
+- Terraform >= 1.0
 - DigitalOcean API token (or GCP credentials)
 - SSH key pair for server access
 - Domain name for staging (e.g., `staging.yourdomain.com`)
 
-## 1. Configure Variables
+---
 
-Copy the staging tfvars and add your credentials:
+## 1. Create workspaces (first time only)
 
 ```bash
 cd infra/cloud
-cp staging.tfvars my-staging.tfvars
+
+terraform workspace new staging
+terraform workspace new production
+
+# Confirm
+terraform workspace list
+#   default
+# * staging
+#   production
 ```
 
-Edit `my-staging.tfvars` and set:
+> Never deploy from the `default` workspace. It exists only as Terraform's
+> built-in fallback and has no corresponding environment.
 
-```hcl
-domain         = "staging.yourdomain.com"
-ssh_public_key = "ssh-ed25519 AAAA... your-key"
-```
+---
 
-For DigitalOcean, also set the provider token:
-
-```hcl
-digitalocean_token = "dop_v1_..."
-```
-
-## 2. Initialize and Deploy
+## 2. Configure variables
 
 ```bash
-# Initialize Terraform
-terraform init
-
-# Preview changes
-terraform plan -var-file="my-staging.tfvars"
-
-# Apply
-terraform apply -var-file="my-staging.tfvars"
+cp terraform.tfvars.example terraform.tfvars
 ```
 
-## 3. Deploy Application
+Edit `terraform.tfvars` and fill in your credentials. For staging, use
+smaller instance sizes and disable managed DB to keep costs low:
 
-After infrastructure is provisioned:
+```hcl
+domain              = "staging.yourdomain.com"
+ssh_public_key      = "ssh-ed25519 AAAA... your-key"
+digitalocean_token  = "dop_v1_..."
+
+instance_size           = "s-1vcpu-1gb"
+enable_managed_database = false
+database_node_count     = 1
+
+# Restrict SSH to your IP in staging too
+ssh_allowed_cidrs = ["your.ip.address/32"]
+```
+
+---
+
+## 3. Deploy staging
 
 ```bash
-# SSH into staging server
-ssh root@$(terraform output -raw server_ip)
-
-# Clone and deploy (or use CI/CD)
-git clone <repo-url> /opt/bslt
-cd /opt/bslt
-
-# Copy staging env file
-cp config/env/.env.staging .env
-
-# Start with Docker
-docker compose -f infra/docker/production/docker-compose.yml up -d
+terraform workspace select staging
+terraform init       # only needed once per workspace
+terraform plan
+terraform apply
 ```
 
-## 4. Environment Variables
+---
 
-Create `config/env/.env.staging` based on `.env.example` with:
+## 4. Deploy production
 
-- `NODE_ENV=staging`
-- `APP_URL=https://staging.yourdomain.com`
-- Database connection string from managed DB
-- Stripe test-mode keys (not live keys)
-- Reduced rate limits for testing
-- Console email provider (or staging SMTP)
-- `SENTRY_ENVIRONMENT=staging`
+```bash
+terraform workspace select production
+terraform plan
+terraform apply
+```
 
-## 5. CI/CD Integration
+Production should use larger resources — override in `terraform.tfvars` or
+pass `-var` flags:
 
-The staging deployment can be automated via GitHub Actions. Add a
-`deploy-staging` job to `.github/workflows/deploy.yml` that triggers
-on pushes to the `staging` branch:
+```bash
+terraform apply \
+  -var="instance_size=s-2vcpu-4gb" \
+  -var="enable_managed_database=true" \
+  -var="database_node_count=2"
+```
+
+---
+
+## 5. Application deployment
+
+After infrastructure is provisioned, deploy the application stack:
+
+```bash
+# SSH in (IP from terraform output)
+ssh bslt@$(terraform output -raw instance_public_ip)
+
+# On the server — pull the compose stack and run it
+git clone <repo-url> /home/bslt/bslt
+cd /home/bslt/bslt
+docker compose -f infra/docker/production/docker-compose.prod.yml \
+  --env-file config/env/.env.staging up -d
+```
+
+---
+
+## 6. CI/CD integration
+
+Trigger workspace-aware deploys from GitHub Actions:
 
 ```yaml
 deploy-staging:
@@ -91,23 +115,33 @@ deploy-staging:
   environment: staging
   steps:
     - uses: actions/checkout@v4
-    - run: terraform apply -var-file="staging.tfvars" -auto-approve
+    - uses: hashicorp/setup-terraform@v3
+    - run: |
+        terraform workspace select staging
+        terraform apply -auto-approve
       env:
         DIGITALOCEAN_TOKEN: ${{ secrets.DO_TOKEN_STAGING }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.SPACES_KEY }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.SPACES_SECRET }}
 ```
 
-## 6. Resource Comparison
+---
 
-| Resource   | Staging        | Production      |
-| ---------- | -------------- | --------------- |
-| Compute    | s-1vcpu-1gb    | s-2vcpu-4gb+    |
-| Database   | db-s-1vcpu-1gb | db-s-2vcpu-4gb+ |
-| Backups    | Disabled       | Enabled         |
-| SSL        | Let's Encrypt  | Let's Encrypt   |
-| Monitoring | Enabled        | Enabled         |
+## 7. Resource comparison
 
-## 7. Teardown
+| Resource   | Staging       | Production                 |
+| ---------- | ------------- | -------------------------- |
+| Compute    | s-1vcpu-1gb   | s-2vcpu-4gb+               |
+| Managed DB | Disabled      | Optional (2+ nodes for HA) |
+| Backups    | Disabled      | Enabled                    |
+| TLS        | Let's Encrypt | Let's Encrypt              |
+| Monitoring | Enabled       | Enabled                    |
+
+---
+
+## 8. Teardown
 
 ```bash
-terraform destroy -var-file="my-staging.tfvars"
+terraform workspace select staging
+terraform destroy
 ```

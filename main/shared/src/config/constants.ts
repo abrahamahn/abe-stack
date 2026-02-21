@@ -13,8 +13,14 @@
 
 /** All supported authentication strategies. */
 export const AUTH_STRATEGIES = [
-  'local', 'magic', 'webauthn', 'google', 'github',
-  'facebook', 'microsoft', 'apple',
+  'local',
+  'magic',
+  'webauthn',
+  'google',
+  'github',
+  'facebook',
+  'microsoft',
+  'apple',
 ] as const;
 
 // ============================================================================
@@ -23,7 +29,13 @@ export const AUTH_STRATEGIES = [
 
 /** Secrets that must never be used as JWT/cookie secrets. */
 export const WEAK_SECRETS: ReadonlySet<string> = new Set([
-  'secret', 'password', 'jwt_secret', 'changeme', 'test', 'dev', 'prod',
+  'secret',
+  'password',
+  'jwt_secret',
+  'changeme',
+  'test',
+  'dev',
+  'prod',
 ]);
 
 /** Detects repeating-character patterns (e.g. "aaaa..." 32+ times). */
@@ -35,7 +47,7 @@ export const REPEATING_SECRET_PATTERN = /^(.)\1{31,}$/;
 
 /** Argon2id OWASP-recommended parameters for password hashing. */
 export const ARGON2_DEFAULTS = {
-  TYPE: 2,           // argon2id
+  TYPE: 2, // argon2id
   MEMORY_COST: 19456,
   TIME_COST: 2,
   PARALLELISM: 1,
@@ -52,7 +64,13 @@ export const SEARCH_PROVIDERS = ['sql', 'elasticsearch'] as const;
 export const QUEUE_PROVIDERS = ['local', 'redis'] as const;
 export const CACHE_PROVIDERS = ['local', 'redis'] as const;
 export const NOTIFICATION_PROVIDERS = [
-  'onesignal', 'courier', 'knock', 'fcm', 'sns', 'braze', 'generic',
+  'onesignal',
+  'courier',
+  'knock',
+  'fcm',
+  'sns',
+  'braze',
+  'generic',
 ] as const;
 export const PACKAGE_MANAGER_PROVIDERS = ['npm', 'pnpm', 'yarn'] as const;
 
@@ -85,7 +103,7 @@ export const SMTP_DEFAULTS = {
 
 /** Default cache parameters. */
 export const CACHE_DEFAULTS = {
-  TTL_MS: 300_000,   // 5 minutes
+  TTL_MS: 300_000, // 5 minutes
   MAX_SIZE: 1000,
 } as const;
 

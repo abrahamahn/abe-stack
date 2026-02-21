@@ -16,7 +16,7 @@ import {
   type CreatePlanRequest,
   type SubscriptionActionResponse,
   type SyncStripeResponse,
-  type UpdatePlanRequest
+  type UpdatePlanRequest,
 } from '@bslt/shared';
 
 import { createBillingProvider } from '../billing';
@@ -78,11 +78,17 @@ function handleError(
     return { status: 400, body: { message: err.message } };
   }
   if (error instanceof BillingProviderNotConfiguredError) {
-    return { status: 500, body: { message: 'Billing service is not configured' } };
+    return {
+      status: 500,
+      body: { message: 'Billing service is not configured' },
+    };
   }
 
   ctx.log.error(error instanceof Error ? error : new Error(String(error)));
-  return { status: 500, body: { message: 'An error occurred processing your request' } };
+  return {
+    status: 500,
+    body: { message: 'An error occurred processing your request' },
+  };
 }
 
 // ============================================================================

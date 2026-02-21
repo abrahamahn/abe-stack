@@ -9,11 +9,7 @@
  * @remarks Uses `FileRecord` (not `File`) to avoid collision with the DOM `File` global.
  */
 
-import {
-  FILE_PURPOSES,
-  STORAGE_PROVIDERS,
-  type FilePurpose,
-} from '@bslt/shared';
+import { FILE_PURPOSES, STORAGE_PROVIDERS, type FilePurpose } from '@bslt/shared';
 import { type StorageProvider } from '@bslt/shared/system';
 
 // Re-export shared constants for consumers that import from schema

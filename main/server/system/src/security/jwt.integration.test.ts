@@ -11,7 +11,6 @@ import { AppError } from '@bslt/shared';
 import { checkTokenSecret, decode, JwtError, sign, verify } from '@bslt/shared/system/crypto';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-
 describe('JWT Integration', () => {
   const SECRET = 'super-secret-key-for-testing-jwt-123!@#';
   const REFRESH_SECRET = 'different-secret-for-refresh-tokens-456!@#';
@@ -398,7 +397,9 @@ describe('JWT Integration', () => {
       // Initial tokens
       sign({ userId }, SECRET, { expiresIn: '15m' });
 
-      const refreshToken = sign({ userId, version: 1 }, REFRESH_SECRET, { expiresIn: '7d' });
+      const refreshToken = sign({ userId, version: 1 }, REFRESH_SECRET, {
+        expiresIn: '7d',
+      });
 
       // Access token expires
       vi.advanceTimersByTime(20 * 60 * 1000); // 20 minutes
@@ -421,7 +422,9 @@ describe('JWT Integration', () => {
       const userId = 'user-abc-123';
       const tokenVersion = 1;
 
-      const accessToken = sign({ userId, tokenVersion }, SECRET, { expiresIn: '15m' });
+      const accessToken = sign({ userId, tokenVersion }, SECRET, {
+        expiresIn: '15m',
+      });
 
       // Decode to get version (simulating server-side check)
       const decoded = decode(accessToken);
@@ -442,7 +445,11 @@ describe('JWT Integration', () => {
       });
 
       const adminToken = sign(
-        { userId: '2', role: 'admin', permissions: ['read', 'write', 'delete'] },
+        {
+          userId: '2',
+          role: 'admin',
+          permissions: ['read', 'write', 'delete'],
+        },
         SECRET,
         { expiresIn: '15m' },
       );

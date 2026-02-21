@@ -87,11 +87,6 @@ jobs:
       instance_ip: ${{ steps.get-deployment-info.outputs.instance_ip }}
       domain: ${{ steps.get-deployment-info.outputs.domain }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
-        with:
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
-
       - name: Download deployment info artifact
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         with:
@@ -138,11 +133,6 @@ jobs:
     environment: ${{ inputs.environment || 'production' }}
     needs: get-infrastructure-info
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
-        with:
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
-
       - name: Resolve image variables
         id: image-vars
         env:

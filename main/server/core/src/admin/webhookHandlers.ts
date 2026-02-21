@@ -34,9 +34,7 @@ type AdminWebhookDelivery = {
   createdAt: string;
 };
 
-function hasUser(
-  request: HttpRequest,
-): request is HttpRequest & { user: { userId: string } } {
+function hasUser(request: HttpRequest): request is HttpRequest & { user: { userId: string } } {
   return Boolean((request as { user?: unknown }).user);
 }
 
@@ -77,7 +75,10 @@ export async function handleListAdminWebhooks(
   _body: unknown,
   request: HttpRequest,
   _reply: HttpReply,
-): Promise<{ status: number; body: { webhooks: AdminWebhook[] } | { message: string } }> {
+): Promise<{
+  status: number;
+  body: { webhooks: AdminWebhook[] } | { message: string };
+}> {
   if (!hasUser(request)) {
     return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
@@ -113,7 +114,11 @@ export async function handleListAdminWebhooks(
   const webhooks = rows.map((row) => toWebhook(row));
 
   ctx.log.info(
-    { adminId: request.user.userId, count: webhooks.length, tenantId: tenantId ?? null },
+    {
+      adminId: request.user.userId,
+      count: webhooks.length,
+      tenantId: tenantId ?? null,
+    },
     'Admin listed registered webhooks',
   );
 
@@ -125,7 +130,10 @@ export async function handleListAdminWebhookDeliveries(
   _body: unknown,
   request: HttpRequest,
   _reply: HttpReply,
-): Promise<{ status: number; body: { deliveries: AdminWebhookDelivery[] } | { message: string } }> {
+): Promise<{
+  status: number;
+  body: { deliveries: AdminWebhookDelivery[] } | { message: string };
+}> {
   if (!hasUser(request)) {
     return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
@@ -172,9 +180,15 @@ export async function handleReplayAdminWebhookDelivery(
   _body: unknown,
   request: HttpRequest,
   _reply: HttpReply,
-): Promise<{ status: number; body: { success: boolean; deliveryId?: string; message?: string } }> {
+): Promise<{
+  status: number;
+  body: { success: boolean; deliveryId?: string; message?: string };
+}> {
   if (!hasUser(request)) {
-    return { status: 401, body: { success: false, message: ERROR_MESSAGES.UNAUTHORIZED } };
+    return {
+      status: 401,
+      body: { success: false, message: ERROR_MESSAGES.UNAUTHORIZED },
+    };
   }
 
   const { webhooks, webhookDeliveries } = getWebhookRepos(ctx);
@@ -182,12 +196,18 @@ export async function handleReplayAdminWebhookDelivery(
 
   const webhook = await webhooks.findById(params.id);
   if (webhook === null) {
-    return { status: 404, body: { success: false, message: 'Webhook not found' } };
+    return {
+      status: 404,
+      body: { success: false, message: 'Webhook not found' },
+    };
   }
 
   const existingDelivery = await webhookDeliveries.findById(params.deliveryId);
   if (existingDelivery?.webhookId !== params.id) {
-    return { status: 404, body: { success: false, message: 'Delivery not found' } };
+    return {
+      status: 404,
+      body: { success: false, message: 'Delivery not found' },
+    };
   }
 
   if (existingDelivery.status !== 'failed' && existingDelivery.status !== 'dead') {
@@ -218,5 +238,8 @@ export async function handleReplayAdminWebhookDelivery(
     'Admin replayed webhook delivery',
   );
 
-  return { status: 200, body: { success: true, deliveryId: replayDelivery.id } };
+  return {
+    status: 200,
+    body: { success: true, deliveryId: replayDelivery.id },
+  };
 }

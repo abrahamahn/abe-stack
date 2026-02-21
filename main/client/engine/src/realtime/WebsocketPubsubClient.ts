@@ -39,7 +39,10 @@ export type ClientPubsubMessage =
  */
 export type ServerPubsubMessage<T = unknown> =
   | { type: 'update'; key: string; value: T; timestamp?: number }
-  | { type: 'sync_response'; messages: Array<{ key: string; version: number; timestamp: number }> };
+  | {
+      type: 'sync_response';
+      messages: Array<{ key: string; version: number; timestamp: number }>;
+    };
 
 /**
  * Connection states for the WebSocket client
@@ -530,7 +533,11 @@ export class WebsocketPubsubClient {
     while (this.offlineQueue.length > this.config.maxQueueSize) {
       const dropped = this.offlineQueue.shift();
       if (dropped !== undefined) {
-        this.log('Dropped oldest queued message:', dropped.type, 'key' in dropped ? dropped.key : undefined);
+        this.log(
+          'Dropped oldest queued message:',
+          dropped.type,
+          'key' in dropped ? dropped.key : undefined,
+        );
       }
     }
   }

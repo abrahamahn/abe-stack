@@ -76,7 +76,8 @@ export function loadServerConfig(env: FullEnv): ServerConfig {
     // Global Rate Limiting (Infrastructure layer)
     rateLimit: {
       windowMs: env.RATE_LIMIT_WINDOW_MS ?? RATE_LIMIT_DEFAULTS.GLOBAL_WINDOW_MS,
-      max: env.RATE_LIMIT_MAX ??
+      max:
+        env.RATE_LIMIT_MAX ??
         (isProd ? RATE_LIMIT_DEFAULTS.GLOBAL_MAX_PROD : RATE_LIMIT_DEFAULTS.GLOBAL_MAX_DEV),
     },
 
