@@ -58,6 +58,7 @@ import type {
   OAuthEnabledProvidersResponse,
   OAuthProvider,
   OAuthUnlinkResponse,
+  AuthStrategy,
   PasskeyListItem,
   RefreshResponse,
   RegisterRequest,
@@ -178,6 +179,7 @@ export interface ApiClient {
   confirmEmailChange: (data: ConfirmEmailChangeRequest) => Promise<ConfirmEmailChangeResponse>;
   revertEmailChange: (data: RevertEmailChangeRequest) => Promise<RevertEmailChangeResponse>;
   // OAuth methods
+  getAuthStrategies: () => Promise<{ enabled: AuthStrategy[]; disabled: AuthStrategy[] }>;
   getEnabledOAuthProviders: () => Promise<OAuthEnabledProvidersResponse>;
   getOAuthConnections: () => Promise<OAuthConnectionsResponse>;
   unlinkOAuthProvider: (provider: OAuthProvider) => Promise<OAuthUnlinkResponse>;
@@ -324,6 +326,23 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
     }
 
     return data as T;
+  };
+
+  const authStrategiesResponseSchema = {
+    parse(value: unknown): { enabled: AuthStrategy[]; disabled: AuthStrategy[] } {
+      if (value === null || typeof value !== 'object') {
+        throw new Error('Invalid auth strategies response');
+      }
+      const obj = value as Record<string, unknown>;
+      const enabledRaw = obj['enabled'];
+      const disabledRaw = obj['disabled'];
+      if (!Array.isArray(enabledRaw) || !Array.isArray(disabledRaw)) {
+        throw new Error('Invalid auth strategies payload');
+      }
+      const enabled = enabledRaw.filter((item): item is AuthStrategy => typeof item === 'string');
+      const disabled = disabledRaw.filter((item): item is AuthStrategy => typeof item === 'string');
+      return { enabled, disabled };
+    },
   };
 
   const requestBlob = async (path: string, options?: RequestInit): Promise<Blob> => {
@@ -851,6 +870,9 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
       );
     },
     // OAuth methods
+    async getAuthStrategies(): Promise<{ enabled: AuthStrategy[]; disabled: AuthStrategy[] }> {
+      return request('/auth/strategies', undefined, authStrategiesResponseSchema);
+    },
     async getEnabledOAuthProviders(): Promise<OAuthEnabledProvidersResponse> {
       return request('/auth/oauth/providers', undefined, oauthEnabledProvidersResponseSchema);
     },

@@ -21,6 +21,13 @@ vi.mock('@bslt/react', async (importOriginal) => {
       isLoading: false,
       error: null,
     }),
+    useEnabledAuthStrategies: () => ({
+      enabled: ['local', 'webauthn'],
+      disabled: [],
+      isLoading: false,
+      error: null,
+      refresh: vi.fn(),
+    }),
     getOAuthLoginUrl: (baseUrl: string, provider: string) => `${baseUrl}/auth/${provider}`,
   };
 });

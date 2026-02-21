@@ -22,6 +22,22 @@ vi.mock('../hooks/useWebauthn', () => ({
   useLoginWithPasskey: mockUseLoginWithPasskey,
 }));
 
+vi.mock('@app/ClientEnvironment', () => ({
+  useClientEnvironment: () => ({
+    config: { apiUrl: 'http://localhost:3000' },
+  }),
+}));
+
+vi.mock('@bslt/react', () => ({
+  useEnabledAuthStrategies: () => ({
+    enabled: ['local', 'webauthn'],
+    disabled: [],
+    isLoading: false,
+    error: null,
+    refresh: vi.fn(),
+  }),
+}));
+
 // ============================================================================
 // Tests
 // ============================================================================

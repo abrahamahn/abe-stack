@@ -16,7 +16,7 @@ import { useMutation } from '../query/useMutation';
 import { useQuery } from '../query/useQuery';
 
 import type { ApiClientConfig } from '@bslt/client-engine';
-import type { OAuthConnection, OAuthProvider } from '@bslt/shared';
+import type { AuthStrategy, OAuthConnection, OAuthProvider } from '@bslt/shared';
 
 // ============================================================================
 // Query Keys
@@ -24,9 +24,41 @@ import type { OAuthConnection, OAuthProvider } from '@bslt/shared';
 
 export const oauthQueryKeys = {
   all: ['oauth'] as const,
+  authStrategies: () => [...oauthQueryKeys.all, 'auth-strategies'] as const,
   enabledProviders: () => [...oauthQueryKeys.all, 'enabled-providers'] as const,
   connections: () => [...oauthQueryKeys.all, 'connections'] as const,
 } as const;
+
+export interface EnabledAuthStrategiesState {
+  isLoading: boolean;
+  enabled: AuthStrategy[];
+  disabled: AuthStrategy[];
+  error: Error | null;
+  refresh: () => Promise<void>;
+}
+
+export function useEnabledAuthStrategies(
+  clientConfig: ApiClientConfig,
+): EnabledAuthStrategiesState {
+  const client = useMemo(() => createApiClient(clientConfig), [clientConfig]);
+
+  const query = useQuery({
+    queryKey: oauthQueryKeys.authStrategies(),
+    queryFn: () => client.getAuthStrategies(),
+  });
+
+  const handleRefresh = useCallback(async (): Promise<void> => {
+    await query.refetch();
+  }, [query]);
+
+  return {
+    enabled: query.data?.enabled ?? [],
+    disabled: query.data?.disabled ?? [],
+    isLoading: query.isLoading,
+    error: query.error ?? null,
+    refresh: handleRefresh,
+  };
+}
 
 // ============================================================================
 // useEnabledOAuthProviders

@@ -7,7 +7,7 @@
  */
 
 import { useClientEnvironment } from '@app/ClientEnvironment';
-import { getOAuthLoginUrl, useEnabledOAuthProviders } from '@bslt/react';
+import { getOAuthLoginUrl, useEnabledAuthStrategies, useEnabledOAuthProviders } from '@bslt/react';
 import { AuthFormLayout, OAuthButton, Text } from '@bslt/ui';
 import { useMemo } from 'react';
 
@@ -95,12 +95,19 @@ export const OAuthButtons = ({
   );
 
   const oauthState = useEnabledOAuthProviders(clientConfig);
+  const strategyState = useEnabledAuthStrategies(clientConfig);
   const providers = Array.isArray(oauthState.providers) ? oauthState.providers : [];
   const isLoading = oauthState.isLoading;
   const error = oauthState.error;
+  const disabledOAuthStrategies = strategyState.disabled.filter(
+    (strategy): strategy is OAuthProviderLocal => strategy in PROVIDER_CONFIG,
+  );
 
-  // Don't render anything if no providers are enabled or provider lookup failed
-  if ((!isLoading && providers.length === 0) || error !== null) {
+  // Don't render anything if no provider data is available.
+  if (
+    (!isLoading && providers.length === 0 && disabledOAuthStrategies.length === 0) ||
+    error !== null
+  ) {
     return null;
   }
 
@@ -143,6 +150,12 @@ export const OAuthButtons = ({
           })
         )}
       </div>
+
+      {!isLoading && disabledOAuthStrategies.length > 0 && (
+        <Text size="xs" tone="muted" className="text-center">
+          Disabled: {disabledOAuthStrategies.map((p) => PROVIDER_CONFIG[p].label).join(', ')}
+        </Text>
+      )}
 
       {/* Divider */}
       {!isLoading && providers.length > 0 && <AuthFormLayout.Divider>or</AuthFormLayout.Divider>}

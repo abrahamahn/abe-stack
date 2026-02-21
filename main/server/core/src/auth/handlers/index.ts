@@ -23,6 +23,7 @@ export { handleRemovePhone, handleSetPhone, handleVerifyPhone } from './phone';
 export { handleRefresh } from './refresh';
 export { handleRegister } from './register';
 export { handleSendSmsCode, handleVerifySmsCode } from './sms-challenge';
+export { handleGetAuthStrategies } from './strategies';
 export { handleSudoElevate, SUDO_TOKEN_TTL_MINUTES, verifySudoToken } from './sudo';
 export { handleAcceptTos, handleTosStatus } from './tos';
 export {

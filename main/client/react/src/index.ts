@@ -327,10 +327,15 @@ export type {
 export {
   getOAuthLoginUrl,
   oauthQueryKeys,
+  useEnabledAuthStrategies,
   useEnabledOAuthProviders,
   useOAuthConnections,
 } from './oauth';
-export type { EnabledOAuthProvidersState, OAuthConnectionsState } from './oauth';
+export type {
+  EnabledAuthStrategiesState,
+  EnabledOAuthProvidersState,
+  OAuthConnectionsState,
+} from './oauth';
 
 // ============================================================================
 // Webhooks

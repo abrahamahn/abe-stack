@@ -71,6 +71,7 @@ import {
   handleChangeEmail,
   handleConfirmEmailChange,
   handleForgotPassword,
+  handleGetAuthStrategies,
   handleInvalidateSessions,
   handleListDevices,
   handleLogin,
@@ -130,6 +131,18 @@ function asAppContext(ctx: HandlerContext): AppContext {
  * @complexity O(n) where n = number of routes
  */
 const coreAuthEntries: [string, RouteDefinition][] = [
+  [
+    'auth/strategies',
+    publicRoute(
+      'GET',
+      (ctx: HandlerContext) => {
+        return handleGetAuthStrategies(asAppContext(ctx));
+      },
+      undefined,
+      { summary: 'Get enabled/disabled auth strategies', tags: ['Auth'] },
+    ),
+  ],
+
   [
     'auth/register',
     publicRoute(

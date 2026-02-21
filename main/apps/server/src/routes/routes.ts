@@ -26,6 +26,69 @@ import type { FastifyInstance } from 'fastify';
 
 import { registerRouteMap } from '@/http';
 
+const LOCAL_AUTH_ROUTES = new Set<string>([
+  'auth/register',
+  'auth/login',
+  'auth/forgot-password',
+  'auth/reset-password',
+  'auth/set-password',
+  'auth/verify-email',
+  'auth/resend-verification',
+  'auth/password/change',
+]);
+
+const OAUTH_STRATEGY_KEYS = new Set<string>(['google', 'github', 'facebook', 'microsoft', 'apple']);
+
+function filterAuthRoutesByStrategies(
+  routes: DbRouteMap,
+  enabledStrategies: readonly string[],
+): DbRouteMap {
+  const enabled = new Set(enabledStrategies);
+  const filtered = new Map(routes);
+
+  if (!enabled.has('local')) {
+    for (const key of LOCAL_AUTH_ROUTES) {
+      filtered.delete(key);
+    }
+  }
+
+  if (!enabled.has('magic')) {
+    for (const key of [...filtered.keys()]) {
+      if (key.startsWith('auth/magic-link/')) filtered.delete(key);
+    }
+  }
+
+  if (!enabled.has('webauthn')) {
+    for (const key of [...filtered.keys()]) {
+      if (key.startsWith('auth/webauthn/') || key.startsWith('users/me/passkeys')) {
+        filtered.delete(key);
+      }
+    }
+  }
+
+  const hasAnyOAuthStrategy = [...enabled].some((s) => OAUTH_STRATEGY_KEYS.has(s));
+  if (!hasAnyOAuthStrategy) {
+    for (const key of [...filtered.keys()]) {
+      if (key.startsWith('auth/oauth/') && key !== 'auth/oauth/providers') {
+        filtered.delete(key);
+      }
+    }
+  } else {
+    for (const key of [...filtered.keys()]) {
+      if (!key.startsWith('auth/oauth/')) continue;
+      if (key === 'auth/oauth/providers' || key === 'auth/oauth/connections') continue;
+
+      const segments = key.split('/');
+      const provider = segments[2];
+      if (provider !== undefined && OAUTH_STRATEGY_KEYS.has(provider) && !enabled.has(provider)) {
+        filtered.delete(key);
+      }
+    }
+  }
+
+  return filtered;
+}
+
 /**
  * Annotate routes from shared modules with OpenAPI metadata.
  * Shared's BaseRouteDefinition doesn't include `openapi`, but the engine's
@@ -67,9 +130,13 @@ export function registerRoutes(app: FastifyInstance, ctx: AppContext): void {
 
   // OpenAPI annotations for example routes (shared modules don't include openapi on their types)
   const typedAuthRoutes = authRoutes as unknown as DbRouteMap;
+  const filteredAuthRoutes = filterAuthRoutesByStrategies(
+    typedAuthRoutes,
+    ctx.config.auth.strategies,
+  );
   const typedUserRoutes = userRoutes as unknown as DbRouteMap;
 
-  annotateRoutes(typedAuthRoutes, {
+  annotateRoutes(filteredAuthRoutes, {
     [AUTH_LOGIN_PATH]: {
       summary: 'Login with email/username and password',
       tags: ['auth'],
@@ -114,7 +181,8 @@ export function registerRoutes(app: FastifyInstance, ctx: AppContext): void {
 
   // Shared module registrations
   for (const { module, routes, prefix } of appRouteModuleRegistrations) {
-    registerRouteMap(app, handlerCtx, routes, {
+    const effectiveRoutes = module === 'auth' ? filteredAuthRoutes : routes;
+    registerRouteMap(app, handlerCtx, effectiveRoutes, {
       ...routerOptions,
       ...(prefix !== undefined ? { prefix } : {}),
       module,

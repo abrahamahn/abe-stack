@@ -2,11 +2,13 @@
 /**
  * Manual pre-push hook script.
  *
- * Fast by default:
+ * CI-parity by default (matches .github/workflows/continuous-integration.yml global-checks):
  * 1. Header consistency check
- * 2. Changed-scope lint + type-check
+ * 2. Format check (CI mode)
+ * 3. Lint (workspace)
+ * 4. Storybook build validation
  *
- * Set PRE_PUSH_FULL=1 to run full workspace validate (slow).
+ * Set PRE_PUSH_FAST=1 to run changed-scope lint + type-check instead.
  */
 
 import { execSync } from 'child_process';
@@ -31,21 +33,30 @@ function tryRunOutput(cmd: string): string | null {
 }
 
 function main(): void {
-  console.log('\n🚀 Pre-push checks (Fast Mode)...\n');
+  const fastMode = process.env.PRE_PUSH_FAST === '1';
+  console.log(`\n🚀 Pre-push checks (${fastMode ? 'Fast Mode' : 'CI-Parity Mode'})...\n`);
 
   console.log('🧾 Verifying header sync...');
   run('pnpm sync:headers:check');
 
-  console.log('📦 Verifying project state (lint + type-check)...');
+  if (!fastMode) {
+    console.log('🎨 Checking formatting (CI mode)...');
+    run('pnpm format:check:ci');
 
-  // Default is changed-only and avoids full test execution locally.
-  // CI remains the authoritative full gate.
-  const fullValidation = process.env.PRE_PUSH_FULL === '1';
+    console.log('🔎 Running workspace lint...');
+    run('pnpm lint');
+
+    console.log('📚 Building Storybook (CI parity)...');
+    run('pnpm --filter @bslt/storybook build-storybook --quiet');
+
+    console.log('\n✅ Pre-push passed (CI parity checks)!\n');
+    return;
+  }
+
+  console.log('📦 Verifying project state (lint + type-check, changed scope)...');
   const upstreamRef = tryRunOutput("git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}'");
   const changedFilter = upstreamRef ? `[${upstreamRef}]` : '[HEAD^1]';
-  const validateCommand = fullValidation
-    ? 'pnpm exec turbo run validate --output-logs=new-only'
-    : `pnpm exec turbo run lint type-check --filter=${changedFilter} --output-logs=new-only`;
+  const validateCommand = `pnpm exec turbo run lint type-check --filter=${changedFilter} --output-logs=new-only`;
 
   try {
     run(validateCommand);
@@ -54,7 +65,7 @@ function main(): void {
     process.exit(1);
   }
 
-  console.log('\n✅ Pre-push passed! Ready to fly. ✈️\n');
+  console.log('\n✅ Pre-push passed (fast mode)!\n');
 }
 
 main();

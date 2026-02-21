@@ -4,6 +4,8 @@
  * Only renders when WebAuthn is supported by the browser.
  */
 
+import { useClientEnvironment } from '@app/ClientEnvironment';
+import { useEnabledAuthStrategies } from '@bslt/react';
 import { Button, Text } from '@bslt/ui';
 
 import { useLoginWithPasskey } from '../hooks/useWebauthn';
@@ -19,12 +21,27 @@ export function PasskeyLoginButton({
   onSuccess,
   disabled,
 }: PasskeyLoginButtonProps): ReactElement | null {
+  const { config } = useClientEnvironment();
+  const strategyState = useEnabledAuthStrategies({ baseUrl: config.apiUrl });
   const { login, isLoading, error } = useLoginWithPasskey(onSuccess);
 
   // Only show when WebAuthn is available
   const isWebAuthnSupported = typeof window !== 'undefined' && 'PublicKeyCredential' in window;
   if (!isWebAuthnSupported) {
     return null;
+  }
+
+  const passkeyEnabled =
+    strategyState.error !== null ||
+    strategyState.isLoading ||
+    strategyState.enabled.includes('webauthn');
+
+  if (!passkeyEnabled) {
+    return (
+      <Text size="xs" tone="muted" className="text-center">
+        Passkey sign-in is disabled.
+      </Text>
+    );
   }
 
   return (

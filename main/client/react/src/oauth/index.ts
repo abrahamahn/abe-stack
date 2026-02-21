@@ -8,7 +8,12 @@
 export {
   getOAuthLoginUrl,
   oauthQueryKeys,
+  useEnabledAuthStrategies,
   useEnabledOAuthProviders,
   useOAuthConnections,
 } from './hooks';
-export type { EnabledOAuthProvidersState, OAuthConnectionsState } from './hooks';
+export type {
+  EnabledAuthStrategiesState,
+  EnabledOAuthProvidersState,
+  OAuthConnectionsState,
+} from './hooks';

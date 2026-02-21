@@ -133,12 +133,13 @@ describe('Auth Routes', () => {
 
     test('should define all expected routes', () => {
       const routeKeys = Array.from(authRoutes.keys());
-      // Core auth routes (20) + ToS routes (2) + Device routes (3) + Phone routes (2*)
-      // + SMS routes (2) + Magic-link routes (2) + OAuth routes (14) + WebAuthn routes (9) = 54
+      // Core auth routes (21) + ToS routes (2) + Device routes (3) + Phone routes (2*)
+      // + SMS routes (2) + Magic-link routes (2) + OAuth routes (14) + WebAuthn routes (9) = 55
       // *Note: users/me/phone POST is overwritten by DELETE in the Map, so only 2 unique phone entries
-      expect(routeKeys).toHaveLength(54);
+      expect(routeKeys).toHaveLength(55);
 
       // Core auth routes
+      expect(routeKeys).toContain('auth/strategies');
       expect(routeKeys).toContain('auth/register');
       expect(routeKeys).toContain('auth/login');
       expect(routeKeys).toContain('auth/refresh');
@@ -993,12 +994,13 @@ describe('Route Protection', () => {
   test('should have all other routes as public', () => {
     const publicRoutes = Array.from(authRoutes.entries()).filter(([_, def]) => def.isPublic);
 
-    // 11 core public + 2 SMS public + 2 magic-link + 7 OAuth (3 initiate + 3 callback + providers)
+    // 12 core public + 2 SMS public + 2 magic-link + 7 OAuth (3 initiate + 3 callback + providers)
     // + 2 WebAuthn public (login options/verify)
-    expect(publicRoutes).toHaveLength(24);
+    expect(publicRoutes).toHaveLength(25);
 
     const publicRouteNames = publicRoutes.map(([name]) => name);
     // Core public routes
+    expect(publicRouteNames).toContain('auth/strategies');
     expect(publicRouteNames).toContain('auth/register');
     expect(publicRouteNames).toContain('auth/login');
     expect(publicRouteNames).toContain('auth/refresh');
