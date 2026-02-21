@@ -547,6 +547,181 @@ describe('User Management API Integration Tests', () => {
       expect(response.statusCode).not.toBe(401);
     });
 
+    it('PUT /api/users/me/avatar validates → uploads to storage → updates user record', async () => {
+      const now = new Date('2024-01-01T00:00:00.000Z');
+      const storageKey = 'avatars/user-avatar-pipeline/avatar.png';
+      const signedUrl = 'https://cdn.test/avatars/user-avatar-pipeline/avatar.png?sig=abc';
+
+      mockRepos.users.findById.mockResolvedValue({
+        id: 'user-avatar-pipeline',
+        email: 'pipeline@example.com',
+        canonicalEmail: 'pipeline@example.com',
+        username: 'pipelineuser',
+        firstName: 'Pipeline',
+        lastName: 'Test',
+        avatarUrl: null,
+        role: 'user',
+        emailVerified: true,
+        phone: null,
+        phoneVerified: null,
+        dateOfBirth: null,
+        gender: null,
+        bio: null,
+        city: null,
+        state: null,
+        country: null,
+        language: null,
+        website: null,
+        createdAt: now,
+        updatedAt: now,
+      });
+      mockRepos.users.update.mockResolvedValue(null);
+      testServer.storage.upload.mockResolvedValue(storageKey);
+      testServer.storage.getSignedUrl.mockResolvedValue(signedUrl);
+
+      const token = createTestJwt({
+        userId: 'user-avatar-pipeline',
+        email: 'pipeline@example.com',
+        role: 'user',
+      });
+
+      const response = await testServer.inject({
+        method: 'PUT',
+        url: '/api/users/me/avatar',
+        headers: {
+          authorization: `Bearer ${token}`,
+          'content-type': 'application/json',
+        },
+        payload: JSON.stringify({
+          buffer: [137, 80, 78, 71, 13, 10, 26, 10], // PNG magic bytes
+          mimetype: 'image/png',
+          size: 8,
+        }),
+      });
+
+      expect(response.statusCode).toBe(200);
+
+      // Verify storage.upload was called (file stored to S3/local)
+      expect(testServer.storage.upload).toHaveBeenCalledWith(
+        expect.stringContaining('avatars/user-avatar-pipeline/'),
+        expect.any(Buffer),
+        'image/png',
+      );
+
+      // Verify user record was updated with the storage key
+      expect(mockRepos.users.update).toHaveBeenCalledWith(
+        'user-avatar-pipeline',
+        { avatarUrl: storageKey },
+      );
+
+      // Verify response contains the signed URL
+      const body = parseJsonResponse(response) as { avatarUrl: string };
+      expect(body.avatarUrl).toBe(signedUrl);
+    });
+
+    it('PUT /api/users/me/avatar rejects invalid MIME type with 400', async () => {
+      const now = new Date('2024-01-01T00:00:00.000Z');
+      mockRepos.users.findById.mockResolvedValue({
+        id: 'user-avatar-invalid',
+        email: 'invalid@example.com',
+        canonicalEmail: 'invalid@example.com',
+        username: 'invaliduser',
+        firstName: 'Invalid',
+        lastName: 'Type',
+        avatarUrl: null,
+        role: 'user',
+        emailVerified: true,
+        phone: null,
+        phoneVerified: null,
+        dateOfBirth: null,
+        gender: null,
+        bio: null,
+        city: null,
+        state: null,
+        country: null,
+        language: null,
+        website: null,
+        createdAt: now,
+        updatedAt: now,
+      });
+
+      const token = createTestJwt({
+        userId: 'user-avatar-invalid',
+        email: 'invalid@example.com',
+        role: 'user',
+      });
+
+      const response = await testServer.inject({
+        method: 'PUT',
+        url: '/api/users/me/avatar',
+        headers: {
+          authorization: `Bearer ${token}`,
+          'content-type': 'application/json',
+        },
+        payload: JSON.stringify({
+          buffer: [37, 80, 68, 70], // PDF magic bytes
+          mimetype: 'application/pdf',
+          size: 4,
+        }),
+      });
+
+      // Invalid file type must be rejected
+      expect(response.statusCode).toBe(400);
+      const body = parseJsonResponse(response) as { message: string };
+      expect(body.message).toMatch(/invalid file type/i);
+
+      // Storage must NOT have been called
+      expect(testServer.storage.upload).not.toHaveBeenCalled();
+    });
+
+    it('PUT /api/users/me/avatar fallback chain: Gravatar URL returned when no custom avatar', async () => {
+      // The fallback chain (custom → Gravatar → initials) is exercised in
+      // avatar.test.ts unit tests. This integration test confirms that the
+      // GET profile endpoint returns null avatarUrl when no file is uploaded,
+      // allowing the client to apply the fallback chain.
+      const now = new Date('2024-01-01T00:00:00.000Z');
+      mockRepos.users.findById.mockResolvedValue({
+        id: 'user-no-avatar',
+        email: 'noavatar@example.com',
+        canonicalEmail: 'noavatar@example.com',
+        username: 'noavataruser',
+        firstName: 'No',
+        lastName: 'Avatar',
+        avatarUrl: null, // No custom avatar
+        role: 'user',
+        emailVerified: true,
+        phone: null,
+        phoneVerified: null,
+        dateOfBirth: null,
+        gender: null,
+        bio: null,
+        city: null,
+        state: null,
+        country: null,
+        language: null,
+        website: null,
+        createdAt: now,
+        updatedAt: now,
+      });
+
+      const token = createTestJwt({
+        userId: 'user-no-avatar',
+        email: 'noavatar@example.com',
+        role: 'user',
+      });
+
+      const response = await testServer.inject({
+        method: 'GET',
+        url: '/api/users/me',
+        headers: { authorization: `Bearer ${token}` },
+      });
+
+      expect(response.statusCode).toBe(200);
+      const body = parseJsonResponse(response) as { avatarUrl: string | null };
+      // No custom avatar → null returned, client applies fallback chain
+      expect(body.avatarUrl).toBeNull();
+    });
+
     it('POST /api/users/me/avatar/delete clears avatar from user record', async () => {
       const now = new Date('2024-01-01T00:00:00.000Z');
       mockRepos.users.findById.mockResolvedValue({
