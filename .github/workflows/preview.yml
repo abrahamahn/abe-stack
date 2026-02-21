@@ -18,24 +18,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.26.2
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Setup Node and pnpm
+        uses: ./.github/actions/setup-node-pnpm
 
       - name: Cache Turbo
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
         with:
           path: node_modules/.cache/turbo
           key: ${{ runner.os }}-turbo-preview-${{ github.sha }}
@@ -46,30 +35,47 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Generate preview URL
-        id: preview
+      - name: Resolve image variables
+        id: image-vars
         run: |
-          PREVIEW_URL="pr-${{ github.event.number }}.preview.bslt.dev"
-          echo "url=$PREVIEW_URL" >> "$GITHUB_OUTPUT"
-          # Placeholder: actual preview deployment depends on infrastructure
-          # For production use, this step would:
-          # 1. Build Docker images tagged with the PR number
-          # 2. Deploy to an isolated preview environment
-          # 3. Configure DNS/routing for the preview URL
+          REGISTRY="${{ vars.REGISTRY || secrets.REGISTRY || 'ghcr.io' }}"
+          IMAGE_NAME_RAW="${{ vars.IMAGE_NAME || github.event.repository.name }}"
+          if [[ "$IMAGE_NAME_RAW" != */* ]]; then
+            IMAGE_NAME="${{ github.repository_owner }}/$IMAGE_NAME_RAW"
+          else
+            IMAGE_NAME="$IMAGE_NAME_RAW"
+          fi
+          echo "registry=$REGISTRY" >> "$GITHUB_OUTPUT"
+          echo "image_name=$IMAGE_NAME" >> "$GITHUB_OUTPUT"
 
-      - name: Comment preview URL on PR
-        uses: actions/github-script@v7
+      - name: Build preview Docker images (no push)
+        uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25
+        with:
+          context: .
+          file: ./infra/docker/Dockerfile
+          push: false
+          tags: ${{ steps.image-vars.outputs.registry }}/${{ steps.image-vars.outputs.image_name }}:pr-${{ github.event.number }}-${{ github.sha }}-api
+
+      - name: Build preview web Docker image (no push)
+        uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25
+        with:
+          context: .
+          file: ./infra/docker/Dockerfile.web
+          push: false
+          tags: ${{ steps.image-vars.outputs.registry }}/${{ steps.image-vars.outputs.image_name }}:pr-${{ github.event.number }}-${{ github.sha }}-web
+          build-args: |
+            VITE_API_URL=
+
+      - name: Comment preview status on PR
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b
         with:
           script: |
-            const previewUrl = '${{ steps.preview.outputs.url }}';
             const body = [
               '### Preview Deployment',
               '',
-              `**URL:** https://${previewUrl}`,
+              '**Status:** Preview build validated (no live preview environment configured).',
               `**Commit:** \`${context.sha.slice(0, 8)}\``,
               `**Updated:** ${new Date().toISOString()}`,
-              '',
-              '> This preview will be automatically cleaned up when the PR is closed or merged.'
             ].join('\n');
 
             // Check for existing preview comment to update instead of creating duplicates
@@ -104,7 +110,7 @@ jobs:
           echo "## PR Preview Deployment" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "**PR:** #${{ github.event.number }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "**Preview URL:** https://${{ steps.preview.outputs.url }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Status:** Preview build validated (no live preview environment configured)." >> "$GITHUB_STEP_SUMMARY"
           echo "**Commit:** \`${GITHUB_SHA}\`" >> "$GITHUB_STEP_SUMMARY"
 
   cleanup:
@@ -113,13 +119,7 @@ jobs:
     steps:
       - name: Cleanup preview environment
         run: |
-          echo "Cleaning up preview environment for PR #${{ github.event.number }}"
-          echo "Preview URL: pr-${{ github.event.number }}.preview.bslt.dev"
-          # Placeholder: actual cleanup depends on infrastructure
-          # For production use, this step would:
-          # 1. Remove the preview Docker containers/services
-          # 2. Clean up DNS/routing entries
-          # 3. Remove any preview-specific resources (databases, storage)
+          echo "PR #${{ github.event.number }} closed; no persistent preview environment to clean up."
 
       - name: Cleanup Summary
         run: |

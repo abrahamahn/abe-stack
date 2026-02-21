@@ -47,6 +47,10 @@
 		X-XSS-Protection "1; mode=block"
 		# Referrer policy
 		Referrer-Policy "strict-origin-when-cross-origin"
+		# Prevent XSS via injected scripts
+		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' wss:; object-src 'none'; base-uri 'self'; frame-ancestors 'self';"
+		# Disable browser features not used by this app
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
 		# Remove server header
 		-Server
 	}

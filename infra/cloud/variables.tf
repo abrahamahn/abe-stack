@@ -85,3 +85,15 @@ variable "app_port" {
   type        = number
   default     = 3000
 }
+
+variable "ssh_allowed_cidrs" {
+  description = "CIDR blocks permitted to reach SSH (port 22). Restrict to your static IP or VPN CIDR in production — never leave open to 0.0.0.0/0 on a live server."
+  type        = list(string)
+  default     = ["0.0.0.0/0", "::/0"]
+}
+
+variable "database_node_count" {
+  description = "Number of managed database nodes (DigitalOcean only; 1 = single node, 2+ = HA cluster). Use 2+ in production."
+  type        = number
+  default     = 1
+}

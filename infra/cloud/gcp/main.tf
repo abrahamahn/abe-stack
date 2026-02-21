@@ -5,7 +5,7 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = "~> 4.0"
+      version = "~> 6.0"
     }
   }
 }
@@ -110,7 +110,7 @@ resource "google_compute_firewall" "abe_stack_ssh" {
     ports    = ["22"]
   }
 
-  source_ranges = ["0.0.0.0/0"]  # Restrict in production
+  source_ranges = var.ssh_allowed_cidrs
   target_tags   = ["bslt"]
 }
 
@@ -120,7 +120,7 @@ resource "google_compute_firewall" "abe_stack_http" {
 
   allow {
     protocol = "tcp"
-    ports    = ["80", "443", tostring(var.app_port)]
+    ports    = ["80", "443"]
   }
 
   source_ranges = ["0.0.0.0/0"]

@@ -32,6 +32,9 @@ jobs:
   destroy-infrastructure:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment || 'staging' }}
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID || '' }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY || '' }}
 
     steps:
       - name: Validate Destruction Confirmation
@@ -41,10 +44,10 @@ jobs:
           exit 1
 
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd
         with:
           terraform_version: '~1.0'
 
@@ -58,17 +61,17 @@ jobs:
 
       - name: Authenticate to Google Cloud
         if: inputs.provider == 'gcp'
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
       - name: Set up Google Cloud SDK
         if: inputs.provider == 'gcp'
-        uses: google-github-actions/setup-gcloud@v2
+        uses: google-github-actions/setup-gcloud@e427ad8a34f8676edf47cf7d7925499adf3eb74f
 
       - name: Configure AWS Credentials (for state backend)
-        if: env.AWS_ACCESS_KEY_ID
-        uses: aws-actions/configure-aws-credentials@v4
+        if: env.AWS_ACCESS_KEY_ID != '' && env.AWS_SECRET_ACCESS_KEY != ''
+        uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536d5c3a
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -76,7 +79,7 @@ jobs:
 
       # Download terraform state if available
       - name: Download Terraform State
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         with:
           name: terraform-state-${{ inputs.environment }}-${{ inputs.provider }}
           path: infra/cloud/${{ inputs.provider }}/

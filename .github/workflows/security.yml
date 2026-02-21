@@ -22,37 +22,35 @@ jobs:
   codeql:
     name: CodeQL
     runs-on: ubuntu-latest
-    continue-on-error: ${{ vars.SECURITY_SCAN_NON_BLOCKING != 'false' }}
     strategy:
       fail-fast: false
       matrix:
         language: ['javascript-typescript']
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v4
+        uses: github/codeql-action/init@89a39a4e59826350b863aa6b6252a07ad50cf83e
         with:
           languages: ${{ matrix.language }}
           queries: security-extended,security-and-quality
 
       - name: Autobuild
-        uses: github/codeql-action/autobuild@v4
+        uses: github/codeql-action/autobuild@89a39a4e59826350b863aa6b6252a07ad50cf83e
 
       - name: Analyze
-        uses: github/codeql-action/analyze@v4
+        uses: github/codeql-action/analyze@89a39a4e59826350b863aa6b6252a07ad50cf83e
         with:
           category: '/language:${{ matrix.language }}'
 
   semgrep:
     name: Semgrep (SAST)
     runs-on: ubuntu-latest
-    continue-on-error: ${{ vars.SECURITY_SCAN_NON_BLOCKING != 'false' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: '3.12'
 
@@ -63,7 +61,7 @@ jobs:
         run: semgrep scan --config auto --sarif --output semgrep.sarif
 
       - name: Upload Semgrep SARIF
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@89a39a4e59826350b863aa6b6252a07ad50cf83e
         if: always() && hashFiles('semgrep.sarif') != ''
         continue-on-error: true
         with:
@@ -71,7 +69,7 @@ jobs:
           category: semgrep
 
       - name: Upload Semgrep artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always() && hashFiles('semgrep.sarif') != ''
         with:
           name: semgrep-sarif
@@ -80,30 +78,28 @@ jobs:
   dependency-scan:
     name: Dependencies (pnpm audit + OSV)
     runs-on: ubuntu-latest
-    continue-on-error: ${{ vars.SECURITY_SCAN_NON_BLOCKING != 'false' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061
+        with:
+          version: ${{ env.PNPM_VERSION }}
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Run pnpm audit
         run: pnpm audit --audit-level moderate
-        continue-on-error: true
 
       - name: Run OSV Scanner
-        uses: google/osv-scanner-action/osv-scanner-action@v2
+        uses: google/osv-scanner-action/osv-scanner-action@c5996e0193a3df57d695c1b8a1dec2a4c62e8730
         with:
           scan-args: |-
             --recursive
@@ -112,7 +108,7 @@ jobs:
             .
 
       - name: Upload OSV SARIF
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@89a39a4e59826350b863aa6b6252a07ad50cf83e
         if: always() && hashFiles('osv-results.sarif') != ''
         continue-on-error: true
         with:
@@ -120,7 +116,7 @@ jobs:
           category: osv
 
       - name: Upload OSV artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always() && hashFiles('osv-results.sarif') != ''
         with:
           name: osv-sarif
@@ -129,14 +125,13 @@ jobs:
   gitleaks:
     name: Gitleaks (Secrets)
     runs-on: ubuntu-latest
-    continue-on-error: ${{ vars.SECURITY_SCAN_NON_BLOCKING != 'false' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
           fetch-depth: 0
 
       - name: Run Gitleaks
-        uses: gitleaks/gitleaks-action@v2
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7
         env:
           GITLEAKS_ENABLE_COMMENTS: false
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -144,17 +139,15 @@ jobs:
   trivy:
     name: Trivy (Image + Filesystem)
     runs-on: ubuntu-latest
-    continue-on-error: ${{ vars.SECURITY_SCAN_NON_BLOCKING != 'false' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
       - name: Build Docker image
         id: build-image
         run: docker build -f infra/docker/Dockerfile -t bslt-server:${{ github.sha }} .
-        continue-on-error: true
 
       - name: Trivy image scan
-        uses: aquasecurity/trivy-action@0.30.0
+        uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         if: steps.build-image.outcome == 'success'
         with:
           image-ref: bslt-server:${{ github.sha }}
@@ -164,7 +157,7 @@ jobs:
           exit-code: '0'
 
       - name: Trivy filesystem scan
-        uses: aquasecurity/trivy-action@0.30.0
+        uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
         with:
           scan-type: fs
           scan-ref: .
@@ -174,7 +167,7 @@ jobs:
           exit-code: '0'
 
       - name: Upload Trivy image SARIF
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@89a39a4e59826350b863aa6b6252a07ad50cf83e
         if: always() && hashFiles('trivy-image.sarif') != ''
         continue-on-error: true
         with:
@@ -182,7 +175,7 @@ jobs:
           category: trivy-image
 
       - name: Upload Trivy filesystem SARIF
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@89a39a4e59826350b863aa6b6252a07ad50cf83e
         if: always() && hashFiles('trivy-fs.sarif') != ''
         continue-on-error: true
         with:
@@ -190,7 +183,7 @@ jobs:
           category: trivy-fs
 
       - name: Upload Trivy artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
           name: trivy-sarif

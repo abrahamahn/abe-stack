@@ -34,7 +34,7 @@ services:
       DOMAIN: ${DOMAIN:-localhost}
       ACME_EMAIL: ${ACME_EMAIL:-admin@example.com}
     volumes:
-      - ../caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ../../runtime/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
     networks:
@@ -155,8 +155,8 @@ services:
   # ===========================================================================
   web:
     build:
-      context: ../..
-      dockerfile: config/docker/Dockerfile.web
+      context: ../../..
+      dockerfile: infra/docker/Dockerfile.web
       args:
         # Empty = relative URLs (reverse proxy handles /api routing)
         VITE_API_URL: ${VITE_API_URL:-}

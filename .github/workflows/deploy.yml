@@ -1,6 +1,35 @@
 name: Deploy
 
 on:
+  workflow_call:
+    inputs:
+      environment:
+        description: Deployment environment
+        required: false
+        default: production
+        type: string
+      provider:
+        description: Cloud provider where infrastructure is deployed
+        required: false
+        default: digitalocean
+        type: string
+      image_tag:
+        description: Docker image tag fallback
+        required: false
+        type: string
+      app_name:
+        description: Application slug used to isolate deployment resources
+        required: false
+        default: bslt
+        type: string
+      instance_ip:
+        description: Optional target server IP
+        required: false
+        type: string
+      domain:
+        description: Optional domain override
+        required: false
+        type: string
   workflow_run:
     workflows: ['CI']
     types: [completed]
@@ -59,12 +88,12 @@ jobs:
       domain: ${{ steps.get-deployment-info.outputs.domain }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - name: Download deployment info artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         with:
           name: deployment-info-${{ inputs.environment || 'production' }}-${{ inputs.provider || 'digitalocean' }}
           path: .deploy/
@@ -110,7 +139,7 @@ jobs:
     needs: get-infrastructure-info
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
@@ -141,17 +170,17 @@ jobs:
 
       - name: Download CI deployment image artifact
         if: github.event_name == 'workflow_run'
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         with:
           name: deployment-images
           path: .deploy-image/
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: true
 
       - name: Resolve deployment image references
         id: image-refs
         env:
+          EVENT_NAME: ${{ github.event_name }}
           IMAGE_REGISTRY: ${{ steps.image-vars.outputs.registry }}
           IMAGE_NAME: ${{ steps.image-vars.outputs.image_name }}
           IMAGE_TAG: ${{ steps.image-vars.outputs.image_tag }}
@@ -164,6 +193,9 @@ jobs:
             API_IMAGE=$(jq -r '.api_image // empty' "$ARTIFACT_FILE")
             WEB_IMAGE=$(jq -r '.web_image // empty' "$ARTIFACT_FILE")
             SOURCE="ci-artifact"
+          elif [ "$EVENT_NAME" = "workflow_run" ]; then
+            echo "Expected deployment image artifact was not found for workflow_run deployment."
+            exit 1
           else
             API_IMAGE="$DEFAULT_API_IMAGE"
             WEB_IMAGE="$DEFAULT_WEB_IMAGE"
@@ -190,7 +222,7 @@ jobs:
           ssh-keyscan -H "$INSTANCE_IP" >> ~/.ssh/known_hosts
 
       - name: Deploy to Server
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262
         with:
           host: ${{ needs.get-infrastructure-info.outputs.instance_ip }}
           username: ${{ vars.SSH_USERNAME || secrets.SERVER_USER || 'root' }}

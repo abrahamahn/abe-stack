@@ -76,3 +76,19 @@ variable "database_size" {
   type        = string
   default     = "db-s-1vcpu-1gb"
 }
+
+variable "database_node_count" {
+  description = "Number of database nodes (1 = single node; 2+ = HA cluster). Use 2+ in production."
+  type        = number
+  default     = 1
+  validation {
+    condition     = var.database_node_count >= 1 && var.database_node_count <= 3
+    error_message = "Node count must be between 1 and 3."
+  }
+}
+
+variable "ssh_allowed_cidrs" {
+  description = "CIDR blocks permitted to reach SSH (port 22). Restrict to your static IP or VPN CIDR in production — never leave open to 0.0.0.0/0 on a live server."
+  type        = list(string)
+  default     = ["0.0.0.0/0", "::/0"]
+}

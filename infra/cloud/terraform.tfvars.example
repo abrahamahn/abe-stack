@@ -59,6 +59,27 @@ database_size = "db-s-1vcpu-1gb"  # DigitalOcean managed DB
 # database_password = "super-secret-password"
 
 # ============================================================================
+# SECURITY
+# ============================================================================
+
+# SSH access restriction — IMPORTANT: change this to your static IP or VPN CIDR
+# before exposing the server to the internet. Leaving this open exposes SSH to
+# brute-force attacks even with key authentication.
+#
+# Examples:
+#   ssh_allowed_cidrs = ["203.0.113.10/32"]       # single static IP
+#   ssh_allowed_cidrs = ["10.0.0.0/8"]            # private VPN range
+ssh_allowed_cidrs = ["0.0.0.0/0", "::/0"]         # WARN: open — restrict in production
+
+# ============================================================================
+# DATABASE HIGH AVAILABILITY (DigitalOcean managed database only)
+# ============================================================================
+
+# 1 = single node (development / staging)
+# 2 = primary + standby replica (recommended for production)
+database_node_count = 1
+
+# ============================================================================
 # DEVELOPMENT/TESTING OPTIONS
 # ============================================================================
 

@@ -43,10 +43,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
       - name: Download Deployment Info
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         with:
           name: deployment-info-${{ inputs.environment || 'production' }}-${{ inputs.provider || 'digitalocean' }}
           path: .deploy/
@@ -113,7 +113,7 @@ jobs:
           ssh-keyscan -H "$INSTANCE_IP" >> ~/.ssh/known_hosts
 
       - name: Execute Rollback
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262
         with:
           host: ${{ steps.get-deployment-info.outputs.instance_ip }}
           username: ${{ vars.SSH_USERNAME || secrets.SERVER_USER || 'root' }}
