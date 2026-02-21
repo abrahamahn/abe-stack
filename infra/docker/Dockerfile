@@ -60,6 +60,8 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile && \
     pnpm --filter @bslt/shared build && \
     pnpm --filter @bslt/core build && \
+    pnpm --filter @bslt/realtime build && \
+    pnpm --filter @bslt/websocket build && \
     pnpm --filter @bslt/server build && \
     pnpm --filter @bslt/server deploy --prod --legacy /app/server-deploy
 # node main/tools/dev/create-server-aliases.js /app/server-deploy main/apps/server/tsconfig.json
