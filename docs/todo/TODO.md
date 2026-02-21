@@ -238,15 +238,15 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 **P2 (UX + Verification Backfill):**
 
 - [x] 3.1 API keys client/UI + integration/E2E
-- [ ] 3.4 Notifications remaining email templates/bounce/unsubscribe + test coverage
-- [ ] 3.5 Avatar/file pipeline verification + tests
+- [x] 3.4 Notifications remaining email templates/bounce/unsubscribe + test coverage
+- [x] 3.5 Avatar/file pipeline verification + tests
 - [x] 3.6 Activities contracts + tests
 - [x] 3.7 Usage metering + workspace override UI + tests
 - [x] 3.9 Realtime reconnection/offline queue/delta sync + tests
 - [x] 3.10 Media library/gallery + tests
 - [x] 3.11 Settings completeness (preferences/API keys/backup codes tabs + E2E)
 - [x] 3.14 Impersonation integration/E2E
-- [ ] 3.16 Data hygiene follow-through (search/list visibility, audit shape, FK safety, file cleanup, tests)
+- [x] 3.16 Data hygiene follow-through (search/list visibility, audit shape, FK safety, file cleanup, tests)
 - [ ] 3.19 Desktop manual verification
 - [x] 3.20 Staging infra/docs
 - [x] 3.21 Storybook layout/pattern stories
@@ -403,9 +403,9 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 
 **Avatar Pipeline Verification:**
 
-- [ ] Verify: `PUT /api/users/me/avatar` → multipart → validate → resize → store to S3/local → update user record
-- [ ] Verify: `DELETE /api/users/me/avatar` → remove file → update user record
-- [ ] Verify: fallback chain — custom upload → Gravatar → generated initials
+- [x] Verify: `PUT /api/users/me/avatar` → multipart → validate → resize → store to S3/local → update user record
+- [x] Verify: `DELETE /api/users/me/avatar` → remove file → update user record
+- [x] Verify: fallback chain — custom upload → Gravatar → generated initials
 
 **Tests:**
 
@@ -708,7 +708,7 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 **Soft Delete Enforcement:**
 
 - [x] Service: hide soft-deleted users from search results and member lists
-- [ ] Service: preserve audit trail — soft-deleted user's events remain queryable by admin
+- [x] Service: preserve audit trail — soft-deleted user's events remain queryable by admin
 
 **PII Anonymization Cron (BUSINESS 6.4):**
 
@@ -721,8 +721,8 @@ Completed: Sudo mode (2.1), username management (2.2), avatar workflow (2.3), pr
 **Tests:**
 
 - [x] Unit: anonymization rules, grace period calculation, foreign key safety checks
-- [ ] Integration: soft-delete user → cron runs → PII anonymized → audit trail intact
-- [ ] Integration: create unverified user → wait past threshold → cron deletes → user gone
+- [x] Integration: soft-delete user → cron runs → PII anonymized → audit trail intact
+- [x] Integration: create unverified user → wait past threshold → cron deletes → user gone
 
 > **Note:** Token/session cleanup crons (login-cleanup, magic-link-cleanup, push-cleanup, etc.)
 > are consolidated in Sprint 3.18 (Backend Infrastructure). This slice owns only PII/data hygiene.
@@ -2067,7 +2067,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 **CDN & Asset Optimization:**
 
 - [ ] Infra: CDN configuration for static assets (Cloudflare, CloudFront, or BunnyCDN) — deferred (deployment-specific)
-- [ ] Service: asset fingerprinting — Vite already does content hashing
+- [x] Service: asset fingerprinting — Vite already does content hashing
 - [ ] Service: image CDN — on-the-fly resize/optimize via CDN transform (or Imgproxy) — deferred
 - [ ] Service: edge caching rules — static assets (1 year), API (no-cache), HTML (short TTL) — deferred
 
@@ -2145,7 +2145,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 **Tests:**
 
 - [x] Unit: string interpolation, pluralization, date formatting per locale
-- [ ] Integration: set locale preference → API returns localized messages
+- [x] Integration: set locale preference → API returns localized messages
 - [ ] E2E: switch language → UI text updates → refresh → preference persisted
 
 ---
@@ -2178,8 +2178,8 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 **Tests:**
 
 - [x] Unit: permission evaluation for read/write across ownership/role/share patterns
-- [ ] Integration: user A writes record → user B (no permission) does not receive update
-- [ ] Integration: permission revoked → user stops receiving updates immediately
+- [x] Integration: user A writes record → user B (no permission) does not receive update
+- [x] Integration: permission revoked → user stops receiving updates immediately
 - [ ] E2E: share record with teammate → teammate sees it; revoke → teammate loses access
 
 ---
@@ -2267,8 +2267,8 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 - [x] Service: task/record ownership pattern — owner + shared-with permissions
 - [x] Service: permission inheritance — workspace admin overrides board restrictions
 - [x] Service: permission-aware subscriptions — WebSocket only publishes to authorized subscribers
-- [ ] Service: permission change propagation — revoke → remove from subscription + client cache
-- [ ] Client: `useRecord`/`useRecords` honor permissions — 403 graceful handling in hooks
+- [x] Service: permission change propagation — revoke → remove from subscription + client cache
+- [x] Client: `useRecord`/`useRecords` honor permissions — 403 graceful handling in hooks
 
 **Phase 6 — React Hooks:**
 
@@ -2280,9 +2280,9 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 **Tests:**
 
 - [ ] E2E: two browser tabs → edit in tab A → update appears in tab B; offline → online → sync
-- [ ] Integration: permission revoked → user stops receiving updates immediately
-- [ ] Integration: user A writes record → user B (no permission) does not receive update
-- [ ] Integration: create record → undo → record removed → redo → record restored
+- [x] Integration: permission revoked → user stops receiving updates immediately
+- [x] Integration: user A writes record → user B (no permission) does not receive update
+- [x] Integration: create record → undo → record removed → redo → record restored
 
 ---
 
