@@ -9,7 +9,6 @@
  * @module websocket/lifecycle
  */
 
-import { eq, select } from '@bslt/db';
 import { validateCsrfToken } from '@bslt/server-system';
 import {
   ACCESS_TOKEN_COOKIE_NAME,
@@ -113,10 +112,12 @@ async function getRecordVersion(
 
   const actualTable = resolve(table);
   if (actualTable == null) return undefined;
+  if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(actualTable)) return undefined;
 
-  const row = await ctx.db.queryOne<{ version: number }>(
-    select(actualTable).columns('version').where(eq('id', id)).limit(1).toSql(),
-  );
+  const row = await ctx.db.queryOne<{ version: number }>({
+    text: `select version from "${actualTable}" where id = $1 limit 1`,
+    values: [id],
+  });
 
   return row?.version;
 }

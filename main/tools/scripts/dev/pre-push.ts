@@ -40,14 +40,8 @@ function main(): void {
   run('pnpm sync:headers:check');
 
   if (!fastMode) {
-    console.log('🎨 Checking formatting (CI mode)...');
-    run('pnpm format:check:ci');
-
-    console.log('🔎 Running workspace lint...');
-    run('pnpm lint');
-
-    console.log('📚 Building Storybook (CI parity)...');
-    run('STORYBOOK_DISABLE_TELEMETRY=1 pnpm --filter @bslt/storybook build-storybook --quiet');
+    console.log('🧪 Running CI-parity local pipeline...');
+    run('pnpm ci:local');
 
     console.log('\n✅ Pre-push passed (CI parity checks)!\n');
     return;

@@ -26,13 +26,18 @@ describe('env', () => {
       expect(() => baseEnvSchema.parse({ NODE_ENV: 'staging' })).toThrow();
     });
 
-    it('accepts optional NEXT_PUBLIC_APP_URL', () => {
-      const result = baseEnvSchema.parse({ NEXT_PUBLIC_APP_URL: 'https://example.com' });
-      expect(result.NEXT_PUBLIC_APP_URL).toBe('https://example.com');
+    it('accepts optional APP_PUBLIC_URL', () => {
+      const result = baseEnvSchema.parse({ APP_PUBLIC_URL: 'https://example.com' });
+      expect(result.APP_PUBLIC_URL).toBe('https://example.com');
     });
 
-    it('rejects invalid NEXT_PUBLIC_APP_URL', () => {
-      expect(() => baseEnvSchema.parse({ NEXT_PUBLIC_APP_URL: 'not-a-url' })).toThrow();
+    it('accepts legacy NEXT_PUBLIC_APP_URL as fallback', () => {
+      const result = baseEnvSchema.parse({ NEXT_PUBLIC_APP_URL: 'https://example.com' });
+      expect(result.APP_PUBLIC_URL).toBe('https://example.com');
+    });
+
+    it('rejects invalid APP_PUBLIC_URL', () => {
+      expect(() => baseEnvSchema.parse({ APP_PUBLIC_URL: 'not-a-url' })).toThrow();
     });
   });
 
@@ -157,24 +162,24 @@ describe('env', () => {
       expect(result.NODE_ENV).toBe('development');
     });
 
-    it('omitting NEXT_PUBLIC_APP_URL leaves it undefined', () => {
+    it('omitting APP_PUBLIC_URL leaves it undefined', () => {
       const result = baseEnvSchema.parse({ NODE_ENV: 'test' });
-      expect(result.NEXT_PUBLIC_APP_URL).toBeUndefined();
+      expect(result.APP_PUBLIC_URL).toBeUndefined();
     });
 
-    it('rejects NEXT_PUBLIC_APP_URL with only whitespace', () => {
-      expect(() => baseEnvSchema.parse({ NEXT_PUBLIC_APP_URL: '   ' })).toThrow();
+    it('rejects APP_PUBLIC_URL with only whitespace', () => {
+      expect(() => baseEnvSchema.parse({ APP_PUBLIC_URL: '   ' })).toThrow();
     });
 
-    it('rejects NEXT_PUBLIC_APP_URL as ftp:// (not http/https)', () => {
-      expect(() => baseEnvSchema.parse({ NEXT_PUBLIC_APP_URL: 'ftp://example.com' })).toThrow();
+    it('rejects APP_PUBLIC_URL as ftp:// (not http/https)', () => {
+      expect(() => baseEnvSchema.parse({ APP_PUBLIC_URL: 'ftp://example.com' })).toThrow();
     });
 
-    it('accepts NEXT_PUBLIC_APP_URL with path and query string', () => {
+    it('accepts APP_PUBLIC_URL with path and query string', () => {
       const result = baseEnvSchema.parse({
-        NEXT_PUBLIC_APP_URL: 'https://example.com/app?foo=bar',
+        APP_PUBLIC_URL: 'https://example.com/app?foo=bar',
       });
-      expect(result.NEXT_PUBLIC_APP_URL).toBe('https://example.com/app?foo=bar');
+      expect(result.APP_PUBLIC_URL).toBe('https://example.com/app?foo=bar');
     });
 
     it('ignores unknown keys in input (does not throw)', () => {

@@ -38,7 +38,7 @@ export const trueFalseSchema = createEnumSchema(['true', 'false'] as const, 'boo
 export interface BaseEnv {
   NODE_ENV: 'development' | 'production' | 'test';
   PORT: number;
-  NEXT_PUBLIC_APP_URL?: string | undefined;
+  APP_PUBLIC_URL?: string | undefined;
 }
 
 export const BaseEnvSchema: Schema<BaseEnv> = createSchema<BaseEnv>((data: unknown) => {
@@ -46,8 +46,9 @@ export const BaseEnvSchema: Schema<BaseEnv> = createSchema<BaseEnv>((data: unkno
   return {
     NODE_ENV: nodeEnvSchema.parse(withDefault(obj['NODE_ENV'], 'development')),
     PORT: coerceNumber(withDefault(obj['PORT'], 8080), 'PORT'),
-    NEXT_PUBLIC_APP_URL: parseOptional(obj['NEXT_PUBLIC_APP_URL'], (v: unknown) =>
-      parseString(v, 'NEXT_PUBLIC_APP_URL', { url: true }),
+    APP_PUBLIC_URL: parseOptional(
+      obj['APP_PUBLIC_URL'] ?? obj['NEXT_PUBLIC_APP_URL'],
+      (v: unknown) => parseString(v, 'APP_PUBLIC_URL', { url: true }),
     ),
   };
 });

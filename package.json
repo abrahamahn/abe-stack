@@ -34,6 +34,7 @@
     "sync:headers:check": "node --import tsx main/tools/sync/sync-file-headers.ts --check --quiet",
     "sync:headers:watch": "node --import tsx main/tools/sync/sync-file-headers.ts --watch",
     "build:theme": "node --import tsx main/tools/sync/sync-css-theme.ts",
+    "ci:local": "pnpm -w run sync:headers:check && pnpm format:check:ci && pnpm lint && STORYBOOK_DISABLE_TELEMETRY=1 pnpm --filter @bslt/storybook build-storybook --quiet",
     "sync:docs": "node --import tsx main/tools/sync/sync-docs.ts",
     "api:generate-client": "node --import tsx main/tools/scripts/api/generate-client.ts",
     "api:generate-hooks": "node --import tsx main/tools/scripts/api/generate-hooks.ts",
