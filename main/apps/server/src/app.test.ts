@@ -481,20 +481,12 @@ function spyOnAppLog(app: App): Record<string, ReturnType<typeof vi.fn>> {
 // ============================================================================
 
 describe('App', () => {
-  beforeEach(async () => {
+  beforeEach(() => {
     vi.clearAllMocks();
     // Reset mock implementations to default values
     mockServerFactory.mockReset();
     mockListenFactory.mockReset();
     mockListenFactory.mockResolvedValue(undefined);
-    // Reset @bslt/db mocks
-    const db = await import('@bslt/db');
-    vi.mocked(db.requireValidSchema).mockReset();
-    vi.mocked(db.requireValidSchema).mockResolvedValue(undefined);
-    // Reset health mocks
-    const health = await import('@bslt/server-system');
-    vi.mocked(health.logStartupSummary).mockReset();
-    vi.mocked(health.logStartupSummary).mockResolvedValue(undefined);
   });
 
   describe('constructor', () => {

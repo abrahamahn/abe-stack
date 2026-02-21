@@ -53,19 +53,52 @@ export const ConfirmationDialog = ({
   onConfirm,
   onCancel,
 }: ConfirmationDialogProps): ReactElement | null => {
+  if (!open) return null;
+
+  return (
+    <ConfirmationDialogOpen
+      title={title}
+      description={description}
+      confirmLabel={confirmLabel}
+      cancelLabel={cancelLabel}
+      countdownSeconds={countdownSeconds}
+      tone={tone}
+      isLoading={isLoading}
+      onConfirm={onConfirm}
+      onCancel={onCancel}
+    />
+  );
+};
+
+type ConfirmationDialogOpenProps = {
+  title: string;
+  description: string;
+  confirmLabel: string;
+  cancelLabel: string;
+  countdownSeconds: number;
+  tone: 'danger' | 'warning' | 'info';
+  isLoading: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+};
+
+const ConfirmationDialogOpen = ({
+  title,
+  description,
+  confirmLabel,
+  cancelLabel,
+  countdownSeconds,
+  tone,
+  isLoading,
+  onConfirm,
+  onCancel,
+}: ConfirmationDialogOpenProps): ReactElement => {
   const [countdown, setCountdown] = useState(countdownSeconds);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Reset countdown when dialog opens
-  useEffect(() => {
-    if (open) {
-      setCountdown(countdownSeconds);
-    }
-  }, [open, countdownSeconds]);
-
   // Run countdown timer
   useEffect(() => {
-    if (!open || countdown <= 0) {
+    if (countdown <= 0) {
       return;
     }
 
@@ -88,7 +121,7 @@ export const ConfirmationDialog = ({
         intervalRef.current = null;
       }
     };
-  }, [open, countdown]);
+  }, [countdown]);
 
   const handleClose = useCallback((): void => {
     if (!isLoading) {
@@ -104,7 +137,7 @@ export const ConfirmationDialog = ({
 
   const isConfirmEnabled = countdown <= 0 && !isLoading;
 
-  const toneClasses: Record<string, string> = {
+  const toneClasses: Record<ConfirmationDialogOpenProps['tone'], string> = {
     danger: 'text-danger',
     warning: 'text-warning',
     info: 'text-info',
@@ -117,12 +150,10 @@ export const ConfirmationDialog = ({
         ? 'Processing...'
         : confirmLabel;
 
-  if (!open) return null;
-
   return (
-    <Modal.Root open={open} onClose={handleClose}>
+    <Modal.Root open={true} onClose={handleClose}>
       <Modal.Header>
-        <Modal.Title className={toneClasses[tone] ?? ''}>{title}</Modal.Title>
+        <Modal.Title className={toneClasses[tone]}>{title}</Modal.Title>
         <Modal.Close />
       </Modal.Header>
 
@@ -151,7 +182,7 @@ export const ConfirmationDialog = ({
                     stroke="currentColor"
                     strokeWidth="2"
                     strokeDasharray={`${String(Math.round((countdown / countdownSeconds) * 88))} 88`}
-                    className={toneClasses[tone] ?? 'text-danger'}
+                    className={toneClasses[tone]}
                     strokeLinecap="round"
                   />
                 </svg>

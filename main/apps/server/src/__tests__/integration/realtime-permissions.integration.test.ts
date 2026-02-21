@@ -18,13 +18,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { filterRecordsForUser as filterRecords } from '../../../../../server/core/src/realtime/permission.filter';
 import { createPermissionChangeHandler } from '../../../../../server/core/src/realtime/permission.propagation';
 
+import type { PermissionMiddleware } from '../../../../../server/core/src/realtime/permission.middleware';
 import type {
   ConnectionRegistry,
   PermissionRevokedEvent,
   SubscriptionRegistry,
   WebSocketConnection,
 } from '../../../../../server/core/src/realtime/permission.propagation';
-import type { PermissionMiddleware } from '../../../../../server/core/src/realtime/permission.middleware';
 import type { MembershipRepository, PermissionRecord } from '../../../../../server/core/src/realtime/permissions';
 
 // ============================================================================
@@ -111,7 +111,7 @@ describe('Sprint 6.8 — permission-aware record filtering', () => {
 
   beforeEach(() => {
     membershipRepo = {
-      findByTenantAndUser: vi.fn(),
+      findByUserAndTenant: vi.fn(),
       findByUserId: vi.fn(),
       findByTenantId: vi.fn(),
     } as unknown as MembershipRepository;
@@ -133,7 +133,7 @@ describe('Sprint 6.8 — permission-aware record filtering', () => {
     ];
 
     // User B has no membership in tenant-A
-    vi.mocked(membershipRepo.findByTenantAndUser).mockResolvedValue(null);
+    vi.mocked(membershipRepo.findByUserAndTenant).mockResolvedValue(null);
 
     const result = await filterRecords(userBId, tenantId, records, membershipRepo);
 
@@ -152,7 +152,7 @@ describe('Sprint 6.8 — permission-aware record filtering', () => {
     ];
 
     // User B IS a member of tenant-A
-    vi.mocked(membershipRepo.findByTenantAndUser).mockResolvedValue({
+    vi.mocked(membershipRepo.findByUserAndTenant).mockResolvedValue({
       id: 'membership-1',
       userId,
       tenantId,
@@ -181,7 +181,7 @@ describe('Sprint 6.8 — permission-aware record filtering', () => {
     ];
 
     // User B is a member of tenant-A but not tenant-X
-    vi.mocked(membershipRepo.findByTenantAndUser)
+    vi.mocked(membershipRepo.findByUserAndTenant)
       .mockImplementation(async (_tId: string, _uId: string) => {
         return null;
       });

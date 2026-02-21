@@ -18,6 +18,9 @@ import { createHash } from 'node:crypto';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
+  getAuditEventsForDeletedUser,
+} from '../../../../../server/core/src/users/data-hygiene';
+import {
   anonymizeExpiredUsers,
   type AnonymizeResult,
 } from '../../../../../server/core/src/users/pii-anonymization';
@@ -25,9 +28,6 @@ import {
   cleanupUnverifiedUsers,
   type CleanupResult,
 } from '../../../../../server/core/src/users/unverified-cleanup';
-import {
-  getAuditEventsForDeletedUser,
-} from '../../../../../server/core/src/users/data-hygiene';
 
 import type { DbClient, Repositories } from '../../../../../server/db/src';
 import type { ServerLogger } from '@bslt/shared';

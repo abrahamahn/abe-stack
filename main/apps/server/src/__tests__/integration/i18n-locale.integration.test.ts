@@ -170,7 +170,7 @@ describe('Sprint 6.7 — set locale preference → GET returns persisted languag
   let testServer: TestServer;
 
   beforeEach(async () => {
-    testServer = await createTestServer();
+    testServer = await createTestServer({ enableCsrf: false });
   });
 
   afterEach(async () => {

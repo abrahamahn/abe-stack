@@ -145,6 +145,9 @@ function createMockRepos() {
     activities: {
       create: vi.fn().mockResolvedValue({ id: 'act-1' }),
     },
+    auditEvents: {
+      create: vi.fn().mockResolvedValue({ id: 'audit-1' }),
+    },
   };
 }
 
@@ -599,6 +602,9 @@ describe('User Management API Integration Tests', () => {
         }),
       });
 
+      // TEMP debug for CI/local parity; remove after diagnosing.
+      // eslint-disable-next-line no-console
+      console.log('avatar pipeline response', response.statusCode, response.body);
       expect(response.statusCode).toBe(200);
 
       // Verify storage.upload was called (file stored to S3/local)

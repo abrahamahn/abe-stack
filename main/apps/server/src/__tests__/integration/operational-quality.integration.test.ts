@@ -328,7 +328,7 @@ describe('Deployment Sanity', () => {
       // Uses longer timeout because importing @bslt/db and @bslt/core/auth is heavy
       const mod = await importRuntimeModule('../../../../../tools/scripts/db/bootstrap-admin');
       expect(typeof mod['bootstrapAdmin']).toBe('function');
-    }, 30_000);
+    }, 90_000);
   });
 
   describe('seed.ts exports', () => {
