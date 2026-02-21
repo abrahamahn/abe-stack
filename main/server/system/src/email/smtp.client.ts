@@ -322,8 +322,15 @@ export class SmtpClient {
       content += this.encodeQuotedPrintable(message.text ?? '');
     }
 
-    // Escape leading dots (SMTP transparency)
-    return content.replace(/^\./gm, '..');
+    // Escape leading dots (SMTP transparency) without regex backtracking.
+    const lines = content.split('\r\n');
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (line != null && line.startsWith('.')) {
+        lines[i] = `.${line}`;
+      }
+    }
+    return lines.join('\r\n');
   }
 
   private encodeHeader(header: string): string {

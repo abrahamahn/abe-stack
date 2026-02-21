@@ -97,10 +97,11 @@ export function applyCors(req: FastifyRequest, res: FastifyReply, options: CorsO
 
   const requestOrigin = req.headers.origin;
   let allowOrigin: string | null = null;
+  const wildcardAllowed = hasWildcardOrigin(allowedOrigin);
 
-  if (allowedOrigin === '*') {
+  if (wildcardAllowed) {
     // Wildcard origin: use literal '*' only, never reflect arbitrary origins.
-    // Credentials cannot be used with wildcard origin per the CORS spec.
+    // Credentials are handled separately and must not be enabled with '*'.
     allowOrigin = '*';
   } else if (requestOrigin === allowedOrigin) {
     // Exact match: use the configured value (not the request header) to avoid reflection
@@ -143,6 +144,14 @@ export function applyCors(req: FastifyRequest, res: FastifyReply, options: CorsO
 function findAllowedOrigin(origin: string, allowedOrigins: string): string | undefined {
   const origins = allowedOrigins.split(',').map((o) => o.trim());
   return origins.find((o) => o === origin);
+}
+
+function hasWildcardOrigin(allowedOrigin: string): boolean {
+  if (allowedOrigin.trim() === '*') return true;
+  return allowedOrigin
+    .split(',')
+    .map((origin) => origin.trim())
+    .some((origin) => origin === '*');
 }
 
 /**

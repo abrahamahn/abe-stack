@@ -8,9 +8,8 @@
 
 import { createReadStream } from 'node:fs';
 import { open } from 'node:fs/promises';
-import { join } from 'node:path';
+import { resolve, sep } from 'node:path';
 
-import { isSafePath } from '@bslt/server-system';
 import { createRateLimiter, getMimeType, getRequesterId, HTTP_STATUS } from '@bslt/shared';
 
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
@@ -21,6 +20,14 @@ const staticRateLimit = createRateLimiter(RATE_LIMIT_WINDOW_MS, RATE_LIMIT_MAX_R
 
 function isRateLimited(requester: string): boolean {
   return !staticRateLimit(requester).allowed;
+}
+
+function resolveStaticPath(root: string, relativePath: string): string | null {
+  const resolvedRoot = resolve(root);
+  const resolvedPath = resolve(resolvedRoot, relativePath);
+  if (resolvedPath === resolvedRoot) return null;
+  if (!resolvedPath.startsWith(`${resolvedRoot}${sep}`)) return null;
+  return resolvedPath;
 }
 
 export interface StaticServeOptions {
@@ -45,7 +52,7 @@ export function registerStaticServe(server: FastifyInstance, options: StaticServ
   const normalizedPrefix = prefix.endsWith('/') ? prefix : `${prefix}/`;
 
   /** Rate limiting preHandler for static file routes */
-  const rateLimitHandler = async (req: FastifyRequest, reply: FastifyReply): Promise<void> => {
+  const rateLimitHandler = (req: FastifyRequest, reply: FastifyReply): void => {
     if (isRateLimited(getRequesterId(req))) {
       void reply.status(HTTP_STATUS.TOO_MANY_REQUESTS).send({ error: 'Too many requests' });
     }
@@ -55,19 +62,18 @@ export function registerStaticServe(server: FastifyInstance, options: StaticServ
   server.get(
     `${normalizedPrefix}*`,
     {
-      preHandler: (req, reply, done) => {
-        rateLimitHandler(req, reply)
-          .then(() => {
-            done();
-          })
-          .catch(done);
+      preHandler: (req, reply) => {
+        rateLimitHandler(req, reply);
       },
     },
     async (req: FastifyRequest, reply: FastifyReply): Promise<void> => {
-      const url = req.url;
-
-      // Extract file path from URL (remove prefix)
-      const relativePath = url.slice(normalizedPrefix.length);
+      const params = (req.params ?? {}) as Record<string, unknown>;
+      const wildcard = params['*'];
+      const fromParams = typeof wildcard === 'string' ? wildcard : undefined;
+      const fromUrl = req.url.startsWith(normalizedPrefix)
+        ? req.url.slice(normalizedPrefix.length)
+        : req.url;
+      const relativePath = fromParams ?? fromUrl;
 
       // Decode URI components (handle %20, etc.)
       let decodedPath: string;
@@ -77,12 +83,10 @@ export function registerStaticServe(server: FastifyInstance, options: StaticServ
         return reply.status(HTTP_STATUS.BAD_REQUEST).send({ error: 'Invalid path encoding' });
       }
 
-      // Security: Check for path traversal
-      if (!isSafePath(root, decodedPath)) {
+      const fullPath = resolveStaticPath(root, decodedPath);
+      if (fullPath === null) {
         return reply.status(HTTP_STATUS.FORBIDDEN).send({ error: 'Forbidden' });
       }
-
-      const fullPath = join(root, decodedPath);
 
       // Use a single file handle for stat + read to avoid TOCTOU race
       try {

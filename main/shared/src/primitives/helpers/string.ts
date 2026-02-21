@@ -21,12 +21,35 @@ export function camelToSnake(str: string): string {
   if (str === str.toUpperCase()) {
     return str.toLowerCase();
   }
+  if (str === '') return '';
 
-  return str
-    .replace(/([a-z\d_])([A-Z])/g, '$1_$2')
-    .replace(/([A-Z]+)(?=[A-Z][a-z])/g, '$1_')
-    .replace(/-/g, '_')
-    .toLowerCase();
+  let out = '';
+  for (let i = 0; i < str.length; i++) {
+    const ch = str[i] as string;
+    const code = str.charCodeAt(i);
+    const prevCode = i > 0 ? str.charCodeAt(i - 1) : 0;
+    const nextCode = i + 1 < str.length ? str.charCodeAt(i + 1) : 0;
+
+    if (ch === '-') {
+      out += '_';
+      continue;
+    }
+
+    const isUpper = code >= 65 && code <= 90;
+    const prevIsLowerOrDigitOrUnderscore =
+      (prevCode >= 97 && prevCode <= 122) || (prevCode >= 48 && prevCode <= 57) || prevCode === 95;
+    const prevIsUpper = prevCode >= 65 && prevCode <= 90;
+    const nextIsLower = nextCode >= 97 && nextCode <= 122;
+    const needsBoundary =
+      i > 0 && isUpper && (prevIsLowerOrDigitOrUnderscore || (prevIsUpper && nextIsLower));
+
+    if (needsBoundary && out[out.length - 1] !== '_') {
+      out += '_';
+    }
+    out += isUpper ? ch.toLowerCase() : ch;
+  }
+
+  return out;
 }
 
 /**

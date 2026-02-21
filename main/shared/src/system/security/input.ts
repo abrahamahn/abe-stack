@@ -7,9 +7,19 @@
  */
 
 function stripScriptBlocks(value: string): string {
-  // Neutralize every '<' that begins a script or closing-script tag.
-  // Uses regex to avoid manual pointer arithmetic and desynchronization bugs.
-  return value.replace(/<(\/?script)/gi, '&lt;$1');
+  const lower = value.toLowerCase();
+  let out = '';
+  let i = 0;
+  while (i < value.length) {
+    if (lower.startsWith('<script', i) || lower.startsWith('</script', i)) {
+      out += '&lt;';
+      i++;
+      continue;
+    }
+    out += value[i] as string;
+    i++;
+  }
+  return out;
 }
 
 function isWordChar(code: number): boolean {
@@ -54,17 +64,43 @@ function stripEventHandlers(value: string): string {
 }
 
 function stripDangerousSchemes(value: string): string {
-  // Match javascript: and vbscript: with optional whitespace/control chars between letters
-  const jsPattern =
-    /j[\s\0]*a[\s\0]*v[\s\0]*a[\s\0]*s[\s\0]*c[\s\0]*r[\s\0]*i[\s\0]*p[\s\0]*t[\s\0]*:/gi;
-  const vbPattern = /v[\s\0]*b[\s\0]*s[\s\0]*c[\s\0]*r[\s\0]*i[\s\0]*p[\s\0]*t[\s\0]*:/gi;
+  let output = '';
+  let i = 0;
+  while (i < value.length) {
+    const code = value.charCodeAt(i);
+    if (code === 58) {
+      let j = output.length - 1;
+      while (j >= 0 && isWhitespace(output.charCodeAt(j))) {
+        j--;
+      }
 
-  let output = value.replace(jsPattern, '').replace(vbPattern, '');
+      let token = '';
+      let tokenStart = j + 1;
+      let k = j;
+      while (k >= 0) {
+        const charCode = output.charCodeAt(k);
+        if ((charCode >= 65 && charCode <= 90) || (charCode >= 97 && charCode <= 122)) {
+          token = `${String.fromCharCode(charCode).toLowerCase()}${token}`;
+          tokenStart = k;
+          k--;
+          continue;
+        }
+        if (isWhitespace(charCode)) {
+          k--;
+          continue;
+        }
+        break;
+      }
 
-  // Final safety: if any scheme survives after stripping, encode all colons
-  const collapsed = output.toLowerCase().replace(/[\s\0]/g, '');
-  if (collapsed.includes('javascript:') || collapsed.includes('vbscript:')) {
-    output = output.replace(/:/g, '&#58;');
+      if (token === 'javascript' || token === 'vbscript') {
+        output = output.slice(0, tokenStart);
+        i++;
+        continue;
+      }
+    }
+
+    output += value[i] as string;
+    i++;
   }
 
   return output;
@@ -179,9 +215,32 @@ export function detectSQLInjection(
  */
 export function detectNoSQLInjection(input: unknown): boolean {
   if (typeof input === 'string') {
-    return /(\$|\{|\}|\[|\]|\$eq|\$ne|\$gt|\$gte|\$lt|\$lte|\$in|\$nin|\$and|\$or|\$not|\$nor|\$exists|\$type|\$regex|\$where|\$options)/.test(
-      input,
-    );
+    const lower = input.toLowerCase();
+    const markers = [
+      '$',
+      '{',
+      '}',
+      '[',
+      ']',
+      '$eq',
+      '$ne',
+      '$gt',
+      '$gte',
+      '$lt',
+      '$lte',
+      '$in',
+      '$nin',
+      '$and',
+      '$or',
+      '$not',
+      '$nor',
+      '$exists',
+      '$type',
+      '$regex',
+      '$where',
+      '$options',
+    ];
+    return markers.some((marker) => lower.includes(marker));
   }
 
   if (typeof input === 'object' && input !== null) {
