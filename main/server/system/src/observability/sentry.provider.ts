@@ -13,16 +13,57 @@
  * @module Observability
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
+import { createRequire } from 'node:module';
 
 import type { ErrorContext, ErrorTrackingConfig, ErrorTrackingProvider } from './types';
 
 // Lazy reference to @sentry/node — resolved at init time
-let Sentry: any = null;
+type ScopeLike = {
+  setUser: (user: { id?: string; email?: string; username?: string }) => void;
+  setTag: (key: string, value: string) => void;
+  setExtra: (key: string, value: unknown) => void;
+  setContext: (name: string, context: unknown) => void;
+};
+
+type SentryNodeModule = {
+  init: (options: {
+    dsn: string;
+    environment: string;
+    release?: string;
+    sampleRate: number;
+    sendDefaultPii: boolean;
+    ignoreErrors: string[];
+  }) => void;
+  withScope: (callback: (scope: ScopeLike) => void) => void;
+  captureException: (error: unknown) => void;
+  setUser: (user: { id: string; email?: string } | null) => void;
+  addBreadcrumb: (breadcrumb: {
+    message: string;
+    category: string;
+    level: 'info';
+    data?: Record<string, unknown>;
+  }) => void;
+};
+
+const require = createRequire(import.meta.url);
+
+let Sentry: SentryNodeModule | null = null;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function isSentryNodeModule(value: unknown): value is SentryNodeModule {
+  if (!isRecord(value)) return false;
+
+  return (
+    typeof value['init'] === 'function' &&
+    typeof value['withScope'] === 'function' &&
+    typeof value['captureException'] === 'function' &&
+    typeof value['setUser'] === 'function' &&
+    typeof value['addBreadcrumb'] === 'function'
+  );
+}
 
 /**
  * Sentry Node.js implementation of ErrorTrackingProvider.
@@ -48,8 +89,11 @@ export class SentryNodeProvider implements ErrorTrackingProvider {
     }
 
     try {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      Sentry = require('@sentry/node');
+      const loadedModule: unknown = require('@sentry/node');
+      if (!isSentryNodeModule(loadedModule)) {
+        return;
+      }
+      Sentry = loadedModule;
     } catch {
       // @sentry/node not installed — gracefully degrade to no-op
       return;
@@ -85,14 +129,15 @@ export class SentryNodeProvider implements ErrorTrackingProvider {
    */
   captureError(error: unknown, context?: ErrorContext): void {
     if (!this.initialized || Sentry === null) return;
+    const sentry = Sentry;
 
-    Sentry.withScope((scope: any) => {
+    sentry.withScope((scope) => {
       if (context?.user !== undefined) {
-        scope.setUser({
-          id: context.user?.id,
-          email: context.user?.email,
-          username: context.user?.username,
-        });
+        const user: { id?: string; email?: string; username?: string } = {};
+        if (context.user.id !== undefined) user.id = context.user.id;
+        if (context.user.email !== undefined) user.email = context.user.email;
+        if (context.user.username !== undefined) user.username = context.user.username;
+        scope.setUser(user);
       }
 
       if (context?.tags !== undefined) {
@@ -111,7 +156,7 @@ export class SentryNodeProvider implements ErrorTrackingProvider {
         scope.setContext('request', context.request);
       }
 
-      Sentry.captureException(error);
+      sentry.captureException(error);
     });
   }
 
@@ -123,8 +168,9 @@ export class SentryNodeProvider implements ErrorTrackingProvider {
    */
   setUserContext(userId: string, email?: string): void {
     if (!this.initialized || Sentry === null) return;
+    const sentry = Sentry;
 
-    Sentry.setUser(email !== undefined ? { id: userId, email } : { id: userId });
+    sentry.setUser(email !== undefined ? { id: userId, email } : { id: userId });
   }
 
   /**
@@ -136,8 +182,9 @@ export class SentryNodeProvider implements ErrorTrackingProvider {
    */
   addBreadcrumb(message: string, category: string, data?: Record<string, unknown>): void {
     if (!this.initialized || Sentry === null) return;
+    const sentry = Sentry;
 
-    Sentry.addBreadcrumb({
+    sentry.addBreadcrumb({
       message,
       category,
       level: 'info',

@@ -1,8 +1,11 @@
 // eslint.config.ts
+/// <reference types="node" />
+
 import { includeIgnoreFile } from '@eslint/compat';
 import type { Linter } from 'eslint';
 import boundaries from 'eslint-plugin-boundaries';
 import importXPlugin from 'eslint-plugin-import-x';
+import perfectionistPlugin from 'eslint-plugin-perfectionist';
 import reactHooksPlugin from 'eslint-plugin-react-hooks';
 import unusedImportsPlugin from 'eslint-plugin-unused-imports';
 import { createRequire } from 'node:module';
@@ -182,6 +185,7 @@ export const baseConfig = [
       '@typescript-eslint': tseslint.plugin,
       'unused-imports': unusedImportsPlugin as any,
       'import-x': importXPlugin as any,
+      perfectionist: perfectionistPlugin as any,
     },
     rules: {
       // --- LOGIC & PERFORMANCE (The BSLT Core) ---

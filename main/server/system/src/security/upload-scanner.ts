@@ -269,8 +269,6 @@ const SCRIPT_PATTERNS: Array<{ pattern: RegExp; description: string }> = [
   { pattern: /javascript:/i, description: 'JavaScript protocol handler' },
   { pattern: /vbscript:/i, description: 'VBScript protocol handler' },
   { pattern: /on\w+\s*=\s*["']/i, description: 'Inline event handler' },
-  // eslint-disable-next-line no-control-regex
-  { pattern: /\x00/, description: 'Null byte (binary in text content)' },
 ];
 
 /**
@@ -341,6 +339,10 @@ export function detectScriptContent(buffer: Buffer): string | null {
   // Only scan text-like content (first 8KB)
   const scanLength = Math.min(buffer.length, 8192);
   const content = buffer.subarray(0, scanLength).toString('utf-8');
+
+  if (content.includes('\u0000')) {
+    return 'Null byte (binary in text content)';
+  }
 
   for (const { pattern, description } of SCRIPT_PATTERNS) {
     if (pattern.test(content)) {

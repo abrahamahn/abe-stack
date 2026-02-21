@@ -99,9 +99,10 @@ export function useDeepMemo<T>(factory: () => T, deps: React.DependencyList): T 
     if (typeof value === 'function') return value.toString();
     return value;
   });
-  // Include both factory and serializedDeps so the compiler is satisfied.
-  // serializedDeps changes only when deps change deeply, limiting recomputation.
-  return useMemo(() => factory(), [factory, serializedDeps]);
+  return useMemo(() => {
+    void serializedDeps;
+    return factory();
+  }, [factory, serializedDeps]);
 }
 
 /**
@@ -128,9 +129,10 @@ export function useDeepMemo<T>(factory: () => T, deps: React.DependencyList): T 
 export function useShallowMemo<T>(factory: () => T, deps: React.DependencyList): T {
   // Serialize deps to create a stable key for shallow equality comparison.
   const serializedDeps = JSON.stringify(deps);
-  // Include both factory and serializedDeps so the compiler is satisfied.
-  // serializedDeps changes only when deps change shallowly, limiting recomputation.
-  return useMemo(() => factory(), [factory, serializedDeps]);
+  return useMemo(() => {
+    void serializedDeps;
+    return factory();
+  }, [factory, serializedDeps]);
 }
 
 // ============================================================================
@@ -216,6 +218,7 @@ export function useShallowCallback<T extends (...args: unknown[]) => unknown>(
  */
 export function useDeepEffect(effect: React.EffectCallback, deps: React.DependencyList): void {
   const ref = useRef<React.DependencyList | undefined>(undefined);
+  const serializedDeps = JSON.stringify(deps);
 
   useEffect(() => {
     if (ref.current === undefined || !deepEqual(ref.current, deps)) {
@@ -223,7 +226,7 @@ export function useDeepEffect(effect: React.EffectCallback, deps: React.Dependen
       return effect();
     }
     return undefined;
-  }, [JSON.stringify(deps)]);
+  }, [effect, deps, serializedDeps]);
 }
 
 /**
@@ -246,6 +249,7 @@ export function useDeepEffect(effect: React.EffectCallback, deps: React.Dependen
  */
 export function useShallowEffect(effect: React.EffectCallback, deps: React.DependencyList): void {
   const ref = useRef<React.DependencyList | undefined>(undefined);
+  const serializedDeps = JSON.stringify(deps);
 
   useEffect(() => {
     if (ref.current === undefined || !shallowEqual(ref.current, deps)) {
@@ -253,7 +257,7 @@ export function useShallowEffect(effect: React.EffectCallback, deps: React.Depen
       return effect();
     }
     return undefined;
-  }, [JSON.stringify(deps)]);
+  }, [effect, deps, serializedDeps]);
 }
 
 // ============================================================================
@@ -608,6 +612,10 @@ export function useExpensiveComputation<T>(
   const { debounceMs, skipInitial = false } = options;
   const [result, setResult] = useState<T | undefined>(skipInitial ? undefined : compute());
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const serializedDeps = JSON.stringify(deps, (_key, value: unknown) => {
+    if (typeof value === 'function') return value.toString();
+    return value;
+  });
 
   useEffect(() => {
     if (timeoutRef.current !== undefined) {
@@ -634,7 +642,7 @@ export function useExpensiveComputation<T>(
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [compute, debounceMs, ...deps]);
+  }, [compute, debounceMs, serializedDeps]);
 
   return result;
 }

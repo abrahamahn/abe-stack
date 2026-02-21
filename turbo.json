@@ -67,7 +67,7 @@
     "vitest.workspace.ts",
     "**/vitest.config.ts",
     "config/env/.env.*",
-    "config/**/*.{ts,js,mjs,cjs,json}",
+    "config/*.{ts,js,mjs,cjs,json}",
     "config/.prettierrc",
     "config/tsconfig.eslint.json",
     "eslint.config.ts",
