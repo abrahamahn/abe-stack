@@ -25,13 +25,12 @@ import { isTableAllowed, loadRecords, saveRecords } from '../service';
 import type { ConflictResult, RealtimeModuleDeps, RealtimeRequest, WriteResult } from '../types';
 import type { RealtimeTransaction, RecordPointer, RouteResult } from '@bslt/shared';
 
-function isAuthenticatedWriteRequest(req: RealtimeRequest): req is RealtimeRequest & {
+function isAuthenticatedWriteRequest(req: unknown): req is {
   user: { userId: string };
 } {
-  return (
-    typeof (req as { user?: { userId?: unknown } }).user?.userId === 'string' &&
-    ((req as { user?: { userId?: string } }).user?.userId?.length ?? 0) > 0
-  );
+  if (typeof req !== 'object' || req === null) return false;
+  const maybeUser = (req as { user?: { userId?: unknown } }).user;
+  return typeof maybeUser?.userId === 'string' && maybeUser.userId.length > 0;
 }
 
 // ============================================================================
@@ -88,8 +87,23 @@ export async function handleWrite(
   body: RealtimeTransaction,
   req: RealtimeRequest,
 ): Promise<RouteResult<WriteResult | ConflictResult | { code: string; message: string }>> {
-  const db = ctx.db;
-  const log = ctx.log;
+  const safeCtx = ctx as unknown as {
+    db: RealtimeModuleDeps['db'];
+    pubsub: RealtimeModuleDeps['pubsub'];
+    log: unknown;
+  };
+  const db = safeCtx.db;
+  const log = safeCtx.log as {
+    debug: (message: string, meta?: Record<string, unknown>) => void;
+    info: (message: string, meta?: Record<string, unknown>) => void;
+    warn: (message: string, meta?: Record<string, unknown>) => void;
+    error: (message: string, meta?: Record<string, unknown>) => void;
+  };
+  const writeBody = body as unknown as {
+    authorId: string;
+    txId: string;
+    operations: Array<{ table: string }>;
+  };
 
   // Require authentication using type guard
   if (!isAuthenticatedWriteRequest(req)) {
@@ -99,14 +113,14 @@ export async function handleWrite(
     };
   }
 
-  const userId = req.user.userId;
+  const userId = (req as { user: { userId: string } }).user.userId;
 
   // Validate author matches authenticated user
-  if (body.authorId !== userId) {
+  if (writeBody.authorId !== userId) {
     log.warn('Write attempt with mismatched authorId', {
-      authorId: body.authorId,
+      authorId: writeBody.authorId,
       userId,
-      txId: body.txId,
+      txId: writeBody.txId,
     });
     return {
       status: HTTP_STATUS.FORBIDDEN,
@@ -115,7 +129,7 @@ export async function handleWrite(
   }
 
   // Validate all tables are allowed
-  for (const op of body.operations) {
+  for (const op of writeBody.operations) {
     if (!isTableAllowed(op.table)) {
       return {
         status: HTTP_STATUS.BAD_REQUEST,
@@ -126,15 +140,15 @@ export async function handleWrite(
 
   try {
     log.debug('Write transaction started', {
-      txId: body.txId,
-      authorId: body.authorId,
-      operationCount: body.operations.length,
+      txId: writeBody.txId,
+      authorId: writeBody.authorId,
+      operationCount: writeBody.operations.length,
     });
 
     // Execute in a database transaction
     const result = await withTransaction(db, async (tx) => {
       // 1. Load affected records
-      const pointers = getOperationPointers(body.operations);
+      const pointers = getOperationPointers(writeBody.operations as never);
       const originalRecordMap = await loadRecords(tx, pointers);
 
       // 2. Verify all records exist
@@ -146,8 +160,8 @@ export async function handleWrite(
 
       // 3. Apply operations to get new record states
       const { recordMap: newRecordMap, modifiedRecords } = applyOperations(
-        originalRecordMap,
-        body.operations,
+        originalRecordMap as never,
+        writeBody.operations as never,
       );
 
       // 4. Reload records to check for concurrent modifications
@@ -177,7 +191,7 @@ export async function handleWrite(
         if (tableRecords === undefined) continue;
         const record = tableRecords[id];
         if (record !== undefined && 'version' in record) {
-          ctx.pubsub.publish(SubKeys.record(table, id), record.version);
+          safeCtx.pubsub.publish(SubKeys.record(table, id), record.version);
         }
       }
     });
@@ -201,7 +215,7 @@ export async function handleWrite(
 
     if (error instanceof VersionConflictError) {
       log.info('Write transaction conflict', {
-        txId: body.txId,
+        txId: writeBody.txId,
         conflicts: error.conflictingRecords,
       });
       return {
@@ -215,7 +229,7 @@ export async function handleWrite(
     }
 
     log.error('Write transaction failed', {
-      txId: body.txId,
+      txId: writeBody.txId,
       error: error instanceof Error ? error.message : String(error),
     });
 

@@ -151,11 +151,12 @@ describe('isStrategyEnabled', () => {
 
   it('should handle all OAuth strategies', () => {
     const config = createTestAuthConfig({
-      strategies: ['google', 'github', 'facebook', 'microsoft', 'apple'],
+      strategies: ['google', 'github', 'kakao', 'facebook', 'microsoft', 'apple'],
     });
 
     expect(isStrategyEnabled(config, 'google')).toBe(true);
     expect(isStrategyEnabled(config, 'github')).toBe(true);
+    expect(isStrategyEnabled(config, 'kakao')).toBe(true);
     expect(isStrategyEnabled(config, 'facebook')).toBe(true);
     expect(isStrategyEnabled(config, 'microsoft')).toBe(true);
     expect(isStrategyEnabled(config, 'apple')).toBe(true);
@@ -176,6 +177,7 @@ describe('isStrategyEnabled', () => {
       'webauthn',
       'google',
       'github',
+      'kakao',
       'facebook',
       'microsoft',
       'apple',

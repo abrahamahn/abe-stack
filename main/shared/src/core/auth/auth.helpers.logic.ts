@@ -19,6 +19,7 @@ export type AuthStrategy =
   | 'webauthn'
   | 'google'
   | 'github'
+  | 'kakao'
   | 'facebook'
   | 'microsoft'
   | 'apple';

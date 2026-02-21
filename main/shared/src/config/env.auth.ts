@@ -165,6 +165,7 @@ export interface AuthConfig {
   oauth: {
     google?: OAuthProviderConfig;
     github?: OAuthProviderConfig;
+    kakao?: OAuthProviderConfig;
     facebook?: OAuthProviderConfig;
     microsoft?: OAuthProviderConfig & {
       /** Azure AD tenant ID ('common' for multi-tenant) */

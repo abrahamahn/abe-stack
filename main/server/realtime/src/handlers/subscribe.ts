@@ -11,6 +11,7 @@
 import { isTableAllowed, loadRecords } from '../service';
 
 type RecordPointer = { table: string; id: string };
+type RecordMap = import('../types').GetRecordsResult['recordMap'];
 
 type SubscribeContext = {
   db: Parameters<typeof loadRecords>[0];
@@ -24,12 +25,12 @@ type SubscribeRequest = {
 };
 
 type ErrorBody = { code: string; message: string };
-type GetRecordsResult = { recordMap: Awaited<ReturnType<typeof loadRecords>> };
+type GetRecordsResult = import('../types').GetRecordsResult;
 type RouteResult<TBody> = { status: number; body: TBody };
 const loadRecordsTyped = loadRecords as (
   db: SubscribeContext['db'],
   pointers: RecordPointer[],
-) => Promise<GetRecordsResult['recordMap']>;
+) => Promise<RecordMap>;
 
 const HTTP_STATUS = {
   OK: 200,
