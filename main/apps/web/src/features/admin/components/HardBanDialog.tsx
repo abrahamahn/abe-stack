@@ -162,7 +162,7 @@ export const HardBanDialog = ({
           {/* Grace Period Info */}
           <div className="bg-surface rounded-lg p-3">
             <Text size="sm" tone="muted">
-              <strong>Grace period:</strong> The user's personal data will be preserved for{' '}
+              <strong>Grace period:</strong> The user&apos;s personal data will be preserved for{' '}
               {graceDays} days before being anonymized. During this period, the ban can be reviewed
               by a senior administrator.
             </Text>

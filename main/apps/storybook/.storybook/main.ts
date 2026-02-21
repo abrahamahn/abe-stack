@@ -7,11 +7,7 @@ const config: StorybookConfig = {
     '../src/**/*.stories.@(ts|tsx)',
     '../stories/**/*.stories.@(ts|tsx)',
   ],
-  addons: [
-    '@storybook/addon-essentials',
-    '@storybook/addon-a11y',
-    '@storybook/addon-viewport',
-  ],
+  addons: ['@storybook/addon-essentials', '@storybook/addon-a11y', '@storybook/addon-viewport'],
   framework: '@storybook/react-vite',
   viteFinal: async (config) => {
     return config;

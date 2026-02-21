@@ -23,8 +23,6 @@ import type { AuthGuardFactory } from '@/http';
 
 import { registerRouteMap } from '@/http';
 
-import { registerRouteMap } from '@/http';
-
 // ============================================================================
 // Mock Repositories
 // ============================================================================
@@ -1024,7 +1022,12 @@ describe('Notifications API Integration Tests', () => {
         {
           user_id: 'user-test-123',
           global_enabled: true,
-          quiet_hours: JSON.stringify({ enabled: false, startHour: 22, endHour: 7, timezone: 'UTC' }),
+          quiet_hours: JSON.stringify({
+            enabled: false,
+            startHour: 22,
+            endHour: 7,
+            timezone: 'UTC',
+          }),
           types: JSON.stringify({}),
           created_at: new Date(),
           updated_at: new Date(),
@@ -1126,7 +1129,8 @@ describe('Notifications API Integration Tests', () => {
             subscription: {
               endpoint: 'https://fcm.googleapis.com/fcm/send/mock-token-123',
               keys: {
-                p256dh: 'BNcRdreALRFXTkOOUHK1EtK2wtaz5Ry4YfYCA_0QTpQtUbVlUls0VJXg7A8u-Ts1XbjhazAkj7I99e8p8REfXPQ',
+                p256dh:
+                  'BNcRdreALRFXTkOOUHK1EtK2wtaz5Ry4YfYCA_0QTpQtUbVlUls0VJXg7A8u-Ts1XbjhazAkj7I99e8p8REfXPQ',
                 auth: 'tBHItJI5svbpC7FR_bNE1g',
               },
             },
@@ -1182,12 +1186,12 @@ describe('Notifications API Integration Tests', () => {
   describe('email delivery', () => {
     it('email service mock is available and returns success', async () => {
       // Verify the mock email service is properly wired
-      const result = await testServer.email.send({
+      const result = (await testServer.email.send({
         to: 'test@example.com',
         subject: 'Test notification email',
         html: '<p>Test</p>',
         text: 'Test',
-      });
+      })) as { success: boolean; messageId: string };
 
       expect(result).toBeDefined();
       expect(result.success).toBe(true);

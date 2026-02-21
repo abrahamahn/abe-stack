@@ -133,7 +133,9 @@ function validate(config: AppConfig): void {
       errors.push('Database: SSL must be enabled in production.');
     }
     if (config.database.provider === 'json') {
-      errors.push('Database: JSON provider is not allowed in production; use PostgreSQL or MongoDB');
+      errors.push(
+        'Database: JSON provider is not allowed in production; use PostgreSQL or MongoDB',
+      );
     }
     if (!config.server.appBaseUrl.startsWith('https://')) {
       errors.push(

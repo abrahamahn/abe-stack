@@ -59,9 +59,7 @@ test.describe('Realtime & WebSocket E2E', () => {
         await settingsLink.first().click();
 
         // Update something (e.g., display name)
-        const nameInput = pageA
-          .getByLabel(/name/i)
-          .or(pageA.getByLabel(/display/i));
+        const nameInput = pageA.getByLabel(/name/i).or(pageA.getByLabel(/display/i));
 
         if ((await nameInput.count()) > 0) {
           const originalName = await nameInput.first().inputValue();
@@ -130,8 +128,6 @@ test.describe('Realtime & WebSocket E2E', () => {
     await page.waitForTimeout(2000);
 
     // Get the initial page content for comparison
-    const contentBefore = await page.textContent('body');
-
     // Simulate network disconnection using CDP
     const cdpSession = await page.context().newCDPSession(page);
     await cdpSession.send('Network.enable');
@@ -209,8 +205,6 @@ test.describe('Realtime & WebSocket E2E', () => {
       await pageB.waitForTimeout(2000);
 
       // Capture the initial state of User B's dashboard
-      const pageBContentBefore = await pageB.textContent('body');
-
       // === User A: Perform a workspace-specific action ===
       // This depends on the app's workspace features
       const workspaceNav = pageA

@@ -2,9 +2,9 @@
 import { SubscriptionManager } from '@bslt/shared';
 import { registerRoutes } from '@routes';
 
-import type { SystemContext } from '@bslt/server-system';
 import type { DbClient, QueueStore, Repositories, SessionContext } from '@bslt/db';
 import type {
+  SystemContext,
   ServerSearchProvider,
   SmsProvider,
   WriteService,

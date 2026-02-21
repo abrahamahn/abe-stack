@@ -14,6 +14,8 @@ export { JobActionsMenu } from './JobActionsMenu';
 export type { JobActionsMenuProps } from './JobActionsMenu';
 export { JobDetailsPanel } from './JobDetailsPanel';
 export type { JobDetailsPanelProps } from './JobDetailsPanel';
+export { LockUserDialog } from './LockUserDialog';
+export type { LockUserDialogProps } from './LockUserDialog';
 export { JobQueueStatsWidget } from './JobQueueStatsWidget';
 export type { JobQueueStatsWidgetProps } from './JobQueueStatsWidget';
 export { JobStatusBadge } from './JobStatusBadge';

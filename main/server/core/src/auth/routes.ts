@@ -64,6 +64,7 @@ import {
   type RouteDefinition,
   type RouteSchema,
 } from '../../../system/src';
+import { handleChangePassword } from '../users/handlers';
 
 import {
   handleAcceptTos,
@@ -97,7 +98,6 @@ import {
   handleVerifyPhone,
   handleVerifySmsCode,
 } from './handlers';
-import { handleChangePassword } from '../users/handlers';
 import { magicLinkRouteEntries } from './magic-link';
 import { oauthRouteEntries } from './oauth';
 import { webauthnRouteEntries } from './webauthn';

@@ -290,7 +290,11 @@ describe('health integration', () => {
 
       expect(response.statusCode).toBe(200);
       const body = JSON.parse(response.body) as {
-        requests: { total: number; byRoute: Record<string, number>; byStatus: Record<string, number> };
+        requests: {
+          total: number;
+          byRoute: Record<string, number>;
+          byStatus: Record<string, number>;
+        };
         latency: { p50: number; p95: number; p99: number; avg: number };
         jobs: { enqueued: number; processed: number; completed: number; failed: number };
         auth: { loginAttempts: number; loginSuccess: number; loginFailures: number };
@@ -321,7 +325,12 @@ describe('health integration', () => {
 
       expect(response.statusCode).toBe(200);
       const body = JSON.parse(response.body) as {
-        jobs: { enqueued: number; completed: number; failed: number; byName: Record<string, unknown> };
+        jobs: {
+          enqueued: number;
+          completed: number;
+          failed: number;
+          byName: Record<string, unknown>;
+        };
       };
       expect(typeof body.jobs.enqueued).toBe('number');
       expect(typeof body.jobs.completed).toBe('number');
@@ -339,9 +348,10 @@ describe('health integration', () => {
       // Simulate a DB healthCheck that hangs for a short period then resolves.
       // This verifies the endpoint does not crash when the DB is slow.
       mockDb.healthCheck.mockImplementation(
-        () => new Promise<boolean>((resolve) => {
-          setTimeout(() => resolve(true), 200);
-        }),
+        () =>
+          new Promise<boolean>((resolve) => {
+            setTimeout(() => resolve(true), 200);
+          }),
       );
 
       const response = await server.inject({ method: 'GET', url: '/health' });
@@ -355,9 +365,10 @@ describe('health integration', () => {
     it('health endpoint responds within bounded time when DB is slow', async () => {
       // Simulate a DB healthCheck that takes 500ms — endpoint should still respond
       mockDb.healthCheck.mockImplementation(
-        () => new Promise<boolean>((resolve) => {
-          setTimeout(() => resolve(true), 500);
-        }),
+        () =>
+          new Promise<boolean>((resolve) => {
+            setTimeout(() => resolve(true), 500);
+          }),
       );
 
       const start = Date.now();
@@ -516,7 +527,10 @@ describe('health integration', () => {
       expect(responses).toHaveLength(concurrency);
       for (const response of responses) {
         expect([200, 503]).toContain(response.statusCode);
-        const body = JSON.parse(response.body) as { status: string; services: Record<string, unknown> };
+        const body = JSON.parse(response.body) as {
+          status: string;
+          services: Record<string, unknown>;
+        };
         expect(body.status).toBeDefined();
         expect(body.services).toBeDefined();
       }

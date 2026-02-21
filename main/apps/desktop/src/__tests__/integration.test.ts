@@ -1900,7 +1900,9 @@ describe('Integration: Offline Detection and IPC Communication', () => {
     results.forEach((version) => {
       expect(version).toBe('1.0.0');
     });
-    expect(integrationMocks.invokedChannels.filter((c) => c.channel === 'get-app-version')).toHaveLength(5);
+    expect(
+      integrationMocks.invokedChannels.filter((c) => c.channel === 'get-app-version'),
+    ).toHaveLength(5);
   });
 });
 

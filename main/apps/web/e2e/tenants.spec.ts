@@ -46,15 +46,6 @@ async function registerAndLogin(
   return { email, password };
 }
 
-/** Log in with existing credentials. */
-async function login(page: Page, email: string, password: string): Promise<void> {
-  await page.goto(`${baseURL}/login`);
-  await page.getByLabel(/email/i).fill(email);
-  await page.getByLabel(/password/i).fill(password);
-  await page.getByRole('button', { name: /login|sign in/i }).click();
-  await page.waitForURL(/dashboard/i);
-}
-
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
@@ -77,9 +68,9 @@ test.describe('Multi-Tenant / Workspace Management', () => {
       await workspaceMenu.click();
     }
 
-    const createLink = page.getByRole('link', { name: /create.*workspace|new.*workspace/i }).or(
-      page.getByRole('button', { name: /create.*workspace|new.*workspace/i }),
-    );
+    const createLink = page
+      .getByRole('link', { name: /create.*workspace|new.*workspace/i })
+      .or(page.getByRole('button', { name: /create.*workspace|new.*workspace/i }));
     if ((await createLink.count()) > 0) {
       await createLink.first().click();
     } else {
@@ -155,10 +146,7 @@ test.describe('Multi-Tenant / Workspace Management', () => {
     // Create the teammate first
     const ctxTeammate: BrowserContext = await browser.newContext();
     const pageTeammate: Page = await ctxTeammate.newPage();
-    const { email: teammateEmail, password: teammatePassword } = await registerAndLogin(
-      pageTeammate,
-      'Teammate',
-    );
+    const { email: teammateEmail } = await registerAndLogin(pageTeammate, 'Teammate');
 
     // Back to owner: invite the teammate
     const inviteButton = pageOwner.getByRole('button', { name: /invite|add.*member/i });
@@ -166,17 +154,15 @@ test.describe('Multi-Tenant / Workspace Management', () => {
       await inviteButton.first().click();
       await pageOwner.waitForTimeout(500);
 
-      const emailInput = pageOwner.getByLabel(/email/i).or(
-        pageOwner.locator('input[name="email"][type="email"]'),
-      );
+      const emailInput = pageOwner
+        .getByLabel(/email/i)
+        .or(pageOwner.locator('input[name="email"][type="email"]'));
       if ((await emailInput.count()) > 0) {
         await emailInput.last().fill(teammateEmail);
       }
 
       // Select role if available
-      const roleSelect = pageOwner.getByLabel(/role/i).or(
-        pageOwner.locator('select[name="role"]'),
-      );
+      const roleSelect = pageOwner.getByLabel(/role/i).or(pageOwner.locator('select[name="role"]'));
       if ((await roleSelect.count()) > 0) {
         await roleSelect.selectOption('member');
       }
@@ -204,9 +190,7 @@ test.describe('Multi-Tenant / Workspace Management', () => {
     await pageOwner.reload();
     await pageOwner.waitForTimeout(1000);
 
-    const memberListArea = pageOwner.getByText(teammateEmail).or(
-      pageOwner.getByText(/teammate/i),
-    );
+    const memberListArea = pageOwner.getByText(teammateEmail).or(pageOwner.getByText(/teammate/i));
     if ((await memberListArea.count()) > 0) {
       await expect(memberListArea.first()).toBeVisible();
     }
@@ -279,7 +263,7 @@ test.describe('Multi-Tenant / Workspace Management', () => {
     // Teammate setup - needs to be a member first
     const ctxMember: BrowserContext = await browser.newContext();
     const pageMember: Page = await ctxMember.newPage();
-    const { email: memberEmail } = await registerAndLogin(pageMember, 'RemoveMember');
+    await registerAndLogin(pageMember, 'RemoveMember');
 
     // Navigate to members section
     await pageOwner.goto(`${baseURL}/settings`);
@@ -372,9 +356,9 @@ test.describe('Multi-Tenant / Workspace Management', () => {
     }
 
     // Switch to workspace 1
-    const switcher = page.getByRole('button', { name: /workspace|switch|team/i }).or(
-      page.getByRole('combobox', { name: /workspace/i }),
-    );
+    const switcher = page
+      .getByRole('button', { name: /workspace|switch|team/i })
+      .or(page.getByRole('combobox', { name: /workspace/i }));
     if ((await switcher.count()) > 0) {
       await switcher.first().click();
       await page.waitForTimeout(500);
@@ -423,9 +407,7 @@ test.describe('Multi-Tenant / Workspace Management', () => {
     await page.waitForTimeout(2000);
 
     // The app should display a clear error message about the expired invitation
-    const errorMessage = page.getByText(
-      /expired|invalid|no longer valid|invitation.*not found/i,
-    );
+    const errorMessage = page.getByText(/expired|invalid|no longer valid|invitation.*not found/i);
 
     const hasError = (await errorMessage.count()) > 0;
     const isRedirected =

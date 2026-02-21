@@ -90,7 +90,9 @@ test.describe('Media upload flows', () => {
       });
 
       // Wait for avatar image to update (look for img with src containing blob: or /files/ or /media/)
-      const avatarImg = page.locator('img[alt*="avatar" i], img[alt*="profile" i], img.avatar').first();
+      const avatarImg = page
+        .locator('img[alt*="avatar" i], img[alt*="profile" i], img.avatar')
+        .first();
       if ((await avatarImg.count()) > 0) {
         await expect(avatarImg).toBeVisible({ timeout: 10000 });
         const src = await avatarImg.getAttribute('src');
@@ -101,9 +103,11 @@ test.describe('Media upload flows', () => {
       const error = page.getByText(/error|failed/i);
       if ((await error.count()) > 0) {
         // If there is a transient error toast, it should have disappeared
-        await expect(error).not.toBeVisible({ timeout: 5000 }).catch(() => {
-          // Not critical - some UIs show brief messages
-        });
+        await expect(error)
+          .not.toBeVisible({ timeout: 5000 })
+          .catch(() => {
+            // Not critical - some UIs show brief messages
+          });
       }
     }
   });
@@ -171,13 +175,11 @@ test.describe('Media upload flows', () => {
     await page.goto(`${baseURL}/settings`);
 
     // Find a drop zone area
-    const dropZone = page.locator(
-      '[data-testid="dropzone"], .dropzone, [class*="drop"], [role="presentation"]',
-    ).first();
+    const dropZone = page
+      .locator('[data-testid="dropzone"], .dropzone, [class*="drop"], [role="presentation"]')
+      .first();
 
     if ((await dropZone.count()) > 0) {
-      const buffer = Buffer.from('plain text test content for drag-drop');
-
       // Create a DataTransfer event to simulate drag and drop
       const dataTransfer = await page.evaluateHandle(() => new DataTransfer());
       await page.evaluate(
@@ -201,9 +203,11 @@ test.describe('Media upload flows', () => {
       const successIndicator = page.getByText(/uploaded|success|complete/i);
 
       // At least one of these should appear within a reasonable time
-      await expect(progress.or(successIndicator).first()).toBeVisible({ timeout: 15000 }).catch(() => {
-        // Drop zone may not be active in all configurations - test is resilient
-      });
+      await expect(progress.or(successIndicator).first())
+        .toBeVisible({ timeout: 15000 })
+        .catch(() => {
+          // Drop zone may not be active in all configurations - test is resilient
+        });
     }
   });
 
@@ -244,9 +248,11 @@ test.describe('Media upload flows', () => {
         '[role="alert"], .toast-error, [data-testid="error-message"], .error',
       );
 
-      await expect(errorMessage.or(toastError).first()).toBeVisible({ timeout: 10000 }).catch(() => {
-        // Browser-level validation may prevent the upload entirely, which is fine
-      });
+      await expect(errorMessage.or(toastError).first())
+        .toBeVisible({ timeout: 10000 })
+        .catch(() => {
+          // Browser-level validation may prevent the upload entirely, which is fine
+        });
     }
   });
 });

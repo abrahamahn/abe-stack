@@ -19,7 +19,9 @@ export const Default: Story = {
     <AuthLayout title="Sign In" description="Welcome back! Enter your credentials to continue.">
       <form
         style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ui-gap-md)' }}
-        onSubmit={(e) => { e.preventDefault(); }}
+        onSubmit={(e) => {
+          e.preventDefault();
+        }}
       >
         <Input.Field label="Email" type="email" placeholder="you@example.com" />
         <Input.Field label="Password" type="password" placeholder="Enter your password" />
@@ -36,7 +38,9 @@ export const Register: Story = {
     <AuthLayout title="Create Account" description="Sign up for a new account.">
       <form
         style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ui-gap-md)' }}
-        onSubmit={(e) => { e.preventDefault(); }}
+        onSubmit={(e) => {
+          e.preventDefault();
+        }}
       >
         <Input.Field label="Full Name" placeholder="Jane Doe" />
         <Input.Field label="Email" type="email" placeholder="you@example.com" />
@@ -58,7 +62,9 @@ export const ForgotPassword: Story = {
     >
       <form
         style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ui-gap-md)' }}
-        onSubmit={(e) => { e.preventDefault(); }}
+        onSubmit={(e) => {
+          e.preventDefault();
+        }}
       >
         <Input.Field label="Email" type="email" placeholder="you@example.com" />
         <Button variant="primary" type="submit">

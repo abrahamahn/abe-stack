@@ -387,7 +387,8 @@ describe('Golden Path: Tenant + RBAC Flow', () => {
     //   2nd call → membership insert row (snake_case)
     mockDb.transaction.mockImplementation(async (cb: (tx: unknown) => Promise<unknown>) => {
       const txMock = {
-        query: vi.fn()
+        query: vi
+          .fn()
           .mockResolvedValueOnce([TENANT_ROW])
           .mockResolvedValueOnce([OWNER_MEMBERSHIP_ROW]),
         execute: vi.fn().mockResolvedValue(0),

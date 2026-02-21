@@ -11,7 +11,11 @@ import {
   validateSqlSearchConfig,
 } from './search';
 
-import type { ElasticsearchProviderConfig, FullEnv, SqlSearchProviderConfig } from '@bslt/shared/config';
+import type {
+  ElasticsearchProviderConfig,
+  FullEnv,
+  SqlSearchProviderConfig,
+} from '@bslt/shared/config';
 
 /**
  * Creates a base environment with search-related defaults (as applied by Zod schema).

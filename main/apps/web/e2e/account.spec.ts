@@ -95,9 +95,7 @@ test.describe('Account Management', () => {
       if ((await profileLinkAgain.count()) > 0) {
         await profileLinkAgain.first().click();
       }
-      const usernameField = page
-        .getByLabel(/username/i)
-        .or(page.locator('input[name="username"]'));
+      const usernameField = page.getByLabel(/username/i).or(page.locator('input[name="username"]'));
       if ((await usernameField.count()) > 0) {
         await expect(usernameField).toHaveValue(newUsername);
       }
@@ -418,9 +416,7 @@ test.describe('Account Management', () => {
 
       if ((await sudoPrompt.count()) > 0) {
         // Enter password for re-authentication
-        const passwordInput = page.locator(
-          'input[type="password"]:visible',
-        );
+        const passwordInput = page.locator('input[type="password"]:visible');
         if ((await passwordInput.count()) > 0) {
           await passwordInput.last().fill(password);
         }

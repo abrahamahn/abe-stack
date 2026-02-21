@@ -88,7 +88,9 @@ function findPackages(dir: string): PackageInfo[] {
 }
 
 const packages = findPackages(MAIN_DIR).sort((a, b) => b.lines - a.lines);
-const maxLabel = Math.max(...packages.map((p) => `${p.name} (${relative(MAIN_DIR, p.dir)})`.length));
+const maxLabel = Math.max(
+  ...packages.map((p) => `${p.name} (${relative(MAIN_DIR, p.dir)})`.length),
+);
 
 console.log('Lines of Code by Package (excluding tests, comments, and blank lines):');
 console.log('-'.repeat(maxLabel + 12));
@@ -101,4 +103,6 @@ for (const pkg of packages) {
 }
 
 console.log('-'.repeat(maxLabel + 12));
-console.log(`Total Source Lines of Code (excluding tests, index.ts, comments, blank lines): ${total}`);
+console.log(
+  `Total Source Lines of Code (excluding tests, index.ts, comments, blank lines): ${total}`,
+);

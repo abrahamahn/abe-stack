@@ -82,9 +82,7 @@ test.describe('Sessions & Device Security', () => {
     await expect(sessionsList.first()).toBeVisible();
 
     // The current session should be labeled as "This device" or "Current session"
-    const currentIndicator = page
-      .getByText(/this device/i)
-      .or(page.getByText(/current session/i));
+    const currentIndicator = page.getByText(/this device/i).or(page.getByText(/current session/i));
     await expect(currentIndicator.first()).toBeVisible();
   });
 
@@ -117,9 +115,7 @@ test.describe('Sessions & Device Security', () => {
     await pageA.waitForTimeout(1000);
 
     // Revoke the other session (not the current one)
-    const revokeButton = pageA
-      .getByRole('button', { name: /revoke|end session|log out/i })
-      .first();
+    const revokeButton = pageA.getByRole('button', { name: /revoke|end session|log out/i }).first();
     if ((await revokeButton.count()) > 0) {
       await revokeButton.click();
 

@@ -10,7 +10,6 @@ import { Alert, Button, Text } from '@bslt/ui';
 import { clientConfig } from '@config';
 import { useCallback, useState, type ReactElement } from 'react';
 
-
 export interface ForgotPasswordShortcutProps {
   email: string;
   onSuccess?: () => void;

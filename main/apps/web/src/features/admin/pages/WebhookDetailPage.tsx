@@ -289,9 +289,7 @@ export function WebhookDetailPage({ webhookId }: WebhookDetailPageProps): ReactE
               <TableBody>
                 {deliveries.map((delivery) => (
                   <WebhookDeliveryRow
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
                     key={delivery.id}
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                     delivery={delivery}
                     onReplay={handleReplay}
                     isReplaying={replayDelivery.isLoading}

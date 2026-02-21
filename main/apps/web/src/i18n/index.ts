@@ -12,7 +12,13 @@
 // Types
 // ============================================================================
 
-export type { FlatTranslationMap, I18nContextValue, Locale, LocaleMetadata, TranslationMap } from './types';
+export type {
+  FlatTranslationMap,
+  I18nContextValue,
+  Locale,
+  LocaleMetadata,
+  TranslationMap,
+} from './types';
 export { DEFAULT_LOCALE, LOCALE_METADATA, SUPPORTED_LOCALES } from './types';
 
 // ============================================================================

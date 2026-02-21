@@ -429,9 +429,7 @@ describe('meter increment logic', () => {
 
     // First increment: no existing snapshot
     vi.mocked(repos.usageSnapshots.findByTenantAndMetric).mockResolvedValueOnce([]);
-    vi.mocked(repos.usageSnapshots.upsert).mockResolvedValueOnce(
-      createMockSnapshot({ value: 10 }),
-    );
+    vi.mocked(repos.usageSnapshots.upsert).mockResolvedValueOnce(createMockSnapshot({ value: 10 }));
 
     await recordUsage(repos, {
       metricKey: 'api_calls',
@@ -449,9 +447,7 @@ describe('meter increment logic', () => {
     vi.mocked(repos.usageSnapshots.findByTenantAndMetric).mockResolvedValueOnce([
       createMockSnapshot({ value: 10 }),
     ]);
-    vi.mocked(repos.usageSnapshots.upsert).mockResolvedValueOnce(
-      createMockSnapshot({ value: 35 }),
-    );
+    vi.mocked(repos.usageSnapshots.upsert).mockResolvedValueOnce(createMockSnapshot({ value: 35 }));
 
     await recordUsage(repos, {
       metricKey: 'api_calls',
@@ -568,9 +564,7 @@ describe('usage limit enforcement', () => {
   });
 
   it('unlimited limit (-1) never throws regardless of usage', async () => {
-    await expect(
-      assertWithinUsageLimit(repos, 'api_calls', 'tenant-1', -1),
-    ).resolves.not.toThrow();
+    await expect(assertWithinUsageLimit(repos, 'api_calls', 'tenant-1', -1)).resolves.not.toThrow();
     // findByKey should never have been called for unlimited
     expect(repos.usageMetrics.findByKey).not.toHaveBeenCalled();
   });

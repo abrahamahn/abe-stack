@@ -45,8 +45,8 @@ Build cache is stored at `node_modules/.cache/typescript/tsconfig.tsbuildinfo`.
 
 Defined in the root `tsconfig.json` `compilerOptions.paths`:
 
-| Alias                      | Source                              |
-| -------------------------- | ----------------------------------- |
+| Alias                 | Source                              |
+| --------------------- | ----------------------------------- |
 | `@bslt/shared`        | `./main/shared/src/index.ts`        |
 | `@bslt/ui`            | `./main/client/ui/src/index.ts`     |
 | `@bslt/api`           | `./main/client/api/src/index.ts`    |

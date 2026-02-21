@@ -31,8 +31,9 @@ import type {
   RouteDefinition as DbRouteDefinition,
   RouteMap as DbRouteMap,
   HandlerContext,
+  HttpReply,
+  HttpRequest,
 } from '@bslt/server-system';
-import type { FastifyReply, FastifyRequest } from 'fastify';
 
 import { registerRouteMap } from '@/http';
 
@@ -281,8 +282,8 @@ function adaptBillingRoutes(): DbRouteMap {
     const adaptedHandler = async (
       handlerCtx: HandlerContext,
       body: unknown,
-      req: FastifyRequest,
-      reply: FastifyReply,
+      req: HttpRequest,
+      reply: HttpReply,
     ): Promise<unknown> => {
       const result = await billingDef.handler(
         handlerCtx as unknown as BillingAppContext,

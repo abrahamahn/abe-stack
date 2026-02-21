@@ -10,7 +10,10 @@ export {
   InvalidPreferencesError,
   InvalidSubscriptionError,
   NOTIFICATION_PAYLOAD_MAX_SIZE,
-  NotificationRateLimitError, NotificationsDisabledError, NotificationSendError, PayloadTooLargeError,
+  NotificationRateLimitError,
+  NotificationsDisabledError,
+  NotificationSendError,
+  PayloadTooLargeError,
   PreferencesNotFoundError,
   ProviderError,
   ProviderNotConfiguredError,
@@ -21,6 +24,5 @@ export {
   SubscriptionExistsError,
   SubscriptionExpiredError,
   SubscriptionNotFoundError,
-  VapidNotConfiguredError
+  VapidNotConfiguredError,
 } from '@bslt/shared';
-

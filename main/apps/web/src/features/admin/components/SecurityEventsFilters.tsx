@@ -5,11 +5,7 @@
  * Filter controls for security events list.
  */
 
-import {
-  SECURITY_EVENT_TYPES,
-  SECURITY_SEVERITIES,
-  type SecurityEventsFilter,
-} from '@bslt/shared';
+import { SECURITY_EVENT_TYPES, SECURITY_SEVERITIES, type SecurityEventsFilter } from '@bslt/shared';
 import { Button, Input, Select } from '@bslt/ui';
 import { useCallback, useEffect, useState } from 'react';
 

@@ -67,9 +67,8 @@ test.describe('Webhook delivery flow', () => {
     expect(triggerResponse.status).toBeLessThan(500);
 
     await page.getByRole('button', { name: /^refresh$/i }).click();
-    await expect(
-      page.getByText(/delivered|failed|pending|dead letter/i).first(),
-    ).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText(/delivered|failed|pending|dead letter/i).first()).toBeVisible({
+      timeout: 15000,
+    });
   });
 });
-

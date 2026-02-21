@@ -113,7 +113,6 @@ describe('ApiKeyCreateDialog', () => {
   });
 
   it('should show copy-once modal after successful key creation', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let onSuccessCallback: ((response: any) => void) | undefined;
 
     vi.mocked(useCreateApiKey).mockImplementation((options) => {

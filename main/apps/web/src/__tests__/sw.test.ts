@@ -1,4 +1,4 @@
-// apps/web/src/__tests__/sw.test.ts
+// main/apps/web/src/__tests__/sw.test.ts
 /**
  * Unit tests for Service Worker (sw.js)
  *
@@ -1086,8 +1086,7 @@ describe('Service Worker (sw.js)', () => {
             notification.data !== null && notification.data !== undefined
               ? (notification.data as Record<string, string>)
               : {};
-          const targetUrl =
-            data['url'] !== undefined && data['url'] !== '' ? data['url'] : '/';
+          const targetUrl = data['url'] !== undefined && data['url'] !== '' ? data['url'] : '/';
 
           // No existing window, open new one
           const fullUrl = targetUrl.startsWith('http')
@@ -1118,8 +1117,7 @@ describe('Service Worker (sw.js)', () => {
             notification.data !== null && notification.data !== undefined
               ? (notification.data as Record<string, string>)
               : {};
-          const targetUrl =
-            data['url'] !== undefined && data['url'] !== '' ? data['url'] : '/';
+          const targetUrl = data['url'] !== undefined && data['url'] !== '' ? data['url'] : '/';
 
           const windowClients = await mockSelf.clients.matchAll({
             type: 'window',
@@ -1164,8 +1162,7 @@ describe('Service Worker (sw.js)', () => {
             notification.data !== null && notification.data !== undefined
               ? (notification.data as Record<string, string>)
               : {};
-          const targetUrl =
-            data['url'] !== undefined && data['url'] !== '' ? data['url'] : '/';
+          const targetUrl = data['url'] !== undefined && data['url'] !== '' ? data['url'] : '/';
 
           const windowClients = await mockSelf.clients.matchAll({
             type: 'window',
@@ -1209,8 +1206,7 @@ describe('Service Worker (sw.js)', () => {
             actions?: Array<{ action: string; title: string; url?: string }>;
           };
           const action = event.action;
-          let targetUrl =
-            data.url !== undefined && data.url !== '' ? data.url : '/';
+          let targetUrl = data.url !== undefined && data.url !== '' ? data.url : '/';
 
           // Check for action-specific URL
           if (action !== '' && data.actions !== undefined) {
@@ -1242,8 +1238,7 @@ describe('Service Worker (sw.js)', () => {
             notification.data !== null && notification.data !== undefined
               ? (notification.data as Record<string, string>)
               : {};
-          const targetUrl =
-            data['url'] !== undefined && data['url'] !== '' ? data['url'] : '/';
+          const targetUrl = data['url'] !== undefined && data['url'] !== '' ? data['url'] : '/';
 
           const fullUrl = targetUrl.startsWith('http')
             ? targetUrl
@@ -1268,8 +1263,7 @@ describe('Service Worker (sw.js)', () => {
             notification.data !== null && notification.data !== undefined
               ? (notification.data as Record<string, string>)
               : {};
-          const targetUrl =
-            data['url'] !== undefined && data['url'] !== '' ? data['url'] : '/';
+          const targetUrl = data['url'] !== undefined && data['url'] !== '' ? data['url'] : '/';
 
           await mockSelf.clients.openWindow(mockSelf.location.origin + targetUrl);
         })();

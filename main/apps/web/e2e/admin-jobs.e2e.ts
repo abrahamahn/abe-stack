@@ -82,7 +82,12 @@ test.describe('Admin Job Monitor Page', () => {
 
       for (const status of statusTexts) {
         const element = page.getByText(new RegExp(status, 'i'));
-        if (await element.first().isVisible().catch(() => false)) {
+        if (
+          await element
+            .first()
+            .isVisible()
+            .catch(() => false)
+        ) {
           foundStatus = true;
           break;
         }

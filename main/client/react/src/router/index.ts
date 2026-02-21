@@ -45,7 +45,7 @@ export type {
   RouterContextValue,
   RouterLocation,
   RouterProps,
-  RouterState
+  RouterState,
 } from './context';
 
 // Hooks
@@ -58,7 +58,7 @@ export type {
   NavigateProps,
   OutletProviderProps,
   RouteProps,
-  RoutesProps
+  RoutesProps,
 } from './components';
 
 // Alias for compatibility

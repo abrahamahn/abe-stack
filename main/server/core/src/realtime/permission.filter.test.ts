@@ -16,9 +16,7 @@ function createMockMembershipRepo(): MembershipRepository {
   };
 }
 
-function createMockMembership(
-  overrides: Partial<Membership> = {},
-): Membership {
+function createMockMembership(overrides: Partial<Membership> = {}): Membership {
   return {
     id: 'mem-1' as Membership['id'],
     tenantId: 'tenant-1' as Membership['tenantId'],
@@ -52,9 +50,7 @@ describe('filterRecordsForUser', () => {
   });
 
   it('should return all records when user has access to the workspace', async () => {
-    vi.mocked(repo.findByUserAndTenant).mockResolvedValue(
-      createMockMembership({ role: 'member' }),
-    );
+    vi.mocked(repo.findByUserAndTenant).mockResolvedValue(createMockMembership({ role: 'member' }));
 
     const records = [
       createMockRecord({ id: 'rec-1' }),
@@ -71,10 +67,7 @@ describe('filterRecordsForUser', () => {
   it('should return empty array when user has no workspace access', async () => {
     vi.mocked(repo.findByUserAndTenant).mockResolvedValue(null);
 
-    const records = [
-      createMockRecord({ id: 'rec-1' }),
-      createMockRecord({ id: 'rec-2' }),
-    ];
+    const records = [createMockRecord({ id: 'rec-1' }), createMockRecord({ id: 'rec-2' })];
 
     const result = await filterRecordsForUser('outsider', 'tenant-1', records, repo);
 
@@ -83,9 +76,7 @@ describe('filterRecordsForUser', () => {
   });
 
   it('should filter out cross-workspace records', async () => {
-    vi.mocked(repo.findByUserAndTenant).mockResolvedValue(
-      createMockMembership({ role: 'admin' }),
-    );
+    vi.mocked(repo.findByUserAndTenant).mockResolvedValue(createMockMembership({ role: 'admin' }));
 
     const records = [
       createMockRecord({ id: 'rec-1', tenantId: 'tenant-1' }),
@@ -110,9 +101,7 @@ describe('filterRecordsForUser', () => {
   });
 
   it('should preserve record types in output', async () => {
-    vi.mocked(repo.findByUserAndTenant).mockResolvedValue(
-      createMockMembership({ role: 'viewer' }),
-    );
+    vi.mocked(repo.findByUserAndTenant).mockResolvedValue(createMockMembership({ role: 'viewer' }));
 
     interface ExtendedRecord extends PermissionRecord {
       title: string;
@@ -132,9 +121,7 @@ describe('filterRecordsForUser', () => {
 
   it('should handle mixed access records', async () => {
     // First call for records in tenant-1, second for record in tenant-2
-    vi.mocked(repo.findByUserAndTenant).mockResolvedValue(
-      createMockMembership({ role: 'member' }),
-    );
+    vi.mocked(repo.findByUserAndTenant).mockResolvedValue(createMockMembership({ role: 'member' }));
 
     const records = [
       createMockRecord({ id: 'rec-1', tenantId: 'tenant-1' }),
@@ -185,9 +172,7 @@ describe('canAccessTenant', () => {
   });
 
   it('should return true when user is a member of the tenant', async () => {
-    vi.mocked(repo.findByUserAndTenant).mockResolvedValue(
-      createMockMembership({ role: 'viewer' }),
-    );
+    vi.mocked(repo.findByUserAndTenant).mockResolvedValue(createMockMembership({ role: 'viewer' }));
 
     const result = await canAccessTenant('user-1', 'tenant-1', repo);
 
@@ -214,9 +199,7 @@ describe('canAccessTenant', () => {
     const roles = ['owner', 'admin', 'member', 'viewer'] as const;
 
     for (const role of roles) {
-      vi.mocked(repo.findByUserAndTenant).mockResolvedValue(
-        createMockMembership({ role }),
-      );
+      vi.mocked(repo.findByUserAndTenant).mockResolvedValue(createMockMembership({ role }));
 
       const result = await canAccessTenant('user-1', 'tenant-1', repo);
       expect(result).toBe(true);

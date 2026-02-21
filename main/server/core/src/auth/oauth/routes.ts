@@ -9,11 +9,7 @@
  * @module oauth/routes
  */
 
-import {
-  emptyBodySchema,
-  oauthCallbackQuerySchema,
-  type OAuthCallbackQuery,
-} from '@bslt/shared';
+import { emptyBodySchema, oauthCallbackQuerySchema, type OAuthCallbackQuery } from '@bslt/shared';
 
 import {
   createRouteMap,

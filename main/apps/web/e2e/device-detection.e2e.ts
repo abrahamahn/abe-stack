@@ -14,7 +14,11 @@ const baseURL = process.env['E2E_BASE_URL'] ?? 'http://localhost:5173';
 const email = process.env['E2E_EMAIL'];
 const password = process.env['E2E_PASSWORD'];
 
-async function login(page: import('@playwright/test').Page, userEmail: string, userPassword: string) {
+async function login(
+  page: import('@playwright/test').Page,
+  userEmail: string,
+  userPassword: string,
+) {
   await page.goto(`${baseURL}/auth/login`);
   await page.getByLabel(/email/i).fill(userEmail);
   await page.getByLabel(/password/i).fill(userPassword);
@@ -56,4 +60,3 @@ test.describe('Device detection flow', () => {
     await expect(page.getByText(/new device or location/i)).toHaveCount(0);
   });
 });
-

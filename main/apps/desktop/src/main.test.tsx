@@ -56,6 +56,26 @@ vi.mock('react-dom/client', () => ({
   createRoot: mockCreateRoot,
 }));
 
+// Keep main.tsx imports fast and deterministic in tests.
+vi.mock('@app/App', () => ({
+  ['App']: () => <div data-testid="mock-app">Mock App</div>,
+}));
+
+vi.mock('@config', () => ({
+  ['clientConfig']: { isDev: false },
+}));
+
+const mockInitialize = vi.fn().mockResolvedValue(undefined);
+vi.mock('@features/auth', () => ({
+  ['createAuthService']: () => ({ initialize: mockInitialize }),
+}));
+
+const MockQueryCache = vi.fn(function mockQueryCache(_options: unknown) {});
+
+vi.mock('@bslt/client-engine', () => ({
+  ['QueryCache']: MockQueryCache,
+}));
+
 describe('main.tsx', () => {
   let rootElement: HTMLDivElement | null = null;
 
@@ -285,8 +305,7 @@ describe('main.tsx', () => {
                     <ul className="list-disc ml-6 mt-2 space-y-1">
                       <li>
                         <Text as="span">
-                          Shared UI from{' '}
-                          <code className="bg-subtle px-1 rounded">@bslt/ui</code>
+                          Shared UI from <code className="bg-subtle px-1 rounded">@bslt/ui</code>
                         </Text>
                       </li>
                     </ul>

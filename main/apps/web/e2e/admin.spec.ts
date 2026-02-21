@@ -71,9 +71,11 @@ test.describe('Admin dashboard flows', () => {
     }
 
     // Click on the user row to view details
-    const userRow = page.locator('tr, [data-testid="user-row"]', {
-      hasText: testUserEmail ?? '',
-    }).first();
+    const userRow = page
+      .locator('tr, [data-testid="user-row"]', {
+        hasText: testUserEmail ?? '',
+      })
+      .first();
     await expect(userRow).toBeVisible({ timeout: 10000 });
     await userRow.click();
 
@@ -138,9 +140,7 @@ test.describe('Admin dashboard flows', () => {
     page,
   }) => {
     test.skip(
-      adminEmail === undefined ||
-        adminPassword === undefined ||
-        testUserEmail === undefined,
+      adminEmail === undefined || adminPassword === undefined || testUserEmail === undefined,
       'Set E2E_ADMIN_EMAIL, E2E_ADMIN_PASSWORD, and E2E_TEST_USER_EMAIL to run impersonation E2E test.',
     );
 
@@ -154,16 +154,20 @@ test.describe('Admin dashboard flows', () => {
       await searchInput.press('Enter');
     }
 
-    const userRow = page.locator('tr, [data-testid="user-row"]', {
-      hasText: testUserEmail ?? '',
-    }).first();
+    const userRow = page
+      .locator('tr, [data-testid="user-row"]', {
+        hasText: testUserEmail ?? '',
+      })
+      .first();
     await expect(userRow).toBeVisible({ timeout: 10000 });
     await userRow.click();
 
     // Click the impersonate button
-    const impersonateButton = page.getByRole('button', {
-      name: /impersonate|view as/i,
-    }).first();
+    const impersonateButton = page
+      .getByRole('button', {
+        name: /impersonate|view as/i,
+      })
+      .first();
     if ((await impersonateButton.count()) > 0) {
       await impersonateButton.click();
 
@@ -190,9 +194,11 @@ test.describe('Admin dashboard flows', () => {
       await expect(page).toHaveURL(/admin|dashboard/i, { timeout: 10000 });
 
       // Impersonation banner should be gone
-      await expect(bannerText).not.toBeVisible({ timeout: 5000 }).catch(() => {
-        // Banner may already be removed
-      });
+      await expect(bannerText)
+        .not.toBeVisible({ timeout: 5000 })
+        .catch(() => {
+          // Banner may already be removed
+        });
     }
   });
 
@@ -238,9 +244,11 @@ test.describe('Admin dashboard flows', () => {
       await expect(page.getByText(planName)).toBeVisible({ timeout: 10000 });
 
       // Edit the plan
-      const planRow = page.locator('tr, [data-testid="plan-row"]', {
-        hasText: planName,
-      }).first();
+      const planRow = page
+        .locator('tr, [data-testid="plan-row"]', {
+          hasText: planName,
+        })
+        .first();
       const editButton = planRow.getByRole('button', { name: /edit/i });
       if ((await editButton.count()) > 0) {
         await editButton.click();
@@ -271,9 +279,11 @@ test.describe('Admin dashboard flows', () => {
 
         // Plan should show as inactive or be removed from active list
         const statusIndicator = page.getByText(/inactive|deactivated|archived/i);
-        await expect(statusIndicator).toBeVisible({ timeout: 5000 }).catch(() => {
-          // Plan might have been removed from the active list entirely
-        });
+        await expect(statusIndicator)
+          .toBeVisible({ timeout: 5000 })
+          .catch(() => {
+            // Plan might have been removed from the active list entirely
+          });
       }
     }
   });
@@ -355,15 +365,11 @@ test.describe('Admin dashboard flows', () => {
     await page.waitForLoadState('networkidle');
 
     // Verify routes are displayed
-    const routesContainer = page.locator(
-      'table, [data-testid="routes-list"], .route-manifest',
-    );
+    const routesContainer = page.locator('table, [data-testid="routes-list"], .route-manifest');
     await expect(routesContainer.first()).toBeVisible({ timeout: 10000 });
 
     // Look for route entries showing method and path
-    const routeEntries = page.locator(
-      'tr, [data-testid="route-entry"], .route-row',
-    );
+    const routeEntries = page.locator('tr, [data-testid="route-entry"], .route-row');
     const routeCount = await routeEntries.count();
     expect(routeCount).toBeGreaterThan(0);
 

@@ -86,7 +86,10 @@ test.describe('RBAC & Authorization', () => {
       // Regular user should either be redirected to dashboard or see a 403 page
       const url = page.url();
       const isRedirected = /dashboard/i.test(url);
-      const hasForbiddenMessage = await page.getByText(/forbidden|not authorized|access denied/i).isVisible().catch(() => false);
+      const hasForbiddenMessage = await page
+        .getByText(/forbidden|not authorized|access denied/i)
+        .isVisible()
+        .catch(() => false);
 
       expect(isRedirected || hasForbiddenMessage).toBe(true);
     });
@@ -108,7 +111,10 @@ test.describe('RBAC & Authorization', () => {
       // Should not see admin user management content
       const url = page.url();
       const isRedirected = /dashboard/i.test(url);
-      const hasForbiddenMessage = await page.getByText(/forbidden|not authorized|access denied/i).isVisible().catch(() => false);
+      const hasForbiddenMessage = await page
+        .getByText(/forbidden|not authorized|access denied/i)
+        .isVisible()
+        .catch(() => false);
 
       expect(isRedirected || hasForbiddenMessage).toBe(true);
     });
@@ -140,14 +146,26 @@ test.describe('RBAC & Authorization', () => {
 
       if ((await createButton.count()) > 0) {
         // Button exists but should be disabled or hidden for viewers
-        const isDisabled = await createButton.first().isDisabled().catch(() => false);
-        const isHidden = await createButton.first().isHidden().catch(() => true);
+        const isDisabled = await createButton
+          .first()
+          .isDisabled()
+          .catch(() => false);
+        const isHidden = await createButton
+          .first()
+          .isHidden()
+          .catch(() => true);
         expect(isDisabled || isHidden).toBe(true);
       }
 
       if ((await editButton.count()) > 0) {
-        const isDisabled = await editButton.first().isDisabled().catch(() => false);
-        const isHidden = await editButton.first().isHidden().catch(() => true);
+        const isDisabled = await editButton
+          .first()
+          .isDisabled()
+          .catch(() => false);
+        const isHidden = await editButton
+          .first()
+          .isHidden()
+          .catch(() => true);
         expect(isDisabled || isHidden).toBe(true);
       }
     });
@@ -226,8 +244,14 @@ test.describe('RBAC & Authorization', () => {
       const transferLink = page.getByRole('link', { name: /transfer ownership/i });
 
       if ((await transferButton.count()) > 0) {
-        const isDisabled = await transferButton.first().isDisabled().catch(() => false);
-        const isHidden = await transferButton.first().isHidden().catch(() => true);
+        const isDisabled = await transferButton
+          .first()
+          .isDisabled()
+          .catch(() => false);
+        const isHidden = await transferButton
+          .first()
+          .isHidden()
+          .catch(() => true);
         expect(isDisabled || isHidden).toBe(true);
       } else if ((await transferLink.count()) > 0) {
         // Transfer ownership link should not be visible to workspace admins

@@ -23,18 +23,6 @@ const DYNAMIC_CACHE = `dynamic-${CACHE_VERSION}`;
 const API_CACHE = `api-${CACHE_VERSION}`;
 const ASSET_CACHE = `assets-${CACHE_VERSION}`;
 
-/**
- * Maximum age for cached API responses (5 minutes).
- * Responses older than this are considered stale.
- */
-const API_CACHE_MAX_AGE_MS = 5 * 60 * 1000;
-
-/**
- * Maximum number of entries in the API cache.
- * Oldest entries are evicted when exceeded.
- */
-const API_CACHE_MAX_ENTRIES = 50;
-
 // Assets to pre-cache during install
 const PRECACHE_ASSETS = [
   '/',
@@ -69,20 +57,7 @@ const SWR_ASSET_PATTERNS = [
  * Immutable assets (fonts) that use cache-first:
  * These rarely change and are safe to serve from cache indefinitely.
  */
-const IMMUTABLE_ASSET_PATTERNS = [
-  /\.woff2?$/,
-  /\.ttf$/,
-  /\.otf$/,
-  /\.eot$/,
-];
-
-/**
- * Combined static asset patterns for backwards compatibility.
- */
-const STATIC_ASSET_PATTERNS = [
-  ...SWR_ASSET_PATTERNS,
-  ...IMMUTABLE_ASSET_PATTERNS,
-];
+const IMMUTABLE_ASSET_PATTERNS = [/\.woff2?$/, /\.ttf$/, /\.otf$/, /\.eot$/];
 
 /**
  * Fingerprinted asset pattern: files with a content hash in the name.
@@ -104,13 +79,6 @@ const HTML_PATTERNS = [/\.html$/, /\/$/];
 function matchesPattern(url, patterns) {
   const pathname = new URL(url).pathname;
   return patterns.some((pattern) => pattern.test(pathname) || pattern.test(url));
-}
-
-/**
- * Check if request is for a static asset
- */
-function isStaticAsset(request) {
-  return matchesPattern(request.url, STATIC_ASSET_PATTERNS);
 }
 
 /**

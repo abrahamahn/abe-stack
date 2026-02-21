@@ -8,20 +8,18 @@
  */
 
 import {
-  createLogger,
-  type BaseLogger,
-  type LogData,
-} from './logger';
-
-import {
   createDbClient,
   createRepositories,
   requireValidSchema,
   type DbClient,
+  type QueueStore,
   type Repositories,
   type SessionContext,
+  type WriteService,
+  createPostgresPubSub,
+  type PostgresPubSub,
 } from '@bslt/db';
-
+import { createPostgresQueueStore, createWriteService } from '@bslt/db';
 import {
   type BillingService,
   type DetailedHealthResponse,
@@ -33,20 +31,16 @@ import {
   type StorageClient,
 } from '@bslt/shared';
 
-import { createPostgresPubSub, type PostgresPubSub } from '@bslt/db';
-import { createPostgresQueueStore } from '@bslt/db';
-import { createWriteService } from '@bslt/db';
 import { createCache } from './cache';
-import { emailTemplates, type AuthEmailTemplates } from './email';
-import { getDetailedHealth, logStartupSummary } from './system';
 import { initEnv, loadServerEnv } from './config';
+import { emailTemplates, type AuthEmailTemplates } from './email';
+import { createLogger, type BaseLogger, type LogData } from './logger';
 import { addBreadcrumb, captureError, initSentry, setUserContext } from './observability';
+import { getDetailedHealth, logStartupSummary } from './system';
 
 import type { AppConfig, PostgresConfig } from './config';
-import type { QueueStore } from '@bslt/db';
 import type { ServerSearchProvider } from './search';
 import type { SmsProvider } from './sms';
-import type { WriteService } from '@bslt/db';
 
 /**
  * Full system context assembled at bootstrap time.

@@ -8,6 +8,7 @@
  *
  * Moved from @bslt/server-system to keep Fastify coupling in the app layer.
  */
+import { replyError, type HttpReply } from '@bslt/server-system';
 import {
   AppError,
   BadRequestError,
@@ -15,7 +16,6 @@ import {
   mapErrorToHttpResponse,
 } from '@bslt/shared/system';
 
-import { replyError, type HttpReply } from '@bslt/server-system';
 
 import type { FastifyBaseLogger, FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 

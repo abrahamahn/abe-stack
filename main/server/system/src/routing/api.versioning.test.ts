@@ -268,7 +268,10 @@ describe('apiVersioningPlugin', () => {
   });
 
   function createMockRequest(
-    overrides: Partial<{ url: string; headers: Record<string, string | string[] | undefined> }> = {},
+    overrides: Partial<{
+      url: string;
+      headers: Record<string, string | string[] | undefined>;
+    }> = {},
   ): FastifyRequest {
     return {
       url: '/api/test',

@@ -202,11 +202,7 @@ export function createPermissionMiddleware(
     return permissions;
   };
 
-  const hasRole = (
-    connectionId: string,
-    tenantId: string,
-    requiredRole: TenantRole,
-  ): boolean => {
+  const hasRole = (connectionId: string, tenantId: string, requiredRole: TenantRole): boolean => {
     const permissions = getConnectionPermissions(connectionId);
     if (permissions === null) {
       return false;

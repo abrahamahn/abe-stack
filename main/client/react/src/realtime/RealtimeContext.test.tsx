@@ -292,9 +292,7 @@ describe('RealtimeContext', () => {
         return createElement('span', null, 'subscribed');
       };
 
-      render(
-        createElement(RealtimeProvider<TestTables>, { config }, createElement(TestComponent)),
-      );
+      render(createElement(RealtimeProvider<TestTables>, { config }, createElement(TestComponent)));
 
       await act(async () => {
         await vi.advanceTimersByTimeAsync(0);
@@ -325,9 +323,7 @@ describe('RealtimeContext', () => {
         return createElement('span', { ['data-testid']: 'user-name' }, user?.name ?? 'not found');
       };
 
-      render(
-        createElement(RealtimeProvider<TestTables>, { config }, createElement(TestComponent)),
-      );
+      render(createElement(RealtimeProvider<TestTables>, { config }, createElement(TestComponent)));
 
       await act(async () => {
         await vi.advanceTimersByTimeAsync(100);
@@ -364,9 +360,7 @@ describe('RealtimeContext', () => {
         );
       };
 
-      render(
-        createElement(RealtimeProvider<TestTables>, { config }, createElement(TestComponent)),
-      );
+      render(createElement(RealtimeProvider<TestTables>, { config }, createElement(TestComponent)));
 
       await waitFor(
         () => {
@@ -401,8 +395,12 @@ describe('RealtimeContext', () => {
         useEffect(() => {
           if (written && !undone && undoRedoState.canUndo) {
             undo();
-            const id = setTimeout(() => { setUndone(true); }, 0);
-            return (): void => { clearTimeout(id); };
+            const id = setTimeout(() => {
+              setUndone(true);
+            }, 0);
+            return (): void => {
+              clearTimeout(id);
+            };
           }
           return;
         }, [written, undone, undoRedoState.canUndo, undo]);
@@ -416,9 +414,7 @@ describe('RealtimeContext', () => {
         );
       };
 
-      render(
-        createElement(RealtimeProvider<TestTables>, { config }, createElement(TestComponent)),
-      );
+      render(createElement(RealtimeProvider<TestTables>, { config }, createElement(TestComponent)));
 
       await waitFor(
         () => {
@@ -495,9 +491,7 @@ describe('RealtimeContext', () => {
         return createElement('span', { ['data-testid']: 'user-name' }, user?.name ?? 'not found');
       };
 
-      render(
-        createElement(RealtimeProvider<TestTables>, { config }, createElement(TestComponent)),
-      );
+      render(createElement(RealtimeProvider<TestTables>, { config }, createElement(TestComponent)));
 
       await waitFor(
         () => {
@@ -587,9 +581,7 @@ describe('RealtimeContext', () => {
         );
       };
 
-      render(
-        createElement(RealtimeProvider<TestTables>, { config }, createElement(TestComponent)),
-      );
+      render(createElement(RealtimeProvider<TestTables>, { config }, createElement(TestComponent)));
 
       await waitFor(
         () => {
@@ -628,8 +620,12 @@ describe('RealtimeContext', () => {
         useEffect(() => {
           if (step === 1 && undoRedoState.canUndo) {
             undo();
-            const id = setTimeout(() => { setStep(2); }, 0);
-            return (): void => { clearTimeout(id); };
+            const id = setTimeout(() => {
+              setStep(2);
+            }, 0);
+            return (): void => {
+              clearTimeout(id);
+            };
           }
           return;
         }, [step, undoRedoState.canUndo, undo]);
@@ -637,8 +633,12 @@ describe('RealtimeContext', () => {
         useEffect(() => {
           if (step === 2 && undoRedoState.canRedo) {
             redo();
-            const id = setTimeout(() => { setStep(3); }, 0);
-            return (): void => { clearTimeout(id); };
+            const id = setTimeout(() => {
+              setStep(3);
+            }, 0);
+            return (): void => {
+              clearTimeout(id);
+            };
           }
           return;
         }, [step, undoRedoState.canRedo, redo]);
@@ -652,9 +652,7 @@ describe('RealtimeContext', () => {
         );
       };
 
-      render(
-        createElement(RealtimeProvider<TestTables>, { config }, createElement(TestComponent)),
-      );
+      render(createElement(RealtimeProvider<TestTables>, { config }, createElement(TestComponent)));
 
       await waitFor(
         () => {

@@ -39,11 +39,7 @@ export const WithDescription: Story = {
 
 export const WithError: Story = {
   render: () => (
-    <Input.Field
-      label="Password"
-      type="password"
-      error="Password must be at least 8 characters."
-    />
+    <Input.Field label="Password" type="password" error="Password must be at least 8 characters." />
   ),
 };
 
@@ -53,7 +49,14 @@ export const DisabledField: Story = {
 
 export const AllStates: Story = {
   render: () => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ui-gap-lg)', maxWidth: '24rem' }}>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 'var(--ui-gap-lg)',
+        maxWidth: '24rem',
+      }}
+    >
       <Input.Field label="Default" placeholder="Enter text..." />
       <Input.Field label="With value" defaultValue="Some text content" />
       <Input.Field
@@ -61,11 +64,7 @@ export const AllStates: Story = {
         description="This field includes a helpful description."
         placeholder="Type here..."
       />
-      <Input.Field
-        label="With error"
-        error="This field is required."
-        defaultValue=""
-      />
+      <Input.Field label="With error" error="This field is required." defaultValue="" />
       <Input.Field label="Disabled" defaultValue="Cannot edit this" disabled />
     </div>
   ),

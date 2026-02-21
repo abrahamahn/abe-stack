@@ -124,9 +124,7 @@ export class SentryNodeProvider implements ErrorTrackingProvider {
   setUserContext(userId: string, email?: string): void {
     if (!this.initialized || Sentry === null) return;
 
-    Sentry.setUser(
-      email !== undefined ? { id: userId, email } : { id: userId },
-    );
+    Sentry.setUser(email !== undefined ? { id: userId, email } : { id: userId });
   }
 
   /**

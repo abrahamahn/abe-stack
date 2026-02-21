@@ -31,18 +31,15 @@ test.describe('Data Export', () => {
     await expect(page).toHaveURL(/dashboard/i);
 
     // Navigate to settings / privacy section
-    const settingsLink =
-      page.getByRole('link', { name: /settings/i }).or(
-        page.getByRole('link', { name: /account/i }),
-      );
+    const settingsLink = page
+      .getByRole('link', { name: /settings/i })
+      .or(page.getByRole('link', { name: /account/i }));
     await settingsLink.click();
 
-    const privacySection =
-      page.getByRole('link', { name: /privacy/i }).or(
-        page.getByRole('tab', { name: /privacy/i }),
-      ).or(
-        page.getByText(/data export/i),
-      );
+    const privacySection = page
+      .getByRole('link', { name: /privacy/i })
+      .or(page.getByRole('tab', { name: /privacy/i }))
+      .or(page.getByText(/data export/i));
     if ((await privacySection.count()) > 0) {
       await privacySection.first().click();
     }
@@ -118,17 +115,15 @@ test.describe('Account Deletion', () => {
     }
 
     // Navigate to account settings
-    const settingsLink =
-      page.getByRole('link', { name: /settings/i }).or(
-        page.getByRole('link', { name: /account/i }),
-      );
+    const settingsLink = page
+      .getByRole('link', { name: /settings/i })
+      .or(page.getByRole('link', { name: /account/i }));
     await settingsLink.click();
 
     // Look for the delete account section
-    const deleteSection =
-      page.getByRole('button', { name: /delete.*account/i }).or(
-        page.getByText(/delete.*account/i),
-      );
+    const deleteSection = page
+      .getByRole('button', { name: /delete.*account/i })
+      .or(page.getByText(/delete.*account/i));
 
     if ((await deleteSection.count()) > 0) {
       await deleteSection.first().click();
@@ -149,9 +144,7 @@ test.describe('Account Deletion', () => {
       // Expect to be on login page or landing page
       const currentUrl = page.url();
       const isLoggedOut =
-        currentUrl.includes('login') ||
-        currentUrl === baseURL ||
-        currentUrl === `${baseURL}/`;
+        currentUrl.includes('login') || currentUrl === baseURL || currentUrl === `${baseURL}/`;
       expect(isLoggedOut).toBe(true);
 
       // Try to log back in during grace period — should fail
@@ -166,14 +159,11 @@ test.describe('Account Deletion', () => {
 
       // Expect login to fail or show account pending deletion message
       await page.waitForTimeout(1000);
-      const errorOrPending =
-        page.getByText(/deleted/i).or(
-          page.getByText(/pending/i),
-        ).or(
-          page.getByText(/deactivated/i),
-        ).or(
-          page.getByText(/error/i),
-        );
+      const errorOrPending = page
+        .getByText(/deleted/i)
+        .or(page.getByText(/pending/i))
+        .or(page.getByText(/deactivated/i))
+        .or(page.getByText(/error/i));
 
       // We should either see an error or still be on the login page
       const stillOnLogin = page.url().includes('login');
@@ -211,7 +201,6 @@ test.describe('Terms of Service', () => {
       await expect(tosPrompt.first()).toBeVisible();
 
       // The dashboard should not be accessible yet
-      const dashboardContent = page.getByText(/dashboard/i);
       // Dashboard may or may not be visible depending on the gating approach
       // but the ToS prompt should be prominent
 
@@ -222,9 +211,7 @@ test.describe('Terms of Service', () => {
         .or(page.getByRole('button', { name: /i accept/i }));
 
       // May need to check the checkbox first
-      const checkbox = page
-        .getByRole('checkbox')
-        .or(page.locator('[data-testid="tos-checkbox"]'));
+      const checkbox = page.getByRole('checkbox').or(page.locator('[data-testid="tos-checkbox"]'));
       if ((await checkbox.count()) > 0) {
         await checkbox.first().check();
       }
@@ -274,10 +261,9 @@ test.describe('Terms of Service', () => {
     await expect(page.getByText(/dashboard/i)).toBeVisible();
 
     // Verify navigation works (settings, etc.)
-    const settingsLink =
-      page.getByRole('link', { name: /settings/i }).or(
-        page.getByRole('link', { name: /account/i }),
-      );
+    const settingsLink = page
+      .getByRole('link', { name: /settings/i })
+      .or(page.getByRole('link', { name: /account/i }));
     if ((await settingsLink.count()) > 0) {
       await settingsLink.first().click();
       // Should navigate successfully without being blocked
@@ -310,18 +296,15 @@ test.describe('Consent Preferences', () => {
     await expect(page).toHaveURL(/dashboard/i);
 
     // Navigate to consent/privacy settings
-    const settingsLink =
-      page.getByRole('link', { name: /settings/i }).or(
-        page.getByRole('link', { name: /account/i }),
-      );
+    const settingsLink = page
+      .getByRole('link', { name: /settings/i })
+      .or(page.getByRole('link', { name: /account/i }));
     await settingsLink.click();
 
-    const privacyTab =
-      page.getByRole('link', { name: /privacy/i }).or(
-        page.getByRole('tab', { name: /privacy/i }),
-      ).or(
-        page.getByRole('link', { name: /consent/i }),
-      );
+    const privacyTab = page
+      .getByRole('link', { name: /privacy/i })
+      .or(page.getByRole('tab', { name: /privacy/i }))
+      .or(page.getByRole('link', { name: /consent/i }));
     if ((await privacyTab.count()) > 0) {
       await privacyTab.first().click();
     }

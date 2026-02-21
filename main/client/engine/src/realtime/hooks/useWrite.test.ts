@@ -142,9 +142,7 @@ describe('useWrite types and deps', () => {
     it('should apply optimistic updates to cache', () => {
       cache.set('user', 'u1', { id: 'u1', version: 1, name: 'Alice', email: 'a@test.com' });
 
-      const operations: WriteOperation[] = [
-        { table: 'user', id: 'u1', updates: { name: 'Bob' } },
-      ];
+      const operations: WriteOperation[] = [{ table: 'user', id: 'u1', updates: { name: 'Bob' } }];
 
       // Simulate the optimistic update logic from useWrite
       for (const op of operations) {
@@ -153,7 +151,7 @@ describe('useWrite types and deps', () => {
           | undefined;
         if (existing !== undefined) {
           const updated = { ...existing, ...op.updates };
-          cache.set(op.table as 'user', op.id, updated as User, { force: true });
+          cache.set(op.table as 'user', op.id, updated as unknown as User, { force: true });
         }
       }
 
@@ -215,7 +213,13 @@ describe('useWrite types and deps', () => {
         { table: 'user', id: 'u1', updates: { name: 'Bob', email: 'bob@test.com' } },
       ];
 
-      const flatOperations: Array<{ type: string; table: string; id: string; key: string; value: unknown }> = [];
+      const flatOperations: Array<{
+        type: string;
+        table: string;
+        id: string;
+        key: string;
+        value: unknown;
+      }> = [];
       for (const op of operations) {
         for (const [key, value] of Object.entries(op.updates)) {
           flatOperations.push({

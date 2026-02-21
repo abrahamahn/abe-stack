@@ -51,13 +51,15 @@ function createMockFileRepo(record: FileRecord | null = null): FileRepository {
     findById: vi.fn().mockResolvedValue(record),
     findByUserId: vi.fn().mockResolvedValue(record !== null ? [record] : []),
     findByTenantId: vi.fn().mockResolvedValue(record !== null ? [record] : []),
-    create: vi.fn().mockImplementation((data: NewFileRecord): FileRecord => ({
-      ...createMockFileRecord(),
-      ...data,
-      id: 'file-new',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    })),
+    create: vi.fn().mockImplementation(
+      (data: NewFileRecord): FileRecord => ({
+        ...createMockFileRecord(),
+        ...data,
+        id: 'file-new',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }),
+    ),
     update: vi.fn().mockResolvedValue(record),
     delete: vi.fn().mockResolvedValue(true),
     deleteByUserId: vi.fn().mockResolvedValue(0),

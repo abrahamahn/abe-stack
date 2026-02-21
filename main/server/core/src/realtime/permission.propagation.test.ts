@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createPermissionChangeHandler } from './permission.propagation';
 
+import type { ConnectionPermissions, PermissionMiddleware } from './permission.middleware';
 import type {
   ConnectionRegistry,
   PermissionChangeHandler,
@@ -10,8 +11,6 @@ import type {
   SubscriptionRegistry,
   WebSocketConnection,
 } from './permission.propagation';
-import type { ConnectionPermissions, PermissionMiddleware } from './permission.middleware';
-import type { Membership } from '@bslt/shared';
 
 // ============================================================================
 // Test Helpers
@@ -57,20 +56,6 @@ function createMockConnectionPermissions(
     userId: 'user-1',
     memberships: new Map(),
     loadedAt: Date.now(),
-    ...overrides,
-  };
-}
-
-function createMockMembership(
-  overrides: Partial<Membership> = {},
-): Membership {
-  return {
-    id: 'mem-1' as Membership['id'],
-    tenantId: 'tenant-1' as Membership['tenantId'],
-    userId: 'user-1' as Membership['userId'],
-    role: 'member',
-    createdAt: '2026-01-01T00:00:00Z',
-    updatedAt: '2026-01-01T00:00:00Z',
     ...overrides,
   };
 }
@@ -182,9 +167,7 @@ describe('createPermissionChangeHandler', () => {
 
       vi.mocked(connectionRegistry.getConnectionIds).mockReturnValue(['conn-1', 'conn-2']);
       vi.mocked(middleware.getConnectionPermissions).mockReturnValue(permissions);
-      vi.mocked(connectionRegistry.getConnection)
-        .mockReturnValueOnce(ws1)
-        .mockReturnValueOnce(ws2);
+      vi.mocked(connectionRegistry.getConnection).mockReturnValueOnce(ws1).mockReturnValueOnce(ws2);
       vi.mocked(subscriptionRegistry.removeSubscriptionsForTenant)
         .mockReturnValueOnce(2)
         .mockReturnValueOnce(1);
@@ -404,9 +387,7 @@ describe('createPermissionChangeHandler', () => {
 
       vi.mocked(connectionRegistry.getConnectionIds).mockReturnValue(['conn-1', 'conn-2']);
       vi.mocked(middleware.getConnectionPermissions).mockReturnValue(permissions);
-      vi.mocked(connectionRegistry.getConnection)
-        .mockReturnValueOnce(ws1)
-        .mockReturnValueOnce(ws2);
+      vi.mocked(connectionRegistry.getConnection).mockReturnValueOnce(ws1).mockReturnValueOnce(ws2);
       vi.mocked(subscriptionRegistry.removeSubscriptionsForTenant).mockReturnValue(1);
       vi.mocked(middleware.refreshPermissions).mockResolvedValue(null);
 

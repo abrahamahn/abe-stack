@@ -9,15 +9,9 @@
 import { authRoutes, createAuthGuard } from '@bslt/core/auth';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import {
-  createTestServer,
-  parseJsonResponse,
-  type TestServer,
-} from './test-utils';
+import { createTestServer, parseJsonResponse, type TestServer } from './test-utils';
 
 import type { AuthGuardFactory } from '@/http';
-
-import { registerRouteMap } from '@/http';
 
 import { registerRouteMap } from '@/http';
 

@@ -29,7 +29,9 @@ test.describe('Terms of Service — E2E', () => {
     await expect(page.locator('main')).toBeVisible();
 
     // Check that the app shell loads properly (ToS check happens after login)
-    const heading = page.getByRole('heading', { level: 1 }).or(page.getByRole('heading', { level: 2 }));
+    const heading = page
+      .getByRole('heading', { level: 1 })
+      .or(page.getByRole('heading', { level: 2 }));
     await expect(heading.first()).toBeVisible({ timeout: 5000 });
   });
 

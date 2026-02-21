@@ -36,8 +36,8 @@ graph TD
   db --> shared
 ```
 
-| Layer              | Package                    | Workspace deps                                                                   |
-| ------------------ | -------------------------- | -------------------------------------------------------------------------------- |
+| Layer              | Package               | Workspace deps                                                                   |
+| ------------------ | --------------------- | -------------------------------------------------------------------------------- |
 | `apps/server`      | `@bslt/server`        | server/core, server/db, server/realtime, server/system, shared, server/websocket |
 | `server/core`      | `@bslt/core`          | server/media, server/system, server/db, shared                                   |
 | `server/system`    | `@bslt/server-system` | server/db, shared                                                                |

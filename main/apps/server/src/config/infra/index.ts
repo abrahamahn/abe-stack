@@ -4,7 +4,13 @@
 export { DEFAULT_CACHE_CONFIG, loadCacheConfig } from './cache';
 
 // database.ts
-export { buildConnectionString, getSafeConnectionString, isJsonDatabase, isPostgres, loadDatabaseConfig } from './database';
+export {
+  buildConnectionString,
+  getSafeConnectionString,
+  isJsonDatabase,
+  isPostgres,
+  loadDatabaseConfig,
+} from './database';
 
 // queue.ts
 export { DEFAULT_QUEUE_CONFIG, loadQueueConfig } from './queue';

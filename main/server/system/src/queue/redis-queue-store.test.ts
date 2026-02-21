@@ -76,7 +76,11 @@ function makeTask(overrides: Partial<Task> = {}): Task {
   };
 }
 
-function storedTaskJson(task: Task, status = 'pending', extra: Record<string, unknown> = {}): string {
+function storedTaskJson(
+  task: Task,
+  status = 'pending',
+  extra: Record<string, unknown> = {},
+): string {
   return JSON.stringify({ ...task, status, ...extra });
 }
 
@@ -216,9 +220,7 @@ describe('RedisQueueStore', () => {
       mockRedisInstance.get.mockResolvedValue(stored);
 
       let capturedPipeline: ReturnType<typeof createMockPipeline> | undefined;
-      let pipelineCallCount = 0;
       mockRedisInstance.pipeline.mockImplementation(() => {
-        pipelineCallCount++;
         const p = createMockPipeline();
         // The second pipeline call is the one that sets processing status
         // (first may be the promote call)
@@ -473,11 +475,10 @@ describe('RedisQueueStore', () => {
   describe('clearCompleted', () => {
     test('should delete completed tasks older than given date', async () => {
       const past = new Date(Date.now() - 60000).toISOString();
-      const completedTask = storedTaskJson(
-        makeTask({ id: 'completed-1' }),
-        'completed',
-        { completedAt: past, durationMs: 100 },
-      );
+      const completedTask = storedTaskJson(makeTask({ id: 'completed-1' }), 'completed', {
+        completedAt: past,
+        durationMs: 100,
+      });
 
       mockRedisInstance.keys.mockResolvedValue(['q:task:completed-1']);
       mockRedisInstance.mget.mockResolvedValue([completedTask]);
@@ -491,11 +492,10 @@ describe('RedisQueueStore', () => {
 
     test('should not delete recently completed tasks', async () => {
       const now = new Date();
-      const completedTask = storedTaskJson(
-        makeTask({ id: 'completed-1' }),
-        'completed',
-        { completedAt: now.toISOString(), durationMs: 100 },
-      );
+      const completedTask = storedTaskJson(makeTask({ id: 'completed-1' }), 'completed', {
+        completedAt: now.toISOString(),
+        durationMs: 100,
+      });
 
       mockRedisInstance.keys.mockResolvedValue(['q:task:completed-1']);
       mockRedisInstance.mget.mockResolvedValue([completedTask]);
@@ -734,10 +734,7 @@ describe('RedisQueueStore', () => {
 
       await store.enqueue(task);
 
-      expect(capturedPipeline!.set).toHaveBeenCalledWith(
-        `q:task:${task.id}`,
-        expect.any(String),
-      );
+      expect(capturedPipeline!.set).toHaveBeenCalledWith(`q:task:${task.id}`, expect.any(String));
       expect(capturedPipeline!.lpush).toHaveBeenCalledWith('q:ready', task.id);
     });
 

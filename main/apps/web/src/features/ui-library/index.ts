@@ -1,7 +1,11 @@
 // main/apps/web/src/features/ui-library/index.ts
 
 // Components
-export { SidePeekUILibraryContent, UILibraryComponentList, UILibraryPreviewArea } from './components';
+export {
+  SidePeekUILibraryContent,
+  UILibraryComponentList,
+  UILibraryPreviewArea,
+} from './components';
 
 // Catalog
 export {

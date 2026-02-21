@@ -9,7 +9,7 @@ export {
   matchesModifiers,
   parseKeyBinding,
   type KeyModifiers,
-  type ParsedKeyBinding
+  type ParsedKeyBinding,
 } from './keyboard';
 
 export {
@@ -17,6 +17,5 @@ export {
   formatDateTime,
   formatTimeAgo,
   toISODateOnly,
-  toISOStringOrNull
+  toISOStringOrNull,
 } from './date';
-

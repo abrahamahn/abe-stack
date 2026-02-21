@@ -7,7 +7,7 @@ export {
   getDensityCssVariables,
   getSpacingForDensity,
   highContrastDarkOverrides,
-  highContrastLightOverrides
+  highContrastLightOverrides,
 } from '@bslt/client-engine';
 export { colors, darkColors, lightColors } from './colors';
 export { motion } from './motion';
@@ -20,4 +20,3 @@ export type { ContrastMode, Density } from '@bslt/client-engine';
 export type { DarkColors, LightColors, ThemeColors } from './colors';
 export type { ThemeContextValue, ThemeProviderProps } from './provider';
 export type { Radius } from './radius';
-

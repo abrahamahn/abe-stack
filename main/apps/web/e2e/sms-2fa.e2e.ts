@@ -19,7 +19,11 @@ const phoneNumber = process.env['E2E_SMS_PHONE'];
 const setupCode = process.env['E2E_SMS_SETUP_CODE'];
 const loginCode = process.env['E2E_SMS_LOGIN_CODE'] ?? process.env['E2E_SMS_SETUP_CODE'];
 
-async function login(page: import('@playwright/test').Page, userEmail: string, userPassword: string) {
+async function login(
+  page: import('@playwright/test').Page,
+  userEmail: string,
+  userPassword: string,
+) {
   await page.goto(`${baseURL}/auth/login`);
   await page.getByLabel(/email/i).fill(userEmail);
   await page.getByLabel(/password/i).fill(userPassword);
@@ -70,4 +74,3 @@ test.describe('SMS 2FA flow', () => {
     await expect(page.getByText(/sms verification/i)).toHaveCount(0);
   });
 });
-

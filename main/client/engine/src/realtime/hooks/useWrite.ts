@@ -17,8 +17,7 @@ import { useCallback, useState } from 'react';
 /** Minimal record shape with id + version. */
 interface RecordShape {
   id: string;
-  version: number;
-  [key: string]: unknown;
+  version?: number;
 }
 
 /** Minimal interface for the in-memory record cache. */
@@ -70,7 +69,7 @@ export interface UseWriteResult {
 }
 
 /** Dependencies injected into useWrite. */
-export interface UseWriteDeps {
+export interface UseWriteDeps<_TTables = unknown> {
   userId: string;
   recordCache: RecordCacheLike;
   transactionQueue: TransactionQueueLike;
@@ -118,7 +117,7 @@ export function useWrite(deps: UseWriteDeps): UseWriteResult {
           if (existing !== undefined) {
             const prevValue: Record<string, unknown> = {};
             for (const key of Object.keys(op.updates)) {
-              prevValue[key] = existing[key];
+              prevValue[key] = (existing as unknown as Record<string, unknown>)[key];
             }
             previousValues.push(prevValue);
 

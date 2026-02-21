@@ -20,14 +20,7 @@
 
 import { randomInt } from 'crypto';
 
-import {
-  buildConnectionString,
-  createDbClient,
-  eq,
-  insert,
-  select,
-  USERS_TABLE,
-} from '@bslt/db';
+import { buildConnectionString, createDbClient, eq, insert, select, USERS_TABLE } from '@bslt/db';
 
 import { hashPassword } from '@bslt/core/auth';
 import { canonicalizeEmail } from '@bslt/shared';

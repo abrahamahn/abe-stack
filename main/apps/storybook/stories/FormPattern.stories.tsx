@@ -51,7 +51,9 @@ export const LoginForm: Story = {
       <Card.Body>
         <form
           style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ui-gap-md)' }}
-          onSubmit={(e) => { e.preventDefault(); }}
+          onSubmit={(e) => {
+            e.preventDefault();
+          }}
         >
           <Input.Field label="Email" type="email" placeholder="you@example.com" />
           <PasswordInput.Field label="Password" placeholder="Enter password" />
@@ -81,7 +83,9 @@ export const SettingsForm: Story = {
       <Card.Body>
         <form
           style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ui-gap-lg)' }}
-          onSubmit={(e) => { e.preventDefault(); }}
+          onSubmit={(e) => {
+            e.preventDefault();
+          }}
         >
           <Input.Field label="Display Name" defaultValue="Jane Doe" />
           <Input.Field label="Email" type="email" defaultValue="jane@example.com" />
@@ -126,7 +130,9 @@ export const RegistrationForm: Story = {
       <Card.Body>
         <form
           style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ui-gap-md)' }}
-          onSubmit={(e) => { e.preventDefault(); }}
+          onSubmit={(e) => {
+            e.preventDefault();
+          }}
         >
           <div style={{ display: 'flex', gap: 'var(--ui-gap-md)' }}>
             <div style={{ flex: 1 }}>
@@ -160,7 +166,9 @@ export const FormWithValidation: Story = {
       <Card.Body>
         <form
           style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ui-gap-md)' }}
-          onSubmit={(e) => { e.preventDefault(); }}
+          onSubmit={(e) => {
+            e.preventDefault();
+          }}
         >
           <Input.Field label="Username" error="Username is already taken" defaultValue="admin" />
           <Input.Field
@@ -202,7 +210,9 @@ export const RadioGroupForm: Story = {
       <Card.Body>
         <form
           style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ui-gap-lg)' }}
-          onSubmit={(e) => { e.preventDefault(); }}
+          onSubmit={(e) => {
+            e.preventDefault();
+          }}
         >
           <RadioGroup name="plan" defaultValue="pro">
             <Radio value="free" label="Free - Basic features" />
@@ -233,7 +243,9 @@ export const InlineForm: Story = {
             gap: 'var(--ui-gap-md)',
             flexWrap: 'wrap',
           }}
-          onSubmit={(e) => { e.preventDefault(); }}
+          onSubmit={(e) => {
+            e.preventDefault();
+          }}
         >
           <div style={{ flex: '1 1 12rem' }}>
             <Input.Field label="Search" placeholder="Search users..." />

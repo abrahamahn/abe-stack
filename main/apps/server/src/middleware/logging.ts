@@ -16,7 +16,6 @@ import {
   getOrCreateCorrelationId,
 } from '@bslt/shared/system';
 
-
 import type { LoggingConfig } from '@bslt/shared/config';
 import type { UserRole } from '@bslt/shared/core';
 import type { BaseLogger, ErrorTracker, Logger, LogRequestContext } from '@bslt/shared/system';

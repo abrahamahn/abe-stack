@@ -16,6 +16,7 @@ import {
   ForbiddenError,
   NotFoundError,
 } from '@bslt/shared';
+
 import { isUserDeleted } from '../users/data-hygiene';
 
 import type { Repositories } from '../../../db/src';

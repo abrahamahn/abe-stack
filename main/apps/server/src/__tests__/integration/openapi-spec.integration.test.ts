@@ -16,10 +16,7 @@ import {
   registerRoute,
 } from '../../../../../server/system/src/routing/route.registry';
 
-import {
-  createTestServer,
-  type TestServer,
-} from './test-utils';
+import { createTestServer, type TestServer } from './test-utils';
 
 // ============================================================================
 // Route Registry Tests

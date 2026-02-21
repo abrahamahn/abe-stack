@@ -50,10 +50,7 @@ export {
   SearchProviderFactory,
 } from './search-factory';
 
-export type {
-  ProviderOptions,
-  SqlSearchProviderOptions,
-} from './search-factory';
+export type { ProviderOptions, SqlSearchProviderOptions } from './search-factory';
 
 // ============================================================================
 // Query Builder (unique to system)

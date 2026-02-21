@@ -41,7 +41,7 @@ export function useStripePortal(options?: UseStripePortalOptions): UseStripePort
         baseUrl: config.apiUrl,
         getToken: getAccessToken,
       });
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+
       const response = (await billingClient.createPortal({
         returnUrl: returnUrl ?? window.location.href,
       })) as PortalSessionResponse;

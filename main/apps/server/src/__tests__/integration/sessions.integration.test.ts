@@ -21,8 +21,6 @@ import type { AuthGuardFactory } from '@/http';
 
 import { registerRouteMap } from '@/http';
 
-import { registerRouteMap } from '@/http';
-
 // ============================================================================
 // Mock Repositories
 // ============================================================================
@@ -372,7 +370,8 @@ describe('Sessions API Integration Tests', () => {
           familyRevokeReason: null,
           latestExpiresAt: new Date('2026-02-14T08:00:00Z'),
           ipAddress: '198.51.100.7',
-          userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 Safari/605.1.15',
+          userAgent:
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 Safari/605.1.15',
         },
       ]);
 
@@ -1077,13 +1076,49 @@ describe('Sessions API Integration Tests', () => {
         // Simulate first call returning 3 sessions, second call (after revocation) returning 1
         if (callCount === 1) {
           return [
-            { familyId: 'f1', userId: 'user-race-2', familyCreatedAt: new Date(), familyRevokedAt: null, familyRevokeReason: null, latestExpiresAt: new Date(), ipAddress: '1.1.1.1', userAgent: 'A' },
-            { familyId: 'f2', userId: 'user-race-2', familyCreatedAt: new Date(), familyRevokedAt: null, familyRevokeReason: null, latestExpiresAt: new Date(), ipAddress: '2.2.2.2', userAgent: 'B' },
-            { familyId: 'f3', userId: 'user-race-2', familyCreatedAt: new Date(), familyRevokedAt: null, familyRevokeReason: null, latestExpiresAt: new Date(), ipAddress: '3.3.3.3', userAgent: 'C' },
+            {
+              familyId: 'f1',
+              userId: 'user-race-2',
+              familyCreatedAt: new Date(),
+              familyRevokedAt: null,
+              familyRevokeReason: null,
+              latestExpiresAt: new Date(),
+              ipAddress: '1.1.1.1',
+              userAgent: 'A',
+            },
+            {
+              familyId: 'f2',
+              userId: 'user-race-2',
+              familyCreatedAt: new Date(),
+              familyRevokedAt: null,
+              familyRevokeReason: null,
+              latestExpiresAt: new Date(),
+              ipAddress: '2.2.2.2',
+              userAgent: 'B',
+            },
+            {
+              familyId: 'f3',
+              userId: 'user-race-2',
+              familyCreatedAt: new Date(),
+              familyRevokedAt: null,
+              familyRevokeReason: null,
+              latestExpiresAt: new Date(),
+              ipAddress: '3.3.3.3',
+              userAgent: 'C',
+            },
           ];
         }
         return [
-          { familyId: 'f1', userId: 'user-race-2', familyCreatedAt: new Date(), familyRevokedAt: null, familyRevokeReason: null, latestExpiresAt: new Date(), ipAddress: '1.1.1.1', userAgent: 'A' },
+          {
+            familyId: 'f1',
+            userId: 'user-race-2',
+            familyCreatedAt: new Date(),
+            familyRevokedAt: null,
+            familyRevokeReason: null,
+            latestExpiresAt: new Date(),
+            ipAddress: '1.1.1.1',
+            userAgent: 'A',
+          },
         ];
       });
       mockRepos.refreshTokens.findByToken.mockResolvedValue(null);
@@ -1211,7 +1246,7 @@ describe('Sessions API Integration Tests', () => {
 
       mockRepos.refreshTokens.findByToken.mockResolvedValue(null);
       mockRepos.refreshTokens.revokeFamily
-        .mockResolvedValueOnce(1)  // first delete succeeds
+        .mockResolvedValueOnce(1) // first delete succeeds
         .mockResolvedValueOnce(0); // second delete: already revoked
 
       const requestOpts = buildAuthenticatedRequest({
@@ -1279,7 +1314,9 @@ describe('Sessions API Integration Tests', () => {
           method: 'POST',
           url: '/api/users/me/sessions/revoke-all',
           accessToken: token,
-          payload: JSON.parse('{"__proto__":{"isAdmin":true},"constructor":{"prototype":{"isAdmin":true}}}'),
+          payload: JSON.parse(
+            '{"__proto__":{"isAdmin":true},"constructor":{"prototype":{"isAdmin":true}}}',
+          ),
         }),
       );
 

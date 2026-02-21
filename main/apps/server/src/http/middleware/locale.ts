@@ -155,9 +155,7 @@ export function resolveLocale(entries: AcceptLanguageEntry[]): SupportedLocale {
     // 2. Language prefix match
     const prefix = entry.locale.split('-')[0] ?? '';
     if (prefix !== '') {
-      const prefixMatch = SUPPORTED_LOCALES.find(
-        (s) => s === prefix || s.startsWith(`${prefix}-`),
-      );
+      const prefixMatch = SUPPORTED_LOCALES.find((s) => s === prefix || s.startsWith(`${prefix}-`));
       if (prefixMatch !== undefined) {
         return prefixMatch;
       }

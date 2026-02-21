@@ -113,11 +113,7 @@ export function formatNumber(
  *
  * @complexity O(1)
  */
-export function formatCurrency(
-  amount: number,
-  currency: string,
-  locale: Locale,
-): string {
+export function formatCurrency(amount: number, currency: string, locale: Locale): string {
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,
@@ -172,10 +168,7 @@ const RELATIVE_TIME_THRESHOLDS: Array<{
  *
  * @complexity O(1) - bounded iteration over threshold list
  */
-export function formatRelativeTime(
-  date: Date | string,
-  locale: Locale,
-): string {
+export function formatRelativeTime(date: Date | string, locale: Locale): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
   const now = Date.now();
   const elapsedSeconds = Math.round((dateObj.getTime() - now) / 1000);

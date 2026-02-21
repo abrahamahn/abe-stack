@@ -35,8 +35,8 @@ import {
 
 import type { AuthEmailService, AuthEmailTemplates, AuthLogger } from './types';
 import type { DbClient, Repositories } from '../../../db/src';
-import type { AuthConfig } from '@bslt/shared/config';
 import type { BreadcrumbData } from '@bslt/shared';
+import type { AuthConfig } from '@bslt/shared/config';
 
 // ============================================================================
 // Facade Input Types
@@ -334,14 +334,7 @@ export function createAuthFacade(deps: AuthFacadeDeps): AuthFacade {
     },
 
     async forgotPassword(input: ForgotPasswordInput): Promise<void> {
-      return requestPasswordReset(
-        db,
-        repos,
-        email,
-        emailTemplates,
-        input.email,
-        input.baseUrl,
-      );
+      return requestPasswordReset(db, repos, email, emailTemplates, input.email, input.baseUrl);
     },
 
     async resetPassword(input: ResetPasswordInput): Promise<string> {

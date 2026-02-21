@@ -307,19 +307,25 @@ export const SortableTable: Story = {
             <TableRow>
               <TableHead
                 style={{ cursor: 'pointer' }}
-                onClick={() => { handleSort('name'); }}
+                onClick={() => {
+                  handleSort('name');
+                }}
               >
                 Name{sortIndicator('name')}
               </TableHead>
               <TableHead
                 style={{ cursor: 'pointer' }}
-                onClick={() => { handleSort('email'); }}
+                onClick={() => {
+                  handleSort('email');
+                }}
               >
                 Email{sortIndicator('email')}
               </TableHead>
               <TableHead
                 style={{ cursor: 'pointer' }}
-                onClick={() => { handleSort('role'); }}
+                onClick={() => {
+                  handleSort('role');
+                }}
               >
                 Role{sortIndicator('role')}
               </TableHead>

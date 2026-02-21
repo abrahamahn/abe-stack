@@ -18,8 +18,9 @@ export { realtimeRoutes } from './routes';
 // Handlers
 export {
   handleGetRecords,
-  handleWrite, RecordNotFoundError,
-  VersionConflictError
+  handleWrite,
+  RecordNotFoundError,
+  VersionConflictError,
 } from './handlers';
 
 // Service — server-specific (DB operations, table registry)
@@ -28,7 +29,7 @@ export {
   loadRecords,
   registerRealtimeTable,
   resolveTableName,
-  saveRecords
+  saveRecords,
 } from './service';
 
 // Service — re-exported from @bslt/shared (pure operation logic)
@@ -37,9 +38,11 @@ export {
   applyOperations,
   checkVersionConflicts,
   getOperationPointers,
-  isFieldMutable, PROTECTED_FIELDS,
-  REALTIME_ERRORS, type ApplyOperationsResult,
-  type VersionConflict
+  isFieldMutable,
+  PROTECTED_FIELDS,
+  REALTIME_ERRORS,
+  type ApplyOperationsResult,
+  type VersionConflict,
 } from '@bslt/shared';
 
 // WebSocket
@@ -50,7 +53,7 @@ export {
   type SubscriptionKey,
   type TokenVerifier,
   type WebSocketRegistrationOptions,
-  type WebSocketStats
+  type WebSocketStats,
 } from '@bslt/websocket';
 
 // Types — server-specific
@@ -66,6 +69,5 @@ export type {
   RealtimeRecord,
   RealtimeRequest,
   TableConfig,
-  WriteResult
+  WriteResult,
 } from './types';
-

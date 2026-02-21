@@ -25,7 +25,7 @@ export type {
   StorageConfig,
   StorageProvider,
   StorageProviderName,
-  UploadParams
+  UploadParams,
 } from './types';
 
 // Factory
@@ -36,13 +36,15 @@ export { LocalStorageProvider, S3StorageProvider } from './providers';
 
 // URL Signing (canonical implementations)
 export {
-  createSignedUrl, createSignature as createStorageSignature, getDefaultExpiration,
+  createSignedUrl,
+  createSignature as createStorageSignature,
+  getDefaultExpiration,
   isUrlExpired,
   normalizeFilename as normalizeStorageFilename,
   normalizeStorageKey,
   parseSignedUrl,
   verifySignature as verifyStorageSignature,
-  type SignedUrlData
+  type SignedUrlData,
 } from './signing';
 
 // HTTP Signing helpers (registerFileServer/FilesConfig moved to apps/server/src/http/file-server.ts)
@@ -52,4 +54,3 @@ export {
   verifySignature as verifyFileSignature,
   type FileSignatureData,
 } from './http';
-

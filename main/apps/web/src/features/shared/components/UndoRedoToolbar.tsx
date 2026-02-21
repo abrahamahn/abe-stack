@@ -9,12 +9,8 @@
  * @packageDocumentation
  */
 
-import {
-  getUndoRedoShortcutTexts,
-  useUndoRedoShortcuts,
-} from '@bslt/react';
-
-import { useUndoRedoStore } from '@bslt/react';
+import { getUndoRedoShortcutTexts, useUndoRedoShortcuts, useUndoRedoStore } from '@bslt/react';
+import { Button } from '@bslt/ui';
 
 import type { ReactElement } from 'react';
 
@@ -91,14 +87,14 @@ export function UndoRedoToolbar({
       aria-label="Undo and redo actions"
       data-testid="undo-redo-toolbar"
     >
-      <button
-        type="button"
+      <Button
+        variant="secondary"
         onClick={triggerUndo}
         disabled={!canUndo}
         aria-label={`Undo${showShortcutHints ? ` (${shortcuts.undo})` : ''}`}
         title={`Undo${showShortcutHints ? ` (${shortcuts.undo})` : ''}`}
         data-testid="undo-button"
-        className="inline-flex items-center justify-center rounded px-2 py-1 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+        className="inline-flex items-center justify-center px-2 py-1 text-sm font-medium"
       >
         <span aria-hidden="true">&#x21A9;</span>
         <span className="ml-1">Undo</span>
@@ -107,7 +103,7 @@ export function UndoRedoToolbar({
             ({undoCount})
           </span>
         )}
-      </button>
+      </Button>
 
       {label !== undefined && (
         <span className="text-sm opacity-70 px-1" data-testid="toolbar-label">
@@ -115,14 +111,14 @@ export function UndoRedoToolbar({
         </span>
       )}
 
-      <button
-        type="button"
+      <Button
+        variant="secondary"
         onClick={triggerRedo}
         disabled={!canRedo}
         aria-label={`Redo${showShortcutHints ? ` (${shortcuts.redo})` : ''}`}
         title={`Redo${showShortcutHints ? ` (${shortcuts.redo})` : ''}`}
         data-testid="redo-button"
-        className="inline-flex items-center justify-center rounded px-2 py-1 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+        className="inline-flex items-center justify-center px-2 py-1 text-sm font-medium"
       >
         <span aria-hidden="true">&#x21AA;</span>
         <span className="ml-1">Redo</span>
@@ -131,7 +127,7 @@ export function UndoRedoToolbar({
             ({redoCount})
           </span>
         )}
-      </button>
+      </Button>
 
       {showShortcutHints && (
         <span className="text-xs opacity-50 ml-2" data-testid="shortcut-hints">

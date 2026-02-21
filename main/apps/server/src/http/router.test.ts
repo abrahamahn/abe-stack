@@ -11,8 +11,6 @@
  *  3. A non-Error safeParse.error must fall back to 'Validation failed' message
  */
 
-import { beforeEach, describe, expect, test, vi } from 'vitest';
-
 import {
   clearRegistry,
   createRouteMap,
@@ -20,10 +18,12 @@ import {
   protectedRoute,
   publicRoute,
 } from '@bslt/server-system';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
+
 import { registerRouteMap } from './router';
 
-import type { HandlerContext, RouteHandler, RouteSchema, ValidationSchema } from '@bslt/server-system';
 import type { RouterOptions } from './router';
+import type { HandlerContext, RouteHandler, RouteSchema, ValidationSchema } from '@bslt/server-system';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================

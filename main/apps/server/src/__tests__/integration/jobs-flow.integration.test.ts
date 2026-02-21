@@ -27,8 +27,6 @@ import type { RouteMap as DbRouteMap } from '@bslt/server-system';
 
 import { registerRouteMap } from '@/http';
 
-import { registerRouteMap } from '@/http';
-
 // ============================================================================
 // Mock Factories
 // ============================================================================
@@ -1029,20 +1027,22 @@ describe('Job Operations Flow Integration Tests', () => {
       // Second retry: job is no longer in failed state, returns 0
       mockDb.execute.mockResolvedValueOnce(0);
       // getJobDetails for second call — job exists but in pending state
-      mockDb.raw.mockResolvedValueOnce([{
-        id: 'job-idempotent-retry',
-        name: 'email.send',
-        args: '{}',
-        status: 'pending',
-        attempts: 0,
-        max_attempts: 3,
-        scheduled_at: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-        completed_at: null,
-        duration_ms: null,
-        error: null,
-        dead_letter_reason: null,
-      }]);
+      mockDb.raw.mockResolvedValueOnce([
+        {
+          id: 'job-idempotent-retry',
+          name: 'email.send',
+          args: '{}',
+          status: 'pending',
+          attempts: 0,
+          max_attempts: 3,
+          scheduled_at: new Date().toISOString(),
+          created_at: new Date().toISOString(),
+          completed_at: null,
+          duration_ms: null,
+          error: null,
+          dead_letter_reason: null,
+        },
+      ]);
 
       const adminJwt = createAdminJwt();
 
@@ -1073,20 +1073,22 @@ describe('Job Operations Flow Integration Tests', () => {
       // Second cancel: job already cancelled, returns 0
       mockDb.execute.mockResolvedValueOnce(0);
       // getJobDetails for second call — job exists but in cancelled state
-      mockDb.raw.mockResolvedValueOnce([{
-        id: 'job-idempotent-cancel',
-        name: 'email.send',
-        args: '{}',
-        status: 'cancelled',
-        attempts: 0,
-        max_attempts: 3,
-        scheduled_at: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-        completed_at: null,
-        duration_ms: null,
-        error: null,
-        dead_letter_reason: null,
-      }]);
+      mockDb.raw.mockResolvedValueOnce([
+        {
+          id: 'job-idempotent-cancel',
+          name: 'email.send',
+          args: '{}',
+          status: 'cancelled',
+          attempts: 0,
+          max_attempts: 3,
+          scheduled_at: new Date().toISOString(),
+          created_at: new Date().toISOString(),
+          completed_at: null,
+          duration_ms: null,
+          error: null,
+          dead_letter_reason: null,
+        },
+      ]);
 
       const adminJwt = createAdminJwt();
 
@@ -1134,7 +1136,9 @@ describe('Job Operations Flow Integration Tests', () => {
     });
 
     it('DB throws TypeError during job details — handled gracefully', async () => {
-      mockDb.raw.mockRejectedValueOnce(new TypeError("Cannot read properties of undefined (reading 'rows')"));
+      mockDb.raw.mockRejectedValueOnce(
+        new TypeError("Cannot read properties of undefined (reading 'rows')"),
+      );
 
       const adminJwt = createAdminJwt();
       const response = await testServer.inject(

@@ -1,10 +1,5 @@
 // main/client/ui/src/components/Image.tsx
-import {
-  forwardRef,
-  useState,
-  type ComponentPropsWithoutRef,
-  type ReactNode,
-} from 'react';
+import { forwardRef, useState, type ComponentPropsWithoutRef, type ReactNode } from 'react';
 import '../styles/elements.css';
 
 type ImageProps = Omit<ComponentPropsWithoutRef<'img'>, 'loading'> & {

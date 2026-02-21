@@ -20,9 +20,8 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 // ============================================================================
 
 vi.mock('@bslt/server-system', async () => {
-  const actual = await vi.importActual<typeof import('../../../../system/src')>(
-    '@bslt/server-system',
-  );
+  const actual =
+    await vi.importActual<typeof import('../../../../system/src')>('@bslt/server-system');
   return {
     ...actual,
   };
@@ -92,11 +91,7 @@ function createMockContext(): AppContext {
 /**
  * Create mock HttpRequest for testing
  */
-function createMockRequest(user?: {
-  userId: string;
-  email: string;
-  role: string;
-}): HttpRequest & {
+function createMockRequest(user?: { userId: string; email: string; role: string }): HttpRequest & {
   user?: { userId: string; email: string; role: string };
   requestInfo: { ipAddress: string; userAgent: string };
 } {

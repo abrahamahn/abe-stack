@@ -8,8 +8,9 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
-import type { PermissionEventListener } from './usePermissionError';
 import { isPermissionError, createPermissionError } from './usePermissionError';
+
+import type { PermissionEventListener } from './usePermissionError';
 
 // ============================================================================
 // Types — inline to avoid cross-package resolution issues at lint time
@@ -18,8 +19,7 @@ import { isPermissionError, createPermissionError } from './usePermissionError';
 /** Minimal record shape with id + version. */
 interface RecordShape {
   id: string;
-  version: number;
-  [key: string]: unknown;
+  version?: number;
 }
 
 /** Minimal interface for the in-memory record cache. */
@@ -207,14 +207,12 @@ export function useRecords<T extends RecordShape = RecordShape>(
         // Handle 403 permission errors gracefully
         if (isPermissionError(err)) {
           setPermissionDenied(true);
-          const message =
-            err instanceof Error ? err.message : 'Permission denied';
+          const message = err instanceof Error ? err.message : 'Permission denied';
           setError(new Error(message));
           return;
         }
 
-        const message =
-          err instanceof Error ? err.message : 'Failed to load records from storage';
+        const message = err instanceof Error ? err.message : 'Failed to load records from storage';
         setError(new Error(message));
       })
       .finally(() => {
@@ -226,13 +224,9 @@ export function useRecords<T extends RecordShape = RecordShape>(
     };
   }, [fallbackToStorage, permissionDenied, recordCache, recordStorage, table, ids]);
 
-  const currentRecords: Array<T | undefined> = useMemo(
-    (): Array<T | undefined> => {
-      return ids.map((id) => recordCache.get(table, id) as T | undefined);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- forceUpdate trigger intentional
-    [recordCache, table, ids, forceUpdate],
-  );
+  const currentRecords: Array<T | undefined> = useMemo((): Array<T | undefined> => {
+    return ids.map((id) => recordCache.get(table, id) as T | undefined);
+  }, [recordCache, table, ids, forceUpdate]);
 
   return { records: currentRecords, isLoading, error, permissionDenied };
 }

@@ -16,6 +16,5 @@ export type {
   ProcessingResult,
   SecurityScanResult,
   UploadConfig,
-  VideoProcessingOptions
+  VideoProcessingOptions,
 } from '@bslt/shared';
-

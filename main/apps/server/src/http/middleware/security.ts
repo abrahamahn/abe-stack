@@ -16,12 +16,7 @@ import {
   getProductionSecurityDefaults,
   type SecurityHeaderOptions,
 } from '@bslt/server-system';
-import {
-  HTTP_STATUS,
-  SECONDS_PER_DAY,
-  hasDangerousKeys,
-  sanitizePrototype,
-} from '@bslt/shared';
+import { HTTP_STATUS, SECONDS_PER_DAY, hasDangerousKeys, sanitizePrototype } from '@bslt/shared';
 
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 

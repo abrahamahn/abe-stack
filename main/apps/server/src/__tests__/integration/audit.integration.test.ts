@@ -1361,8 +1361,8 @@ describe('Audit/Security Events Admin API Integration Tests', () => {
           page: 1,
           limit: 10,
           filter: { severity: 'high' },
-          '__proto__': { isAdmin: true, polluted: true },
-          'constructor': { prototype: { hacked: true } },
+          __proto__: { isAdmin: true, polluted: true },
+          constructor: { prototype: { hacked: true } },
         }),
       });
 

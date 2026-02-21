@@ -18,7 +18,7 @@ export {
   getProgressiveDelay,
   isAccountLocked,
   logLoginAttempt,
-  unlockAccount
+  unlockAccount,
 } from './lockout';
 
 // Auth rate limiting
@@ -27,25 +27,28 @@ export {
   authRateLimiters,
   createAuthRateLimitHook,
   type AuthEndpoint,
-  type AuthRateLimitConfig
+  type AuthRateLimitConfig,
 } from './rateLimitPresets';
 
 // Security events (re-exported for convenience)
 export {
-  flagSuspiciousLogin, getSecurityEventMetrics,
+  flagSuspiciousLogin,
+  getSecurityEventMetrics,
   getUserSecurityEvents,
   logAccountLockedEvent,
   logAccountUnlockedEvent,
   logMagicLinkFailedEvent,
   logMagicLinkRequestEvent,
-  logMagicLinkVerifiedEvent, logNewDeviceLogin,
+  logMagicLinkVerifiedEvent,
+  logNewDeviceLogin,
   // OAuth events
   logOAuthLinkFailureEvent,
   logOAuthLinkSuccessEvent,
   logOAuthLoginFailureEvent,
   logOAuthLoginSuccessEvent,
   logOAuthUnlinkFailureEvent,
-  logOAuthUnlinkSuccessEvent, logSecurityEvent,
+  logOAuthUnlinkSuccessEvent,
+  logSecurityEvent,
   logTokenFamilyRevokedEvent,
   logTokenReuseEvent,
   // "Was This You?" alerts
@@ -59,7 +62,7 @@ export {
   type SecurityEventType,
   type SendEmailChangedAlertParams,
   type SendSecurityAlertParams,
-  type SendTokenReuseAlertParams
+  type SendTokenReuseAlertParams,
 } from './events';
 
 // Audit Logs
@@ -89,7 +92,7 @@ export {
   type PasswordConfig,
   type PasswordPenalties,
   type PasswordValidationResult,
-  type StrengthResult
+  type StrengthResult,
 } from '@bslt/shared';
 
 // CAPTCHA Verification
@@ -97,7 +100,7 @@ export {
   isCaptchaRequired,
   verifyCaptchaToken,
   verifyTurnstileToken,
-  type CaptchaVerifyResult
+  type CaptchaVerifyResult,
 } from './captcha';
 
 // Sudo Mode
@@ -108,13 +111,12 @@ export {
   generateDeviceFingerprint,
   isKnownDevice,
   isTrustedDevice,
-  recordDeviceAccess
+  recordDeviceAccess,
 } from './device-fingerprint';
 
 // Session Enforcement
 export {
   enforceMaxConcurrentSessions,
   getIdleTimeRemaining,
-  isSessionIdle
+  isSessionIdle,
 } from './session-enforcement';
-

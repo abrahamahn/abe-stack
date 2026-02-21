@@ -81,9 +81,9 @@ const SUPPORTED_OPERATORS: FilterOperator[] = [
  * }
  * ```
  */
-export class ElasticsearchProvider<TRecord = Record<string, unknown>>
-  implements ServerSearchProvider<TRecord>
-{
+export class ElasticsearchProvider<
+  TRecord = Record<string, unknown>,
+> implements ServerSearchProvider<TRecord> {
   readonly name: string;
   private readonly _config: ElasticsearchProviderConfig;
   private connected = false;

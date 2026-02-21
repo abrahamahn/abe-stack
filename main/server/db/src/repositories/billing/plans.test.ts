@@ -35,7 +35,12 @@ const createMockDb = (): RawDb => ({
 
 const mockFeatures: PlanFeature[] = [
   { key: 'api:access', name: 'Unlimited storage', included: true },
-  { key: 'branding:custom', name: 'Priority support', included: true, description: '24/7 email support' },
+  {
+    key: 'branding:custom',
+    name: 'Priority support',
+    included: true,
+    description: '24/7 email support',
+  },
   { key: 'team:invite', name: 'Advanced analytics', included: false },
 ];
 
@@ -467,7 +472,9 @@ describe('createPlanRepository', () => {
 
       expect(result?.name).toBe('Pro Plan Updated');
       expect(result?.priceInCents).toBe(2499);
-      expect(result?.features).toEqual([{ key: 'api:access', name: 'New Feature', included: true }]);
+      expect(result?.features).toEqual([
+        { key: 'api:access', name: 'New Feature', included: true },
+      ]);
       expect(mockDb.queryOne).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining('UPDATE'),
@@ -491,7 +498,9 @@ describe('createPlanRepository', () => {
 
       vi.mocked(mockDb.queryOne).mockResolvedValue({
         ...mockDbRow,
-        features: JSON.stringify([{ key: 'team:invite', name: 'Updated Feature', included: false }]),
+        features: JSON.stringify([
+          { key: 'team:invite', name: 'Updated Feature', included: false },
+        ]),
       });
 
       const repo = createPlanRepository(mockDb);
@@ -745,7 +754,9 @@ describe('createPlanRepository', () => {
     });
 
     it('should handle features without optional description', async () => {
-      const minimalFeatures: PlanFeature[] = [{ key: 'team:invite', name: 'Minimal Feature', included: false }];
+      const minimalFeatures: PlanFeature[] = [
+        { key: 'team:invite', name: 'Minimal Feature', included: false },
+      ];
 
       const rowWithMinimalFeatures = {
         ...mockDbRow,

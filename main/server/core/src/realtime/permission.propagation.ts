@@ -15,8 +15,8 @@
  * @module Realtime/PermissionPropagation
  */
 
+import type { PermissionMiddleware } from './permission.middleware';
 import type { TenantRole } from '@bslt/shared';
-import type { ConnectionPermissions, PermissionMiddleware } from './permission.middleware';
 
 // ============================================================================
 // Types
@@ -232,7 +232,7 @@ export function createPermissionChangeHandler(
       type: 'permission_revoked',
       tenantId,
       reason,
-      newRole,
+      ...(newRole === undefined ? {} : { newRole }),
     };
 
     const notified = notifyConnection(connectionId, event);

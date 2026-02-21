@@ -103,7 +103,11 @@ export function registerErrorHandler(server: FastifyInstance): void {
         },
         'Request schema validation failed',
       );
-      replyError(reply as unknown as HttpReply, new BadRequestError('Request validation failed'), request.correlationId);
+      replyError(
+        reply as unknown as HttpReply,
+        new BadRequestError('Request validation failed'),
+        request.correlationId,
+      );
       return;
     }
 

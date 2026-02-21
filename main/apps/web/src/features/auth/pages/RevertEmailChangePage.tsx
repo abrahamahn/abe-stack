@@ -13,7 +13,6 @@ import { Alert, AuthLayout, Button, Heading, Spinner, Text } from '@bslt/ui';
 import { clientConfig } from '@config';
 import { useEffect, useState } from 'react';
 
-
 import type { ReactElement } from 'react';
 
 export const RevertEmailChangePage = (): ReactElement => {

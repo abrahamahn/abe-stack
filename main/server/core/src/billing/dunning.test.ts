@@ -778,9 +778,7 @@ describe('suspension threshold', () => {
     });
 
     vi.mocked(repos.subscriptions.findPastDue).mockResolvedValue([subscription]);
-    vi.mocked(provider.cancelSubscription).mockRejectedValue(
-      new Error('Provider unavailable'),
-    );
+    vi.mocked(provider.cancelSubscription).mockRejectedValue(new Error('Provider unavailable'));
     vi.mocked(repos.subscriptions.update).mockResolvedValue(
       createMockSubscription({ status: 'canceled' }),
     );
@@ -998,24 +996,18 @@ describe('adversarial: payment provider ambiguous responses', () => {
     });
 
     vi.mocked(repos.subscriptions.findPastDue).mockResolvedValue([subscription]);
-    vi.mocked(repos.subscriptions.update).mockRejectedValue(
-      new Error('SERIALIZATION_FAILURE'),
-    );
+    vi.mocked(repos.subscriptions.update).mockRejectedValue(new Error('SERIALIZATION_FAILURE'));
 
     // Should throw because the local update failure is not caught in processGracePeriodExpiry
-    await expect(
-      processGracePeriodExpiry(repos, provider, 14, now),
-    ).rejects.toThrow('SERIALIZATION_FAILURE');
+    await expect(processGracePeriodExpiry(repos, provider, 14, now)).rejects.toThrow(
+      'SERIALIZATION_FAILURE',
+    );
   });
 
   it('repos.subscriptions.findPastDue throws — error propagates cleanly', async () => {
-    vi.mocked(repos.subscriptions.findPastDue).mockRejectedValue(
-      new Error('Connection refused'),
-    );
+    vi.mocked(repos.subscriptions.findPastDue).mockRejectedValue(new Error('Connection refused'));
 
-    await expect(
-      processGracePeriodExpiry(repos, provider),
-    ).rejects.toThrow('Connection refused');
+    await expect(processGracePeriodExpiry(repos, provider)).rejects.toThrow('Connection refused');
   });
 
   it('handlePaymentFailure with repos.subscriptions.update throwing preserves original status', async () => {
@@ -1023,9 +1015,9 @@ describe('adversarial: payment provider ambiguous responses', () => {
     vi.mocked(repos.subscriptions.findByProviderSubscriptionId).mockResolvedValue(subscription);
     vi.mocked(repos.subscriptions.update).mockRejectedValue(new Error('DB write failed'));
 
-    await expect(
-      handlePaymentFailure(repos, 'sub_stripe_123', 'stripe'),
-    ).rejects.toThrow('DB write failed');
+    await expect(handlePaymentFailure(repos, 'sub_stripe_123', 'stripe')).rejects.toThrow(
+      'DB write failed',
+    );
 
     // The update was attempted once
     expect(repos.subscriptions.update).toHaveBeenCalledTimes(1);
@@ -1195,9 +1187,7 @@ describe('adversarial: subscription cancelled during active dunning + webhook ra
       new Error('CONFLICT: row was modified by another transaction'),
     );
 
-    await expect(
-      processGracePeriodExpiry(repos, provider, 14, now),
-    ).rejects.toThrow('CONFLICT');
+    await expect(processGracePeriodExpiry(repos, provider, 14, now)).rejects.toThrow('CONFLICT');
 
     // Provider was still called — this is the race condition: provider is cancelled
     // but local DB update failed, leaving inconsistency

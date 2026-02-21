@@ -33,9 +33,7 @@ export const Secondary: Story = {
 export const Danger: Story = {
   name: 'Danger (Text Variant)',
   args: { children: 'Delete', variant: 'text' },
-  render: (args) => (
-    <Button {...args} style={{ color: 'var(--ui-color-danger)' }} />
-  ),
+  render: (args) => <Button {...args} style={{ color: 'var(--ui-color-danger)' }} />,
 };
 
 export const TextVariant: Story = {
@@ -75,24 +73,48 @@ export const AllVariants: Story = {
   render: () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ui-gap-lg)' }}>
       <div style={{ display: 'flex', gap: 'var(--ui-gap-md)', alignItems: 'center' }}>
-        <Button variant="primary" size="small">Primary Small</Button>
-        <Button variant="primary" size="medium">Primary Medium</Button>
-        <Button variant="primary" size="large">Primary Large</Button>
+        <Button variant="primary" size="small">
+          Primary Small
+        </Button>
+        <Button variant="primary" size="medium">
+          Primary Medium
+        </Button>
+        <Button variant="primary" size="large">
+          Primary Large
+        </Button>
       </div>
       <div style={{ display: 'flex', gap: 'var(--ui-gap-md)', alignItems: 'center' }}>
-        <Button variant="secondary" size="small">Secondary Small</Button>
-        <Button variant="secondary" size="medium">Secondary Medium</Button>
-        <Button variant="secondary" size="large">Secondary Large</Button>
+        <Button variant="secondary" size="small">
+          Secondary Small
+        </Button>
+        <Button variant="secondary" size="medium">
+          Secondary Medium
+        </Button>
+        <Button variant="secondary" size="large">
+          Secondary Large
+        </Button>
       </div>
       <div style={{ display: 'flex', gap: 'var(--ui-gap-md)', alignItems: 'center' }}>
-        <Button variant="text" size="small">Text Small</Button>
-        <Button variant="text" size="medium">Text Medium</Button>
-        <Button variant="text" size="large">Text Large</Button>
+        <Button variant="text" size="small">
+          Text Small
+        </Button>
+        <Button variant="text" size="medium">
+          Text Medium
+        </Button>
+        <Button variant="text" size="large">
+          Text Large
+        </Button>
       </div>
       <div style={{ display: 'flex', gap: 'var(--ui-gap-md)', alignItems: 'center' }}>
-        <Button variant="primary" disabled>Disabled Primary</Button>
-        <Button variant="secondary" disabled>Disabled Secondary</Button>
-        <Button variant="text" disabled>Disabled Text</Button>
+        <Button variant="primary" disabled>
+          Disabled Primary
+        </Button>
+        <Button variant="secondary" disabled>
+          Disabled Secondary
+        </Button>
+        <Button variant="text" disabled>
+          Disabled Text
+        </Button>
       </div>
     </div>
   ),

@@ -28,15 +28,23 @@ function ModalDemo({
     <>
       <Button
         variant="primary"
-        onClick={() => { setOpen(true); }}
+        onClick={() => {
+          setOpen(true);
+        }}
       >
         {label}
       </Button>
       <Modal.Root
         open={open}
-        onClose={() => { setOpen(false); }}
+        onClose={() => {
+          setOpen(false);
+        }}
       >
-        {children({ onClose: () => { setOpen(false); } })}
+        {children({
+          onClose: () => {
+            setOpen(false);
+          },
+        })}
       </Modal.Root>
     </>
   );

@@ -48,10 +48,11 @@ export class MemoryQueueStore implements QueueStore {
    */
   enqueue(task: Task): Promise<void> {
     if (task.idempotencyKey != null && task.idempotencyKey !== '') {
-      if (this.idempotencyKeys.has(task.idempotencyKey)) {
+      const { idempotencyKey } = task;
+      if (this.idempotencyKeys.has(idempotencyKey)) {
         return Promise.resolve();
       }
-      this.idempotencyKeys.add(task.idempotencyKey);
+      this.idempotencyKeys.add(idempotencyKey);
     }
 
     this.tasks.set(task.id, { ...task, status: 'pending' });

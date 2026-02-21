@@ -15,8 +15,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createAuthFacade, type AuthFacadeDeps } from './facade';
 
-import type { DbClient, Repositories } from '../../../db/src';
 import type { AuthEmailService, AuthEmailTemplates, AuthLogger } from './types';
+import type { DbClient, Repositories } from '../../../db/src';
 import type { AuthConfig } from '@bslt/shared/config';
 
 // ============================================================================
@@ -373,11 +373,7 @@ describe('AuthFacade', () => {
       await facade.signOut({ refreshToken: 'token-to-revoke' });
 
       expect(mockLogoutUser).toHaveBeenCalledOnce();
-      expect(mockLogoutUser).toHaveBeenCalledWith(
-        deps.db,
-        deps.repos,
-        'token-to-revoke',
-      );
+      expect(mockLogoutUser).toHaveBeenCalledWith(deps.db, deps.repos, 'token-to-revoke');
     });
 
     it('handles signOut without a refresh token gracefully', async () => {
@@ -387,11 +383,7 @@ describe('AuthFacade', () => {
       await facade.signOut({});
 
       expect(mockLogoutUser).toHaveBeenCalledOnce();
-      expect(mockLogoutUser).toHaveBeenCalledWith(
-        deps.db,
-        deps.repos,
-        undefined,
-      );
+      expect(mockLogoutUser).toHaveBeenCalledWith(deps.db, deps.repos, undefined);
     });
   });
 

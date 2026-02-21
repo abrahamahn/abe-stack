@@ -56,10 +56,7 @@ describe('ClientSearchQueryBuilder — Advanced Integration', () => {
     });
 
     it('roundtrips search query with full-text search through URL', () => {
-      const builder = createClientSearchQuery()
-        .search('hello world')
-        .page(1)
-        .limit(10);
+      const builder = createClientSearchQuery().search('hello world').page(1).limit(10);
 
       const queryString = builder.toQueryString();
       const restored = ClientSearchQueryBuilder.fromURLSearchParams(queryString);
@@ -172,19 +169,14 @@ describe('ClientSearchQueryBuilder — Advanced Integration', () => {
     });
 
     it('supports fuzzy search', () => {
-      const query = createClientSearchQuery()
-        .searchFuzzy('test', 0.7)
-        .build();
+      const query = createClientSearchQuery().searchFuzzy('test', 0.7).build();
 
       expect(query.search?.query).toBe('test');
       expect(query.search?.fuzziness).toBe(0.7);
     });
 
     it('clearSearch removes search config', () => {
-      const query = createClientSearchQuery()
-        .search('test')
-        .clearSearch()
-        .build();
+      const query = createClientSearchQuery().search('test').clearSearch().build();
 
       expect(query.search).toBeUndefined();
     });
@@ -224,10 +216,7 @@ describe('ClientSearchQueryBuilder — Advanced Integration', () => {
     });
 
     it('cursor pagination works', () => {
-      const query = createClientSearchQuery()
-        .cursor('eyJpZCI6MTAwfQ==')
-        .limit(20)
-        .build();
+      const query = createClientSearchQuery().cursor('eyJpZCI6MTAwfQ==').limit(20).build();
 
       expect(query.cursor).toBe('eyJpZCI6MTAwfQ==');
       expect(query.limit).toBe(20);
@@ -236,9 +225,7 @@ describe('ClientSearchQueryBuilder — Advanced Integration', () => {
 
   describe('select and count options', () => {
     it('select specifies fields to return', () => {
-      const query = createClientSearchQuery()
-        .select('id', 'name', 'email')
-        .build();
+      const query = createClientSearchQuery().select('id', 'name', 'email').build();
 
       expect(query.select).toEqual(['id', 'name', 'email']);
     });
@@ -249,10 +236,7 @@ describe('ClientSearchQueryBuilder — Advanced Integration', () => {
     });
 
     it('withoutCount disables count', () => {
-      const query = createClientSearchQuery()
-        .withCount()
-        .withoutCount()
-        .build();
+      const query = createClientSearchQuery().withCount().withoutCount().build();
 
       expect(query.includeCount).toBe(false);
     });
@@ -260,9 +244,7 @@ describe('ClientSearchQueryBuilder — Advanced Integration', () => {
 
   describe('faceted search', () => {
     it('builds faceted query with single facet', () => {
-      const query = createClientSearchQuery()
-        .facet('category')
-        .buildFaceted();
+      const query = createClientSearchQuery().facet('category').buildFaceted();
 
       expect(query.facets).toEqual([{ field: 'category' }]);
     });
@@ -283,10 +265,7 @@ describe('ClientSearchQueryBuilder — Advanced Integration', () => {
     });
 
     it('clearFacets removes all facets', () => {
-      const query = createClientSearchQuery()
-        .facet('category')
-        .clearFacets()
-        .buildFaceted();
+      const query = createClientSearchQuery().facet('category').clearFacets().buildFaceted();
 
       expect(query.facets).toBeUndefined();
     });
@@ -294,9 +273,7 @@ describe('ClientSearchQueryBuilder — Advanced Integration', () => {
 
   describe('builder isolation (clone and reset)', () => {
     it('clone creates independent copy', () => {
-      const original = createClientSearchQuery()
-        .whereEq('status', 'active')
-        .limit(20);
+      const original = createClientSearchQuery().whereEq('status', 'active').limit(20);
 
       const cloned = original.clone();
       cloned.whereEq('age', 25).limit(50);
@@ -399,10 +376,7 @@ describe('fromSearchQuery — Integration', () => {
   });
 
   it('reconstructed builder can be further modified', () => {
-    const original = createClientSearchQuery()
-      .whereEq('status', 'active')
-      .page(2)
-      .build();
+    const original = createClientSearchQuery().whereEq('status', 'active').page(2).build();
 
     const restored = fromClientSearchQuery(original);
     const modified = restored.orderByAsc('name').limit(10).build();
@@ -475,9 +449,7 @@ describe('Server SearchQueryBuilder — Integration', () => {
   });
 
   it('supports null handling in sort', () => {
-    const query = createSearchQuery()
-      .orderByWithNulls('deletedAt', 'asc', 'last')
-      .build();
+    const query = createSearchQuery().orderByWithNulls('deletedAt', 'asc', 'last').build();
 
     expect(query.sort).toEqual([{ field: 'deletedAt', order: 'asc', nulls: 'last' }]);
   });

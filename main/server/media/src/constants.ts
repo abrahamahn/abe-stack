@@ -21,7 +21,7 @@ export {
   MAX_UPLOAD_FILE_SIZE,
   MAX_UPLOAD_TIMEOUT_MS,
   MIME_TO_EXT,
-  VIDEO_EXTENSIONS
+  VIDEO_EXTENSIONS,
 } from '@bslt/shared';
 
 // --- Size limits ---

@@ -16,7 +16,13 @@ import {
 import { HTTP_STATUS } from '@bslt/shared';
 import { getWebSocketStats } from '@bslt/websocket';
 
-import type { HandlerContext, HealthContext, HttpReply, HttpRequest, RouteMap } from '@bslt/server-system';
+import type {
+  HandlerContext,
+  HealthContext,
+  HttpReply,
+  HttpRequest,
+  RouteMap,
+} from '@bslt/server-system';
 import type { LiveResponse, ReadyResponse } from '@bslt/shared';
 import type { FastifyReply } from 'fastify';
 
@@ -63,12 +69,7 @@ export const systemRoutes: RouteMap = createRouteMap([
     'metrics',
     publicRoute(
       'GET',
-      async (
-        _ctx: HandlerContext,
-        _body: undefined,
-        _req: HttpRequest,
-        _reply: HttpReply,
-      ) => {
+      (_ctx: HandlerContext, _body: undefined, _req: HttpRequest, _reply: HttpReply) => {
         return getMetricsCollector().getMetricsSummary();
       },
       undefined,
@@ -107,12 +108,12 @@ export const systemRoutes: RouteMap = createRouteMap([
     'health/live',
     publicRoute(
       'GET',
-      async (
+      (
         _ctx: HandlerContext,
         _body: undefined,
         _req: HttpRequest,
         _reply: HttpReply,
-      ): Promise<LiveResponse> => {
+      ): LiveResponse => {
         return {
           status: 'alive',
           uptime: process.uptime(),

@@ -345,16 +345,16 @@ See `docs/dev/ci-cd.md` for the full CI/CD workflow documentation.
 
 ## Further Reading
 
-| Topic                    | Document                     |
-| ------------------------ | ---------------------------- |
-| Architecture deep dive   | `docs/specs/architecture.md` |
-| Authentication system    | `docs/specs/auth.md`         |
-| Coding principles        | `docs/specs/principles.md`   |
-| CI/CD & infrastructure   | `docs/dev/ci-cd.md`          |
-| Testing strategy         | `docs/dev/testing.md`        |
-| Current sprint / backlog | `docs/todo/TODO.md`          |
+| Topic                    | Document                       |
+| ------------------------ | ------------------------------ |
+| Architecture deep dive   | `docs/specs/architecture.md`   |
+| Authentication system    | `docs/specs/auth.md`           |
+| Coding principles        | `docs/specs/principles.md`     |
+| CI/CD & infrastructure   | `docs/dev/ci-cd.md`            |
+| Testing strategy         | `docs/dev/testing.md`          |
+| Current sprint / backlog | `docs/todo/TODO.md`            |
 | Future roadmap           | `docs/todo/TODO.md` (Sprint 7) |
-| Configuration system     | `config/README.md`           |
+| Configuration system     | `config/README.md`             |
 
 ---
 

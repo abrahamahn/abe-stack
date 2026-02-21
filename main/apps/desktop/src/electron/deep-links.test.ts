@@ -173,9 +173,7 @@ describe('deep-links', () => {
 
       registerDeepLinkProtocol('bslt');
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        '[DeepLinks] Failed to register protocol bslt://',
-      );
+      expect(consoleSpy).toHaveBeenCalledWith('[DeepLinks] Failed to register protocol bslt://');
       consoleSpy.mockRestore();
     });
   });

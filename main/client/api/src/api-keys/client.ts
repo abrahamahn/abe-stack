@@ -32,7 +32,7 @@ export type {
   CreateApiKeyResponse,
   DeleteApiKeyResponse,
   ListApiKeysResponse,
-  RevokeApiKeyResponse
+  RevokeApiKeyResponse,
 };
 
 export interface ApiKeysClient {

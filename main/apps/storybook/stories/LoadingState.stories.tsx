@@ -141,21 +141,27 @@ export const ProgressIndicators: Story = {
                 <Button
                   variant="secondary"
                   size="small"
-                  onClick={() => { setValue(Math.max(0, value - 10)); }}
+                  onClick={() => {
+                    setValue(Math.max(0, value - 10));
+                  }}
                 >
                   -10%
                 </Button>
                 <Button
                   variant="secondary"
                   size="small"
-                  onClick={() => { setValue(Math.min(100, value + 10)); }}
+                  onClick={() => {
+                    setValue(Math.min(100, value + 10));
+                  }}
                 >
                   +10%
                 </Button>
                 <Button
                   variant="secondary"
                   size="small"
-                  onClick={() => { setValue(100); }}
+                  onClick={() => {
+                    setValue(100);
+                  }}
                 >
                   Complete
                 </Button>

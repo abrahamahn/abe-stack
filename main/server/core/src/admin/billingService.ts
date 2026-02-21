@@ -5,10 +5,7 @@
  * Business logic for admin plan management operations.
  */
 
-import {
-  CannotDeactivatePlanWithActiveSubscriptionsError,
-  PlanNotFoundError,
-} from '@bslt/shared';
+import { CannotDeactivatePlanWithActiveSubscriptionsError, PlanNotFoundError } from '@bslt/shared';
 
 import type {
   Plan as DbPlan,

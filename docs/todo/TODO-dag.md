@@ -562,7 +562,7 @@ Do multiple apps share logic that should be in a package?
 
 | Priority | Check                   | Reason                                                    |
 | -------- | ----------------------- | --------------------------------------------------------- |
-| HIGH     | web ↔ desktop          | near-identical client stacks, highest duplication risk    |
+| HIGH     | web ↔ desktop           | near-identical client stacks, highest duplication risk    |
 | HIGH     | server vs core          | server is thin orchestrator; leaked logic = DRY violation |
 | HIGH     | web vs react            | web features may duplicate react hooks                    |
 | HIGH     | web vs shared           | app may hardcode constants/types available in shared      |
@@ -574,8 +574,8 @@ Do multiple apps share logic that should be in a package?
 | LOW      | web vs client-engine    | engine is low-level, less likely duplicated in app code   |
 | LOW      | desktop vs shared       | same concern as web vs shared                             |
 | LOW      | desktop vs ui           | same concern as web vs ui                                 |
-| LOW      | web ↔ server           | different stacks (HTTP boundary only)                     |
-| LOW      | desktop ↔ server       | check server-system boundary only                         |
+| LOW      | web ↔ server            | different stacks (HTTP boundary only)                     |
+| LOW      | desktop ↔ server        | check server-system boundary only                         |
 
 ---
 

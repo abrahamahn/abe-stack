@@ -458,7 +458,9 @@ describe('createInvoiceRepository', () => {
       });
 
       it('should handle exactly limit items (no more pages)', async () => {
-        const rows = Array.from({ length: 20 }, (_, i) => createMockDbRow({ id: `inv-${String(i)}` }));
+        const rows = Array.from({ length: 20 }, (_, i) =>
+          createMockDbRow({ id: `inv-${String(i)}` }),
+        );
         vi.mocked(mockDb.query).mockResolvedValue(rows);
 
         const repo = createInvoiceRepository(mockDb);

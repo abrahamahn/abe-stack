@@ -255,7 +255,11 @@ const ResendVerificationForm = ({
       <p>Didn&apos;t receive the verification email?</p>
 
       <Button onClick={handleResend} disabled={isLoading || isOnCooldown} data-testid="resend-btn">
-        {isLoading ? 'Sending...' : isOnCooldown ? `Resend in ${String(cooldown)}s` : 'Resend Email'}
+        {isLoading
+          ? 'Sending...'
+          : isOnCooldown
+            ? `Resend in ${String(cooldown)}s`
+            : 'Resend Email'}
       </Button>
     </div>
   );

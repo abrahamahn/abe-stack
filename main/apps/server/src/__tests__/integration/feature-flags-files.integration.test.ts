@@ -29,8 +29,6 @@ import type { AuthGuardFactory } from '@/http';
 
 import { registerRouteMap } from '@/http';
 
-import { registerRouteMap } from '@/http';
-
 // ============================================================================
 // Mock Repositories
 // ============================================================================
@@ -577,9 +575,7 @@ describe('Feature Flags & Files Integration Tests', () => {
       expect(responseBeta.statusCode).not.toBe(404);
 
       if (mockRepos.featureFlagOverrides.findByTenantId.mock.calls.length > 0) {
-        expect(mockRepos.featureFlagOverrides.findByTenantId.mock.calls[0]![0]).toBe(
-          'tenant-beta',
-        );
+        expect(mockRepos.featureFlagOverrides.findByTenantId.mock.calls[0]![0]).toBe('tenant-beta');
       }
     });
 

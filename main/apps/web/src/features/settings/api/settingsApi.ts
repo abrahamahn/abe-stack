@@ -49,6 +49,5 @@ export type {
   UpdateProfileRequest,
   UpdateUsernameRequest,
   UpdateUsernameResponse,
-  User
+  User,
 } from '@bslt/shared';
-

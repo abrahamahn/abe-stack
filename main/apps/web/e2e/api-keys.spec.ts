@@ -103,14 +103,9 @@ test.describe('API Keys management', () => {
   // Revoke key -> removed from list -> API calls fail
   // --------------------------------------------------------------------------
 
-  test('revoke key -> removed from list -> API calls with key fail', async ({
-    page,
-    request,
-  }) => {
+  test('revoke key -> removed from list -> API calls with key fail', async ({ page, request }) => {
     test.skip(
-      email === undefined ||
-        password === undefined ||
-        apiKeyUsePath === undefined,
+      email === undefined || password === undefined || apiKeyUsePath === undefined,
       'Set E2E_EMAIL, E2E_PASSWORD, and E2E_API_KEY_USE_PATH to run API-key revocation E2E.',
     );
 
@@ -159,10 +154,12 @@ test.describe('API Keys management', () => {
     }
 
     // Wait for the row to disappear or be marked as revoked
-    await expect(row).not.toBeVisible({ timeout: 5000 }).catch(async () => {
-      // Some UIs keep the row but mark it as revoked
-      await expect(row.getByText(/revoked/i)).toBeVisible();
-    });
+    await expect(row)
+      .not.toBeVisible({ timeout: 5000 })
+      .catch(async () => {
+        // Some UIs keep the row but mark it as revoked
+        await expect(row.getByText(/revoked/i)).toBeVisible();
+      });
 
     // Verify API calls with the revoked key now fail
     const revokedResponse = await request.get(apiUrl, {

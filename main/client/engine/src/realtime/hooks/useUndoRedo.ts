@@ -39,7 +39,7 @@ export interface UseUndoRedoResult {
 }
 
 /** Dependencies injected into useUndoRedo. */
-export interface UseUndoRedoDeps {
+export interface UseUndoRedoDeps<_TState = unknown> {
   undoRedoStack: UndoRedoStackLike;
 }
 

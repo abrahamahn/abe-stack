@@ -63,7 +63,8 @@ export const fr: FlatTranslationMap = {
 
   // Settings - Preferences
   'settings.preferences.title': 'Préférences',
-  'settings.preferences.description': "Personnalisez l'apparence et le comportement de l'application.",
+  'settings.preferences.description':
+    "Personnalisez l'apparence et le comportement de l'application.",
   'settings.preferences.theme.title': 'Thème',
   'settings.preferences.theme.description':
     "Choisissez l'apparence de l'application. Sélectionnez un thème ou laissez-le suivre les paramètres du système.",

@@ -23,7 +23,10 @@ async function login(page: import('@playwright/test').Page, email: string, passw
   await page.goto(`${baseURL}/auth/login`);
   await page.getByLabel(/email/i).fill(email);
   await page.getByLabel(/password/i).fill(password);
-  await page.getByRole('button', { name: /login|sign in/i }).first().click();
+  await page
+    .getByRole('button', { name: /login|sign in/i })
+    .first()
+    .click();
 }
 
 test.describe('Admin lock + hard-ban flow', () => {

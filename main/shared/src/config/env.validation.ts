@@ -89,8 +89,16 @@ function validateProductionGuards(env: FullEnv): void {
 
   if (isProd) {
     const weakPatterns = [
-      'secret', 'password', 'changeme', 'change_me', 'jwt_secret',
-      'dev', 'prod', 'test', 'example', 'placeholder',
+      'secret',
+      'password',
+      'changeme',
+      'change_me',
+      'jwt_secret',
+      'dev',
+      'prod',
+      'test',
+      'example',
+      'placeholder',
     ];
     const lc = env.JWT_SECRET.toLowerCase();
     const isWeak =

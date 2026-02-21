@@ -10,10 +10,7 @@
 import { authRoutes, createAuthGuard } from '@bslt/core/auth';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import {
-  createTestServer,
-  type TestServer,
-} from './test-utils';
+import { createTestServer, type TestServer } from './test-utils';
 
 import type { AuthGuardFactory } from '@bslt/server-system';
 

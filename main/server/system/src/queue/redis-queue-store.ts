@@ -524,11 +524,7 @@ export class RedisQueueStore implements QueueStore {
    */
   private async promoteScheduledTasks(nowMs: number): Promise<void> {
     // Get all task IDs scored <= now
-    const readyIds = await this.client.zrangebyscore(
-      this.key('scheduled'),
-      '-inf',
-      String(nowMs),
-    );
+    const readyIds = await this.client.zrangebyscore(this.key('scheduled'), '-inf', String(nowMs));
 
     if (readyIds.length === 0) return;
 

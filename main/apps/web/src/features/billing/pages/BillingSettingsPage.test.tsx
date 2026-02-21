@@ -42,6 +42,17 @@ vi.mock('@bslt/react', async (importOriginal) => {
       isLoading: false,
       error: null,
     })),
+    usePlans: vi.fn(() => ({
+      plans: [],
+      isLoading: false,
+      error: null,
+    })),
+    useProrationPreview: vi.fn(() => ({
+      amountDelta: 0,
+      currency: 'usd',
+      interval: 'month',
+      isUpgrade: false,
+    })),
   };
 });
 

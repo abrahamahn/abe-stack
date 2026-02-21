@@ -10,16 +10,9 @@
 
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
-import {
-  createIpBlocklist,
-} from '../../../../../server/system/src/security/ip-blocklist';
+import { createIpBlocklist } from '../../../../../server/system/src/security/ip-blocklist';
 
-import {
-  createTestServer,
-  parseJsonResponse,
-  type TestServer,
-} from './test-utils';
-
+import { createTestServer, parseJsonResponse, type TestServer } from './test-utils';
 
 // ============================================================================
 // Rate Limiting Tests

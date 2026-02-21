@@ -14,9 +14,7 @@ import {
   getMetricsCollector,
   resetMetricsCollector,
 } from '../../../../../server/system/src/metrics/metrics';
-import {
-  createQueueServer,
-} from '../../../../../server/system/src/queue/client';
+import { createQueueServer } from '../../../../../server/system/src/queue/client';
 import {
   createMemoryQueueStore,
   MemoryQueueStore,
@@ -141,7 +139,7 @@ describe('Generic Job Lifecycle', () => {
 
       const server = createQueueServer({
         store,
-        handlers: { 'process': handler },
+        handlers: { process: handler },
         config: { pollIntervalMs: 10, defaultMaxAttempts: 3 },
         log: createTestLogger(),
       });
@@ -175,7 +173,7 @@ describe('Generic Job Lifecycle', () => {
         config: {
           pollIntervalMs: 10,
           defaultMaxAttempts: 3,
-          backoffBaseMs: 10,  // Very short for testing
+          backoffBaseMs: 10, // Very short for testing
           maxBackoffMs: 50,
         },
         log: createTestLogger(),

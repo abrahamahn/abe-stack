@@ -574,7 +574,13 @@ describe('API Keys Integration', () => {
 
     expect(listResponse.statusCode).toBe(200);
     const body = parseJsonResponse(listResponse) as {
-      apiKeys: Array<{ id: string; name: string; keyPrefix: string; keyHash?: string; scopes: string[] }>;
+      apiKeys: Array<{
+        id: string;
+        name: string;
+        keyPrefix: string;
+        keyHash?: string;
+        scopes: string[];
+      }>;
     };
     expect(body.apiKeys.length).toBeGreaterThanOrEqual(2);
 
@@ -740,7 +746,8 @@ describe('API Keys Integration', () => {
       const created = parseJsonResponse(createResponse) as { plaintext: string };
 
       // Tamper with the plaintext by flipping a character
-      const tampered = created.plaintext.slice(0, -1) + (created.plaintext.endsWith('a') ? 'b' : 'a');
+      const tampered =
+        created.plaintext.slice(0, -1) + (created.plaintext.endsWith('a') ? 'b' : 'a');
 
       const response = await testServer.inject({
         method: 'GET',
@@ -1010,8 +1017,8 @@ describe('API Keys Integration', () => {
         payload: JSON.stringify({
           name: 'Proto Pollution Key',
           scopes: ['read'],
-          '__proto__': { isAdmin: true },
-          'constructor': { prototype: { role: 'admin' } },
+          __proto__: { isAdmin: true },
+          constructor: { prototype: { role: 'admin' } },
         }),
       });
 

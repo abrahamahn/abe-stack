@@ -13,8 +13,9 @@
 
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 
-import type { PermissionError, PermissionEventListener } from './usePermissionError';
 import { isPermissionError, createPermissionError } from './usePermissionError';
+
+import type { PermissionEventListener } from './usePermissionError';
 
 // ============================================================================
 // Types — inline to avoid cross-package resolution issues at lint time
@@ -23,8 +24,7 @@ import { isPermissionError, createPermissionError } from './usePermissionError';
 /** Minimal record shape with id + version. */
 interface RecordShape {
   id: string;
-  version: number;
-  [key: string]: unknown;
+  version?: number;
 }
 
 /** Minimal interface for the in-memory record cache. */
@@ -143,7 +143,7 @@ export function useRecord<T extends RecordShape = RecordShape>(
 
       // If we don't have data but the event is for our tenant context,
       // still mark as denied so re-fetches don't attempt to load
-      if (currentRecord === undefined && event.tenantId !== undefined) {
+      if (currentRecord === undefined) {
         setPermissionDenied(true);
         setError(createPermissionError(event.tenantId, event.reason));
       }
@@ -180,14 +180,12 @@ export function useRecord<T extends RecordShape = RecordShape>(
         // Handle 403 permission errors gracefully
         if (isPermissionError(err)) {
           setPermissionDenied(true);
-          const message =
-            err instanceof Error ? err.message : 'Permission denied';
+          const message = err instanceof Error ? err.message : 'Permission denied';
           setError(new Error(message));
           return;
         }
 
-        const message =
-          err instanceof Error ? err.message : 'Failed to load record from storage';
+        const message = err instanceof Error ? err.message : 'Failed to load record from storage';
         setError(new Error(message));
       })
       .finally(() => {

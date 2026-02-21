@@ -120,7 +120,9 @@ export const WithSidebarNavigation: Story = {
                   <MenuItem
                     key={key}
                     data-active={active === key}
-                    onClick={() => { setActive(key); }}
+                    onClick={() => {
+                      setActive(key);
+                    }}
                   >
                     {item}
                   </MenuItem>

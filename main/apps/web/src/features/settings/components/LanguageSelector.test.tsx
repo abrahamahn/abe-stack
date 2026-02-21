@@ -27,7 +27,12 @@ vi.mock('../../../i18n', () => ({
     fr: { code: 'fr', name: 'French', nativeName: 'Français', direction: 'ltr' },
     de: { code: 'de', name: 'German', nativeName: 'Deutsch', direction: 'ltr' },
     ja: { code: 'ja', name: 'Japanese', nativeName: '日本語', direction: 'ltr' },
-    'zh-CN': { code: 'zh-CN', name: 'Chinese (Simplified)', nativeName: '简体中文', direction: 'ltr' },
+    'zh-CN': {
+      code: 'zh-CN',
+      name: 'Chinese (Simplified)',
+      nativeName: '简体中文',
+      direction: 'ltr',
+    },
   },
   useTranslation: () => ({
     locale: 'en-US',

@@ -26,8 +26,6 @@ import type { AuthGuardFactory } from '@/http';
 
 import { registerRouteMap } from '@/http';
 
-import { registerRouteMap } from '@/http';
-
 // ============================================================================
 // Mock Repositories (minimal set for tenant routes)
 // ============================================================================
@@ -475,7 +473,6 @@ describe('RBAC Integration Tests', () => {
       const viewerUserId = 'viewer-user-2';
       const viewerJwt = createTestJwt({ userId: viewerUserId, email: 'viewer2@example.com' });
 
-
       mockRepos.tenants.findById.mockResolvedValue({ id: 'tenant-1', name: 'Test' });
       mockRepos.memberships.findByTenantAndUser.mockResolvedValue({
         id: 'mb-viewer-2',
@@ -503,7 +500,6 @@ describe('RBAC Integration Tests', () => {
       const memberUserId = 'member-user-1';
       const memberJwt = createTestJwt({ userId: memberUserId, email: 'member@example.com' });
 
-
       mockRepos.tenants.findById.mockResolvedValue({ id: 'tenant-1', name: 'Test' });
       mockRepos.memberships.findByTenantAndUser.mockResolvedValue({
         id: 'mb-member-1',
@@ -530,7 +526,6 @@ describe('RBAC Integration Tests', () => {
     it('member cannot remove other members', async () => {
       const memberUserId = 'member-user-2';
       const memberJwt = createTestJwt({ userId: memberUserId, email: 'member2@example.com' });
-
 
       mockRepos.tenants.findById.mockResolvedValue({ id: 'tenant-1', name: 'Test' });
       mockRepos.memberships.findByTenantAndUser.mockResolvedValue({
@@ -564,7 +559,6 @@ describe('RBAC Integration Tests', () => {
       const userAId = 'user-a';
       const userAJwt = createTestJwt({ userId: userAId, email: 'usera@example.com' });
 
-
       // Tenant exists but userA is NOT a member
       mockRepos.tenants.findById.mockResolvedValue({ id: 'tenant-b', name: 'B Workspace' });
       mockRepos.memberships.findByTenantAndUser.mockResolvedValue(null);
@@ -585,7 +579,6 @@ describe('RBAC Integration Tests', () => {
       const userAId = 'user-a-2';
       const userAJwt = createTestJwt({ userId: userAId, email: 'usera2@example.com' });
 
-
       mockRepos.tenants.findById.mockResolvedValue({ id: 'tenant-foreign', name: 'Foreign' });
       mockRepos.memberships.findByTenantAndUser.mockResolvedValue(null);
 
@@ -604,7 +597,6 @@ describe('RBAC Integration Tests', () => {
     it('user cannot transfer ownership of a workspace they do not own', async () => {
       const userId = 'regular-user';
       const userJwt = createTestJwt({ userId, email: 'regular@example.com' });
-
 
       mockRepos.tenants.findById.mockResolvedValue({ id: 'tenant-1', name: 'Workspace' });
       // User is a member but not the owner
@@ -659,7 +651,6 @@ describe('RBAC Integration Tests', () => {
       // Regular user JWT (role: user, not admin)
       const wsAdminJwt = createTestJwt({ userId: wsAdminId, email: 'wsadmin@example.com' });
 
-
       mockRepos.tenants.findById.mockResolvedValue({ id: 'tenant-1', name: 'Workspace' });
       // Workspace admin membership (role=admin in workspace, but user role at system level)
       mockRepos.memberships.findByTenantAndUser.mockResolvedValue({
@@ -693,7 +684,6 @@ describe('RBAC Integration Tests', () => {
       const wsAdminId = 'ws-admin-user-2';
       const wsAdminJwt = createTestJwt({ userId: wsAdminId, email: 'wsadmin2@example.com' });
 
-
       mockRepos.tenants.findById.mockResolvedValue({ id: 'tenant-1', name: 'Workspace' });
       mockRepos.memberships.findByTenantAndUser.mockResolvedValue({
         id: 'mb-wsadmin-2',
@@ -726,7 +716,6 @@ describe('RBAC Integration Tests', () => {
     it('after role upgrade from viewer to admin, member can perform admin actions', async () => {
       const userId = 'promoted-user';
       const userJwt = createTestJwt({ userId, email: 'promoted@example.com' });
-
 
       mockRepos.tenants.findById.mockResolvedValue({ id: 'tenant-1', name: 'Workspace' });
 
@@ -784,7 +773,6 @@ describe('RBAC Integration Tests', () => {
     it('after role downgrade from admin to viewer, member loses admin actions', async () => {
       const userId = 'demoted-user';
       const userJwt = createTestJwt({ userId, email: 'demoted@example.com' });
-
 
       mockRepos.tenants.findById.mockResolvedValue({ id: 'tenant-1', name: 'Workspace' });
 
@@ -962,7 +950,6 @@ describe('RBAC Integration Tests', () => {
       const adminId = 'admin-role-test';
       const adminJwt = createTestJwt({ userId: adminId, email: 'roleadmin@example.com' });
 
-
       mockRepos.tenants.findById.mockResolvedValue({ id: 'tenant-1', name: 'Test WS' });
       mockRepos.memberships.findByTenantAndUser.mockResolvedValue({
         id: 'mb-role-admin',
@@ -990,7 +977,6 @@ describe('RBAC Integration Tests', () => {
       const adminId = 'admin-numeric-role';
       const adminJwt = createTestJwt({ userId: adminId, email: 'numrole@example.com' });
 
-
       mockRepos.tenants.findById.mockResolvedValue({ id: 'tenant-1', name: 'Test WS' });
       mockRepos.memberships.findByTenantAndUser.mockResolvedValue({
         id: 'mb-num',
@@ -1016,7 +1002,6 @@ describe('RBAC Integration Tests', () => {
     it('role change with null role value returns 400', async () => {
       const adminId = 'admin-null-role';
       const adminJwt = createTestJwt({ userId: adminId, email: 'nullrole@example.com' });
-
 
       mockRepos.tenants.findById.mockResolvedValue({ id: 'tenant-1', name: 'Test WS' });
       mockRepos.memberships.findByTenantAndUser.mockResolvedValue({
@@ -1044,7 +1029,6 @@ describe('RBAC Integration Tests', () => {
       const adminId = 'admin-empty-role';
       const adminJwt = createTestJwt({ userId: adminId, email: 'emptyrole@example.com' });
 
-
       mockRepos.tenants.findById.mockResolvedValue({ id: 'tenant-1', name: 'Test WS' });
       mockRepos.memberships.findByTenantAndUser.mockResolvedValue({
         id: 'mb-empty',
@@ -1070,7 +1054,6 @@ describe('RBAC Integration Tests', () => {
     it('role change with array value for role returns 400', async () => {
       const adminId = 'admin-array-role';
       const adminJwt = createTestJwt({ userId: adminId, email: 'arrayrole@example.com' });
-
 
       mockRepos.tenants.findById.mockResolvedValue({ id: 'tenant-1', name: 'Test WS' });
       mockRepos.memberships.findByTenantAndUser.mockResolvedValue({
@@ -1104,7 +1087,6 @@ describe('RBAC Integration Tests', () => {
       const userId = 'stale-user';
       const userJwt = createTestJwt({ userId, email: 'stale@example.com' });
 
-
       mockRepos.tenants.findById.mockResolvedValue({ id: 'tenant-1', name: 'Test WS' });
       // First call returns membership, second call returns null (deleted mid-request)
       mockRepos.memberships.findByTenantAndUser
@@ -1135,7 +1117,6 @@ describe('RBAC Integration Tests', () => {
     it('tenants repo returning null for existing tenant ID causes 404 or 403', async () => {
       const userId = 'user-null-tenant';
       const userJwt = createTestJwt({ userId, email: 'nulltenant@example.com' });
-
 
       // Tenant not found
       mockRepos.tenants.findById.mockResolvedValue(null);
@@ -1183,7 +1164,6 @@ describe('RBAC Integration Tests', () => {
     it('double role-change request returns same final state', async () => {
       const ownerId = 'owner-idemp';
       const ownerJwt = createTestJwt({ userId: ownerId, email: 'owner-idemp@example.com' });
-
 
       mockRepos.tenants.findById.mockResolvedValue({
         id: 'tenant-idemp',
@@ -1268,7 +1248,9 @@ describe('RBAC Integration Tests', () => {
           method: 'POST',
           url: '/api/tenants/workspace-target/update',
           accessToken: expiredJwt,
-          payload: JSON.parse('{"name":"hacked","__proto__":{"isAdmin":true},"constructor":{"prototype":{"polluted":true}}}'),
+          payload: JSON.parse(
+            '{"name":"hacked","__proto__":{"isAdmin":true},"constructor":{"prototype":{"polluted":true}}}',
+          ),
         }),
       );
 
@@ -1280,8 +1262,10 @@ describe('RBAC Integration Tests', () => {
     });
 
     it('valid token user A cannot perform admin ops on workspace B they have no membership in', async () => {
-      const userAJwt = createTestJwt({ userId: 'user-a-killer', email: 'usera-killer@example.com' });
-
+      const userAJwt = createTestJwt({
+        userId: 'user-a-killer',
+        email: 'usera-killer@example.com',
+      });
 
       mockRepos.tenants.findById.mockResolvedValue({
         id: 'workspace-b-private',
@@ -1303,8 +1287,10 @@ describe('RBAC Integration Tests', () => {
     });
 
     it('concurrent role escalation attempts from non-admin do not succeed', async () => {
-      const memberJwt = createTestJwt({ userId: 'member-escalator', email: 'escalator@example.com' });
-
+      const memberJwt = createTestJwt({
+        userId: 'member-escalator',
+        email: 'escalator@example.com',
+      });
 
       mockRepos.tenants.findById.mockResolvedValue({ id: 'tenant-esc', name: 'Esc WS' });
       mockRepos.memberships.findByTenantAndUser.mockResolvedValue({

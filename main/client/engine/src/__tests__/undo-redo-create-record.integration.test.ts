@@ -9,7 +9,7 @@
  * to verify state transitions through the undo/redo lifecycle.
  */
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { RecordCache, type TableMap } from '../cache/RecordCache';
 import { UndoRedoStack, type UndoableOperation, type UndoRedoState } from '../undo/UndoRedoStack';
@@ -60,10 +60,7 @@ interface CacheUndoRedoSystem {
   cache: RecordCache<TestTables>;
   undoStack: UndoRedoStack<RecordOperation>;
   stateChanges: UndoRedoState[];
-  createRecord: <T extends keyof TestTables & string>(
-    table: T,
-    record: TestTables[T],
-  ) => void;
+  createRecord: <T extends keyof TestTables & string>(table: T, record: TestTables[T]) => void;
   deleteRecord: <T extends keyof TestTables & string>(table: T, id: string) => void;
   updateRecord: <T extends keyof TestTables & string>(
     table: T,
@@ -93,7 +90,7 @@ function createCacheUndoRedoSystem(): CacheUndoRedoSystem {
             cache.set(
               op.table as keyof TestTables & string,
               op.id,
-              op.previousRecord as TestTables[keyof TestTables & string],
+              op.previousRecord as unknown as TestTables[keyof TestTables & string],
               { force: true },
             );
           }
@@ -126,7 +123,7 @@ function createCacheUndoRedoSystem(): CacheUndoRedoSystem {
             cache.set(
               op.table as keyof TestTables & string,
               op.id,
-              op.record as TestTables[keyof TestTables & string],
+              op.record as unknown as TestTables[keyof TestTables & string],
               { force: true },
             );
           }
@@ -195,7 +192,7 @@ function createCacheUndoRedoSystem(): CacheUndoRedoSystem {
       // Capture previous values for the updated fields
       const previousRecord: Record<string, unknown> = {};
       for (const key of Object.keys(updates)) {
-        previousRecord[key] = (existing as Record<string, unknown>)[key];
+        previousRecord[key] = (existing as unknown as Record<string, unknown>)[key];
       }
 
       cache.set(table, id, { ...existing, ...updates } as TestTables[T], { force: true });

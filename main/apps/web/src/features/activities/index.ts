@@ -7,7 +7,12 @@
 
 // API
 export { createActivitiesApi } from './api';
-export type { ActivitiesApi, ActivitiesApiConfig, ActivityListResponse, ActivityLocal } from './api';
+export type {
+  ActivitiesApi,
+  ActivitiesApiConfig,
+  ActivityListResponse,
+  ActivityLocal,
+} from './api';
 
 // Hooks
 export { useActivities, useTenantActivities } from './hooks';

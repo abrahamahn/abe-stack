@@ -3,6 +3,5 @@
 export {
   SessionCard,
   type SessionCardProps,
-  type SessionCardSession
+  type SessionCardSession,
 } from '@bslt/ui/components/SessionCard';
-

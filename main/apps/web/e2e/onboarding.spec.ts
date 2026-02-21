@@ -41,7 +41,10 @@ test.describe('Golden Path Onboarding', () => {
       await nameInput.fill('Onboarding Owner');
     }
     await page.getByLabel(/email/i).fill(ownerEmail);
-    await page.getByLabel(/password/i).first().fill(password);
+    await page
+      .getByLabel(/password/i)
+      .first()
+      .fill(password);
 
     // Handle confirm password field if present
     const confirmPassword = page.getByLabel(/confirm.*password/i);
@@ -115,7 +118,10 @@ test.describe('Golden Path Onboarding', () => {
       await teammateNameInput.fill('Teammate User');
     }
     await teammatePage.getByLabel(/email/i).fill(teammateEmail);
-    await teammatePage.getByLabel(/password/i).first().fill(password);
+    await teammatePage
+      .getByLabel(/password/i)
+      .first()
+      .fill(password);
 
     const teammateConfirmPw = teammatePage.getByLabel(/confirm.*password/i);
     if ((await teammateConfirmPw.count()) > 0) {
@@ -160,7 +166,10 @@ test.describe('Golden Path Onboarding', () => {
       await nameInput.fill('Billing User');
     }
     await page.getByLabel(/email/i).fill(email);
-    await page.getByLabel(/password/i).first().fill(password);
+    await page
+      .getByLabel(/password/i)
+      .first()
+      .fill(password);
 
     const confirmPw = page.getByLabel(/confirm.*password/i);
     if ((await confirmPw.count()) > 0) {
@@ -256,7 +265,10 @@ test.describe('Golden Path Onboarding', () => {
       await nameInput.fill('Welcome User');
     }
     await page.getByLabel(/email/i).fill(email);
-    await page.getByLabel(/password/i).first().fill(password);
+    await page
+      .getByLabel(/password/i)
+      .first()
+      .fill(password);
 
     const confirmPw = page.getByLabel(/confirm.*password/i);
     if ((await confirmPw.count()) > 0) {
@@ -351,7 +363,10 @@ test.describe('Onboarding Negative Paths', () => {
       await nameInput.fill('Payment Fail User');
     }
     await page.getByLabel(/email/i).fill(email);
-    await page.getByLabel(/password/i).first().fill(password);
+    await page
+      .getByLabel(/password/i)
+      .first()
+      .fill(password);
 
     const confirmPw = page.getByLabel(/confirm.*password/i);
     if ((await confirmPw.count()) > 0) {

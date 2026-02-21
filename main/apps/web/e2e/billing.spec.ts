@@ -206,8 +206,7 @@ test.describe('Billing & Subscriptions', () => {
       // Should see confirmation dialog or message
       const confirmDialog = page.getByRole('dialog');
       const confirmText = page.getByText(/are you sure|confirm.*cancel/i);
-      const hasConfirmation =
-        (await confirmDialog.count()) > 0 || (await confirmText.count()) > 0;
+      const hasConfirmation = (await confirmDialog.count()) > 0 || (await confirmText.count()) > 0;
 
       if (hasConfirmation) {
         // Confirm the cancellation

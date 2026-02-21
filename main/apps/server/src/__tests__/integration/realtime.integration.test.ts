@@ -359,9 +359,7 @@ describe('Realtime & WebSocket Integration Tests', () => {
 
   describe('authenticated subscription via getRecords', () => {
     it('authenticated user can request records and receive loaded records', async () => {
-      const mockRecords = [
-        { id: 'user-1', name: 'User 1', email: 'u1@example.com', version: 1 },
-      ];
+      const mockRecords = [{ id: 'user-1', name: 'User 1', email: 'u1@example.com', version: 1 }];
       mockDb.query.mockResolvedValueOnce(mockRecords);
 
       const userJwt = createTestJwt({ userId: 'user-1' });
@@ -682,7 +680,8 @@ describe('Realtime & WebSocket Integration Tests', () => {
         method: 'POST',
         url: '/api/realtime/getRecords',
         headers: {
-          authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLTEiLCJpYXQiOjk5OTk5OTk5OTl9.invalid-sig',
+          authorization:
+            'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLTEiLCJpYXQiOjk5OTk5OTk5OTl9.invalid-sig',
         },
         payload: { pointers: [{ table: 'users', id: 'user-1' }] },
       });

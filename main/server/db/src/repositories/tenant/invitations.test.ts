@@ -724,7 +724,9 @@ describe('createInvitationRepository', () => {
         vi.mocked(mockDb.queryOne).mockResolvedValue(invitation);
 
         const repo = createInvitationRepository(mockDb);
-        const result = await repo.update('inv-123', { status: status as 'pending' | 'accepted' | 'revoked' | 'expired' });
+        const result = await repo.update('inv-123', {
+          status: status as 'pending' | 'accepted' | 'revoked' | 'expired',
+        });
 
         expect(result?.status).toBe(status);
       }

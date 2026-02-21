@@ -33,7 +33,9 @@ describe('storage/providers/s3-client-wrapper', () => {
       return Promise.resolve({});
     });
 
-    const wrapper = new S3ClientWrapper({ send } as unknown as import('@aws-sdk/client-s3').S3Client);
+    const wrapper = new S3ClientWrapper({
+      send,
+    } as unknown as import('@aws-sdk/client-s3').S3Client);
 
     await expect(
       wrapper.uploadObject({ bucket: 'b', key: 'k', body: 'x', contentType: 'text/plain' }),
@@ -56,7 +58,9 @@ describe('storage/providers/s3-client-wrapper', () => {
 
   it('delegates signed upload url creation to awsGetSignedUrl', async () => {
     const send = vi.fn(() => Promise.resolve({}));
-    const wrapper = new S3ClientWrapper({ send } as unknown as import('@aws-sdk/client-s3').S3Client);
+    const wrapper = new S3ClientWrapper({
+      send,
+    } as unknown as import('@aws-sdk/client-s3').S3Client);
 
     const url = await wrapper.getSignedUploadUrl({ bucket: 'b', key: 'k', expiresIn: 123 });
     expect(url).toBe('signed-url');

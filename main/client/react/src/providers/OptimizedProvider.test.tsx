@@ -191,7 +191,15 @@ describe('createReducerContext', () => {
       return (
         <div>
           <span data-testid="count">{state.count}</span>
-          {react.createElement('button', { onClick: () => { dispatch({ type: 'INCREMENT' }); } }, 'Increment')}
+          {react.createElement(
+            'button',
+            {
+              onClick: () => {
+                dispatch({ type: 'INCREMENT' });
+              },
+            },
+            'Increment',
+          )}
         </div>
       );
     };
@@ -213,8 +221,26 @@ describe('createReducerContext', () => {
       return (
         <div>
           <span data-testid="count">{state.count}</span>
-          {react.createElement('button', { 'data-testid': 'increment', onClick: () => { dispatch({ type: 'INCREMENT' }); } }, 'Increment')}
-          {react.createElement('button', { 'data-testid': 'decrement', onClick: () => { dispatch({ type: 'DECREMENT' }); } }, 'Decrement')}
+          {react.createElement(
+            'button',
+            {
+              'data-testid': 'increment',
+              onClick: () => {
+                dispatch({ type: 'INCREMENT' });
+              },
+            },
+            'Increment',
+          )}
+          {react.createElement(
+            'button',
+            {
+              'data-testid': 'decrement',
+              onClick: () => {
+                dispatch({ type: 'DECREMENT' });
+              },
+            },
+            'Decrement',
+          )}
         </div>
       );
     };
@@ -269,7 +295,16 @@ describe('createReducerContext', () => {
       return (
         <div>
           <span data-testid="count">{count}</span>
-          {react.createElement('button', { 'data-testid': 'set', onClick: () => { dispatch({ type: 'SET', payload: 42 }); } }, 'Set to 42')}
+          {react.createElement(
+            'button',
+            {
+              'data-testid': 'set',
+              onClick: () => {
+                dispatch({ type: 'SET', payload: 42 });
+              },
+            },
+            'Set to 42',
+          )}
         </div>
       );
     };
@@ -335,7 +370,10 @@ describe('createLazyContext', () => {
   it('reinitializes when deps change', () => {
     const { Provider, useContextValue } = createLazyContext<{ data: string }>();
     let initCount = 0;
-    const initializer = vi.fn(() => { initCount++; return { data: `init-${String(initCount)}` }; });
+    const initializer = vi.fn(() => {
+      initCount++;
+      return { data: `init-${String(initCount)}` };
+    });
 
     const TestComponent = (): ReactElement => {
       const ctx = useContextValue();
@@ -399,7 +437,16 @@ describe('createSubscriptionContext', () => {
         <div>
           <span data-testid="data">{data ?? 'no-data'}</span>
           <span data-testid="loading">{isLoading ? 'loading' : 'loaded'}</span>
-          {react.createElement('button', { 'data-testid': 'subscribe', onClick: () => { subscribe(() => {}); } }, 'Subscribe')}
+          {react.createElement(
+            'button',
+            {
+              'data-testid': 'subscribe',
+              onClick: () => {
+                subscribe(() => {});
+              },
+            },
+            'Subscribe',
+          )}
         </div>
       );
     };
@@ -432,7 +479,16 @@ describe('createSubscriptionContext', () => {
         <div>
           <span data-testid="data">{localData ?? data ?? 'no-data'}</span>
           <span data-testid="loading">{isLoading ? 'loading' : 'loaded'}</span>
-          {react.createElement('button', { 'data-testid': 'subscribe', onClick: () => { subscribe(setLocalData); } }, 'Subscribe')}
+          {react.createElement(
+            'button',
+            {
+              'data-testid': 'subscribe',
+              onClick: () => {
+                subscribe(setLocalData);
+              },
+            },
+            'Subscribe',
+          )}
         </div>
       );
     };
@@ -494,7 +550,16 @@ describe('createSubscriptionContext', () => {
       return (
         <div>
           <span data-testid="error">{error?.message ?? 'no-error'}</span>
-          {react.createElement('button', { 'data-testid': 'subscribe', onClick: () => { subscribe(() => {}); } }, 'Subscribe')}
+          {react.createElement(
+            'button',
+            {
+              'data-testid': 'subscribe',
+              onClick: () => {
+                subscribe(() => {});
+              },
+            },
+            'Subscribe',
+          )}
         </div>
       );
     };

@@ -1,9 +1,5 @@
 // main/client/ui/src/layouts/layers/Overlay.tsx
-import {
-  forwardRef,
-  type ComponentPropsWithoutRef,
-  type ReactElement,
-} from 'react';
+import { forwardRef, type ComponentPropsWithoutRef, type ReactElement } from 'react';
 import { createPortal } from 'react-dom';
 import '../../styles/elements.css';
 

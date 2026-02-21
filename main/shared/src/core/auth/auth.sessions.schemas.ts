@@ -32,8 +32,6 @@ import type { SessionId, UserId } from '../../primitives/schema/ids';
  * @param deviceName - Human-readable device name (e.g. "Chrome on macOS")
  * @param deviceType - Device category (e.g. "desktop", "mobile", "tablet")
  * @param deviceId - Optional device fingerprint
- * @param deviceName - Human-readable device label (e.g. "iPhone 15")
- * @param deviceType - Device category (e.g. "mobile", "desktop")
  * @param lastActiveAt - Last activity timestamp
  * @param revokedAt - Revocation timestamp (null if active)
  * @param createdAt - Session creation timestamp
@@ -46,8 +44,6 @@ export interface UserSession {
   deviceName: string | null;
   deviceType: string | null;
   deviceId: string | null;
-  deviceName: string | null;
-  deviceType: string | null;
   lastActiveAt: Date;
   revokedAt: Date | null;
   createdAt: Date;
@@ -63,8 +59,6 @@ export interface CreateUserSession {
   deviceName?: string | null | undefined;
   deviceType?: string | null | undefined;
   deviceId?: string | null | undefined;
-  deviceName?: string | null | undefined;
-  deviceType?: string | null | undefined;
 }
 
 /**
@@ -75,8 +69,6 @@ export interface UpdateUserSession {
   deviceName?: string | null | undefined;
   deviceType?: string | null | undefined;
   revokedAt?: Date | null | undefined;
-  deviceName?: string | null | undefined;
-  deviceType?: string | null | undefined;
 }
 
 // ============================================================================
@@ -97,8 +89,6 @@ export const userSessionSchema: Schema<UserSession> = createSchema((data: unknow
     deviceName: parseNullable(obj['deviceName'], (v) => parseString(v, 'deviceName')),
     deviceType: parseNullable(obj['deviceType'], (v) => parseString(v, 'deviceType')),
     deviceId: parseNullable(obj['deviceId'], (v) => parseString(v, 'deviceId')),
-    deviceName: parseNullable(obj['deviceName'], (v) => parseString(v, 'deviceName')),
-    deviceType: parseNullable(obj['deviceType'], (v) => parseString(v, 'deviceType')),
     lastActiveAt: coerceDate(obj['lastActiveAt'], 'lastActiveAt'),
     revokedAt: parseNullable(obj['revokedAt'], (v) => coerceDate(v, 'revokedAt')),
     createdAt: coerceDate(obj['createdAt'], 'createdAt'),
@@ -118,8 +108,6 @@ export const createUserSessionSchema: Schema<CreateUserSession> = createSchema((
     deviceName: parseNullableOptional(obj['deviceName'], (v) => parseString(v, 'deviceName')),
     deviceType: parseNullableOptional(obj['deviceType'], (v) => parseString(v, 'deviceType')),
     deviceId: parseNullableOptional(obj['deviceId'], (v) => parseString(v, 'deviceId')),
-    deviceName: parseNullableOptional(obj['deviceName'], (v) => parseString(v, 'deviceName')),
-    deviceType: parseNullableOptional(obj['deviceType'], (v) => parseString(v, 'deviceType')),
   };
 });
 
@@ -134,7 +122,5 @@ export const updateUserSessionSchema: Schema<UpdateUserSession> = createSchema((
     deviceName: parseNullableOptional(obj['deviceName'], (v) => parseString(v, 'deviceName')),
     deviceType: parseNullableOptional(obj['deviceType'], (v) => parseString(v, 'deviceType')),
     revokedAt: parseNullableOptional(obj['revokedAt'], (v) => coerceDate(v, 'revokedAt')),
-    deviceName: parseNullableOptional(obj['deviceName'], (v) => parseString(v, 'deviceName')),
-    deviceType: parseNullableOptional(obj['deviceType'], (v) => parseString(v, 'deviceType')),
   };
 });

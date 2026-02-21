@@ -13,12 +13,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { useInfiniteQuery as useInfiniteQueryBase } from '../query/useInfiniteQuery';
 import { useQuery as useQueryBase } from '../query/useQuery';
 
-import type {
-  CursorSearchResult,
-  SearchQuery,
-  SearchResult,
-  SearchResultItem,
-} from '@bslt/shared';
+import type { CursorSearchResult, SearchQuery, SearchResult, SearchResultItem } from '@bslt/shared';
 
 // ============================================================================
 // Types

@@ -18,11 +18,18 @@ const triggerPath = process.env['E2E_ACTIVITY_TRIGGER_PATH'];
 const triggerBody = process.env['E2E_ACTIVITY_TRIGGER_BODY'] ?? '{}';
 const expectedText = process.env['E2E_ACTIVITY_EXPECT_TEXT'];
 
-async function login(page: import('@playwright/test').Page, userEmail: string, userPassword: string) {
+async function login(
+  page: import('@playwright/test').Page,
+  userEmail: string,
+  userPassword: string,
+) {
   await page.goto(`${baseURL}/auth/login`);
   await page.getByLabel(/email/i).fill(userEmail);
   await page.getByLabel(/password/i).fill(userPassword);
-  await page.getByRole('button', { name: /login|sign in/i }).first().click();
+  await page
+    .getByRole('button', { name: /login|sign in/i })
+    .first()
+    .click();
 }
 
 test.describe('Activity feed flow', () => {

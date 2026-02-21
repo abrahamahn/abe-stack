@@ -16,9 +16,7 @@ function createMockMembershipRepo(): MembershipRepository {
   };
 }
 
-function createMockMembership(
-  overrides: Partial<Membership> = {},
-): Membership {
+function createMockMembership(overrides: Partial<Membership> = {}): Membership {
   return {
     id: 'mem-1' as Membership['id'],
     tenantId: 'tenant-1' as Membership['tenantId'],
@@ -52,9 +50,7 @@ describe('canReadRecord', () => {
   });
 
   it('should allow owner to read own records', async () => {
-    vi.mocked(repo.findByUserAndTenant).mockResolvedValue(
-      createMockMembership({ role: 'owner' }),
-    );
+    vi.mocked(repo.findByUserAndTenant).mockResolvedValue(createMockMembership({ role: 'owner' }));
     const record = createMockRecord();
 
     const result = await canReadRecord('user-1', 'tenant-1', record, repo);
@@ -106,9 +102,7 @@ describe('canReadRecord', () => {
   });
 
   it('should deny cross-workspace access', async () => {
-    vi.mocked(repo.findByUserAndTenant).mockResolvedValue(
-      createMockMembership({ role: 'owner' }),
-    );
+    vi.mocked(repo.findByUserAndTenant).mockResolvedValue(createMockMembership({ role: 'owner' }));
     const record = createMockRecord({ tenantId: 'tenant-2' });
 
     const result = await canReadRecord('user-1', 'tenant-1', record, repo);
@@ -118,9 +112,7 @@ describe('canReadRecord', () => {
   });
 
   it('should check membership for the correct tenant', async () => {
-    vi.mocked(repo.findByUserAndTenant).mockResolvedValue(
-      createMockMembership(),
-    );
+    vi.mocked(repo.findByUserAndTenant).mockResolvedValue(createMockMembership());
     const record = createMockRecord();
 
     await canReadRecord('user-1', 'tenant-1', record, repo);

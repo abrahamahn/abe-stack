@@ -153,7 +153,7 @@ function run(): void {
     [
       '// main/client/api/src/generated/index.ts',
       "export { createGeneratedApiClient, generatedRouteDefinitions } from './client';",
-      "export type {",
+      'export type {',
       '  GeneratedApiClientConfig,',
       '  GeneratedApiMethod,',
       '  GeneratedApiPath,',

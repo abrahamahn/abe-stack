@@ -108,7 +108,6 @@ function resolveActiveProvider(
   avail: { stripe: boolean; paypal: boolean },
   isProd: boolean,
 ): BillingProvider | null {
-
   // In production: If explicit provider is set, use it (validation will fail if credentials missing)
   // In development: Only use explicit provider if credentials are available
   if (explicit != null) {

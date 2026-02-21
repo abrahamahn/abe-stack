@@ -34,13 +34,7 @@ import type { BillingConfig } from '@bslt/shared/config';
  * The server's full `AppContext` structurally satisfies this interface.
  */
 export interface AdminAppContext
-  extends BaseContext,
-    HasEmail,
-    HasStorage,
-    HasBilling,
-    HasNotifications,
-    HasPubSub,
-    HasCache {
+  extends BaseContext, HasEmail, HasStorage, HasBilling, HasNotifications, HasPubSub, HasCache {
   readonly db: DbClient;
   readonly repos: {
     readonly users: UserRepository;

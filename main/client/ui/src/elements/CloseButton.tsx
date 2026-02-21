@@ -25,12 +25,7 @@ type CloseButtonProps = ComponentPropsWithoutRef<'button'> & {
 const CloseButton = forwardRef<HTMLElement, CloseButtonProps>((props, ref) => {
   const { children, className = '', 'aria-label': ariaLabel = 'Close', ...rest } = props;
   return (
-    <Button
-      ref={ref}
-      aria-label={ariaLabel}
-      className={`close-btn ${className}`.trim()}
-      {...rest}
-    >
+    <Button ref={ref} aria-label={ariaLabel} className={`close-btn ${className}`.trim()} {...rest}>
       {children ?? '✕'}
     </Button>
   );

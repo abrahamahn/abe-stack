@@ -31,10 +31,9 @@ test.describe('Admin Security Events', () => {
     await expect(page).toHaveURL(/dashboard/i);
 
     // Look for admin or security nav link
-    const securityLink =
-      page.getByRole('link', { name: /security/i }).or(
-        page.getByRole('link', { name: /audit/i }),
-      );
+    const securityLink = page
+      .getByRole('link', { name: /security/i })
+      .or(page.getByRole('link', { name: /audit/i }));
     await securityLink.click();
 
     // Expect the security events page to load with a list or table
@@ -64,10 +63,9 @@ test.describe('Admin Security Events', () => {
     await page.getByRole('button', { name: /login/i }).click();
 
     // Navigate to security events
-    const securityLink =
-      page.getByRole('link', { name: /security/i }).or(
-        page.getByRole('link', { name: /audit/i }),
-      );
+    const securityLink = page
+      .getByRole('link', { name: /security/i })
+      .or(page.getByRole('link', { name: /audit/i }));
     await securityLink.click();
 
     // Select a filter option for event type
@@ -106,10 +104,9 @@ test.describe('Admin Security Events', () => {
     await page.getByRole('button', { name: /login/i }).click();
 
     // Navigate to security events
-    const securityLink =
-      page.getByRole('link', { name: /security/i }).or(
-        page.getByRole('link', { name: /audit/i }),
-      );
+    const securityLink = page
+      .getByRole('link', { name: /security/i })
+      .or(page.getByRole('link', { name: /audit/i }));
     await securityLink.click();
 
     // Click on the first event row
@@ -129,10 +126,8 @@ test.describe('Admin Security Events', () => {
 
     if ((await detailView.count()) > 0) {
       // Check for presence of common metadata field labels
-      const hasEventType =
-        (await page.getByText(/event.type/i).count()) > 0;
-      const hasSeverity =
-        (await page.getByText(/severity/i).count()) > 0;
+      const hasEventType = (await page.getByText(/event.type/i).count()) > 0;
+      const hasSeverity = (await page.getByText(/severity/i).count()) > 0;
       const hasIpAddress =
         (await page.getByText(/ip.address/i).count()) > 0 ||
         (await page.getByText(/ip/i).count()) > 0;
@@ -156,10 +151,9 @@ test.describe('Admin Security Events', () => {
     await page.getByRole('button', { name: /login/i }).click();
 
     // Navigate to security events
-    const securityLink =
-      page.getByRole('link', { name: /security/i }).or(
-        page.getByRole('link', { name: /audit/i }),
-      );
+    const securityLink = page
+      .getByRole('link', { name: /security/i })
+      .or(page.getByRole('link', { name: /audit/i }));
     await securityLink.click();
 
     // Look for and click the export button
@@ -174,9 +168,7 @@ test.describe('Admin Security Events', () => {
       await exportButton.click();
 
       // If a format selector appears, choose JSON
-      const jsonOption = page.getByRole('option', { name: /json/i }).or(
-        page.getByText(/json/i),
-      );
+      const jsonOption = page.getByRole('option', { name: /json/i }).or(page.getByText(/json/i));
       if ((await jsonOption.count()) > 0) {
         await jsonOption.first().click();
       }
@@ -213,10 +205,9 @@ test.describe('Admin Security Events', () => {
     await expect(page).toHaveURL(/dashboard/i);
 
     // Navigate to security events
-    const securityLink =
-      page.getByRole('link', { name: /security/i }).or(
-        page.getByRole('link', { name: /audit/i }),
-      );
+    const securityLink = page
+      .getByRole('link', { name: /security/i })
+      .or(page.getByRole('link', { name: /audit/i }));
     await securityLink.click();
 
     // Look for a login_failure event in the list

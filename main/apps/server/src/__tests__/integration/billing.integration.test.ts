@@ -21,12 +21,12 @@ import {
   type TestServer,
 } from './test-utils';
 
+import type { AuthGuardFactory } from '@/http';
 import type {
   BillingAppContext,
   BillingBaseRouteDefinition,
   BillingRequest,
 } from '@bslt/core/billing';
-import type { AuthGuardFactory } from '@/http';
 import type {
   HttpReply,
   HttpRequest,
@@ -1042,7 +1042,12 @@ describe('Billing API Integration Tests', () => {
 
       if (response.statusCode === 200) {
         const body = parseJsonResponse(response) as {
-          metrics: Array<{ metricKey: string; currentValue: number; limit: number; percentUsed: number }>;
+          metrics: Array<{
+            metricKey: string;
+            currentValue: number;
+            limit: number;
+            percentUsed: number;
+          }>;
         };
         // Verify the free plan's limit is reflected
         if (body.metrics.length > 0) {

@@ -5,7 +5,7 @@ export {
   getContrastCssVariables,
   highContrastDarkOverrides,
   highContrastLightOverrides,
-  type ContrastMode
+  type ContrastMode,
 } from '@bslt/client-engine';
 
 export {
@@ -13,6 +13,5 @@ export {
   densityMultipliers,
   getDensityCssVariables,
   getSpacingForDensity,
-  type Density
+  type Density,
 } from '@bslt/client-engine';
-

@@ -150,7 +150,7 @@ export const ApiKeyCreateDialog = ({
 
         <Modal.Footer>
           <Button type="button" onClick={handleDismiss} data-testid="dismiss-key-button">
-            I've Copied My Key
+            I&apos;ve Copied My Key
           </Button>
         </Modal.Footer>
       </Modal.Root>

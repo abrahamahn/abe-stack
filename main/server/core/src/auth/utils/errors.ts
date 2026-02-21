@@ -16,6 +16,5 @@ export {
   TotpInvalidError,
   TotpRequiredError,
   UserNotFoundError,
-  WeakPasswordError
+  WeakPasswordError,
 } from '@bslt/shared'; // Changed from @bslt/shared
-

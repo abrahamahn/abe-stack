@@ -15,12 +15,7 @@ import { getUserById, listUsers } from '../service';
 import { ERROR_MESSAGES, type UsersModuleDeps, type UsersRequest } from '../types';
 
 import type { HandlerContext } from '../../../../system/src';
-import type {
-  CursorPaginatedResult,
-  CursorPaginationOptions,
-  User,
-  UserId,
-} from '@bslt/shared';
+import type { CursorPaginatedResult, CursorPaginationOptions, User, UserId } from '@bslt/shared';
 
 const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));

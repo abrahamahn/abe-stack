@@ -33,7 +33,7 @@ export {
   createRequireAuth,
   createRequireRole,
   extractTokenPayload,
-  isAdmin
+  isAdmin,
 } from './middleware';
 
 // Handlers
@@ -65,7 +65,7 @@ export {
   handleVerifySmsCode,
   SUDO_TOKEN_HEADER,
   SUDO_TOKEN_TTL_MINUTES,
-  verifySudoToken
+  verifySudoToken,
 } from './handlers';
 
 // Magic Link
@@ -77,22 +77,34 @@ export {
   requestMagicLink,
   verifyMagicLink,
   type MagicLinkResult,
-  type RequestMagicLinkResult
+  type RequestMagicLinkResult,
 } from './magic-link';
 
 // OAuth
 export {
   createAppleProvider,
   createGitHubProvider,
-  createGoogleProvider, createOAuthState,
+  createGoogleProvider,
+  createOAuthState,
   decodeOAuthState,
-  encodeOAuthState, extractAppleUserFromIdToken, findUserByOAuthProvider,
+  encodeOAuthState,
+  extractAppleUserFromIdToken,
+  findUserByOAuthProvider,
   getAuthorizationUrl,
   getConnectedProviders,
-  getProviderClient, handleGetConnections, handleOAuthCallback, handleOAuthCallbackRequest,
+  getProviderClient,
+  handleGetConnections,
+  handleOAuthCallback,
+  handleOAuthCallbackRequest,
   handleOAuthInitiate,
   handleOAuthLink,
-  handleOAuthUnlink, linkOAuthAccount, oauthRoutes, refreshExpiringOAuthTokens, unlinkOAuthAccount, type AppleProviderConfig, type OAuthAuthResult,
+  handleOAuthUnlink,
+  linkOAuthAccount,
+  oauthRoutes,
+  refreshExpiringOAuthTokens,
+  unlinkOAuthAccount,
+  type AppleProviderConfig,
+  type OAuthAuthResult,
   type OAuthCallbackResult,
   type OAuthConnectionInfo,
   type OAuthProvider,
@@ -100,7 +112,7 @@ export {
   type OAuthRefreshResult,
   type OAuthState,
   type OAuthTokenResponse,
-  type OAuthUserInfo
+  type OAuthUserInfo,
 } from './oauth';
 
 // Types (auth module types)
@@ -113,7 +125,7 @@ export type {
   AuthModuleDeps,
   EmailTemplateResult,
   ReplyWithCookies,
-  RequestWithCookies
+  RequestWithCookies,
 } from './types';
 
 export {
@@ -124,13 +136,13 @@ export {
   PROGRESSIVE_DELAY_WINDOW_MS,
   REFRESH_COOKIE_NAME,
   REFRESH_TOKEN_BYTES,
-  type LoginFailureReason
+  type LoginFailureReason,
 } from './types';
 
 // Re-export auth messages from shared (admin module imports these via ../auth)
 export {
   AUTH_ERROR_MESSAGES as ERROR_MESSAGES,
-  AUTH_SUCCESS_MESSAGES as SUCCESS_MESSAGES
+  AUTH_SUCCESS_MESSAGES as SUCCESS_MESSAGES,
 } from '@bslt/shared';
 
 // Service (business logic)
@@ -149,7 +161,7 @@ export {
   type AuthResult,
   type RefreshResult,
   type RegisterResult,
-  type TotpChallengeResult
+  type TotpChallengeResult,
 } from './service';
 
 // TOTP (2FA)
@@ -157,23 +169,29 @@ export {
   disableTotp,
   enableTotp,
   getTotpStatus,
-  setupTotp, verifyTotpCode, verifyTotpForLogin,
-  type TotpSetupResult, type TotpVerifyResult
+  setupTotp,
+  verifyTotpCode,
+  verifyTotpForLogin,
+  type TotpSetupResult,
+  type TotpVerifyResult,
 } from './totp';
 
 // SMS 2FA
 export {
   checkSmsRateLimit,
   getSmsVerificationCode,
-  sendSms2faCode, SMS_CODE_EXPIRY_MS,
+  sendSms2faCode,
+  SMS_CODE_EXPIRY_MS,
   SMS_MAX_ATTEMPTS,
   SMS_RATE_LIMIT_DAILY,
-  SMS_RATE_LIMIT_HOURLY, verifySms2faCode, type SetPhoneRequest,
+  SMS_RATE_LIMIT_HOURLY,
+  verifySms2faCode,
+  type SetPhoneRequest,
   type SmsChallengeRequest,
   type SmsRateLimitResult,
   type SmsVerificationCode,
   type SmsVerifyRequest,
-  type VerifyPhoneRequest
+  type VerifyPhoneRequest,
 } from './sms-2fa';
 
 // WebAuthn
@@ -183,7 +201,7 @@ export {
   getRegistrationOptions,
   verifyAuthentication,
   verifyRegistration,
-  webauthnRouteEntries
+  webauthnRouteEntries,
 } from './webauthn';
 
 // WebAuthn Handlers
@@ -194,7 +212,7 @@ export {
   handleWebauthnLoginOptions,
   handleWebauthnLoginVerify,
   handleWebauthnRegisterOptions,
-  handleWebauthnRegisterVerify
+  handleWebauthnRegisterVerify,
 } from './handlers';
 
 // Email Change
@@ -202,7 +220,7 @@ export {
   confirmEmailChange,
   initiateEmailChange,
   type EmailChangeConfirmResult,
-  type EmailChangeResult
+  type EmailChangeResult,
 } from './email-change';
 
 // ToS Gating
@@ -210,7 +228,7 @@ export {
   acceptTos,
   checkTosAcceptance,
   createRequireTosAcceptance,
-  type TosAcceptanceStatus
+  type TosAcceptanceStatus,
 } from './tos-gating';
 
 // Utils (for direct use if needed)
@@ -223,7 +241,9 @@ export {
   createRefreshTokenFamily,
   extractRequestInfo,
   generateBase64UrlToken,
-  generateSecureToken, generateUniqueUsername, getRefreshTokenExpiry,
+  generateSecureToken,
+  generateUniqueUsername,
+  getRefreshTokenExpiry,
   hashPassword,
   hashToken,
   initDummyHashPool,
@@ -234,12 +254,15 @@ export {
   revokeAllUserTokens,
   revokeTokenFamily,
   rotateRefreshToken,
-  setRefreshTokenCookie, splitFullName, verifyPassword,
+  setRefreshTokenCookie,
+  splitFullName,
+  verifyPassword,
   verifyPasswordSafe,
-  verifyToken, type AuthResponseData,
+  verifyToken,
+  type AuthResponseData,
   type AuthUser,
   type RequestWithClientInfo,
-  type TokenPayload
+  type TokenPayload,
 } from './utils';
 
 // Security (login tracking, lockout, audit)
@@ -273,10 +296,15 @@ export {
   sendNewLoginAlert,
   sendPasswordChangedAlert,
   sendTokenReuseAlert,
-  unlockAccount
+  unlockAccount,
 } from './security';
 
-export { createRequireSudo, isCaptchaRequired, verifyCaptchaToken, verifyTurnstileToken } from './security';
+export {
+  createRequireSudo,
+  isCaptchaRequired,
+  verifyCaptchaToken,
+  verifyTurnstileToken,
+} from './security';
 
 // Device fingerprinting
 export {
@@ -299,6 +327,5 @@ export type {
   SecurityEventType,
   SendEmailChangedAlertParams,
   SendSecurityAlertParams,
-  SendTokenReuseAlertParams
+  SendTokenReuseAlertParams,
 } from './security';
-

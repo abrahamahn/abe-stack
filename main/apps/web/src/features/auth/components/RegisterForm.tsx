@@ -9,11 +9,7 @@ import { OAuthButtons } from './OAuthButtons';
 import { TurnstileWidget } from './TurnstileWidget';
 
 import type { AuthMode } from '@bslt/react/hooks';
-import type {
-  RegisterRequest,
-  RegisterResponse,
-  ResendVerificationRequest,
-} from '@bslt/shared';
+import type { RegisterRequest, RegisterResponse, ResendVerificationRequest } from '@bslt/shared';
 import type { ChangeEvent, ReactElement } from 'react';
 
 // ============================================================================

@@ -22,10 +22,9 @@
   --ui-motion-ease-in: cubic-bezier(0.4, 0, 1, 1);
   --ui-motion-ease-out: cubic-bezier(0, 0, 0.2, 1);
   --ui-font-family:
-    system-ui, -apple-system, Segoe UI, sans-serif, Apple Color Emoji,
-    Segoe UI Emoji, Noto Color Emoji;
-  --ui-font-family-mono:
-    Monaco, Menlo, "Ubuntu Mono", Consolas, "Courier New", monospace;
+    system-ui, -apple-system, Segoe UI, sans-serif, Apple Color Emoji, Segoe UI Emoji,
+    Noto Color Emoji;
+  --ui-font-family-mono: Monaco, Menlo, 'Ubuntu Mono', Consolas, 'Courier New', monospace;
   --ui-font-size-base: 0.875rem;
   --ui-font-size-2xs: 0.625rem;
   --ui-font-size-xs: 0.75rem;
@@ -53,8 +52,7 @@
   --ui-color-surface-strong: #202124;
   --ui-color-border: #dadce0;
   --ui-layout-border: var(--ui-border-width) solid var(--ui-color-border);
-  --ui-color-shadow:
-    0 1px 3px rgba(60, 64, 67, 0.15), 0 1px 2px rgba(60, 64, 67, 0.1);
+  --ui-color-shadow: 0 1px 3px rgba(60, 64, 67, 0.15), 0 1px 2px rgba(60, 64, 67, 0.1);
   --ui-focus: 0 0 0 2px rgba(26, 115, 232, 0.4);
   --ui-color-text: #202124;
   --ui-color-text-muted: #5f6368;
@@ -84,7 +82,7 @@
   --ui-badge-neutral-border: #dadce0;
 }
 
-:root[data-theme="light"] {
+:root[data-theme='light'] {
   --ui-radius-sm: 0.25rem;
   --ui-radius-md: 0.625rem;
   --ui-radius-lg: 1rem;
@@ -108,10 +106,9 @@
   --ui-motion-ease-in: cubic-bezier(0.4, 0, 1, 1);
   --ui-motion-ease-out: cubic-bezier(0, 0, 0.2, 1);
   --ui-font-family:
-    system-ui, -apple-system, Segoe UI, sans-serif, Apple Color Emoji,
-    Segoe UI Emoji, Noto Color Emoji;
-  --ui-font-family-mono:
-    Monaco, Menlo, "Ubuntu Mono", Consolas, "Courier New", monospace;
+    system-ui, -apple-system, Segoe UI, sans-serif, Apple Color Emoji, Segoe UI Emoji,
+    Noto Color Emoji;
+  --ui-font-family-mono: Monaco, Menlo, 'Ubuntu Mono', Consolas, 'Courier New', monospace;
   --ui-font-size-base: 0.875rem;
   --ui-font-size-2xs: 0.625rem;
   --ui-font-size-xs: 0.75rem;
@@ -139,8 +136,7 @@
   --ui-color-surface-strong: #202124;
   --ui-color-border: #dadce0;
   --ui-layout-border: var(--ui-border-width) solid var(--ui-color-border);
-  --ui-color-shadow:
-    0 1px 3px rgba(60, 64, 67, 0.15), 0 1px 2px rgba(60, 64, 67, 0.1);
+  --ui-color-shadow: 0 1px 3px rgba(60, 64, 67, 0.15), 0 1px 2px rgba(60, 64, 67, 0.1);
   --ui-focus: 0 0 0 2px rgba(26, 115, 232, 0.4);
   --ui-color-text: #202124;
   --ui-color-text-muted: #5f6368;
@@ -170,7 +166,7 @@
   --ui-badge-neutral-border: #dadce0;
 }
 
-:root[data-theme="dark"] {
+:root[data-theme='dark'] {
   --ui-radius-sm: 0.25rem;
   --ui-radius-md: 0.625rem;
   --ui-radius-lg: 1rem;
@@ -194,10 +190,9 @@
   --ui-motion-ease-in: cubic-bezier(0.4, 0, 1, 1);
   --ui-motion-ease-out: cubic-bezier(0, 0, 0.2, 1);
   --ui-font-family:
-    system-ui, -apple-system, Segoe UI, sans-serif, Apple Color Emoji,
-    Segoe UI Emoji, Noto Color Emoji;
-  --ui-font-family-mono:
-    Monaco, Menlo, "Ubuntu Mono", Consolas, "Courier New", monospace;
+    system-ui, -apple-system, Segoe UI, sans-serif, Apple Color Emoji, Segoe UI Emoji,
+    Noto Color Emoji;
+  --ui-font-family-mono: Monaco, Menlo, 'Ubuntu Mono', Consolas, 'Courier New', monospace;
   --ui-font-size-base: 0.875rem;
   --ui-font-size-2xs: 0.625rem;
   --ui-font-size-xs: 0.75rem;
@@ -225,8 +220,7 @@
   --ui-color-surface-strong: #171717;
   --ui-color-border: #3c4043;
   --ui-layout-border: var(--ui-border-width) solid var(--ui-color-border);
-  --ui-color-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.25);
+  --ui-color-shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.25);
   --ui-focus: 0 0 0 2px rgba(138, 180, 248, 0.4);
   --ui-color-text: #e8eaed;
   --ui-color-text-muted: #9aa0a6;
@@ -281,10 +275,9 @@
     --ui-motion-ease-in: cubic-bezier(0.4, 0, 1, 1);
     --ui-motion-ease-out: cubic-bezier(0, 0, 0.2, 1);
     --ui-font-family:
-      system-ui, -apple-system, Segoe UI, sans-serif, Apple Color Emoji,
-      Segoe UI Emoji, Noto Color Emoji;
-    --ui-font-family-mono:
-      Monaco, Menlo, "Ubuntu Mono", Consolas, "Courier New", monospace;
+      system-ui, -apple-system, Segoe UI, sans-serif, Apple Color Emoji, Segoe UI Emoji,
+      Noto Color Emoji;
+    --ui-font-family-mono: Monaco, Menlo, 'Ubuntu Mono', Consolas, 'Courier New', monospace;
     --ui-font-size-base: 0.875rem;
     --ui-font-size-2xs: 0.625rem;
     --ui-font-size-xs: 0.75rem;
@@ -312,8 +305,7 @@
     --ui-color-surface-strong: #171717;
     --ui-color-border: #3c4043;
     --ui-layout-border: var(--ui-border-width) solid var(--ui-color-border);
-    --ui-color-shadow:
-      0 1px 3px rgba(0, 0, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.25);
+    --ui-color-shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.25);
     --ui-focus: 0 0 0 2px rgba(138, 180, 248, 0.4);
     --ui-color-text: #e8eaed;
     --ui-color-text-muted: #9aa0a6;

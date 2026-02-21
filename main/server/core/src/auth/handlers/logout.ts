@@ -7,10 +7,7 @@
  * @module handlers/logout
  */
 
-import {
-  mapErrorToHttpResponse,
-  AUTH_SUCCESS_MESSAGES as SUCCESS_MESSAGES,
-} from '@bslt/shared';
+import { mapErrorToHttpResponse, AUTH_SUCCESS_MESSAGES as SUCCESS_MESSAGES } from '@bslt/shared';
 
 import { logoutUser } from '../service';
 import { createErrorMapperLogger, REFRESH_COOKIE_NAME } from '../types';

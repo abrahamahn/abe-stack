@@ -26,8 +26,6 @@ import type { AuthGuardFactory } from '@/http';
 
 import { registerRouteMap } from '@/http';
 
-import { registerRouteMap } from '@/http';
-
 // ============================================================================
 // Mock Repositories
 // ============================================================================
@@ -1139,9 +1137,7 @@ describe('Webhooks API Integration Tests', () => {
         // Second delete: webhook already gone
         .mockResolvedValueOnce(null);
 
-      mockRepos.webhooks.delete
-        .mockResolvedValueOnce(true)
-        .mockResolvedValueOnce(false);
+      mockRepos.webhooks.delete.mockResolvedValueOnce(true).mockResolvedValueOnce(false);
 
       const token = createTestJwt({ userId: 'user-1' });
 
@@ -1322,8 +1318,8 @@ describe('Webhooks API Integration Tests', () => {
             url: 'https://example.com/hook',
             events: ['user.created'],
             headers: {
-              '__proto__': { admin: true },
-              'constructor': { prototype: { isAdmin: true } },
+              __proto__: { admin: true },
+              constructor: { prototype: { isAdmin: true } },
               'X-Custom': 'safe-value',
             },
           },
@@ -1353,7 +1349,7 @@ describe('Webhooks API Integration Tests', () => {
         payload: JSON.stringify({
           url: 'https://example.com/hook',
           events: ['user.created'],
-          '__proto__': { 'polluted': true },
+          __proto__: { polluted: true },
         }),
       });
 

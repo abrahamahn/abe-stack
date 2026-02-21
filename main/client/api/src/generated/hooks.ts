@@ -47,72 +47,82 @@ export interface GeneratedClient {
  * Use these for cache invalidation, prefetching, and query matching.
  */
 export const queryKeys = {
-  activities: () => ["/api/activities"] as const,
-  adminAuditEvents: () => ["/api/admin/audit-events"] as const,
-  adminBillingPlans: () => ["/api/admin/billing/plans"] as const,
-  adminBillingPlansById: (params: { id: string }) => ["/api/admin/billing/plans/:id", params] as const,
-  adminFeatureFlags: () => ["/api/admin/feature-flags"] as const,
-  adminHealth: () => ["/api/admin/health"] as const,
-  adminJobs: () => ["/api/admin/jobs"] as const,
-  adminJobsByJobId: (params: { jobId: string }) => ["/api/admin/jobs/:jobId", params] as const,
-  adminJobsStats: () => ["/api/admin/jobs/stats"] as const,
-  adminMetrics: () => ["/api/admin/metrics"] as const,
-  adminRoutes: () => ["/api/admin/routes"] as const,
-  adminSecurityEventsById: (params: { id: string }) => ["/api/admin/security/events/:id", params] as const,
-  adminSecurityMetrics: () => ["/api/admin/security/metrics"] as const,
-  adminTenants: () => ["/api/admin/tenants"] as const,
-  adminTenantsById: (params: { id: string }) => ["/api/admin/tenants/:id", params] as const,
-  adminTenantsByTenantIdFeatureOverrides: (params: { tenantId: string }) => ["/api/admin/tenants/:tenantId/feature-overrides", params] as const,
-  adminUsers: () => ["/api/admin/users"] as const,
-  adminUsersById: (params: { id: string }) => ["/api/admin/users/:id", params] as const,
-  adminUsersSearch: () => ["/api/admin/users/search"] as const,
-  adminWebhooks: () => ["/api/admin/webhooks"] as const,
-  adminWebhooksByIdDeliveries: (params: { id: string }) => ["/api/admin/webhooks/:id/deliveries", params] as const,
-  authOauthApple: () => ["/api/auth/oauth/apple"] as const,
-  authOauthAppleCallback: () => ["/api/auth/oauth/apple/callback"] as const,
-  authOauthConnections: () => ["/api/auth/oauth/connections"] as const,
-  authOauthGithub: () => ["/api/auth/oauth/github"] as const,
-  authOauthGithubCallback: () => ["/api/auth/oauth/github/callback"] as const,
-  authOauthGoogle: () => ["/api/auth/oauth/google"] as const,
-  authOauthGoogleCallback: () => ["/api/auth/oauth/google/callback"] as const,
-  authOauthProviders: () => ["/api/auth/oauth/providers"] as const,
-  authTosStatus: () => ["/api/auth/tos/status"] as const,
-  authTotpStatus: () => ["/api/auth/totp/status"] as const,
-  billingInvoices: () => ["/api/billing/invoices"] as const,
-  billingInvoicesById: (params: { id: string }) => ["/api/billing/invoices/:id", params] as const,
-  billingPaymentMethods: () => ["/api/billing/payment-methods"] as const,
-  billingPlans: () => ["/api/billing/plans"] as const,
-  billingSubscription: () => ["/api/billing/subscription"] as const,
-  billingUsage: () => ["/api/billing/usage"] as const,
-  emailUnsubscribeByToken: (params: { token: string }) => ["/api/email/unsubscribe/:token", params] as const,
-  featureFlagsEvaluate: () => ["/api/feature-flags/evaluate"] as const,
-  filesById: (params: { id: string }) => ["/api/files/:id", params] as const,
-  filesByIdDownload: (params: { id: string }) => ["/api/files/:id/download", params] as const,
-  legalCurrent: () => ["/api/legal/current"] as const,
-  notificationsList: () => ["/api/notifications/list"] as const,
-  notificationsPreferences: () => ["/api/notifications/preferences"] as const,
-  notificationsVapidKey: () => ["/api/notifications/vapid-key"] as const,
-  tenantsById: (params: { id: string }) => ["/api/tenants/:id", params] as const,
-  tenantsByIdAuditEvents: (params: { id: string }) => ["/api/tenants/:id/audit-events", params] as const,
-  tenantsByIdInvitationsList: (params: { id: string }) => ["/api/tenants/:id/invitations/list", params] as const,
-  tenantsByIdMembers: (params: { id: string }) => ["/api/tenants/:id/members", params] as const,
-  tenantsByIdUsage: (params: { id: string }) => ["/api/tenants/:id/usage", params] as const,
-  tenantsByTenantIdActivities: (params: { tenantId: string }) => ["/api/tenants/:tenantId/activities", params] as const,
-  tenantsList: () => ["/api/tenants/list"] as const,
-  usersList: () => ["/api/users/list"] as const,
-  usersMe: () => ["/api/users/me"] as const,
-  usersMeAgreements: () => ["/api/users/me/agreements"] as const,
-  usersMeApiKeys: () => ["/api/users/me/api-keys"] as const,
-  usersMeConsent: () => ["/api/users/me/consent"] as const,
-  usersMeDevices: () => ["/api/users/me/devices"] as const,
-  usersMeExportByIdStatus: (params: { id: string }) => ["/api/users/me/export/:id/status", params] as const,
-  usersMePasskeys: () => ["/api/users/me/passkeys"] as const,
-  usersMeProfileCompleteness: () => ["/api/users/me/profile-completeness"] as const,
-  usersMeSessions: () => ["/api/users/me/sessions"] as const,
-  usersMeSessionsCount: () => ["/api/users/me/sessions/count"] as const,
-  webhooksById: (params: { id: string }) => ["/api/webhooks/:id", params] as const,
-  webhooksByIdDeliveries: (params: { id: string }) => ["/api/webhooks/:id/deliveries", params] as const,
-  webhooksList: () => ["/api/webhooks/list"] as const,
+  activities: () => ['/api/activities'] as const,
+  adminAuditEvents: () => ['/api/admin/audit-events'] as const,
+  adminBillingPlans: () => ['/api/admin/billing/plans'] as const,
+  adminBillingPlansById: (params: { id: string }) =>
+    ['/api/admin/billing/plans/:id', params] as const,
+  adminFeatureFlags: () => ['/api/admin/feature-flags'] as const,
+  adminHealth: () => ['/api/admin/health'] as const,
+  adminJobs: () => ['/api/admin/jobs'] as const,
+  adminJobsByJobId: (params: { jobId: string }) => ['/api/admin/jobs/:jobId', params] as const,
+  adminJobsStats: () => ['/api/admin/jobs/stats'] as const,
+  adminMetrics: () => ['/api/admin/metrics'] as const,
+  adminRoutes: () => ['/api/admin/routes'] as const,
+  adminSecurityEventsById: (params: { id: string }) =>
+    ['/api/admin/security/events/:id', params] as const,
+  adminSecurityMetrics: () => ['/api/admin/security/metrics'] as const,
+  adminTenants: () => ['/api/admin/tenants'] as const,
+  adminTenantsById: (params: { id: string }) => ['/api/admin/tenants/:id', params] as const,
+  adminTenantsByTenantIdFeatureOverrides: (params: { tenantId: string }) =>
+    ['/api/admin/tenants/:tenantId/feature-overrides', params] as const,
+  adminUsers: () => ['/api/admin/users'] as const,
+  adminUsersById: (params: { id: string }) => ['/api/admin/users/:id', params] as const,
+  adminUsersSearch: () => ['/api/admin/users/search'] as const,
+  adminWebhooks: () => ['/api/admin/webhooks'] as const,
+  adminWebhooksByIdDeliveries: (params: { id: string }) =>
+    ['/api/admin/webhooks/:id/deliveries', params] as const,
+  authOauthApple: () => ['/api/auth/oauth/apple'] as const,
+  authOauthAppleCallback: () => ['/api/auth/oauth/apple/callback'] as const,
+  authOauthConnections: () => ['/api/auth/oauth/connections'] as const,
+  authOauthGithub: () => ['/api/auth/oauth/github'] as const,
+  authOauthGithubCallback: () => ['/api/auth/oauth/github/callback'] as const,
+  authOauthGoogle: () => ['/api/auth/oauth/google'] as const,
+  authOauthGoogleCallback: () => ['/api/auth/oauth/google/callback'] as const,
+  authOauthProviders: () => ['/api/auth/oauth/providers'] as const,
+  authTosStatus: () => ['/api/auth/tos/status'] as const,
+  authTotpStatus: () => ['/api/auth/totp/status'] as const,
+  billingInvoices: () => ['/api/billing/invoices'] as const,
+  billingInvoicesById: (params: { id: string }) => ['/api/billing/invoices/:id', params] as const,
+  billingPaymentMethods: () => ['/api/billing/payment-methods'] as const,
+  billingPlans: () => ['/api/billing/plans'] as const,
+  billingSubscription: () => ['/api/billing/subscription'] as const,
+  billingUsage: () => ['/api/billing/usage'] as const,
+  emailUnsubscribeByToken: (params: { token: string }) =>
+    ['/api/email/unsubscribe/:token', params] as const,
+  featureFlagsEvaluate: () => ['/api/feature-flags/evaluate'] as const,
+  filesById: (params: { id: string }) => ['/api/files/:id', params] as const,
+  filesByIdDownload: (params: { id: string }) => ['/api/files/:id/download', params] as const,
+  legalCurrent: () => ['/api/legal/current'] as const,
+  notificationsList: () => ['/api/notifications/list'] as const,
+  notificationsPreferences: () => ['/api/notifications/preferences'] as const,
+  notificationsVapidKey: () => ['/api/notifications/vapid-key'] as const,
+  tenantsById: (params: { id: string }) => ['/api/tenants/:id', params] as const,
+  tenantsByIdAuditEvents: (params: { id: string }) =>
+    ['/api/tenants/:id/audit-events', params] as const,
+  tenantsByIdInvitationsList: (params: { id: string }) =>
+    ['/api/tenants/:id/invitations/list', params] as const,
+  tenantsByIdMembers: (params: { id: string }) => ['/api/tenants/:id/members', params] as const,
+  tenantsByIdUsage: (params: { id: string }) => ['/api/tenants/:id/usage', params] as const,
+  tenantsByTenantIdActivities: (params: { tenantId: string }) =>
+    ['/api/tenants/:tenantId/activities', params] as const,
+  tenantsList: () => ['/api/tenants/list'] as const,
+  usersList: () => ['/api/users/list'] as const,
+  usersMe: () => ['/api/users/me'] as const,
+  usersMeAgreements: () => ['/api/users/me/agreements'] as const,
+  usersMeApiKeys: () => ['/api/users/me/api-keys'] as const,
+  usersMeConsent: () => ['/api/users/me/consent'] as const,
+  usersMeDevices: () => ['/api/users/me/devices'] as const,
+  usersMeExportByIdStatus: (params: { id: string }) =>
+    ['/api/users/me/export/:id/status', params] as const,
+  usersMePasskeys: () => ['/api/users/me/passkeys'] as const,
+  usersMeProfileCompleteness: () => ['/api/users/me/profile-completeness'] as const,
+  usersMeSessions: () => ['/api/users/me/sessions'] as const,
+  usersMeSessionsCount: () => ['/api/users/me/sessions/count'] as const,
+  webhooksById: (params: { id: string }) => ['/api/webhooks/:id', params] as const,
+  webhooksByIdDeliveries: (params: { id: string }) =>
+    ['/api/webhooks/:id/deliveries', params] as const,
+  webhooksList: () => ['/api/webhooks/list'] as const,
 } as const;
 
 // ============================================================================
@@ -127,462 +137,726 @@ export const queryOptions = {
   getActivities(client: GeneratedClient) {
     return {
       queryKey: queryKeys.activities(),
-      queryFn: () => client.request({ path: "/api/activities" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/activities' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getAdminAuditEvents(client: GeneratedClient) {
     return {
       queryKey: queryKeys.adminAuditEvents(),
-      queryFn: () => client.request({ path: "/api/admin/audit-events" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/admin/audit-events' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getAdminBillingPlans(client: GeneratedClient) {
     return {
       queryKey: queryKeys.adminBillingPlans(),
-      queryFn: () => client.request({ path: "/api/admin/billing/plans" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/admin/billing/plans' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getAdminBillingPlansById(client: GeneratedClient, params: { id: string }) {
     return {
       queryKey: queryKeys.adminBillingPlansById(params),
-      queryFn: () => client.request({ path: `/api/admin/billing/plans/${params.id}` as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: `/api/admin/billing/plans/${params.id}` as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getAdminFeatureFlags(client: GeneratedClient) {
     return {
       queryKey: queryKeys.adminFeatureFlags(),
-      queryFn: () => client.request({ path: "/api/admin/feature-flags" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/admin/feature-flags' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getAdminHealth(client: GeneratedClient) {
     return {
       queryKey: queryKeys.adminHealth(),
-      queryFn: () => client.request({ path: "/api/admin/health" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/admin/health' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getAdminJobs(client: GeneratedClient) {
     return {
       queryKey: queryKeys.adminJobs(),
-      queryFn: () => client.request({ path: "/api/admin/jobs" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/admin/jobs' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getAdminJobsByJobId(client: GeneratedClient, params: { jobId: string }) {
     return {
       queryKey: queryKeys.adminJobsByJobId(params),
-      queryFn: () => client.request({ path: `/api/admin/jobs/${params.jobId}` as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: `/api/admin/jobs/${params.jobId}` as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getAdminJobsStats(client: GeneratedClient) {
     return {
       queryKey: queryKeys.adminJobsStats(),
-      queryFn: () => client.request({ path: "/api/admin/jobs/stats" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/admin/jobs/stats' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getAdminMetrics(client: GeneratedClient) {
     return {
       queryKey: queryKeys.adminMetrics(),
-      queryFn: () => client.request({ path: "/api/admin/metrics" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/admin/metrics' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getAdminRoutes(client: GeneratedClient) {
     return {
       queryKey: queryKeys.adminRoutes(),
-      queryFn: () => client.request({ path: "/api/admin/routes" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/admin/routes' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getAdminSecurityEventsById(client: GeneratedClient, params: { id: string }) {
     return {
       queryKey: queryKeys.adminSecurityEventsById(params),
-      queryFn: () => client.request({ path: `/api/admin/security/events/${params.id}` as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: `/api/admin/security/events/${params.id}` as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getAdminSecurityMetrics(client: GeneratedClient) {
     return {
       queryKey: queryKeys.adminSecurityMetrics(),
-      queryFn: () => client.request({ path: "/api/admin/security/metrics" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/admin/security/metrics' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getAdminTenants(client: GeneratedClient) {
     return {
       queryKey: queryKeys.adminTenants(),
-      queryFn: () => client.request({ path: "/api/admin/tenants" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/admin/tenants' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getAdminTenantsById(client: GeneratedClient, params: { id: string }) {
     return {
       queryKey: queryKeys.adminTenantsById(params),
-      queryFn: () => client.request({ path: `/api/admin/tenants/${params.id}` as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: `/api/admin/tenants/${params.id}` as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getAdminTenantsByTenantIdFeatureOverrides(client: GeneratedClient, params: { tenantId: string }) {
     return {
       queryKey: queryKeys.adminTenantsByTenantIdFeatureOverrides(params),
-      queryFn: () => client.request({ path: `/api/admin/tenants/${params.tenantId}/feature-overrides` as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: `/api/admin/tenants/${params.tenantId}/feature-overrides` as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getAdminUsers(client: GeneratedClient) {
     return {
       queryKey: queryKeys.adminUsers(),
-      queryFn: () => client.request({ path: "/api/admin/users" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/admin/users' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getAdminUsersById(client: GeneratedClient, params: { id: string }) {
     return {
       queryKey: queryKeys.adminUsersById(params),
-      queryFn: () => client.request({ path: `/api/admin/users/${params.id}` as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: `/api/admin/users/${params.id}` as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getAdminUsersSearch(client: GeneratedClient) {
     return {
       queryKey: queryKeys.adminUsersSearch(),
-      queryFn: () => client.request({ path: "/api/admin/users/search" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/admin/users/search' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getAdminWebhooks(client: GeneratedClient) {
     return {
       queryKey: queryKeys.adminWebhooks(),
-      queryFn: () => client.request({ path: "/api/admin/webhooks" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/admin/webhooks' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getAdminWebhooksByIdDeliveries(client: GeneratedClient, params: { id: string }) {
     return {
       queryKey: queryKeys.adminWebhooksByIdDeliveries(params),
-      queryFn: () => client.request({ path: `/api/admin/webhooks/${params.id}/deliveries` as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: `/api/admin/webhooks/${params.id}/deliveries` as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getAuthOauthApple(client: GeneratedClient) {
     return {
       queryKey: queryKeys.authOauthApple(),
-      queryFn: () => client.request({ path: "/api/auth/oauth/apple" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/auth/oauth/apple' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getAuthOauthAppleCallback(client: GeneratedClient) {
     return {
       queryKey: queryKeys.authOauthAppleCallback(),
-      queryFn: () => client.request({ path: "/api/auth/oauth/apple/callback" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/auth/oauth/apple/callback' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getAuthOauthConnections(client: GeneratedClient) {
     return {
       queryKey: queryKeys.authOauthConnections(),
-      queryFn: () => client.request({ path: "/api/auth/oauth/connections" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/auth/oauth/connections' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getAuthOauthGithub(client: GeneratedClient) {
     return {
       queryKey: queryKeys.authOauthGithub(),
-      queryFn: () => client.request({ path: "/api/auth/oauth/github" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/auth/oauth/github' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getAuthOauthGithubCallback(client: GeneratedClient) {
     return {
       queryKey: queryKeys.authOauthGithubCallback(),
-      queryFn: () => client.request({ path: "/api/auth/oauth/github/callback" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/auth/oauth/github/callback' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getAuthOauthGoogle(client: GeneratedClient) {
     return {
       queryKey: queryKeys.authOauthGoogle(),
-      queryFn: () => client.request({ path: "/api/auth/oauth/google" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/auth/oauth/google' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getAuthOauthGoogleCallback(client: GeneratedClient) {
     return {
       queryKey: queryKeys.authOauthGoogleCallback(),
-      queryFn: () => client.request({ path: "/api/auth/oauth/google/callback" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/auth/oauth/google/callback' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getAuthOauthProviders(client: GeneratedClient) {
     return {
       queryKey: queryKeys.authOauthProviders(),
-      queryFn: () => client.request({ path: "/api/auth/oauth/providers" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/auth/oauth/providers' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getAuthTosStatus(client: GeneratedClient) {
     return {
       queryKey: queryKeys.authTosStatus(),
-      queryFn: () => client.request({ path: "/api/auth/tos/status" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/auth/tos/status' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getAuthTotpStatus(client: GeneratedClient) {
     return {
       queryKey: queryKeys.authTotpStatus(),
-      queryFn: () => client.request({ path: "/api/auth/totp/status" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/auth/totp/status' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getBillingInvoices(client: GeneratedClient) {
     return {
       queryKey: queryKeys.billingInvoices(),
-      queryFn: () => client.request({ path: "/api/billing/invoices" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/billing/invoices' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getBillingInvoicesById(client: GeneratedClient, params: { id: string }) {
     return {
       queryKey: queryKeys.billingInvoicesById(params),
-      queryFn: () => client.request({ path: `/api/billing/invoices/${params.id}` as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: `/api/billing/invoices/${params.id}` as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getBillingPaymentMethods(client: GeneratedClient) {
     return {
       queryKey: queryKeys.billingPaymentMethods(),
-      queryFn: () => client.request({ path: "/api/billing/payment-methods" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/billing/payment-methods' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getBillingPlans(client: GeneratedClient) {
     return {
       queryKey: queryKeys.billingPlans(),
-      queryFn: () => client.request({ path: "/api/billing/plans" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/billing/plans' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getBillingSubscription(client: GeneratedClient) {
     return {
       queryKey: queryKeys.billingSubscription(),
-      queryFn: () => client.request({ path: "/api/billing/subscription" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/billing/subscription' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getBillingUsage(client: GeneratedClient) {
     return {
       queryKey: queryKeys.billingUsage(),
-      queryFn: () => client.request({ path: "/api/billing/usage" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/billing/usage' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getEmailUnsubscribeByToken(client: GeneratedClient, params: { token: string }) {
     return {
       queryKey: queryKeys.emailUnsubscribeByToken(params),
-      queryFn: () => client.request({ path: `/api/email/unsubscribe/${params.token}` as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: `/api/email/unsubscribe/${params.token}` as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getFeatureFlagsEvaluate(client: GeneratedClient) {
     return {
       queryKey: queryKeys.featureFlagsEvaluate(),
-      queryFn: () => client.request({ path: "/api/feature-flags/evaluate" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/feature-flags/evaluate' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getFilesById(client: GeneratedClient, params: { id: string }) {
     return {
       queryKey: queryKeys.filesById(params),
-      queryFn: () => client.request({ path: `/api/files/${params.id}` as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: `/api/files/${params.id}` as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getFilesByIdDownload(client: GeneratedClient, params: { id: string }) {
     return {
       queryKey: queryKeys.filesByIdDownload(params),
-      queryFn: () => client.request({ path: `/api/files/${params.id}/download` as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: `/api/files/${params.id}/download` as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getLegalCurrent(client: GeneratedClient) {
     return {
       queryKey: queryKeys.legalCurrent(),
-      queryFn: () => client.request({ path: "/api/legal/current" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/legal/current' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getNotificationsList(client: GeneratedClient) {
     return {
       queryKey: queryKeys.notificationsList(),
-      queryFn: () => client.request({ path: "/api/notifications/list" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/notifications/list' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getNotificationsPreferences(client: GeneratedClient) {
     return {
       queryKey: queryKeys.notificationsPreferences(),
-      queryFn: () => client.request({ path: "/api/notifications/preferences" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/notifications/preferences' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getNotificationsVapidKey(client: GeneratedClient) {
     return {
       queryKey: queryKeys.notificationsVapidKey(),
-      queryFn: () => client.request({ path: "/api/notifications/vapid-key" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/notifications/vapid-key' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getTenantsById(client: GeneratedClient, params: { id: string }) {
     return {
       queryKey: queryKeys.tenantsById(params),
-      queryFn: () => client.request({ path: `/api/tenants/${params.id}` as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: `/api/tenants/${params.id}` as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getTenantsByIdAuditEvents(client: GeneratedClient, params: { id: string }) {
     return {
       queryKey: queryKeys.tenantsByIdAuditEvents(params),
-      queryFn: () => client.request({ path: `/api/tenants/${params.id}/audit-events` as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: `/api/tenants/${params.id}/audit-events` as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getTenantsByIdInvitationsList(client: GeneratedClient, params: { id: string }) {
     return {
       queryKey: queryKeys.tenantsByIdInvitationsList(params),
-      queryFn: () => client.request({ path: `/api/tenants/${params.id}/invitations/list` as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: `/api/tenants/${params.id}/invitations/list` as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getTenantsByIdMembers(client: GeneratedClient, params: { id: string }) {
     return {
       queryKey: queryKeys.tenantsByIdMembers(params),
-      queryFn: () => client.request({ path: `/api/tenants/${params.id}/members` as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: `/api/tenants/${params.id}/members` as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getTenantsByIdUsage(client: GeneratedClient, params: { id: string }) {
     return {
       queryKey: queryKeys.tenantsByIdUsage(params),
-      queryFn: () => client.request({ path: `/api/tenants/${params.id}/usage` as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: `/api/tenants/${params.id}/usage` as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getTenantsByTenantIdActivities(client: GeneratedClient, params: { tenantId: string }) {
     return {
       queryKey: queryKeys.tenantsByTenantIdActivities(params),
-      queryFn: () => client.request({ path: `/api/tenants/${params.tenantId}/activities` as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: `/api/tenants/${params.tenantId}/activities` as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getTenantsList(client: GeneratedClient) {
     return {
       queryKey: queryKeys.tenantsList(),
-      queryFn: () => client.request({ path: "/api/tenants/list" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/tenants/list' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getUsersList(client: GeneratedClient) {
     return {
       queryKey: queryKeys.usersList(),
-      queryFn: () => client.request({ path: "/api/users/list" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/users/list' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getUsersMe(client: GeneratedClient) {
     return {
       queryKey: queryKeys.usersMe(),
-      queryFn: () => client.request({ path: "/api/users/me" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/users/me' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getUsersMeAgreements(client: GeneratedClient) {
     return {
       queryKey: queryKeys.usersMeAgreements(),
-      queryFn: () => client.request({ path: "/api/users/me/agreements" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/users/me/agreements' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getUsersMeApiKeys(client: GeneratedClient) {
     return {
       queryKey: queryKeys.usersMeApiKeys(),
-      queryFn: () => client.request({ path: "/api/users/me/api-keys" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/users/me/api-keys' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getUsersMeConsent(client: GeneratedClient) {
     return {
       queryKey: queryKeys.usersMeConsent(),
-      queryFn: () => client.request({ path: "/api/users/me/consent" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/users/me/consent' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getUsersMeDevices(client: GeneratedClient) {
     return {
       queryKey: queryKeys.usersMeDevices(),
-      queryFn: () => client.request({ path: "/api/users/me/devices" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/users/me/devices' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getUsersMeExportByIdStatus(client: GeneratedClient, params: { id: string }) {
     return {
       queryKey: queryKeys.usersMeExportByIdStatus(params),
-      queryFn: () => client.request({ path: `/api/users/me/export/${params.id}/status` as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: `/api/users/me/export/${params.id}/status` as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getUsersMePasskeys(client: GeneratedClient) {
     return {
       queryKey: queryKeys.usersMePasskeys(),
-      queryFn: () => client.request({ path: "/api/users/me/passkeys" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/users/me/passkeys' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getUsersMeProfileCompleteness(client: GeneratedClient) {
     return {
       queryKey: queryKeys.usersMeProfileCompleteness(),
-      queryFn: () => client.request({ path: "/api/users/me/profile-completeness" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/users/me/profile-completeness' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getUsersMeSessions(client: GeneratedClient) {
     return {
       queryKey: queryKeys.usersMeSessions(),
-      queryFn: () => client.request({ path: "/api/users/me/sessions" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/users/me/sessions' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getUsersMeSessionsCount(client: GeneratedClient) {
     return {
       queryKey: queryKeys.usersMeSessionsCount(),
-      queryFn: () => client.request({ path: "/api/users/me/sessions/count" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/users/me/sessions/count' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getWebhooksById(client: GeneratedClient, params: { id: string }) {
     return {
       queryKey: queryKeys.webhooksById(params),
-      queryFn: () => client.request({ path: `/api/webhooks/${params.id}` as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: `/api/webhooks/${params.id}` as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getWebhooksByIdDeliveries(client: GeneratedClient, params: { id: string }) {
     return {
       queryKey: queryKeys.webhooksByIdDeliveries(params),
-      queryFn: () => client.request({ path: `/api/webhooks/${params.id}/deliveries` as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: `/api/webhooks/${params.id}/deliveries` as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 
   getWebhooksList(client: GeneratedClient) {
     return {
       queryKey: queryKeys.webhooksList(),
-      queryFn: () => client.request({ path: "/api/webhooks/list" as GeneratedApiPath, method: "GET" as GeneratedApiMethod, }),
+      queryFn: () =>
+        client.request({
+          path: '/api/webhooks/list' as GeneratedApiPath,
+          method: 'GET' as GeneratedApiMethod,
+        }),
     };
   },
 } as const;
@@ -599,826 +873,1325 @@ export const mutationOptions = {
   mutateAdminAuthUnlock(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/admin/auth/unlock" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/admin/auth/unlock' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAdminBillingPlansByIdDeactivate(client: GeneratedClient, params: { id: string }) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/admin/billing/plans/${params.id}/deactivate` as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/admin/billing/plans/${params.id}/deactivate` as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAdminBillingPlansByIdSyncStripe(client: GeneratedClient, params: { id: string }) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/admin/billing/plans/${params.id}/sync-stripe` as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/admin/billing/plans/${params.id}/sync-stripe` as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAdminBillingPlansByIdUpdate(client: GeneratedClient, params: { id: string }) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/admin/billing/plans/${params.id}/update` as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/admin/billing/plans/${params.id}/update` as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAdminBillingPlansCreate(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/admin/billing/plans/create" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/admin/billing/plans/create' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAdminFeatureFlagsByKeyDelete(client: GeneratedClient, params: { key: string }) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/admin/feature-flags/${params.key}/delete` as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/admin/feature-flags/${params.key}/delete` as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAdminFeatureFlagsByKeyUpdate(client: GeneratedClient, params: { key: string }) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/admin/feature-flags/${params.key}/update` as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/admin/feature-flags/${params.key}/update` as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAdminFeatureFlagsCreate(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/admin/feature-flags/create" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/admin/feature-flags/create' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAdminImpersonateByUserId(client: GeneratedClient, params: { userId: string }) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/admin/impersonate/${params.userId}` as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/admin/impersonate/${params.userId}` as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAdminImpersonateEnd(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/admin/impersonate/end" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/admin/impersonate/end' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAdminJobsByJobIdCancel(client: GeneratedClient, params: { jobId: string }) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/admin/jobs/${params.jobId}/cancel` as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/admin/jobs/${params.jobId}/cancel` as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAdminJobsByJobIdRetry(client: GeneratedClient, params: { jobId: string }) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/admin/jobs/${params.jobId}/retry` as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/admin/jobs/${params.jobId}/retry` as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAdminLegalPublish(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/admin/legal/publish" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/admin/legal/publish' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAdminSecurityEvents(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/admin/security/events" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/admin/security/events' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAdminSecurityExport(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/admin/security/export" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/admin/security/export' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAdminTenantsByIdSuspend(client: GeneratedClient, params: { id: string }) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/admin/tenants/${params.id}/suspend` as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/admin/tenants/${params.id}/suspend` as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAdminTenantsByIdUnsuspend(client: GeneratedClient, params: { id: string }) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/admin/tenants/${params.id}/unsuspend` as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/admin/tenants/${params.id}/unsuspend` as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
-  mutateAdminTenantsByTenantIdFeatureOverridesByKey(client: GeneratedClient, params: { tenantId: string; key: string }) {
+  mutateAdminTenantsByTenantIdFeatureOverridesByKey(
+    client: GeneratedClient,
+    params: { tenantId: string; key: string },
+  ) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/admin/tenants/${params.tenantId}/feature-overrides/${params.key}` as GeneratedApiPath, method: "PUT" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/admin/tenants/${params.tenantId}/feature-overrides/${params.key}` as GeneratedApiPath,
+          method: 'PUT' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
-  mutateAdminTenantsByTenantIdFeatureOverridesByKeyDelete(client: GeneratedClient, params: { tenantId: string; key: string }) {
+  mutateAdminTenantsByTenantIdFeatureOverridesByKeyDelete(
+    client: GeneratedClient,
+    params: { tenantId: string; key: string },
+  ) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/admin/tenants/${params.tenantId}/feature-overrides/${params.key}/delete` as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/admin/tenants/${params.tenantId}/feature-overrides/${params.key}/delete` as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAdminUsersByIdHardBan(client: GeneratedClient, params: { id: string }) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/admin/users/${params.id}/hard-ban` as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/admin/users/${params.id}/hard-ban` as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAdminUsersByIdLock(client: GeneratedClient, params: { id: string }) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/admin/users/${params.id}/lock` as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/admin/users/${params.id}/lock` as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAdminUsersByIdUnlock(client: GeneratedClient, params: { id: string }) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/admin/users/${params.id}/unlock` as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/admin/users/${params.id}/unlock` as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAdminUsersByIdUpdate(client: GeneratedClient, params: { id: string }) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/admin/users/${params.id}/update` as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/admin/users/${params.id}/update` as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
-  mutateAdminWebhooksByIdDeliveriesByDeliveryIdReplay(client: GeneratedClient, params: { id: string; deliveryId: string }) {
+  mutateAdminWebhooksByIdDeliveriesByDeliveryIdReplay(
+    client: GeneratedClient,
+    params: { id: string; deliveryId: string },
+  ) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/admin/webhooks/${params.id}/deliveries/${params.deliveryId}/replay` as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/admin/webhooks/${params.id}/deliveries/${params.deliveryId}/replay` as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAuthChangeEmail(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/auth/change-email" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/auth/change-email' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAuthChangeEmailConfirm(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/auth/change-email/confirm" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/auth/change-email/confirm' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAuthChangeEmailRevert(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/auth/change-email/revert" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/auth/change-email/revert' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAuthForgotPassword(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/auth/forgot-password" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/auth/forgot-password' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAuthInvalidateSessions(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/auth/invalidate-sessions" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/auth/invalidate-sessions' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAuthLogin(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/auth/login" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/auth/login' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAuthLogout(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/auth/logout" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/auth/logout' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAuthLogoutAll(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/auth/logout-all" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/auth/logout-all' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAuthMagicLinkRequest(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/auth/magic-link/request" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/auth/magic-link/request' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAuthMagicLinkVerify(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/auth/magic-link/verify" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/auth/magic-link/verify' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAuthOauthAppleLink(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/auth/oauth/apple/link" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/auth/oauth/apple/link' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAuthOauthAppleUnlink(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/auth/oauth/apple/unlink" as GeneratedApiPath, method: "DELETE" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/auth/oauth/apple/unlink' as GeneratedApiPath,
+          method: 'DELETE' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAuthOauthGithubLink(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/auth/oauth/github/link" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/auth/oauth/github/link' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAuthOauthGithubUnlink(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/auth/oauth/github/unlink" as GeneratedApiPath, method: "DELETE" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/auth/oauth/github/unlink' as GeneratedApiPath,
+          method: 'DELETE' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAuthOauthGoogleLink(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/auth/oauth/google/link" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/auth/oauth/google/link' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAuthOauthGoogleUnlink(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/auth/oauth/google/unlink" as GeneratedApiPath, method: "DELETE" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/auth/oauth/google/unlink' as GeneratedApiPath,
+          method: 'DELETE' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAuthPasswordChange(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/auth/password/change" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/auth/password/change' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAuthRefresh(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/auth/refresh" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/auth/refresh' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAuthRegister(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/auth/register" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/auth/register' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAuthResendVerification(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/auth/resend-verification" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/auth/resend-verification' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAuthResetPassword(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/auth/reset-password" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/auth/reset-password' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAuthSetPassword(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/auth/set-password" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/auth/set-password' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAuthSmsSend(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/auth/sms/send" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/auth/sms/send' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAuthSmsVerify(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/auth/sms/verify" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/auth/sms/verify' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAuthSudo(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/auth/sudo" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/auth/sudo' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAuthTosAccept(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/auth/tos/accept" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/auth/tos/accept' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAuthTotpDisable(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/auth/totp/disable" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/auth/totp/disable' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAuthTotpEnable(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/auth/totp/enable" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/auth/totp/enable' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAuthTotpSetup(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/auth/totp/setup" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/auth/totp/setup' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAuthTotpVerifyLogin(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/auth/totp/verify-login" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/auth/totp/verify-login' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAuthVerifyEmail(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/auth/verify-email" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/auth/verify-email' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAuthWebauthnLoginOptions(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/auth/webauthn/login/options" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/auth/webauthn/login/options' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAuthWebauthnLoginVerify(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/auth/webauthn/login/verify" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/auth/webauthn/login/verify' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAuthWebauthnRegisterOptions(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/auth/webauthn/register/options" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/auth/webauthn/register/options' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateAuthWebauthnRegisterVerify(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/auth/webauthn/register/verify" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/auth/webauthn/register/verify' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateBillingCheckout(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/billing/checkout" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/billing/checkout' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateBillingPaymentMethodsById(client: GeneratedClient, params: { id: string }) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/billing/payment-methods/${params.id}` as GeneratedApiPath, method: "DELETE" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/billing/payment-methods/${params.id}` as GeneratedApiPath,
+          method: 'DELETE' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateBillingPaymentMethodsByIdDefault(client: GeneratedClient, params: { id: string }) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/billing/payment-methods/${params.id}/default` as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/billing/payment-methods/${params.id}/default` as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateBillingPaymentMethodsAdd(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/billing/payment-methods/add" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/billing/payment-methods/add' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateBillingPortal(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/billing/portal" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/billing/portal' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateBillingSetupIntent(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/billing/setup-intent" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/billing/setup-intent' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateBillingSubscriptionCancel(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/billing/subscription/cancel" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/billing/subscription/cancel' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateBillingSubscriptionResume(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/billing/subscription/resume" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/billing/subscription/resume' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateBillingSubscriptionUpdate(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/billing/subscription/update" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/billing/subscription/update' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateFilesByIdDelete(client: GeneratedClient, params: { id: string }) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/files/${params.id}/delete` as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/files/${params.id}/delete` as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateFilesUpload(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/files/upload" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/files/upload' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateInvitationsByIdAccept(client: GeneratedClient, params: { id: string }) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/invitations/${params.id}/accept` as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/invitations/${params.id}/accept` as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateNotificationsDelete(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/notifications/delete" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/notifications/delete' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateNotificationsMarkAllRead(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/notifications/mark-all-read" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/notifications/mark-all-read' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateNotificationsMarkRead(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/notifications/mark-read" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/notifications/mark-read' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateNotificationsPreferencesUpdate(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/notifications/preferences/update" as GeneratedApiPath, method: "PUT" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/notifications/preferences/update' as GeneratedApiPath,
+          method: 'PUT' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateNotificationsSend(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/notifications/send" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/notifications/send' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateNotificationsSubscribe(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/notifications/subscribe" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/notifications/subscribe' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateNotificationsTest(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/notifications/test" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/notifications/test' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateNotificationsUnsubscribe(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/notifications/unsubscribe" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/notifications/unsubscribe' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateTenants(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/tenants" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/tenants' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateTenantsByIdDelete(client: GeneratedClient, params: { id: string }) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/tenants/${params.id}/delete` as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/tenants/${params.id}/delete` as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateTenantsByIdInvitations(client: GeneratedClient, params: { id: string }) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/tenants/${params.id}/invitations` as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/tenants/${params.id}/invitations` as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
-  mutateTenantsByIdInvitationsByInvitationIdRegenerate(client: GeneratedClient, params: { id: string; invitationId: string }) {
+  mutateTenantsByIdInvitationsByInvitationIdRegenerate(
+    client: GeneratedClient,
+    params: { id: string; invitationId: string },
+  ) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/tenants/${params.id}/invitations/${params.invitationId}/regenerate` as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/tenants/${params.id}/invitations/${params.invitationId}/regenerate` as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
-  mutateTenantsByIdInvitationsByInvitationIdResend(client: GeneratedClient, params: { id: string; invitationId: string }) {
+  mutateTenantsByIdInvitationsByInvitationIdResend(
+    client: GeneratedClient,
+    params: { id: string; invitationId: string },
+  ) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/tenants/${params.id}/invitations/${params.invitationId}/resend` as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/tenants/${params.id}/invitations/${params.invitationId}/resend` as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
-  mutateTenantsByIdInvitationsByInvitationIdRevoke(client: GeneratedClient, params: { id: string; invitationId: string }) {
+  mutateTenantsByIdInvitationsByInvitationIdRevoke(
+    client: GeneratedClient,
+    params: { id: string; invitationId: string },
+  ) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/tenants/${params.id}/invitations/${params.invitationId}/revoke` as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/tenants/${params.id}/invitations/${params.invitationId}/revoke` as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
-  mutateTenantsByIdMembersByUserIdRemove(client: GeneratedClient, params: { id: string; userId: string }) {
+  mutateTenantsByIdMembersByUserIdRemove(
+    client: GeneratedClient,
+    params: { id: string; userId: string },
+  ) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/tenants/${params.id}/members/${params.userId}/remove` as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/tenants/${params.id}/members/${params.userId}/remove` as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
-  mutateTenantsByIdMembersByUserIdRole(client: GeneratedClient, params: { id: string; userId: string }) {
+  mutateTenantsByIdMembersByUserIdRole(
+    client: GeneratedClient,
+    params: { id: string; userId: string },
+  ) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/tenants/${params.id}/members/${params.userId}/role` as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/tenants/${params.id}/members/${params.userId}/role` as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateTenantsByIdMembersAdd(client: GeneratedClient, params: { id: string }) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/tenants/${params.id}/members/add` as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/tenants/${params.id}/members/add` as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateTenantsByIdTransferOwnership(client: GeneratedClient, params: { id: string }) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/tenants/${params.id}/transfer-ownership` as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/tenants/${params.id}/transfer-ownership` as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateTenantsByIdUpdate(client: GeneratedClient, params: { id: string }) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/tenants/${params.id}/update` as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/tenants/${params.id}/update` as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateTenantsByIdUsageRecord(client: GeneratedClient, params: { id: string }) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/tenants/${params.id}/usage/record` as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/tenants/${params.id}/usage/record` as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateUsersMeApiKeysById(client: GeneratedClient, params: { id: string }) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/users/me/api-keys/${params.id}` as GeneratedApiPath, method: "DELETE" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/users/me/api-keys/${params.id}` as GeneratedApiPath,
+          method: 'DELETE' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateUsersMeApiKeysByIdRevoke(client: GeneratedClient, params: { id: string }) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/users/me/api-keys/${params.id}/revoke` as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/users/me/api-keys/${params.id}/revoke` as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateUsersMeApiKeysCreate(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/users/me/api-keys/create" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/users/me/api-keys/create' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateUsersMeAvatar(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/users/me/avatar" as GeneratedApiPath, method: "PUT" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/users/me/avatar' as GeneratedApiPath,
+          method: 'PUT' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateUsersMeAvatarDelete(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/users/me/avatar/delete" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/users/me/avatar/delete' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateUsersMeConsentUpdate(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/users/me/consent/update" as GeneratedApiPath, method: "PATCH" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/users/me/consent/update' as GeneratedApiPath,
+          method: 'PATCH' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateUsersMeDeactivate(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/users/me/deactivate" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/users/me/deactivate' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateUsersMeDelete(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/users/me/delete" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/users/me/delete' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateUsersMeDevicesById(client: GeneratedClient, params: { id: string }) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/users/me/devices/${params.id}` as GeneratedApiPath, method: "DELETE" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/users/me/devices/${params.id}` as GeneratedApiPath,
+          method: 'DELETE' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateUsersMeDevicesByIdTrust(client: GeneratedClient, params: { id: string }) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/users/me/devices/${params.id}/trust` as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/users/me/devices/${params.id}/trust` as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateUsersMeExport(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/users/me/export" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/users/me/export' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateUsersMePasskeysById(client: GeneratedClient, params: { id: string }) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/users/me/passkeys/${params.id}` as GeneratedApiPath, method: "PATCH" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/users/me/passkeys/${params.id}` as GeneratedApiPath,
+          method: 'PATCH' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateUsersMePasskeysByIdDelete(client: GeneratedClient, params: { id: string }) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/users/me/passkeys/${params.id}/delete` as GeneratedApiPath, method: "DELETE" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/users/me/passkeys/${params.id}/delete` as GeneratedApiPath,
+          method: 'DELETE' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateUsersMePassword(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/users/me/password" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/users/me/password' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateUsersMePhone(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/users/me/phone" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/users/me/phone' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateUsersMePhoneDelete(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/users/me/phone/delete" as GeneratedApiPath, method: "DELETE" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/users/me/phone/delete' as GeneratedApiPath,
+          method: 'DELETE' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateUsersMePhoneVerify(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/users/me/phone/verify" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/users/me/phone/verify' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateUsersMeReactivate(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/users/me/reactivate" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/users/me/reactivate' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateUsersMeSessionsById(client: GeneratedClient, params: { id: string }) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/users/me/sessions/${params.id}` as GeneratedApiPath, method: "DELETE" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/users/me/sessions/${params.id}` as GeneratedApiPath,
+          method: 'DELETE' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateUsersMeSessionsRevokeAll(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/users/me/sessions/revoke-all" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/users/me/sessions/revoke-all' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateUsersMeUpdate(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/users/me/update" as GeneratedApiPath, method: "PATCH" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/users/me/update' as GeneratedApiPath,
+          method: 'PATCH' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateUsersMeUsername(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/users/me/username" as GeneratedApiPath, method: "PATCH" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/users/me/username' as GeneratedApiPath,
+          method: 'PATCH' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateWebhooks(client: GeneratedClient) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: "/api/webhooks" as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: '/api/webhooks' as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateWebhooksByIdDelete(client: GeneratedClient, params: { id: string }) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/webhooks/${params.id}/delete` as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/webhooks/${params.id}/delete` as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateWebhooksByIdRotateSecret(client: GeneratedClient, params: { id: string }) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/webhooks/${params.id}/rotate-secret` as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/webhooks/${params.id}/rotate-secret` as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
   mutateWebhooksByIdUpdate(client: GeneratedClient, params: { id: string }) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/webhooks/${params.id}/update` as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/webhooks/${params.id}/update` as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 
-  mutateWebhooksDeliveriesByDeliveryIdReplay(client: GeneratedClient, params: { deliveryId: string }) {
+  mutateWebhooksDeliveriesByDeliveryIdReplay(
+    client: GeneratedClient,
+    params: { deliveryId: string },
+  ) {
     return {
       mutationFn: (body?: unknown) =>
-        client.request({ path: `/api/webhooks/deliveries/${params.deliveryId}/replay` as GeneratedApiPath, method: "POST" as GeneratedApiMethod, body, }),
+        client.request({
+          path: `/api/webhooks/deliveries/${params.deliveryId}/replay` as GeneratedApiPath,
+          method: 'POST' as GeneratedApiMethod,
+          body,
+        }),
     };
   },
 } as const;

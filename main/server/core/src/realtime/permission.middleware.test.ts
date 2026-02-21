@@ -16,9 +16,7 @@ function createMockMembershipListRepo(): MembershipListRepository {
   };
 }
 
-function createMockMembership(
-  overrides: Partial<Membership> = {},
-): Membership {
+function createMockMembership(overrides: Partial<Membership> = {}): Membership {
   return {
     id: 'mem-1' as Membership['id'],
     tenantId: 'tenant-1' as Membership['tenantId'],
@@ -99,12 +97,8 @@ describe('createPermissionMiddleware', () => {
 
     it('should overwrite previous permissions for same connection', async () => {
       vi.mocked(repo.findByUserId)
-        .mockResolvedValueOnce([
-          createMockMembership({ role: 'viewer' }),
-        ])
-        .mockResolvedValueOnce([
-          createMockMembership({ role: 'admin' }),
-        ]);
+        .mockResolvedValueOnce([createMockMembership({ role: 'viewer' })])
+        .mockResolvedValueOnce([createMockMembership({ role: 'admin' })]);
 
       await middleware.loadPermissions('conn-1', 'user-1');
       await middleware.loadPermissions('conn-1', 'user-1');
@@ -120,9 +114,7 @@ describe('createPermissionMiddleware', () => {
 
   describe('getConnectionPermissions', () => {
     it('should return cached permissions for a known connection', async () => {
-      vi.mocked(repo.findByUserId).mockResolvedValue([
-        createMockMembership({ role: 'owner' }),
-      ]);
+      vi.mocked(repo.findByUserId).mockResolvedValue([createMockMembership({ role: 'owner' })]);
 
       await middleware.loadPermissions('conn-1', 'user-1');
       const permissions = middleware.getConnectionPermissions('conn-1');
@@ -138,9 +130,7 @@ describe('createPermissionMiddleware', () => {
     });
 
     it('should return null when cache has expired', async () => {
-      vi.mocked(repo.findByUserId).mockResolvedValue([
-        createMockMembership({ role: 'member' }),
-      ]);
+      vi.mocked(repo.findByUserId).mockResolvedValue([createMockMembership({ role: 'member' })]);
 
       await middleware.loadPermissions('conn-1', 'user-1');
 
@@ -153,9 +143,7 @@ describe('createPermissionMiddleware', () => {
     });
 
     it('should return permissions before cache expires', async () => {
-      vi.mocked(repo.findByUserId).mockResolvedValue([
-        createMockMembership({ role: 'member' }),
-      ]);
+      vi.mocked(repo.findByUserId).mockResolvedValue([createMockMembership({ role: 'member' })]);
 
       await middleware.loadPermissions('conn-1', 'user-1');
 
@@ -174,9 +162,7 @@ describe('createPermissionMiddleware', () => {
 
   describe('hasRole', () => {
     it('should return true when user has the exact required role', async () => {
-      vi.mocked(repo.findByUserId).mockResolvedValue([
-        createMockMembership({ role: 'admin' }),
-      ]);
+      vi.mocked(repo.findByUserId).mockResolvedValue([createMockMembership({ role: 'admin' })]);
 
       await middleware.loadPermissions('conn-1', 'user-1');
 
@@ -184,9 +170,7 @@ describe('createPermissionMiddleware', () => {
     });
 
     it('should return true when user has a higher role than required', async () => {
-      vi.mocked(repo.findByUserId).mockResolvedValue([
-        createMockMembership({ role: 'owner' }),
-      ]);
+      vi.mocked(repo.findByUserId).mockResolvedValue([createMockMembership({ role: 'owner' })]);
 
       await middleware.loadPermissions('conn-1', 'user-1');
 
@@ -196,9 +180,7 @@ describe('createPermissionMiddleware', () => {
     });
 
     it('should return false when user has a lower role than required', async () => {
-      vi.mocked(repo.findByUserId).mockResolvedValue([
-        createMockMembership({ role: 'viewer' }),
-      ]);
+      vi.mocked(repo.findByUserId).mockResolvedValue([createMockMembership({ role: 'viewer' })]);
 
       await middleware.loadPermissions('conn-1', 'user-1');
 
@@ -222,9 +204,7 @@ describe('createPermissionMiddleware', () => {
     });
 
     it('should return false when permissions have expired', async () => {
-      vi.mocked(repo.findByUserId).mockResolvedValue([
-        createMockMembership({ role: 'admin' }),
-      ]);
+      vi.mocked(repo.findByUserId).mockResolvedValue([createMockMembership({ role: 'admin' })]);
 
       await middleware.loadPermissions('conn-1', 'user-1');
       vi.advanceTimersByTime(61_000);
@@ -233,9 +213,7 @@ describe('createPermissionMiddleware', () => {
     });
 
     it('should support role hierarchy for member role', async () => {
-      vi.mocked(repo.findByUserId).mockResolvedValue([
-        createMockMembership({ role: 'member' }),
-      ]);
+      vi.mocked(repo.findByUserId).mockResolvedValue([createMockMembership({ role: 'member' })]);
 
       await middleware.loadPermissions('conn-1', 'user-1');
 
@@ -252,12 +230,8 @@ describe('createPermissionMiddleware', () => {
   describe('refreshPermissions', () => {
     it('should reload permissions from the repository', async () => {
       vi.mocked(repo.findByUserId)
-        .mockResolvedValueOnce([
-          createMockMembership({ role: 'viewer' }),
-        ])
-        .mockResolvedValueOnce([
-          createMockMembership({ role: 'admin' }),
-        ]);
+        .mockResolvedValueOnce([createMockMembership({ role: 'viewer' })])
+        .mockResolvedValueOnce([createMockMembership({ role: 'admin' })]);
 
       await middleware.loadPermissions('conn-1', 'user-1');
       const refreshed = await middleware.refreshPermissions('conn-1');
@@ -273,9 +247,7 @@ describe('createPermissionMiddleware', () => {
     });
 
     it('should reset the loadedAt timestamp', async () => {
-      vi.mocked(repo.findByUserId).mockResolvedValue([
-        createMockMembership({ role: 'member' }),
-      ]);
+      vi.mocked(repo.findByUserId).mockResolvedValue([createMockMembership({ role: 'member' })]);
 
       vi.setSystemTime(new Date('2026-02-20T10:00:00Z'));
       await middleware.loadPermissions('conn-1', 'user-1');
@@ -287,9 +259,7 @@ describe('createPermissionMiddleware', () => {
     });
 
     it('should make permissions available again after expiry', async () => {
-      vi.mocked(repo.findByUserId).mockResolvedValue([
-        createMockMembership({ role: 'member' }),
-      ]);
+      vi.mocked(repo.findByUserId).mockResolvedValue([createMockMembership({ role: 'member' })]);
 
       await middleware.loadPermissions('conn-1', 'user-1');
 
@@ -309,9 +279,7 @@ describe('createPermissionMiddleware', () => {
 
   describe('removeConnection', () => {
     it('should remove cached permissions', async () => {
-      vi.mocked(repo.findByUserId).mockResolvedValue([
-        createMockMembership({ role: 'member' }),
-      ]);
+      vi.mocked(repo.findByUserId).mockResolvedValue([createMockMembership({ role: 'member' })]);
 
       await middleware.loadPermissions('conn-1', 'user-1');
       middleware.removeConnection('conn-1');
@@ -326,9 +294,7 @@ describe('createPermissionMiddleware', () => {
     });
 
     it('should prevent refresh after removal', async () => {
-      vi.mocked(repo.findByUserId).mockResolvedValue([
-        createMockMembership({ role: 'member' }),
-      ]);
+      vi.mocked(repo.findByUserId).mockResolvedValue([createMockMembership({ role: 'member' })]);
 
       await middleware.loadPermissions('conn-1', 'user-1');
       middleware.removeConnection('conn-1');
@@ -387,9 +353,7 @@ describe('createPermissionMiddleware', () => {
       const defaultMiddleware = createPermissionMiddleware({
         membershipRepo: repo,
       });
-      vi.mocked(repo.findByUserId).mockResolvedValue([
-        createMockMembership({ role: 'member' }),
-      ]);
+      vi.mocked(repo.findByUserId).mockResolvedValue([createMockMembership({ role: 'member' })]);
 
       await defaultMiddleware.loadPermissions('conn-1', 'user-1');
 
@@ -407,9 +371,7 @@ describe('createPermissionMiddleware', () => {
         membershipRepo: repo,
         cacheTtlMs: 5000,
       });
-      vi.mocked(repo.findByUserId).mockResolvedValue([
-        createMockMembership({ role: 'member' }),
-      ]);
+      vi.mocked(repo.findByUserId).mockResolvedValue([createMockMembership({ role: 'member' })]);
 
       await shortTtlMiddleware.loadPermissions('conn-1', 'user-1');
 

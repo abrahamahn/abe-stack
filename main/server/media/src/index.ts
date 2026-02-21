@@ -36,7 +36,7 @@ export {
   MIME_TO_EXT,
   STREAMING_THRESHOLD,
   TEMP_FILE_MAX_AGE_MS,
-  VIDEO_EXTENSIONS
+  VIDEO_EXTENSIONS,
 } from './constants';
 
 // Audio metadata
@@ -53,7 +53,7 @@ export {
   generateThumbnail,
   generateWaveform,
   getMediaMetadata,
-  runFFmpeg
+  runFFmpeg,
 } from './ffmpeg-wrapper';
 export type { FFmpegOptions, FFmpegResult, MediaMetadataResult } from './ffmpeg-wrapper';
 
@@ -62,7 +62,7 @@ export {
   detectFileType,
   detectFileTypeFromFile,
   detectFileTypeFromPath,
-  isAllowedFileType
+  isAllowedFileType,
 } from './file-type';
 
 // Image processing
@@ -71,7 +71,7 @@ export type {
   ImageFormatOptions,
   ImageResizeOptions,
   ImageValidationOptions,
-  ValidationResult
+  ValidationResult,
 } from './image-processing';
 
 // Security scanning
@@ -88,7 +88,7 @@ export type {
   ProcessingResult,
   SecurityScanResult,
   UploadConfig,
-  VideoProcessingOptions
+  VideoProcessingOptions,
 } from './types';
 
 // Validation
@@ -96,7 +96,7 @@ export {
   generateFileId,
   sanitizeFilename,
   validateMediaFile,
-  validateUploadConfig
+  validateUploadConfig,
 } from './validation';
 
 // Processors (audio, image, video)
@@ -106,13 +106,17 @@ export { VideoProcessor } from './processors';
 
 // Queue (job queue, retry handling)
 export {
-  createMediaProcessingQueue, MediaProcessingQueue, type MediaJobData,
-  type MediaJobResult
+  createMediaProcessingQueue,
+  MediaProcessingQueue,
+  type MediaJobData,
+  type MediaJobResult,
 } from './queue';
 export { CustomJobQueue, type JobData, type QueueOptions } from './queue';
 export {
-  createMediaRetryHandler, MediaProcessingRetryHandler, type RetryOptions,
-  type RetryState
+  createMediaRetryHandler,
+  MediaProcessingRetryHandler,
+  type RetryOptions,
+  type RetryState,
 } from './queue';
 
 // Utils (streaming)
@@ -122,7 +126,7 @@ export { StreamingMediaProcessor, type StreamingOptions } from './utils';
 export {
   MediaProcessingOrchestrator,
   type ProcessingJob,
-  type ProcessingLimits
+  type ProcessingLimits,
 } from './processor';
 
 // Database
@@ -130,7 +134,7 @@ export {
   InMemoryMediaDatabase,
   type MediaDatabaseAdapter,
   type MediaProcessingRecord,
-  type ProcessingStats
+  type ProcessingStats,
 } from './database';
 
 // Facade (main entry point)
@@ -138,6 +142,5 @@ export {
   createServerMediaQueue,
   ServerMediaQueue,
   type MediaEntitlements,
-  type MediaJobData as ServerMediaJobData
+  type MediaJobData as ServerMediaJobData,
 } from './facade';
-

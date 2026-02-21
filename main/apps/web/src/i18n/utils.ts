@@ -34,10 +34,7 @@ import type { FlatTranslationMap, Locale, TranslationMap } from './types';
  *
  * @complexity O(n * m) where n is template length and m is number of params
  */
-export function interpolate(
-  template: string,
-  params?: Record<string, string | number>,
-): string {
+export function interpolate(template: string, params?: Record<string, string | number>): string {
   if (params === undefined) {
     return template;
   }
@@ -128,15 +125,12 @@ export function detectLocale(): Locale {
     return DEFAULT_LOCALE;
   }
 
-  const browserLocales = navigator.languages.length > 0
-    ? navigator.languages
-    : [navigator.language];
+  const browserLocales =
+    navigator.languages.length > 0 ? navigator.languages : [navigator.language];
 
   for (const browserLocale of browserLocales) {
     // Exact match
-    const exactMatch = SUPPORTED_LOCALES.find(
-      (supported) => supported === browserLocale,
-    );
+    const exactMatch = SUPPORTED_LOCALES.find((supported) => supported === browserLocale);
     if (exactMatch !== undefined) {
       return exactMatch;
     }

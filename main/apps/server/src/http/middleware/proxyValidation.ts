@@ -17,6 +17,5 @@ export {
   parseXForwardedFor,
   validateCidrList,
   type ForwardedInfo,
-  type ProxyValidationConfig
+  type ProxyValidationConfig,
 } from '@bslt/shared';
-

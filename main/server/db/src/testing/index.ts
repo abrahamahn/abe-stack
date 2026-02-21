@@ -10,7 +10,7 @@ export {
   createMockDb,
   createMockDbWithData,
   type MockDbClient,
-  type MockDbClientAsDb
+  type MockDbClientAsDb,
 } from './mocks';
 
 export { createJsonDbClient, JsonDatabase, JsonDbClient, type JsonDatabaseConfig } from './json-db';

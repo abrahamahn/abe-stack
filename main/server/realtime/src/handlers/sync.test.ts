@@ -23,8 +23,8 @@ vi.mock('../service', () => ({
 }));
 
 vi.mock('@bslt/db', () => ({
-  withTransaction: vi.fn(
-    (_db: unknown, callback: (_db: unknown) => Promise<unknown>) => callback(_db),
+  withTransaction: vi.fn((_db: unknown, callback: (_db: unknown) => Promise<unknown>) =>
+    callback(_db),
   ),
 }));
 

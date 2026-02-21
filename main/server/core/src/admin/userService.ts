@@ -221,11 +221,12 @@ export async function listUsers(
   return {
     data: activeOnly.data.map(toAdminUser),
     total: activeOnly.total,
-    page: activeOnly.page,
-    limit: activeOnly.limit,
-    totalPages: activeOnly.totalPages,
-    hasNext: activeOnly.hasNext,
-    hasPrev: activeOnly.hasPrev,
+    page: activeOnly.page ?? filters.page ?? 1,
+    limit: activeOnly.limit ?? filters.limit ?? 20,
+    totalPages:
+      activeOnly.totalPages ?? Math.max(1, Math.ceil(activeOnly.total / (filters.limit ?? 20))),
+    hasNext: activeOnly.hasNext ?? false,
+    hasPrev: activeOnly.hasPrev ?? false,
   };
 }
 

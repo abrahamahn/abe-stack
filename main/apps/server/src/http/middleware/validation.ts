@@ -30,13 +30,13 @@ export type { SanitizationResult, ValidationOptions };
 // Input Sanitization
 // ============================================================================
 
-  export { sanitizeObject, sanitizeString };
+export { sanitizeObject, sanitizeString };
 
 // ============================================================================
 // SQL Injection Prevention
 // ============================================================================
 
-  export type { SQLInjectionDetectionOptions };
+export type { SQLInjectionDetectionOptions };
 
 /**
  * Check for potential SQL injection patterns.
@@ -49,7 +49,7 @@ export type { SanitizationResult, ValidationOptions };
  * @param options - Detection options
  * @returns true if potential SQL injection is detected
  */
-  export { detectSQLInjection };
+export { detectSQLInjection };
 
 /**
  * Check for potential NoSQL injection patterns
@@ -57,7 +57,7 @@ export type { SanitizationResult, ValidationOptions };
  * @param input - The value to check for NoSQL injection patterns
  * @returns true if potential NoSQL injection is detected
  */
-  export { detectNoSQLInjection, getInjectionErrors };
+export { detectNoSQLInjection, getInjectionErrors };
 
 // ============================================================================
 // Fastify Middleware

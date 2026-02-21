@@ -101,13 +101,8 @@ export interface I18nProviderProps {
  *
  * @complexity O(1) for t() lookups (hash map access)
  */
-export const I18nProvider = ({
-  children,
-  initialLocale,
-}: I18nProviderProps): ReactElement => {
-  const [locale, setLocale] = useState<Locale>(
-    initialLocale ?? detectLocale(),
-  );
+export const I18nProvider = ({ children, initialLocale }: I18nProviderProps): ReactElement => {
+  const [locale, setLocale] = useState<Locale>(initialLocale ?? detectLocale());
 
   /**
    * Translate a key with optional parameter interpolation.
@@ -129,14 +124,7 @@ export const I18nProvider = ({
     [locale],
   );
 
-  const value = useMemo<I18nContextValue>(
-    () => ({ locale, setLocale, t }),
-    [locale, t],
-  );
+  const value = useMemo<I18nContextValue>(() => ({ locale, setLocale, t }), [locale, t]);
 
-  return (
-    <I18nContext.Provider value={value}>
-      {children}
-    </I18nContext.Provider>
-  );
+  return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 };

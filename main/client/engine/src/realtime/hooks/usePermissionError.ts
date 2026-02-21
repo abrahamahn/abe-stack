@@ -79,7 +79,7 @@ export function isPermissionError(err: unknown): boolean {
   if (
     typeof err === 'object' &&
     'isPermissionError' in err &&
-    (err as PermissionError).isPermissionError === true
+    (err as { isPermissionError?: unknown }).isPermissionError === true
   ) {
     return true;
   }

@@ -11,12 +11,7 @@
  * @module middleware
  */
 
-import {
-  ForbiddenError,
-  HTTP_STATUS,
-  UnauthorizedError,
-  extractBearerToken,
-} from '@bslt/shared';
+import { ForbiddenError, HTTP_STATUS, UnauthorizedError, extractBearerToken } from '@bslt/shared';
 
 import { verifyToken, type TokenPayload } from './utils/jwt';
 

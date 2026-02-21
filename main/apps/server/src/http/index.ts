@@ -17,14 +17,14 @@ export {
   signCookie,
   unsignCookie,
   type CookieOptions,
-  type CookiePluginOptions
+  type CookiePluginOptions,
 } from './middleware';
 
 // Middleware - Correlation ID
 export {
   generateCorrelationId,
   registerCorrelationIdHook,
-  type CorrelationIdOptions
+  type CorrelationIdOptions,
 } from './middleware';
 
 // Middleware - CSRF
@@ -40,7 +40,7 @@ export {
   registerPrototypePollutionProtection,
   sanitizePrototype,
   type CorsOptions,
-  type SecurityHeaderOptions
+  type SecurityHeaderOptions,
 } from './middleware';
 
 // Middleware - Static & Request Info
@@ -48,7 +48,7 @@ export {
   registerRequestInfoHook,
   registerStaticServe,
   type RequestInfo,
-  type StaticServeOptions
+  type StaticServeOptions,
 } from './middleware';
 
 // Middleware - Proxy Validation
@@ -63,7 +63,7 @@ export {
   parseXForwardedFor,
   validateCidrList,
   type ForwardedInfo,
-  type ProxyValidationConfig
+  type ProxyValidationConfig,
 } from './middleware';
 
 // Middleware - Input Validation
@@ -72,7 +72,10 @@ export {
   detectSQLInjection,
   registerInputValidation,
   sanitizeObject as sanitizeInput,
-  sanitizeString, type SanitizationResult, type SQLInjectionDetectionOptions, type ValidationOptions
+  sanitizeString,
+  type SanitizationResult,
+  type SQLInjectionDetectionOptions,
+  type ValidationOptions,
 } from './middleware';
 
 // Router — Fastify bridge (implementation) + route types (from @bslt/server-system)
@@ -97,7 +100,7 @@ export {
   type PaginationContext,
   type PaginationHelpers,
   type PaginationMiddlewareOptions,
-  type PaginationRequest
+  type PaginationRequest,
 } from './pagination';
 
 // Plugins
@@ -106,6 +109,5 @@ export {
   type AppErrorInfo,
   type PluginOptions,
   type RateLimiterLike,
-  type StaticServeConfig
+  type StaticServeConfig,
 } from './plugins';
-

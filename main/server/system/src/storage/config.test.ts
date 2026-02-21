@@ -51,10 +51,18 @@ describe('storage/config', () => {
 
   it('validateStorage throws on missing required fields', () => {
     expect(() => {
-      validateStorage({ provider: 's3', bucket: '', accessKeyId: '', secretAccessKey: '' } as unknown as import('./types').StorageConfig);
+      validateStorage({
+        provider: 's3',
+        bucket: '',
+        accessKeyId: '',
+        secretAccessKey: '',
+      } as unknown as import('./types').StorageConfig);
     }).toThrow(/S3_BUCKET|S3_ACCESS_KEY_ID|S3_SECRET_ACCESS_KEY/);
     expect(() => {
-      validateStorage({ provider: 'local', rootPath: '' } as unknown as import('./types').StorageConfig);
+      validateStorage({
+        provider: 'local',
+        rootPath: '',
+      } as unknown as import('./types').StorageConfig);
     }).toThrow(/STORAGE_ROOT_PATH/);
   });
 });

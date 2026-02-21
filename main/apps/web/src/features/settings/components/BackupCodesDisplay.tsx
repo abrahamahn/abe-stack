@@ -151,7 +151,7 @@ export const BackupCodesDisplay = ({ className }: BackupCodesDisplayProps): Reac
                   onClick={handleDismissCodes}
                   data-testid="dismiss-codes-button"
                 >
-                  I've Saved My Codes
+                  I&apos;ve Saved My Codes
                 </Button>
               </div>
             </div>

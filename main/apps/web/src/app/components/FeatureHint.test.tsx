@@ -4,7 +4,6 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-
 import { FeatureHint } from './FeatureHint';
 
 const TEST_KEY = 'test-feature';

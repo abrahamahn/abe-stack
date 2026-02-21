@@ -20,7 +20,7 @@ export {
   applyOperations,
   checkVersionConflicts,
   getOperationPointers,
-  isFieldMutable
+  isFieldMutable,
 } from '@bslt/shared';
 
 // ============================================================================

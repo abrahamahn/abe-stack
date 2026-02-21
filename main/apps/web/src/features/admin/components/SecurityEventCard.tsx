@@ -5,11 +5,7 @@
  * Displays detailed information about a single security event.
  */
 
-import {
-  formatDateTime,
-  formatSecurityEventType,
-  getSecuritySeverityTone,
-} from '@bslt/shared';
+import { formatDateTime, formatSecurityEventType, getSecuritySeverityTone } from '@bslt/shared';
 import { Badge, Text } from '@bslt/ui';
 import { LabeledValueRow } from '@bslt/ui/components/LabeledValueRow';
 import { TitledCardSection } from '@bslt/ui/components/TitledCardSection';

@@ -15,7 +15,6 @@ import { Alert, Button, FormField, Input, PasswordInput, Text } from '@bslt/ui';
 import { clientConfig } from '@config';
 import { useCallback, useState, type ReactElement } from 'react';
 
-
 // ============================================================================
 // Types
 // ============================================================================

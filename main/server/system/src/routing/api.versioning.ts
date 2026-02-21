@@ -165,8 +165,10 @@ export function extractApiVersion(request: {
   return (
     extractFromUrl(request.url) ??
     extractFromAcceptHeader(request.headers) ??
-    extractFromCustomHeader(request.headers) ??
-    { version: CURRENT_API_VERSION, source: 'default' as ApiVersionSource }
+    extractFromCustomHeader(request.headers) ?? {
+      version: CURRENT_API_VERSION,
+      source: 'default' as ApiVersionSource,
+    }
   );
 }
 

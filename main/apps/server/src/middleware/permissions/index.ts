@@ -14,6 +14,5 @@ export {
   hasPermission,
   type PermissionGuardOptions,
   type PermissionMiddlewareOptions,
-  type PreHandlerHook
+  type PreHandlerHook,
 } from './middleware';
-

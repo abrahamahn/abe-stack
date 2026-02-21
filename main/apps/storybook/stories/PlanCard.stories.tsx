@@ -32,8 +32,20 @@ const freePlan: Plan = {
   priceInCents: 0,
   currency: 'usd',
   features: [
-    { key: 'projects:max', name: 'Projects', included: true, value: 3, description: 'Up to 3 projects' },
-    { key: 'storage:max_gb', name: 'Storage', included: true, value: 1, description: '1 GB storage' },
+    {
+      key: 'projects:max',
+      name: 'Projects',
+      included: true,
+      value: 3,
+      description: 'Up to 3 projects',
+    },
+    {
+      key: 'storage:max_gb',
+      name: 'Storage',
+      included: true,
+      value: 1,
+      description: '1 GB storage',
+    },
     { key: 'team:members', name: 'Team Members', included: false },
     { key: 'api:access', name: 'API Access', included: false },
     { key: 'branding:custom', name: 'Custom Branding', included: false },
@@ -51,8 +63,20 @@ const proPlan: Plan = {
   priceInCents: 2900,
   currency: 'usd',
   features: [
-    { key: 'projects:max', name: 'Projects', included: true, value: 25, description: 'Up to 25 projects' },
-    { key: 'storage:max_gb', name: 'Storage', included: true, value: 50, description: '50 GB storage' },
+    {
+      key: 'projects:max',
+      name: 'Projects',
+      included: true,
+      value: 25,
+      description: 'Up to 25 projects',
+    },
+    {
+      key: 'storage:max_gb',
+      name: 'Storage',
+      included: true,
+      value: 50,
+      description: '50 GB storage',
+    },
     { key: 'team:members', name: 'Team Members', included: true, description: 'Up to 10 members' },
     { key: 'api:access', name: 'API Access', included: true },
     { key: 'branding:custom', name: 'Custom Branding', included: false },
@@ -70,8 +94,20 @@ const enterprisePlan: Plan = {
   priceInCents: 29900,
   currency: 'usd',
   features: [
-    { key: 'projects:max', name: 'Projects', included: true, value: 999, description: 'Unlimited projects' },
-    { key: 'storage:max_gb', name: 'Storage', included: true, value: 500, description: '500 GB storage' },
+    {
+      key: 'projects:max',
+      name: 'Projects',
+      included: true,
+      value: 999,
+      description: 'Unlimited projects',
+    },
+    {
+      key: 'storage:max_gb',
+      name: 'Storage',
+      included: true,
+      value: 500,
+      description: '500 GB storage',
+    },
     { key: 'team:members', name: 'Team Members', included: true, description: 'Unlimited members' },
     { key: 'api:access', name: 'API Access', included: true },
     { key: 'branding:custom', name: 'Custom Branding', included: true },
@@ -149,11 +185,7 @@ export const AllPlans: Story = {
         gap: 'var(--ui-gap-md)',
       }}
     >
-      <PlanCard
-        plan={freePlan}
-        actionLabel="Get Started"
-        onAction={() => {}}
-      />
+      <PlanCard plan={freePlan} actionLabel="Get Started" onAction={() => {}} />
       <PlanCard
         plan={proPlan}
         isHighlighted
@@ -161,11 +193,7 @@ export const AllPlans: Story = {
         actionLabel="Start Free Trial"
         onAction={() => {}}
       />
-      <PlanCard
-        plan={enterprisePlan}
-        actionLabel="Contact Sales"
-        onAction={() => {}}
-      />
+      <PlanCard plan={enterprisePlan} actionLabel="Contact Sales" onAction={() => {}} />
     </div>
   ),
 };

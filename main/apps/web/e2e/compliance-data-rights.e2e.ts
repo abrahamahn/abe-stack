@@ -22,11 +22,18 @@ const settingsPath = process.env['E2E_COMPLIANCE_SETTINGS_PATH'] ?? '/settings';
 const consentToggleLabel = process.env['E2E_CONSENT_TOGGLE_LABEL'] ?? 'Cookie Consent';
 const tosModalText = process.env['E2E_TOS_MODAL_TEXT'] ?? 'Terms of Service';
 
-async function login(page: import('@playwright/test').Page, userEmail: string, userPassword: string) {
+async function login(
+  page: import('@playwright/test').Page,
+  userEmail: string,
+  userPassword: string,
+) {
   await page.goto(`${baseURL}/auth/login`);
   await page.getByLabel(/email/i).fill(userEmail);
   await page.getByLabel(/password/i).fill(userPassword);
-  await page.getByRole('button', { name: /login|sign in/i }).first().click();
+  await page
+    .getByRole('button', { name: /login|sign in/i })
+    .first()
+    .click();
 }
 
 test.describe('Compliance flow', () => {

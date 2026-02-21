@@ -15,7 +15,4 @@ export {
   SearchProviderFactory,
 } from '@bslt/db';
 
-export type {
-  ProviderOptions,
-  SqlSearchProviderOptions,
-} from '@bslt/db';
+export type { ProviderOptions, SqlSearchProviderOptions } from '@bslt/db';

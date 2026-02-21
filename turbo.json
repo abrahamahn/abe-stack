@@ -19,12 +19,7 @@
       "dependsOn": ["^build", "build:theme"],
       "outputs": ["dist/**"],
       "cache": true,
-      "inputs": [
-        "**/*.stories.tsx",
-        "**/*.stories.ts",
-        ".storybook/**",
-        "package.json"
-      ]
+      "inputs": ["**/*.stories.tsx", "**/*.stories.ts", ".storybook/**", "package.json"]
     },
     "dev": {
       "cache": false,

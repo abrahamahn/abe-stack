@@ -302,7 +302,7 @@ export const baseConfig = [
   // disableTypeChecked turns off all type-aware rules (they require project info to run).
   // Non-type-aware rules (import order, unused imports) still apply normally.
   {
-    files: ['**/__tests__/**/*', '**/*.{spec,test}.{ts,tsx}'],
+    files: ['**/__tests__/**/*', '**/*.{spec,test}.{ts,tsx}', '**/*.e2e.{ts,tsx}'],
     ...tseslint.configs.disableTypeChecked,
     languageOptions: {
       parserOptions: {
@@ -317,6 +317,20 @@ export const baseConfig = [
       'no-console': 'off',
       // Raw HTML is acceptable in test render helpers (not shipped to users)
       'no-restricted-syntax': 'off',
+    },
+  },
+
+  // 6b. Service worker runtime globals
+  {
+    files: ['main/apps/web/public/sw.js'],
+    languageOptions: {
+      globals: {
+        URL: 'readonly',
+        Response: 'readonly',
+        caches: 'readonly',
+        fetch: 'readonly',
+        self: 'readonly',
+      },
     },
   },
 

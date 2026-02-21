@@ -291,9 +291,7 @@ function generateMutationOptionFactory(entry: ManifestEntry): string {
   if (params.length > 0) {
     const paramsType = buildParamsType(params);
     const pathExpr = buildPathExpression(entry.path);
-    lines.push(
-      `  ${hookName}(client: GeneratedClient, params: ${paramsType}) {`,
-    );
+    lines.push(`  ${hookName}(client: GeneratedClient, params: ${paramsType}) {`);
     lines.push(`    return {`);
     lines.push(`      mutationFn: (body?: unknown) =>`);
     lines.push(
@@ -321,9 +319,7 @@ function buildHooksSource(entries: ManifestEntry[]): string {
 
   const queryKeyFactoryLines = generateQueryKeyFactories(queries);
   const queryOptionLines = queries.map((e) => generateQueryOptionFactory(e)).join('\n\n');
-  const mutationOptionLines = mutations
-    .map((e) => generateMutationOptionFactory(e))
-    .join('\n\n');
+  const mutationOptionLines = mutations.map((e) => generateMutationOptionFactory(e)).join('\n\n');
 
   return `// main/client/api/src/generated/hooks.ts
 /**

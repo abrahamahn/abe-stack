@@ -89,10 +89,13 @@ describe('RedisSessionStore', () => {
       const result = await loggerStore.get('abc123');
 
       expect(result).toBeNull();
-      expect(logSpy).toHaveBeenCalledWith('Failed to get session', expect.objectContaining({
-        sessionId: 'abc123',
-        error: 'Connection refused',
-      }));
+      expect(logSpy).toHaveBeenCalledWith(
+        'Failed to get session',
+        expect.objectContaining({
+          sessionId: 'abc123',
+          error: 'Connection refused',
+        }),
+      );
     });
 
     test('should use correct key prefix', async () => {
@@ -169,10 +172,13 @@ describe('RedisSessionStore', () => {
 
       await expect(loggerStore.set('abc123', sampleSession)).rejects.toThrow('Write failed');
 
-      expect(logSpy).toHaveBeenCalledWith('Failed to set session', expect.objectContaining({
-        sessionId: 'abc123',
-        error: 'Write failed',
-      }));
+      expect(logSpy).toHaveBeenCalledWith(
+        'Failed to set session',
+        expect.objectContaining({
+          sessionId: 'abc123',
+          error: 'Write failed',
+        }),
+      );
     });
 
     test('should serialize complex session data', async () => {
@@ -230,9 +236,12 @@ describe('RedisSessionStore', () => {
       const result = await loggerStore.delete('abc123');
 
       expect(result).toBe(false);
-      expect(logSpy).toHaveBeenCalledWith('Failed to delete session', expect.objectContaining({
-        sessionId: 'abc123',
-      }));
+      expect(logSpy).toHaveBeenCalledWith(
+        'Failed to delete session',
+        expect.objectContaining({
+          sessionId: 'abc123',
+        }),
+      );
     });
   });
 
@@ -288,9 +297,12 @@ describe('RedisSessionStore', () => {
       const result = await loggerStore.touch('abc123');
 
       expect(result).toBe(false);
-      expect(logSpy).toHaveBeenCalledWith('Failed to touch session', expect.objectContaining({
-        sessionId: 'abc123',
-      }));
+      expect(logSpy).toHaveBeenCalledWith(
+        'Failed to touch session',
+        expect.objectContaining({
+          sessionId: 'abc123',
+        }),
+      );
     });
   });
 
@@ -328,9 +340,12 @@ describe('RedisSessionStore', () => {
       const result = await loggerStore.exists('abc123');
 
       expect(result).toBe(false);
-      expect(logSpy).toHaveBeenCalledWith('Failed to check session existence', expect.objectContaining({
-        sessionId: 'abc123',
-      }));
+      expect(logSpy).toHaveBeenCalledWith(
+        'Failed to check session existence',
+        expect.objectContaining({
+          sessionId: 'abc123',
+        }),
+      );
     });
   });
 
@@ -404,7 +419,11 @@ describe('RedisSessionStore', () => {
       await store.exists(sessionId);
 
       expect(mockRedisInstance.get).toHaveBeenCalledWith(expectedKey);
-      expect(mockRedisInstance.psetex).toHaveBeenCalledWith(expectedKey, expect.any(Number), expect.any(String));
+      expect(mockRedisInstance.psetex).toHaveBeenCalledWith(
+        expectedKey,
+        expect.any(Number),
+        expect.any(String),
+      );
       expect(mockRedisInstance.del).toHaveBeenCalledWith(expectedKey);
       expect(mockRedisInstance.pexpire).toHaveBeenCalledWith(expectedKey, expect.any(Number));
       expect(mockRedisInstance.exists).toHaveBeenCalledWith(expectedKey);

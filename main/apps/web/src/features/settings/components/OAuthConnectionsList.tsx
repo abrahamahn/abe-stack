@@ -12,7 +12,6 @@ import { CardAsyncState } from '@bslt/ui/components/CardAsyncState';
 import { clientConfig as appClientConfig } from '@config';
 import { useMemo, useState, type ReactElement } from 'react';
 
-
 import type { ApiClientConfig } from '@bslt/api';
 
 // ============================================================================

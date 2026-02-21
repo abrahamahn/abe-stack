@@ -15,9 +15,10 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { RecordCache, type TableMap } from '../../cache';
 import { SubscriptionCache } from '../SubscriptionCache';
 
-import type { UseRecordDeps, UseRecordOptions, UseRecordResult } from './useRecord';
-import type { PermissionEventListener, PermissionRevokedEventPayload } from './usePermissionError';
 import { isPermissionError, createPermissionError } from './usePermissionError';
+
+import type { PermissionEventListener, PermissionRevokedEventPayload } from './usePermissionError';
+import type { UseRecordDeps, UseRecordOptions, UseRecordResult } from './useRecord';
 
 // ============================================================================
 // Test Types

@@ -12,7 +12,6 @@ import { Alert, Checkbox, EmptyState, Heading, Input, Skeleton, Switch, Text } f
 import { clientConfig as appClientConfig } from '@config';
 import { useMemo, useState } from 'react';
 
-
 import type { NotificationClientConfig } from '@bslt/api';
 import type { NotificationPreferences, NotificationType } from '@bslt/shared';
 import type { ReactElement } from 'react';

@@ -191,7 +191,10 @@ export const Routes = ({ children, _parentPath = '' }: RoutesProps): ReactElemen
   const routes = useMemo(() => extractRoutes(children), [children]);
 
   // Find matching route
-  let match: { route: (typeof routes)[number]; match: NonNullable<ReturnType<typeof matchPath>> } | null = null;
+  let match: {
+    route: (typeof routes)[number];
+    match: NonNullable<ReturnType<typeof matchPath>>;
+  } | null = null;
   for (const route of routes) {
     const routeMatch = matchPath(route.path, location.pathname, {
       ...(route.index !== undefined && { index: route.index }),

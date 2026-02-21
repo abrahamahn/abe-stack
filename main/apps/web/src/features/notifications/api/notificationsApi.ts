@@ -57,6 +57,5 @@ export function createNotificationsApi(config: NotificationsApiConfig): Notifica
 export type {
   DeleteNotificationResponse,
   MarkReadResponse,
-  NotificationsListResponse
+  NotificationsListResponse,
 } from '@bslt/api';
-

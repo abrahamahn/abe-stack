@@ -6,13 +6,7 @@
  * Provides methods for querying, filtering, and exporting security events.
  */
 
-import {
-  DAYS_PER_WEEK,
-  MS_PER_DAY,
-  MS_PER_HOUR,
-  NotFoundError,
-  toISODateOnly,
-} from '@bslt/shared';
+import { DAYS_PER_WEEK, MS_PER_DAY, MS_PER_HOUR, NotFoundError, toISODateOnly } from '@bslt/shared';
 
 import {
   SECURITY_EVENTS_TABLE,

@@ -137,7 +137,7 @@ export const UsageSummary = forwardRef<HTMLDivElement, UsageSummaryProps>(
               label={metric.label}
               current={metric.current}
               max={metric.limit}
-              unit={metric.unit}
+              {...(metric.unit === undefined ? {} : { unit: metric.unit })}
             />
           ))}
         </div>

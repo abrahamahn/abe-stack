@@ -42,7 +42,7 @@ import type {
 export type {
   DeleteNotificationResponse,
   MarkReadResponse,
-  NotificationsListResponse
+  NotificationsListResponse,
 } from '@bslt/shared';
 
 /** localStorage key for persisting device ID across sessions */

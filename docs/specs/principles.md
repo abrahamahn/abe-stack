@@ -157,11 +157,11 @@ Separate framework-agnostic client from React hooks:
 
 ### Path Aliases
 
-| Alias                      | Path                   |
-| -------------------------- | ---------------------- |
-| `@`                        | `./src/*`              |
-| `@auth`                    | `./src/features/auth`  |
-| `@features`                | `./src/features`       |
+| Alias                 | Path                   |
+| --------------------- | ---------------------- |
+| `@`                   | `./src/*`              |
+| `@auth`               | `./src/features/auth`  |
+| `@features`           | `./src/features`       |
 | `@bslt/shared`        | Business logic package |
 | `@bslt/ui`            | UI component package   |
 | `@bslt/client-engine` | API client package     |

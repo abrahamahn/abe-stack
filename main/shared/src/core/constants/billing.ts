@@ -68,7 +68,14 @@ export const SUBSCRIPTION_STATUSES = [
   'unpaid',
 ] as const;
 
-export const INVOICE_STATUSES = ['draft', 'open', 'paid', 'past_due', 'void', 'uncollectible'] as const;
+export const INVOICE_STATUSES = [
+  'draft',
+  'open',
+  'paid',
+  'past_due',
+  'void',
+  'uncollectible',
+] as const;
 
 // ============================================================================
 // Event Types

@@ -1,11 +1,11 @@
 // main/apps/server/src/manager.ts
 import http from 'node:http';
 
-import { bootstrapSystem, type SystemContext } from '@bslt/server-system';
 import { verifyToken } from '@bslt/core/auth';
 import { registerScheduledTasks, stopScheduledTasks } from '@bslt/core/scheduled-tasks';
 import { REQUIRED_TABLES, requireValidSchema, validateSchema } from '@bslt/db';
 import { resolveTableName } from '@bslt/realtime';
+import { bootstrapSystem, type SystemContext } from '@bslt/server-system';
 import { logStartupSummary } from '@bslt/server-system';
 import { getWebSocketStats, registerWebSocket } from '@bslt/websocket';
 

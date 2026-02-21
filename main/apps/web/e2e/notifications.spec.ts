@@ -86,10 +86,7 @@ test.describe('Notifications', () => {
 
       // Click on the first notification item
       const notificationItems = page.getByTestId('notification-item');
-      const notificationLinks = page.locator('[data-testid="notification-item"] a, [data-testid="notification-item"]');
-
       if ((await notificationItems.count()) > 0) {
-        const currentUrl = page.url();
         await notificationItems.first().click();
 
         // Should navigate away from current URL (to the notification's target)
@@ -132,8 +129,7 @@ test.describe('Notifications', () => {
       const unreadIndicator = page.locator('.unread, [data-unread="true"], .notification-unread');
       const unreadBadge = page.getByTestId('unread-badge');
 
-      const initialUnreadCount =
-        (await unreadIndicator.count()) + (await unreadBadge.count());
+      const initialUnreadCount = (await unreadIndicator.count()) + (await unreadBadge.count());
 
       // If there are unread notifications, try to mark one as read
       if (initialUnreadCount > 0) {
@@ -144,8 +140,7 @@ test.describe('Notifications', () => {
           await page.waitForTimeout(500); // Wait for UI update
 
           // The unread count should decrease
-          const newUnreadCount =
-            (await unreadIndicator.count()) + (await unreadBadge.count());
+          const newUnreadCount = (await unreadIndicator.count()) + (await unreadBadge.count());
           expect(newUnreadCount).toBeLessThanOrEqual(initialUnreadCount);
         }
       }
@@ -215,7 +210,10 @@ test.describe('Notifications', () => {
   // Transactional email received (verify via test mailbox interceptor)
   // ===========================================================================
 
-  test('transactional email is received via test mailbox interceptor', async ({ page, request }) => {
+  test('transactional email is received via test mailbox interceptor', async ({
+    page,
+    request,
+  }) => {
     test.skip(
       process.env['E2E_BASE_URL'] === undefined,
       'Set E2E_BASE_URL to run this test against a live app',
@@ -232,7 +230,6 @@ test.describe('Notifications', () => {
     await page.goto(`${baseURL}/settings`);
 
     // Look for an action that would trigger an email
-    const changeEmailButton = page.getByRole('button', { name: /change email|update email/i });
     const inviteButton = page.getByRole('button', { name: /invite/i });
 
     if ((await inviteButton.count()) > 0) {
@@ -262,7 +259,7 @@ test.describe('Notifications', () => {
       for (let attempt = 0; attempt < maxAttempts; attempt++) {
         const mailboxResponse = await request.get(mailboxApiUrl);
         if (mailboxResponse.ok()) {
-          const emails = await mailboxResponse.json() as Array<{
+          const emails = (await mailboxResponse.json()) as Array<{
             to: string;
             subject: string;
           }>;
