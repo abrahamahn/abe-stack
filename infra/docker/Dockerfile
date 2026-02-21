@@ -83,6 +83,10 @@ RUN addgroup -g 1001 -S nodejs && \
 
 WORKDIR /app
 
+# Runtime image does not need package managers; remove to reduce vuln surface.
+RUN rm -rf /usr/local/lib/node_modules/npm && \
+    rm -f /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack
+
 # Copy built application from build stage
 COPY --from=build --chown=nodejs:nodejs /app/server-deploy/ .
 
