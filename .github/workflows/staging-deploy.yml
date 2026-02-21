@@ -122,10 +122,12 @@ jobs:
     if: always()
     steps:
       - name: Deployment Summary
+        env:
+          BRANCH_NAME: ${{ inputs.branch || github.ref_name }}
         run: |
           echo "## Staging Deployment" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "**Environment:** staging" >> "$GITHUB_STEP_SUMMARY"
-          echo "**Branch:** ${{ inputs.branch || github.ref_name }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Branch:** ${BRANCH_NAME}" >> "$GITHUB_STEP_SUMMARY"
           echo "**Commit:** \`${GITHUB_SHA}\`" >> "$GITHUB_STEP_SUMMARY"
           echo "**Deployed at:** $(date -Iseconds)" >> "$GITHUB_STEP_SUMMARY"

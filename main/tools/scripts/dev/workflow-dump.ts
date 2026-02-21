@@ -1,5 +1,5 @@
 // main/tools/scripts/dev/workflow-dump.ts
-import { execSync } from 'node:child_process';
+import { spawnSync } from 'node:child_process';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
@@ -9,20 +9,28 @@ interface Args {
   outDir: string;
 }
 
-function run(cmd: string): string {
-  return execSync(cmd, {
+function runGh(args: string[], allowFailure = false): string {
+  const result = spawnSync('gh', args, {
     encoding: 'utf-8',
     stdio: ['ignore', 'pipe', 'pipe'],
     maxBuffer: 1024 * 1024 * 32,
-  }).trim();
+  });
+
+  if (result.error) {
+    throw result.error;
+  }
+
+  if ((result.status ?? 1) !== 0 && !allowFailure) {
+    const stderr = (result.stderr ?? '').trim();
+    throw new Error(stderr || `gh ${args.join(' ')} failed with status ${result.status}`);
+  }
+
+  return (result.stdout ?? '').trim();
 }
 
-function runToFile(cmd: string, filePath: string): void {
-  execSync(`{ ${cmd}; } > "${filePath}"`, {
-    stdio: ['ignore', 'pipe', 'pipe'],
-    maxBuffer: 1024 * 1024 * 16,
-    shell: '/bin/bash',
-  });
+function runGhToFile(args: string[], filePath: string, allowFailure = false): void {
+  const output = runGh(args, allowFailure);
+  writeFileSync(filePath, output, 'utf-8');
 }
 
 function parseArgs(argv: string[]): Args {
@@ -71,25 +79,52 @@ function parseArgs(argv: string[]): Args {
 }
 
 function resolveRunId(branch: string): string {
-  const failed = run(
-    `gh run list --branch "${branch}" --status failure --limit 1 --json databaseId -q '.[0].databaseId' || true`,
+  const failedRaw = runGh(
+    [
+      'run',
+      'list',
+      '--branch',
+      branch,
+      '--status',
+      'failure',
+      '--limit',
+      '1',
+      '--json',
+      'databaseId',
+    ],
+    true,
   );
-  if (failed) return failed;
+  const failedRuns = JSON.parse(failedRaw || '[]') as Array<{
+    databaseId?: number;
+  }>;
+  const failed = failedRuns[0]?.databaseId;
+  if (failed != null) return String(failed);
 
-  const latest = run(
-    `gh run list --branch "${branch}" --limit 1 --json databaseId -q '.[0].databaseId'`,
-  );
+  const latestRaw = runGh([
+    'run',
+    'list',
+    '--branch',
+    branch,
+    '--limit',
+    '1',
+    '--json',
+    'databaseId',
+  ]);
+  const latestRuns = JSON.parse(latestRaw || '[]') as Array<{
+    databaseId?: number;
+  }>;
+  const latest = latestRuns[0]?.databaseId;
   if (!latest) {
     throw new Error(`No workflow runs found for branch "${branch}".`);
   }
-  return latest;
+  return String(latest);
 }
 
 function main(): void {
   const args = parseArgs(process.argv.slice(2));
 
   try {
-    run('gh --version');
+    runGh(['--version']);
   } catch {
     console.error('GitHub CLI (gh) is required. Install it and run `gh auth login`.');
     process.exit(1);
@@ -100,18 +135,22 @@ function main(): void {
   const baseDir = resolve(args.outDir, `${runId}-${timestamp}`);
   mkdirSync(baseDir, { recursive: true });
 
-  const metaText = run(`gh run view ${runId}`);
+  const metaText = runGh(['run', 'view', runId]);
   writeFileSync(resolve(baseDir, 'run-meta.txt'), `${metaText}\n`, 'utf-8');
 
-  const metaJson = run(
-    `gh run view ${runId} --json databaseId,name,workflowName,headBranch,headSha,status,conclusion,url,event,createdAt,startedAt,updatedAt,jobs`,
-  );
+  const metaJson = runGh([
+    'run',
+    'view',
+    runId,
+    '--json',
+    'databaseId,name,workflowName,headBranch,headSha,status,conclusion,url,event,createdAt,startedAt,updatedAt,jobs',
+  ]);
   writeFileSync(resolve(baseDir, 'run-meta.json'), `${metaJson}\n`, 'utf-8');
 
   const failedLogPath = resolve(baseDir, 'run-failed.log');
   const fullLogPath = resolve(baseDir, 'run-full.log');
-  runToFile(`gh run view ${runId} --log-failed || true`, failedLogPath);
-  runToFile(`gh run view ${runId} --log`, fullLogPath);
+  runGhToFile(['run', 'view', runId, '--log-failed'], failedLogPath, true);
+  runGhToFile(['run', 'view', runId, '--log'], fullLogPath);
 
   const failedLogs = readFileSync(failedLogPath, 'utf-8').trim();
   const fullLogs = readFileSync(fullLogPath, 'utf-8').trim();
