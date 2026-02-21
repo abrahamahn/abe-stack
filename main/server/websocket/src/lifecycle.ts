@@ -38,7 +38,7 @@ import type { Duplex } from 'node:stream';
 import type { WebSocket } from 'ws';
 
 interface WebSocketDbClient {
-  queryOne<T>(query: { text: string; values?: readonly unknown[] }): Promise<T | undefined>;
+  queryOne<T>(query: { text: string; values?: readonly unknown[] }): Promise<T | null | undefined>;
 }
 
 // ============================================================================
