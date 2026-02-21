@@ -13,17 +13,18 @@ import { eq, select } from '@bslt/db';
 import { validateCsrfToken } from '@bslt/server-system';
 import {
   ACCESS_TOKEN_COOKIE_NAME,
-  AUTH_CONSTANTS,
+  CSRF_COOKIE_NAME,
   ERROR_MESSAGES,
   HTTP_STATUS,
   parseCookies,
   parseRecordKey,
+  WEBSOCKET_PATH,
+  WS_CLOSE_POLICY_VIOLATION,
 } from '@bslt/shared';
 import { WebSocketServer } from 'ws';
 
 import { decrementConnections, incrementConnections, markPluginRegistered } from './stats';
 
-import type { DbClient } from '@bslt/db';
 import type {
   Logger,
   WebSocket as PubSubWebSocket,
@@ -36,7 +37,9 @@ import type { IncomingMessage } from 'node:http';
 import type { Duplex } from 'node:stream';
 import type { WebSocket } from 'ws';
 
-const { CSRF_COOKIE_NAME, WEBSOCKET_PATH, WS_CLOSE_POLICY_VIOLATION } = AUTH_CONSTANTS;
+interface WebSocketDbClient {
+  queryOne<T>(query: { text: string; values?: readonly unknown[] }): Promise<T | undefined>;
+}
 
 // ============================================================================
 // Local Constants
@@ -57,7 +60,7 @@ const KNOWN_SUBPROTOCOLS = new Set(['graphql', 'json', 'Bearer']);
  * Structurally compatible with AppContext but decoupled from specific modules.
  */
 export interface WebSocketDeps {
-  readonly db: DbClient;
+  readonly db: WebSocketDbClient;
   readonly pubsub: SubscriptionManager;
   readonly log: Logger;
   readonly config: {
