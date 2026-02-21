@@ -305,7 +305,7 @@ describe('Database Utils', () => {
 
     test('should handle strings with underscores', () => {
       expect(camelToSnake('already_underscored')).toBe('already_underscored');
-      expect(camelToSnake('mixed_Case_and_underscore')).toBe('mixed__case_and_underscore');
+      expect(camelToSnake('mixed_Case_and_underscore')).toBe('mixed_case_and_underscore');
     });
   });
 

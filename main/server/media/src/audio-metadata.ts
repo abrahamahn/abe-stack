@@ -30,8 +30,18 @@ export async function parseAudioMetadata(filePath: string): Promise<{
   album?: string;
 }> {
   try {
-    // Read file directly (avoids TOCTOU race from separate stat + readFile)
-    const buffer = await fs.readFile(filePath);
+    // Use a single fd for stat + read to avoid TOCTOU races and huge file reads.
+    const fd = await fs.open(filePath, 'r');
+    let buffer: Buffer;
+    try {
+      const stats = await fd.stat();
+      if (stats.size > MAX_AUDIO_FILE_SIZE) {
+        return {};
+      }
+      buffer = await fd.readFile();
+    } finally {
+      await fd.close();
+    }
     if (buffer.length > MAX_AUDIO_FILE_SIZE) {
       return {};
     }

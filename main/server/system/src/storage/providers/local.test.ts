@@ -1,5 +1,5 @@
 // main/server/system/src/storage/providers/local.test.ts
-import { mkdir, open } from 'node:fs/promises';
+import { mkdir, open, rename } from 'node:fs/promises';
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -23,6 +23,7 @@ vi.mock('node:fs/promises', () => {
       close: mockClose,
     }),
     readFile: vi.fn().mockResolvedValue(Buffer.from('')),
+    rename: vi.fn().mockResolvedValue(undefined),
     unlink: vi.fn().mockResolvedValue(undefined),
   };
 });
@@ -64,7 +65,15 @@ describe('LocalStorageProvider', () => {
 
       expect(result).toBe('test/file.txt');
       expect(mkdir).toHaveBeenCalledWith('/tmp/uploads/test', { recursive: true });
-      expect(mockedOpen).toHaveBeenCalledWith('/tmp/uploads/test/file.txt', 'w', 0o600);
+      expect(mockedOpen).toHaveBeenCalledWith(
+        expect.stringContaining('/tmp/uploads/test/.file.txt.'),
+        'wx',
+        0o600,
+      );
+      expect(rename).toHaveBeenCalledWith(
+        expect.stringContaining('/tmp/uploads/test/.file.txt.'),
+        '/tmp/uploads/test/file.txt',
+      );
       expect(fd.writeFile).toHaveBeenCalledWith(params.body);
       expect(fd.close).toHaveBeenCalled();
     });
@@ -82,7 +91,15 @@ describe('LocalStorageProvider', () => {
 
       expect(result).toBe('mock-uuid-1234');
       expect(mkdir).toHaveBeenCalledWith('/tmp/uploads', { recursive: true });
-      expect(mockedOpen).toHaveBeenCalledWith('/tmp/uploads/mock-uuid-1234', 'w', 0o600);
+      expect(mockedOpen).toHaveBeenCalledWith(
+        expect.stringContaining('/tmp/uploads/.mock-uuid-1234.'),
+        'wx',
+        0o600,
+      );
+      expect(rename).toHaveBeenCalledWith(
+        expect.stringContaining('/tmp/uploads/.mock-uuid-1234.'),
+        '/tmp/uploads/mock-uuid-1234',
+      );
       expect(fd.writeFile).toHaveBeenCalledWith(params.body);
       expect(fd.close).toHaveBeenCalled();
     });
@@ -101,7 +118,11 @@ describe('LocalStorageProvider', () => {
       // Returns the original key (not normalized)
       expect(result).toBe('/leading/slash.txt');
       // But writes to normalized path via open()
-      expect(mockedOpen).toHaveBeenCalledWith('/tmp/uploads/leading/slash.txt', 'w', 0o600);
+      expect(mockedOpen).toHaveBeenCalledWith(
+        expect.stringContaining('/tmp/uploads/leading/.slash.txt.'),
+        'wx',
+        0o600,
+      );
       expect(fd.writeFile).toHaveBeenCalledWith(params.body);
     });
 
@@ -117,7 +138,7 @@ describe('LocalStorageProvider', () => {
       const fd = await getMockFd();
 
       // The normalizeStorageKey with stripParentRefs=true removes ".." sequences
-      expect(mockedOpen).toHaveBeenCalledWith(expect.not.stringContaining('..'), 'w', 0o600);
+      expect(mockedOpen).toHaveBeenCalledWith(expect.not.stringContaining('..'), 'wx', 0o600);
       expect(fd.writeFile).toHaveBeenCalledWith(params.body);
     });
 
@@ -132,7 +153,11 @@ describe('LocalStorageProvider', () => {
       await provider.upload(params.key, params.body, params.contentType);
       const fd = await getMockFd();
 
-      expect(mockedOpen).toHaveBeenCalledWith('/tmp/uploads/text-file.txt', 'w', 0o600);
+      expect(mockedOpen).toHaveBeenCalledWith(
+        expect.stringContaining('/tmp/uploads/.text-file.txt.'),
+        'wx',
+        0o600,
+      );
       expect(fd.writeFile).toHaveBeenCalledWith('string content');
     });
 
@@ -148,7 +173,11 @@ describe('LocalStorageProvider', () => {
       await provider.upload(params.key, params.body, params.contentType);
       const fd = await getMockFd();
 
-      expect(mockedOpen).toHaveBeenCalledWith('/tmp/uploads/binary.bin', 'w', 0o600);
+      expect(mockedOpen).toHaveBeenCalledWith(
+        expect.stringContaining('/tmp/uploads/.binary.bin.'),
+        'wx',
+        0o600,
+      );
       expect(fd.writeFile).toHaveBeenCalledWith(body);
     });
   });

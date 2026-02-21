@@ -25,7 +25,17 @@
  * @module
  */
 
-import { closeSync, existsSync, mkdirSync, openSync, readFileSync, writeSync } from 'node:fs';
+import { randomUUID } from 'node:crypto';
+import {
+  closeSync,
+  existsSync,
+  mkdirSync,
+  openSync,
+  readFileSync,
+  renameSync,
+  unlinkSync,
+  writeSync,
+} from 'node:fs';
 import { dirname } from 'node:path';
 
 // =============================================================================
@@ -129,6 +139,32 @@ interface DatabaseSchema {
 /** Query condition */
 type WhereCondition<T> = Partial<T> | ((record: T) => boolean);
 
+const BLOCKED_OBJECT_KEYS = new Set(['__proto__', 'prototype', 'constructor']);
+
+function isSafeObjectKey(key: string): boolean {
+  return key !== '' && !BLOCKED_OBJECT_KEYS.has(key);
+}
+
+function sanitizeValue(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map((entry) => sanitizeValue(entry));
+  }
+  if (value != null && typeof value === 'object') {
+    const input = value as Record<string, unknown>;
+    const output: Record<string, unknown> = {};
+    for (const [key, nested] of Object.entries(input)) {
+      if (!isSafeObjectKey(key)) continue;
+      output[key] = sanitizeValue(nested);
+    }
+    return output;
+  }
+  return value;
+}
+
+function sanitizeRecord<T extends DbRecord>(record: T): T {
+  return sanitizeValue(record) as T;
+}
+
 /** Query options */
 interface QueryOptions<T> {
   where?: WhereCondition<T> | undefined;
@@ -209,7 +245,12 @@ export class JsonDatabase {
     try {
       const content = readFileSync(this.filePath, 'utf-8');
       const parsed = JSON.parse(content) as Record<string, TableData>;
-      return { ...defaultSchema, ...parsed };
+      const sanitizedParsed: Record<string, TableData> = {};
+      for (const [key, value] of Object.entries(parsed)) {
+        if (!isSafeObjectKey(key) || !Array.isArray(value)) continue;
+        sanitizedParsed[key] = value.map((entry) => sanitizeRecord(entry));
+      }
+      return { ...defaultSchema, ...sanitizedParsed };
     } catch {
       return defaultSchema;
     }
@@ -223,12 +264,19 @@ export class JsonDatabase {
       mkdirSync(dir, { recursive: true });
     }
 
-    // Use open with mode to set permissions atomically
-    const fd = openSync(this.filePath, 'w', 0o600);
+    const tempPath = `${this.filePath}.${String(process.pid)}.${randomUUID()}.tmp`;
+    const fd = openSync(tempPath, 'wx', 0o600);
     try {
       writeSync(fd, JSON.stringify(this.data, null, 2));
     } finally {
       closeSync(fd);
+    }
+    try {
+      renameSync(tempPath, this.filePath);
+    } finally {
+      if (existsSync(tempPath)) {
+        unlinkSync(tempPath);
+      }
     }
   }
 
@@ -244,6 +292,7 @@ export class JsonDatabase {
    * @complexity O(n)
    */
   getAll<T extends DbRecord>(table: string): T[] {
+    if (!isSafeObjectKey(table)) return [];
     const tableData = this.data[table] ?? [];
     return [...tableData] as T[];
   }
@@ -334,9 +383,12 @@ export class JsonDatabase {
     table: string,
     data: Omit<T, 'id'> & { id?: string },
   ): Promise<T> {
+    if (!isSafeObjectKey(table)) {
+      throw new Error(`Invalid table name: ${table}`);
+    }
     return this.writeMutex.withLock(() => {
       const id = data.id != null && data.id !== '' ? data.id : this.generateId();
-      const record = { ...data, id } as T;
+      const record = sanitizeRecord({ ...data, id } as T);
 
       this.data[table] ??= [];
       this.data[table].push(record as DbRecord);
@@ -358,11 +410,14 @@ export class JsonDatabase {
     table: string,
     records: Array<Omit<T, 'id'> & { id?: string }>,
   ): Promise<T[]> {
+    if (!isSafeObjectKey(table)) {
+      throw new Error(`Invalid table name: ${table}`);
+    }
     return this.writeMutex.withLock(() => {
       const inserted: T[] = [];
       for (const data of records) {
         const id = data.id != null && data.id !== '' ? data.id : this.generateId();
-        const record = { ...data, id } as T;
+        const record = sanitizeRecord({ ...data, id } as T);
 
         this.data[table] ??= [];
         this.data[table].push(record as DbRecord);
@@ -387,6 +442,7 @@ export class JsonDatabase {
     data: Partial<T>,
     where: WhereCondition<T>,
   ): Promise<T[]> {
+    if (!isSafeObjectKey(table)) return [];
     if (!Object.hasOwn(this.data, table)) {
       return [];
     }
@@ -404,7 +460,7 @@ export class JsonDatabase {
               );
 
         if (matches) {
-          const updatedRecord = { ...typedRecord, ...data } as T;
+          const updatedRecord = sanitizeRecord({ ...typedRecord, ...data } as T);
           const arr = this.data[table] as T[];
           arr[i] = updatedRecord;
           updated.push(updatedRecord);
@@ -446,6 +502,7 @@ export class JsonDatabase {
    * @complexity O(n)
    */
   async delete<T extends DbRecord>(table: string, where: WhereCondition<T>): Promise<T[]> {
+    if (!isSafeObjectKey(table)) return [];
     return this.writeMutex.withLock(() => {
       const deleted: T[] = [];
       const tableData = this.data[table] ?? [];
@@ -496,6 +553,7 @@ export class JsonDatabase {
    * @complexity O(n)
    */
   count(table: string, where?: WhereCondition<DbRecord>): number {
+    if (!isSafeObjectKey(table)) return 0;
     const records = where != null ? this.find<DbRecord>(table, { where }) : this.getAll(table);
     return records.length;
   }
@@ -507,6 +565,7 @@ export class JsonDatabase {
    * @complexity O(1)
    */
   async clearTable(table: string): Promise<void> {
+    if (!isSafeObjectKey(table)) return;
     return this.writeMutex.withLock(() => {
       this.data[table] = [];
       this.saveToFile();
