@@ -155,16 +155,17 @@ export function useMediaStatus(options: UseMediaStatusOptions): UseMediaStatusRe
     },
     enabled: options.enabled ?? true,
   });
+  const { data, refetch, isLoading, isError, error } = queryResult;
 
   // Poll when status is pending or processing
   useEffect(() => {
-    if (options.enabled === false || options.id === '' || queryResult.data === undefined) {
+    if (options.enabled === false || options.id === '' || data === undefined) {
       return undefined;
     }
 
-    if (queryResult.data.status === 'pending' || queryResult.data.status === 'processing') {
+    if (data.status === 'pending' || data.status === 'processing') {
       const interval = setInterval((): void => {
-        void queryResult.refetch();
+        void refetch();
       }, 3000);
 
       return (): void => {
@@ -173,13 +174,13 @@ export function useMediaStatus(options: UseMediaStatusOptions): UseMediaStatusRe
     }
 
     return undefined;
-  }, [options.enabled, options.id, queryResult.data, queryResult.refetch]);
+  }, [options.enabled, options.id, data, refetch]);
 
   return {
-    status: queryResult.data,
-    isLoading: queryResult.isLoading,
-    isError: queryResult.isError,
-    error: queryResult.error,
-    refetch: queryResult.refetch,
+    status: data,
+    isLoading,
+    isError,
+    error,
+    refetch,
   };
 }

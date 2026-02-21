@@ -6,7 +6,6 @@
  * Uses useSyncExternalStore for optimal React integration.
  */
 
-import { hashQueryKey } from '@bslt/client-engine';
 import { MS_PER_SECOND } from '@bslt/shared';
 import { useCallback, useEffect, useRef, useSyncExternalStore } from 'react';
 
@@ -94,6 +93,28 @@ export interface UseQueryResult<TData = unknown, TError = Error> {
 const DEFAULT_RETRY = 3;
 const DEFAULT_RETRY_DELAY = MS_PER_SECOND;
 
+const waitForRetryDelay = (delayMs: number, signal: AbortSignal): Promise<void> => {
+  return new Promise((resolve) => {
+    if (signal.aborted) {
+      resolve();
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      signal.removeEventListener('abort', onAbort);
+      resolve();
+    }, delayMs);
+
+    const onAbort = (): void => {
+      clearTimeout(timeoutId);
+      signal.removeEventListener('abort', onAbort);
+      resolve();
+    };
+
+    signal.addEventListener('abort', onAbort, { once: true });
+  });
+};
+
 const getHttpStatus = (error: unknown): number | null => {
   const status = (error as { status?: unknown }).status;
   if (typeof status === 'number') return status;
@@ -153,7 +174,6 @@ export function useQuery<TData = unknown, TError = Error>(
   } = options;
 
   const cache = useQueryCache();
-  const queryKeyHash = hashQueryKey(queryKey);
 
   // Track if we've done initial fetch
   const hasInitiatedFetch = useRef(false);
@@ -180,8 +200,10 @@ export function useQuery<TData = unknown, TError = Error>(
     // Don't fetch if disabled
     if (!enabled) return;
 
+    const currentState = cache.getQueryState<TData, TError>(queryKey);
+
     // Check if data is fresh (use explicit undefined check to allow null values)
-    if (!cache.isStale(queryKey) && state?.data !== undefined) return;
+    if (!cache.isStale(queryKey) && currentState?.data !== undefined) return;
 
     // Abort any in-progress fetch
     abortController.current?.abort();
@@ -196,12 +218,11 @@ export function useQuery<TData = unknown, TError = Error>(
     let lastError: TError | null = null;
 
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      if (currentController.signal.aborted) return;
+
       try {
         attempts = attempt + 1;
         const data = await queryFn();
-
-        // Check if THIS fetch was aborted (use captured controller, not current ref)
-        if (currentController.signal.aborted) return;
 
         cache.setQueryData(queryKey, data, staleTime !== undefined ? { staleTime } : {});
         logQuerySuccess(queryKey, startedAt, attempts);
@@ -210,9 +231,6 @@ export function useQuery<TData = unknown, TError = Error>(
         return;
       } catch (err) {
         lastError = err as TError;
-
-        // Check if THIS fetch was aborted (use captured controller, not current ref)
-        if (currentController.signal.aborted) return;
 
         // Don't retry or emit errors for aborts.
         if (err instanceof DOMException && err.name === 'AbortError') return;
@@ -233,7 +251,7 @@ export function useQuery<TData = unknown, TError = Error>(
         if (attempt < maxRetries) {
           const delayMs = retryDelay * Math.pow(2, attempt);
           logQueryRetryWait(queryKey, delayMs);
-          await new Promise((resolve) => setTimeout(resolve, delayMs));
+          await waitForRetryDelay(delayMs, currentController.signal);
         }
       }
     }
@@ -256,7 +274,6 @@ export function useQuery<TData = unknown, TError = Error>(
     onSuccess,
     onError,
     onSettled,
-    state,
   ]);
 
   // Manual refetch function
@@ -278,15 +295,29 @@ export function useQuery<TData = unknown, TError = Error>(
     }
 
     // Fetch if stale or no data
-    if (cache.isStale(queryKey) || state?.data === undefined) {
+    if (
+      (cache.isStale(queryKey) || state?.data === undefined) &&
+      state?.fetchStatus !== 'fetching'
+    ) {
       hasInitiatedFetch.current = true;
       void fetchData();
     }
+  }, [
+    enabled,
+    initialData,
+    state?.data,
+    state?.fetchStatus,
+    cache,
+    queryKey,
+    staleTime,
+    fetchData,
+  ]);
 
+  useEffect(() => {
     return (): void => {
       abortController.current?.abort();
     };
-  }, [enabled, queryKeyHash, initialData]);
+  }, []);
 
   // Derive computed values
   // Use explicit undefined check to allow null values from queryFn

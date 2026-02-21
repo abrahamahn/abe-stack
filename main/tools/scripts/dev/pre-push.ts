@@ -17,6 +17,17 @@ function run(cmd: string): void {
   }
 }
 
+function tryRunOutput(cmd: string): string | null {
+  try {
+    return execSync(cmd, {
+      encoding: 'utf-8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+  } catch {
+    return null;
+  }
+}
+
 function main(): void {
   console.log('\n🚀 Pre-push checks (Robust Mode)...\n');
 
@@ -31,10 +42,17 @@ function main(): void {
 
   console.log('📦 Verifying project state (Lint, Type-Check, Test)...');
 
-  // We run 'validate' pipeline which includes lint, type-check, and test
-  // This is defined in turbo.json
+  // We run changed-only validation for fast local feedback and better cache reuse.
+  // Set PRE_PUSH_FULL=1 to force full workspace validation.
+  const fullValidation = process.env.PRE_PUSH_FULL === '1';
+  const upstreamRef = tryRunOutput("git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}'");
+  const changedFilter = upstreamRef ? `[${upstreamRef}]` : '[HEAD^1]';
+  const validateCommand = fullValidation
+    ? 'pnpm exec turbo run validate --output-logs=new-only'
+    : `pnpm exec turbo run validate --filter=${changedFilter} --output-logs=new-only`;
+
   try {
-    run('pnpm exec turbo run validate --output-logs=new-only');
+    run(validateCommand);
   } catch {
     console.error('\n❌ Pre-push checks failed. Please fix the errors above.');
     process.exit(1);

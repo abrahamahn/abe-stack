@@ -230,7 +230,7 @@ export function useInfiniteQuery<
     (onStoreChange: () => void) => {
       return cache.subscribe(queryKeyRef.current, onStoreChange);
     },
-    [cache, queryKeyHash],
+    [cache],
   );
 
   // Get current state snapshot (use queryKeyRef to avoid recreating on array reference change)
@@ -238,7 +238,7 @@ export function useInfiniteQuery<
     | QueryState<InfiniteData<TData, TPageParam>, TError>
     | undefined => {
     return cache.getQueryState<InfiniteData<TData, TPageParam>, TError>(queryKeyRef.current);
-  }, [cache, queryKeyHash]);
+  }, [cache]);
 
   const state = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 
@@ -348,7 +348,7 @@ export function useInfiniteQuery<
     } finally {
       isFetchingRef.current = false;
     }
-  }, [enabled, queryKeyHash, fetchPage, initialPageParam, staleTime, onSuccess, onError, cache]);
+  }, [enabled, fetchPage, initialPageParam, staleTime, onSuccess, onError, cache]);
 
   // Fetch next page (use queryKeyRef.current to avoid dependency on array reference)
   const fetchNextPage = useCallback(async (): Promise<void> => {
@@ -386,17 +386,7 @@ export function useInfiniteQuery<
     } finally {
       setIsFetchingNextPage(false);
     }
-  }, [
-    enabled,
-    infiniteData,
-    getNextPageParam,
-    fetchPage,
-    staleTime,
-    onSuccess,
-    onError,
-    cache,
-    queryKeyHash,
-  ]);
+  }, [enabled, infiniteData, getNextPageParam, fetchPage, staleTime, onSuccess, onError, cache]);
 
   // Fetch previous page (use queryKeyRef.current to avoid dependency on array reference)
   const fetchPreviousPage = useCallback(async (): Promise<void> => {
@@ -449,7 +439,6 @@ export function useInfiniteQuery<
     onSuccess,
     onError,
     cache,
-    queryKeyHash,
   ]);
 
   // Refetch all pages (use queryKeyRef.current to avoid dependency on array reference)
@@ -463,7 +452,7 @@ export function useInfiniteQuery<
     setInfiniteData(undefined);
 
     await fetchInitialPage();
-  }, [enabled, queryKeyHash, fetchInitialPage, cache]);
+  }, [enabled, fetchInitialPage, cache]);
 
   // Keep fetchInitialPage ref in sync
   const fetchInitialPageRef = useRef(fetchInitialPage);

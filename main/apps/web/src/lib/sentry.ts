@@ -1,5 +1,4 @@
 // main/apps/web/src/lib/sentry.ts
-/* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return */
 /**
  * Sentry Browser SDK Integration
  *
@@ -22,7 +21,7 @@
  * @module lib/sentry
  */
 
-import type { ComponentType, ReactNode } from 'react';
+import { createElement, type ComponentType, type ReactNode } from 'react';
 
 import { clientConfig } from '@/config';
 
@@ -30,8 +29,48 @@ import { clientConfig } from '@/config';
 // Lazy Sentry reference — resolved at init-time, stays null when missing
 // ============================================================================
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let Sentry: any = null;
+type Breadcrumb = {
+  category: string;
+  message: string;
+  data?: Record<string, unknown>;
+  level: 'info';
+};
+
+type SentryEvent = {
+  breadcrumbs?: Array<{ data?: Record<string, unknown> }>;
+};
+
+type SentryBrowserModule = {
+  init: (options: {
+    dsn: string;
+    environment: string;
+    release: string;
+    sampleRate: number;
+    tracesSampleRate: number;
+    integrations: unknown[];
+    replaysSessionSampleRate: number;
+    replaysOnErrorSampleRate: number;
+    beforeSend: (event: SentryEvent) => SentryEvent;
+    ignoreErrors: string[];
+    denyUrls: RegExp[];
+  }) => void;
+  browserTracingIntegration: () => unknown;
+  replayIntegration: (options: { maskAllText: boolean; blockAllMedia: boolean }) => unknown;
+  addBreadcrumb: (breadcrumb: Breadcrumb) => void;
+  captureException: (
+    error: unknown,
+    options?: {
+      extra?: Record<string, unknown>;
+    },
+  ) => void;
+  setUser: (user: { id: string; email?: string; role?: string } | null) => void;
+  ErrorBoundary?: ComponentType<{ children?: ReactNode; fallback?: ReactNode }>;
+  withProfiler?: <P extends Record<string, unknown>>(
+    component: ComponentType<P>,
+  ) => ComponentType<P>;
+};
+
+let Sentry: SentryBrowserModule | null = null;
 
 // ============================================================================
 // Types
@@ -45,6 +84,23 @@ type EnvVars = {
 };
 
 const env: EnvVars = import.meta.env as EnvVars;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function isSentryBrowserModule(value: unknown): value is SentryBrowserModule {
+  if (!isRecord(value)) return false;
+
+  return (
+    typeof value['init'] === 'function' &&
+    typeof value['browserTracingIntegration'] === 'function' &&
+    typeof value['replayIntegration'] === 'function' &&
+    typeof value['addBreadcrumb'] === 'function' &&
+    typeof value['captureException'] === 'function' &&
+    typeof value['setUser'] === 'function'
+  );
+}
 
 // ============================================================================
 // Configuration
@@ -86,10 +142,6 @@ const TRACES_SAMPLE_RATE = clientConfig.isProd ? 0.2 : 1.0;
 export async function initSentry(): Promise<void> {
   // Skip initialization if no DSN is configured
   if (SENTRY_DSN === '') {
-    if (clientConfig.isDev) {
-      // eslint-disable-next-line no-console
-      console.debug('[Sentry] No DSN configured -- skipping initialization');
-    }
     return;
   }
 
@@ -98,12 +150,12 @@ export async function initSentry(): Promise<void> {
   // import analysis doesn't reject the import at build/transform time.
   try {
     const sentryModule = '@sentry' + '/react';
-    Sentry = await import(/* @vite-ignore */ sentryModule);
-  } catch {
-    if (clientConfig.isDev) {
-      // eslint-disable-next-line no-console
-      console.debug('[Sentry] @sentry/react is not installed -- running without Sentry');
+    const loadedModule: unknown = await import(/* @vite-ignore */ sentryModule);
+    if (!isSentryBrowserModule(loadedModule)) {
+      return;
     }
+    Sentry = loadedModule;
+  } catch {
     return;
   }
 
@@ -138,13 +190,12 @@ export async function initSentry(): Promise<void> {
     // -----------------------------------------------------------------------
     // Filtering
     // -----------------------------------------------------------------------
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    beforeSend(event: any) {
+    beforeSend(event: SentryEvent) {
       // Scrub access tokens from breadcrumb data
       if (event.breadcrumbs !== undefined) {
         for (const breadcrumb of event.breadcrumbs) {
           if (breadcrumb.data !== undefined) {
-            const data = breadcrumb.data as Record<string, unknown>;
+            const data = breadcrumb.data;
             if (typeof data['url'] === 'string' && data['url'].includes('token')) {
               data['url'] = '[REDACTED]';
             }
@@ -211,9 +262,7 @@ export function addRouteChangeBreadcrumb(from: string, to: string): void {
  */
 export function captureError(error: unknown, context?: Record<string, unknown>): void {
   if (Sentry === null) return;
-  Sentry.captureException(error, {
-    extra: context,
-  });
+  Sentry.captureException(error, context !== undefined ? { extra: context } : {});
 }
 
 /**
@@ -235,7 +284,7 @@ export function setSentryUser(user: { id: string; email?: string; role?: string 
 
   Sentry.setUser({
     id: user.id,
-    email: user.email,
+    ...(user.email !== undefined ? { email: user.email } : {}),
     // Store role as a custom field so we can filter in Sentry UI
     ...(user.role !== undefined ? { role: user.role } : {}),
   });
@@ -261,9 +310,9 @@ export function SentryErrorBoundary({
   children?: ReactNode;
   fallback?: ReactNode;
 }): ReactNode {
-  if (Sentry !== null && Sentry.ErrorBoundary != null) {
+  if (Sentry !== null && Sentry.ErrorBoundary !== undefined) {
     const Boundary = Sentry.ErrorBoundary;
-    return Boundary({ children, fallback }) as ReactNode;
+    return createElement(Boundary, { fallback }, children);
   }
   return children;
 }
@@ -276,7 +325,7 @@ export const withSentryProfiler = <P extends Record<string, unknown>>(
   component: ComponentType<P>,
 ): ComponentType<P> => {
   if (Sentry !== null && typeof Sentry.withProfiler === 'function') {
-    return Sentry.withProfiler(component) as ComponentType<P>;
+    return Sentry.withProfiler(component);
   }
   return component;
 };

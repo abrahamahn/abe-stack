@@ -29,16 +29,6 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
 
-    /* The 2026 Secret Sauce */
-    "tsBuildInfoFile": "${configDir}/node_modules/.cache/typescript/tsconfig.tsbuildinfo",
-
-    /* Search up to 4 levels for node_modules/@types */
-    "typeRoots": [
-      "${configDir}/node_modules/@types",
-      "${configDir}/../node_modules/@types",
-      "${configDir}/../../node_modules/@types",
-      "${configDir}/../../../node_modules/@types",
-      "${configDir}/../../../../node_modules/@types"
-    ]
+    "tsBuildInfoFile": "${configDir}/node_modules/.cache/typescript/tsconfig.tsbuildinfo"
   }
 }

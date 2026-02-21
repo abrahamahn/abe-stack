@@ -43,6 +43,11 @@ export interface UseBackupCodesResult {
   dismissCodes: () => void;
 }
 
+interface BackupCodesApi {
+  backupCodesStatus: () => Promise<BackupCodesStatus>;
+  regenerateBackupCodes: (data: { code: string }) => Promise<{ backupCodes: string[] }>;
+}
+
 // ============================================================================
 // Hook
 // ============================================================================
@@ -54,12 +59,12 @@ export function useBackupCodes(): UseBackupCodesResult {
   const [newCodes, setNewCodes] = useState<string[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const api = useMemo(
+  const api = useMemo<BackupCodesApi>(
     () =>
       getApiClient({
         baseUrl: clientConfig.apiUrl,
         getToken: getAccessToken,
-      }),
+      }) as unknown as BackupCodesApi,
     [],
   );
 
@@ -67,8 +72,7 @@ export function useBackupCodes(): UseBackupCodesResult {
     setIsLoading(true);
     setError(null);
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      const result = (await api.backupCodesStatus()) as BackupCodesStatus;
+      const result = await api.backupCodesStatus();
       setStatus(result);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to fetch backup codes status';
@@ -87,14 +91,10 @@ export function useBackupCodes(): UseBackupCodesResult {
       setIsRegenerating(true);
       setError(null);
       try {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        const result = (await api.regenerateBackupCodes({ code: confirmationCode })) as {
-          backupCodes: string[];
-        };
+        const result = await api.regenerateBackupCodes({ code: confirmationCode });
         setNewCodes(result.backupCodes);
         // Refresh status to get updated remaining count
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        const updatedStatus = (await api.backupCodesStatus()) as BackupCodesStatus;
+        const updatedStatus = await api.backupCodesStatus();
         setStatus(updatedStatus);
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to regenerate backup codes';

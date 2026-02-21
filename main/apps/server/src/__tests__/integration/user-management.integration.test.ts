@@ -217,6 +217,7 @@ describe('User Management API Integration Tests', () => {
       repos: mockRepos,
       log: mockLogger,
       email: testServer.email,
+      storage: testServer.storage,
       emailTemplates: {},
       config: testServer.config,
     };
@@ -602,9 +603,6 @@ describe('User Management API Integration Tests', () => {
         }),
       });
 
-      // TEMP debug for CI/local parity; remove after diagnosing.
-      // eslint-disable-next-line no-console
-      console.log('avatar pipeline response', response.statusCode, response.body);
       expect(response.statusCode).toBe(200);
 
       // Verify storage.upload was called (file stored to S3/local)
@@ -615,10 +613,9 @@ describe('User Management API Integration Tests', () => {
       );
 
       // Verify user record was updated with the storage key
-      expect(mockRepos.users.update).toHaveBeenCalledWith(
-        'user-avatar-pipeline',
-        { avatarUrl: storageKey },
-      );
+      expect(mockRepos.users.update).toHaveBeenCalledWith('user-avatar-pipeline', {
+        avatarUrl: storageKey,
+      });
 
       // Verify response contains the signed URL
       const body = parseJsonResponse(response) as { avatarUrl: string };

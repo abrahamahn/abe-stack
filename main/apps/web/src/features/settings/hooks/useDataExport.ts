@@ -150,7 +150,7 @@ export function useDataExport(): UseDataExportResult {
     } finally {
       setIsLoading(false);
     }
-  }, [config.apiUrl, exportRequestId]);
+  }, [config.apiUrl, exportRequestId, setExportRequestId]);
 
   useEffect(() => {
     void fetchExportStatus();
@@ -177,7 +177,7 @@ export function useDataExport(): UseDataExportResult {
     } finally {
       setIsRequesting(false);
     }
-  }, [config.apiUrl]);
+  }, [config.apiUrl, setExportRequestId]);
 
   return {
     exportInfo,

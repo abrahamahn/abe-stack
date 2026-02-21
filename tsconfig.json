@@ -35,6 +35,7 @@
     { "path": "./main/server/core" },
     { "path": "./main/server/websocket" },
     { "path": "./main/server/realtime" },
-    { "path": "./main/server/db" }
+    { "path": "./main/server/db" },
+    { "path": "./config/tsconfig.eslint.json" }
   ]
 }
