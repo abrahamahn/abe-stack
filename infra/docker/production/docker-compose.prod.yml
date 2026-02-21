@@ -6,7 +6,7 @@
 #
 # Prerequisites:
 #   1. Create config/env/.env.production from .env.example
-#   2. Set strong secrets: JWT_SECRET, SESSION_SECRET, POSTGRES_PASSWORD
+#   2. Set strong secrets: JWT_SECRET, COOKIE_SECRET, OAUTH_TOKEN_ENCRYPTION_KEY, POSTGRES_PASSWORD
 #   3. Set DOMAIN and ACME_EMAIL for automatic TLS certificates
 #
 # Architecture:
@@ -154,7 +154,8 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
-      SESSION_SECRET: ${SESSION_SECRET:?SESSION_SECRET is required}
+      COOKIE_SECRET: ${COOKIE_SECRET:?COOKIE_SECRET is required}
+      OAUTH_TOKEN_ENCRYPTION_KEY: ${OAUTH_TOKEN_ENCRYPTION_KEY:?OAUTH_TOKEN_ENCRYPTION_KEY is required}
       # Trust reverse proxy for correct IP extraction
       TRUST_PROXY: ${TRUST_PROXY:-true}
       TRUSTED_PROXIES: ${TRUSTED_PROXIES:-172.16.0.0/12,10.0.0.0/8}

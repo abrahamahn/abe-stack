@@ -68,7 +68,8 @@ interface EnvConfig {
 
   // Security
   jwtSecret: string;
-  sessionSecret: string;
+  cookieSecret: string;
+  oauthTokenEncryptionKey: string;
 
   // Storage
   storageProvider: StorageProvider;
@@ -122,7 +123,8 @@ const QUICK_START_ENV: EnvConfig = {
   viteApiUrl: 'http://localhost:8080',
   viteAppName: 'bslt-web',
   jwtSecret: '',
-  sessionSecret: '',
+  cookieSecret: '',
+  oauthTokenEncryptionKey: '',
   storageProvider: 'local',
   storageLocalPath: './uploads',
   storageLocalPublicUrl: 'http://localhost:8080/uploads',
@@ -368,7 +370,8 @@ function getPresetConfig(preset: SetupPreset): EnvConfig {
 
   // Generate secrets
   config.jwtSecret = generateRandomSecret();
-  config.sessionSecret = generateRandomSecret();
+  config.cookieSecret = generateRandomSecret();
+  config.oauthTokenEncryptionKey = generateRandomSecret();
 
   return config;
 }
@@ -499,12 +502,17 @@ async function gatherCustomEnvConfig(): Promise<EnvConfig> {
 
   if (generateSecrets) {
     config.jwtSecret = generateRandomSecret();
-    config.sessionSecret = generateRandomSecret();
+    config.cookieSecret = generateRandomSecret();
+    config.oauthTokenEncryptionKey = generateRandomSecret();
     logSuccess('Generated secure random secrets');
   } else {
     logInfo('Enter your own secrets (minimum 32 characters recommended)');
     config.jwtSecret = await promptWithDefault('JWT secret', generateRandomSecret());
-    config.sessionSecret = await promptWithDefault('Session secret', generateRandomSecret());
+    config.cookieSecret = await promptWithDefault('Cookie secret', generateRandomSecret());
+    config.oauthTokenEncryptionKey = await promptWithDefault(
+      'OAuth token encryption key',
+      generateRandomSecret(),
+    );
   }
 
   return config;
@@ -586,7 +594,8 @@ VITE_APP_NAME=${config.viteAppName}
 # SECURITY & AUTH
 # =============================================================================
 JWT_SECRET=${config.jwtSecret}
-SESSION_SECRET=${config.sessionSecret}
+COOKIE_SECRET=${config.cookieSecret}
+OAUTH_TOKEN_ENCRYPTION_KEY=${config.oauthTokenEncryptionKey}
 
 # Access token expiry (default: 15m)
 # JWT_ACCESS_EXPIRY=15m

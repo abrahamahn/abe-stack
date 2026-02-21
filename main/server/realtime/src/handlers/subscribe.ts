@@ -8,13 +8,50 @@
  * @module handlers/subscribe
  */
 
-import { ERROR_CODES, ERROR_MESSAGES, HTTP_STATUS, REALTIME_ERRORS } from '@bslt/shared';
-import { isAuthenticatedRequest } from '@bslt/shared/core';
-
 import { isTableAllowed, loadRecords } from '../service';
 
-import type { GetRecordsResult, RealtimeModuleDeps, RealtimeRequest } from '../types';
-import type { RecordPointer, RouteResult } from '@bslt/shared';
+type RecordPointer = { table: string; id: string };
+
+type SubscribeContext = {
+  db: Parameters<typeof loadRecords>[0];
+  log: unknown;
+};
+
+type SubscribeRequest = {
+  user?: {
+    userId?: unknown;
+  };
+};
+
+type ErrorBody = { code: string; message: string };
+type GetRecordsResult = { recordMap: Awaited<ReturnType<typeof loadRecords>> };
+type RouteResult<TBody> = { status: number; body: TBody };
+
+const HTTP_STATUS = {
+  OK: 200,
+  BAD_REQUEST: 400,
+  FORBIDDEN: 403,
+  INTERNAL_SERVER_ERROR: 500,
+} as const;
+
+const ERROR_CODES = {
+  BAD_REQUEST: 'BAD_REQUEST',
+  FORBIDDEN: 'FORBIDDEN',
+  INTERNAL_ERROR: 'INTERNAL_ERROR',
+} as const;
+
+const ERROR_MESSAGES = {
+  AUTHENTICATION_REQUIRED: 'Authentication required',
+  INTERNAL_ERROR: 'Internal server error',
+} as const;
+
+function tableNotAllowed(table: string): string {
+  return `Table '${table}' is not allowed for realtime operations`;
+}
+
+function isAuthenticatedRequest(req: SubscribeRequest): req is { user: { userId: string } } {
+  return typeof req.user?.userId === 'string' && req.user.userId.length > 0;
+}
 
 // ============================================================================
 // Handlers
@@ -34,11 +71,14 @@ import type { RecordPointer, RouteResult } from '@bslt/shared';
  * @complexity O(t) database queries where t is the number of distinct tables
  */
 export async function handleGetRecords(
-  ctx: RealtimeModuleDeps,
+  ctx: SubscribeContext,
   body: { pointers: RecordPointer[] },
-  req: RealtimeRequest,
-): Promise<RouteResult<GetRecordsResult | { code: string; message: string }>> {
-  const { db, log } = ctx;
+  req: SubscribeRequest,
+): Promise<RouteResult<GetRecordsResult | ErrorBody>> {
+  const log = ctx.log as {
+    debug: (message: string, meta?: Record<string, unknown>) => void;
+    error: (message: string, meta?: Record<string, unknown>) => void;
+  };
 
   // Require authentication using type guard
   if (!isAuthenticatedRequest(req)) {
@@ -57,7 +97,7 @@ export async function handleGetRecords(
         status: HTTP_STATUS.BAD_REQUEST,
         body: {
           code: ERROR_CODES.BAD_REQUEST,
-          message: REALTIME_ERRORS.tableNotAllowed(pointer.table),
+          message: tableNotAllowed(pointer.table),
         },
       };
     }
@@ -69,7 +109,7 @@ export async function handleGetRecords(
       pointerCount: body.pointers.length,
     });
 
-    const recordMap = await loadRecords(db, body.pointers);
+    const recordMap = await loadRecords(ctx.db, body.pointers);
 
     return {
       status: HTTP_STATUS.OK,

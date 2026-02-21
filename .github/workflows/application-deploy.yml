@@ -249,7 +249,8 @@ jobs:
             POSTGRES_DB=abe_stack
             POSTGRES_USER=postgres
             JWT_SECRET=${{ secrets.JWT_SECRET }}
-            SESSION_SECRET=${{ secrets.SESSION_SECRET }}
+            COOKIE_SECRET=${{ secrets.COOKIE_SECRET }}
+            OAUTH_TOKEN_ENCRYPTION_KEY=${{ secrets.OAUTH_TOKEN_ENCRYPTION_KEY }}
             TRUST_PROXY=true
             TRUSTED_PROXIES=172.16.0.0/12,10.0.0.0/8
             MAX_PROXY_DEPTH=1
