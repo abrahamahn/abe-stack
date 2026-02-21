@@ -10,27 +10,11 @@
 
 import { isTableAllowed, loadRecords } from '../service';
 
-type RecordPointer = { table: string; id: string };
-type RecordMap = import('../types').GetRecordsResult['recordMap'];
-
-type SubscribeContext = {
-  db: Parameters<typeof loadRecords>[0];
-  log: unknown;
-};
-
-type SubscribeRequest = {
-  user?: {
-    userId?: unknown;
-  };
-};
+import type { RealtimeModuleDeps, RealtimeRequest } from '../types';
+import type { GetRecordsRequest, RouteResult } from '@bslt/shared';
 
 type ErrorBody = { code: string; message: string };
 type GetRecordsResult = import('../types').GetRecordsResult;
-type RouteResult<TBody> = { status: number; body: TBody };
-const loadRecordsTyped = loadRecords as (
-  db: SubscribeContext['db'],
-  pointers: RecordPointer[],
-) => Promise<RecordMap>;
 
 const HTTP_STATUS = {
   OK: 200,
@@ -54,7 +38,9 @@ function tableNotAllowed(table: string): string {
   return `Table '${table}' is not allowed for realtime operations`;
 }
 
-function isAuthenticatedRequest(req: SubscribeRequest): req is { user: { userId: string } } {
+function isAuthenticatedRequest(
+  req: RealtimeRequest,
+): req is RealtimeRequest & { user: { userId: string } } {
   return typeof req.user?.userId === 'string' && req.user.userId.length > 0;
 }
 
@@ -76,14 +62,11 @@ function isAuthenticatedRequest(req: SubscribeRequest): req is { user: { userId:
  * @complexity O(t) database queries where t is the number of distinct tables
  */
 export async function handleGetRecords(
-  ctx: SubscribeContext,
-  body: { pointers: RecordPointer[] },
-  req: SubscribeRequest,
+  ctx: Pick<RealtimeModuleDeps, 'db' | 'log'>,
+  body: GetRecordsRequest,
+  req: RealtimeRequest,
 ): Promise<RouteResult<GetRecordsResult | ErrorBody>> {
-  const log = ctx.log as {
-    debug: (message: string, meta?: Record<string, unknown>) => void;
-    error: (message: string, meta?: Record<string, unknown>) => void;
-  };
+  const { log } = ctx;
 
   // Require authentication using type guard
   if (!isAuthenticatedRequest(req)) {
@@ -114,8 +97,7 @@ export async function handleGetRecords(
       pointerCount: body.pointers.length,
     });
 
-    const loadedRecordMap = await loadRecordsTyped(ctx.db, body.pointers);
-    const recordMap = loadedRecordMap as unknown as GetRecordsResult['recordMap'];
+    const recordMap = await loadRecords(ctx.db, body.pointers);
 
     return {
       status: HTTP_STATUS.OK,

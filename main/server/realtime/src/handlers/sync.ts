@@ -22,7 +22,14 @@ import {
 import { isTableAllowed, loadRecords, saveRecords } from '../service';
 
 import type { ConflictResult, RealtimeModuleDeps, RealtimeRequest, WriteResult } from '../types';
-import type { RealtimeTransaction, RecordPointer, RouteResult } from '@bslt/shared';
+import type {
+  ApplyOperationsResult,
+  RecordMap,
+  RecordPointer,
+  RealtimeTransaction,
+  RouteResult,
+  VersionConflict,
+} from '@bslt/shared';
 
 const HTTP_STATUS = {
   OK: 200,
@@ -43,13 +50,34 @@ const REALTIME_ERRORS_LOCAL = {
     `Table '${table}' is not allowed for realtime operations`,
 } as const;
 
-function isAuthenticatedWriteRequest(req: unknown): req is {
-  user: { userId: string };
-} {
-  if (typeof req !== 'object' || req === null) return false;
-  const maybeUser = (req as { user?: { userId?: unknown } }).user;
-  return typeof maybeUser?.userId === 'string' && maybeUser.userId.length > 0;
+function isAuthenticatedWriteRequest(
+  req: RealtimeRequest,
+): req is RealtimeRequest & { user: { userId: string } } {
+  return typeof req.user?.userId === 'string' && req.user.userId.length > 0;
 }
+
+type TransactionRunner = <T>(
+  db: RealtimeModuleDeps['db'],
+  callback: (tx: RealtimeModuleDeps['db']) => Promise<T>,
+) => Promise<T>;
+
+type GetOperationPointersFn = (operations: RealtimeTransaction['operations']) => RecordPointer[];
+
+type ApplyOperationsFn = (
+  recordMap: RecordMap,
+  operations: RealtimeTransaction['operations'],
+) => ApplyOperationsResult;
+
+type CheckVersionConflictsFn = (
+  originalRecordMap: RecordMap,
+  currentRecordMap: RecordMap,
+  modifiedRecords: RecordPointer[],
+) => VersionConflict[];
+
+const withTransactionTyped = withTransaction as unknown as TransactionRunner;
+const getOperationPointersTyped = getOperationPointers as unknown as GetOperationPointersFn;
+const applyOperationsTyped = applyOperations as unknown as ApplyOperationsFn;
+const checkVersionConflictsTyped = checkVersionConflicts as unknown as CheckVersionConflictsFn;
 
 // ============================================================================
 // Error Classes
@@ -105,23 +133,8 @@ export async function handleWrite(
   body: RealtimeTransaction,
   req: RealtimeRequest,
 ): Promise<RouteResult<WriteResult | ConflictResult | { code: string; message: string }>> {
-  const safeCtx = ctx as unknown as {
-    db: Parameters<typeof loadRecords>[0];
-    pubsub: { publish: (key: unknown, version: unknown) => void };
-    log: unknown;
-  };
-  const db = safeCtx.db;
-  const log = safeCtx.log as {
-    debug: (message: string, meta?: Record<string, unknown>) => void;
-    info: (message: string, meta?: Record<string, unknown>) => void;
-    warn: (message: string, meta?: Record<string, unknown>) => void;
-    error: (message: string, meta?: Record<string, unknown>) => void;
-  };
-  const writeBody = body as unknown as {
-    authorId: string;
-    txId: string;
-    operations: Array<{ table: string }>;
-  };
+  const { db, log, pubsub } = ctx;
+  const writeBody = body;
 
   // Require authentication using type guard
   if (!isAuthenticatedWriteRequest(req)) {
@@ -131,7 +144,7 @@ export async function handleWrite(
     };
   }
 
-  const userId = (req as { user: { userId: string } }).user.userId;
+  const userId = req.user.userId;
 
   // Validate author matches authenticated user
   if (writeBody.authorId !== userId) {
@@ -167,9 +180,9 @@ export async function handleWrite(
     });
 
     // Execute in a database transaction
-    const result = await withTransaction(db, async (tx) => {
+    const result = await withTransactionTyped(db, async (tx) => {
       // 1. Load affected records
-      const pointers = getOperationPointers(writeBody.operations as never);
+      const pointers = getOperationPointersTyped(writeBody.operations);
       const originalRecordMap = await loadRecords(tx, pointers);
 
       // 2. Verify all records exist
@@ -180,19 +193,20 @@ export async function handleWrite(
       }
 
       // 3. Apply operations to get new record states
-      const { recordMap: newRecordMap, modifiedRecords } = applyOperations(
-        originalRecordMap as never,
-        writeBody.operations as never,
+      const { recordMap: newRecordMap, modifiedRecords } = applyOperationsTyped(
+        originalRecordMap,
+        writeBody.operations,
       );
+      const modifiedPointers: RecordPointer[] = Array.from(modifiedRecords);
 
       // 4. Reload records to check for concurrent modifications
-      const currentRecordMap = await loadRecords(tx, modifiedRecords as RecordPointer[]);
+      const currentRecordMap = await loadRecords(tx, modifiedPointers);
 
       // 5. Check for version conflicts
-      const conflicts = checkVersionConflicts(
+      const conflicts = checkVersionConflictsTyped(
         originalRecordMap,
         currentRecordMap,
-        modifiedRecords as RecordPointer[],
+        modifiedPointers,
       );
 
       if (conflicts.length > 0) {
@@ -202,7 +216,7 @@ export async function handleWrite(
       // 6. Save records to database
       await saveRecords(tx, newRecordMap, originalRecordMap);
 
-      return { recordMap: newRecordMap, modifiedRecords: modifiedRecords as RecordPointer[] };
+      return { recordMap: newRecordMap, modifiedRecords: modifiedPointers };
     });
 
     // Publish updates asynchronously (do not block the response)
@@ -212,7 +226,7 @@ export async function handleWrite(
         if (tableRecords === undefined) continue;
         const record = tableRecords[id];
         if (record !== undefined && 'version' in record) {
-          safeCtx.pubsub.publish(SubKeys.record(table, id), record.version);
+          pubsub.publish(SubKeys.record(table, id), record.version);
         }
       }
     });
