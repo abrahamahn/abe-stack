@@ -61,8 +61,7 @@ Authentication, tokens, and policies.
 - `REFRESH_TOKEN_GRACE_PERIOD` — seconds.
 - `COOKIE_SECRET` — cookie signing secret (defaults to JWT secret if blank).
 - `SESSION_SECRET`
-- `AUTH_BFF_MODE` — boolean toggle.
-- `AUTH_STRATEGIES` — comma-separated list (e.g., `local,oauth`).
+- `AUTH_STRATEGIES` — comma-separated list (e.g., `local,magic,google`).
 - `PASSWORD_MIN_LENGTH`, `PASSWORD_MAX_LENGTH`, `PASSWORD_MIN_SCORE`
 - `LOCKOUT_MAX_ATTEMPTS`, `LOCKOUT_DURATION_MS`
 - `MAGIC_LINK_EXPIRY_MINUTES`, `MAGIC_LINK_MAX_ATTEMPTS`
