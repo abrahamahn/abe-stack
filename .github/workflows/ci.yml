@@ -114,7 +114,9 @@ jobs:
             ${{ runner.os }}-turbo-
 
       - name: Type Check
-        run: pnpm --filter ${{ matrix.package }} type-check
+        run: |
+          pnpm exec turbo run build --filter=${{ matrix.package }}... --output-logs=errors-only
+          pnpm --filter ${{ matrix.package }} type-check
 
       - name: Run Tests
         run: pnpm --filter ${{ matrix.package }} test -- --coverage
