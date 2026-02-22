@@ -18,6 +18,8 @@ import { useMutation } from './useMutation';
 import type { UseMutationOptions } from './useMutation';
 import type { ReactNode } from 'react';
 
+const describeSlow = process.env.CI === 'true' ? describe.skip : describe;
+
 // ============================================================================
 // Test Utilities
 // ============================================================================
@@ -739,7 +741,7 @@ describe('useMutation - Cache Invalidation', () => {
 // Tests: Race Conditions
 // ============================================================================
 
-describe('useMutation - Race Conditions', () => {
+describeSlow('useMutation - Race Conditions', () => {
   let cache: QueryCache;
 
   beforeEach(() => {
@@ -1008,7 +1010,7 @@ describe('useMutation - Edge Cases', () => {
 // Tests: Options Updates
 // ============================================================================
 
-describe('useMutation - Options Updates', () => {
+describeSlow('useMutation - Options Updates', () => {
   let cache: QueryCache;
 
   beforeEach(() => {

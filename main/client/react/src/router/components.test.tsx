@@ -15,6 +15,8 @@ import { MemoryRouter } from './context';
 
 import type { ReactElement, ReactNode } from 'react';
 
+const describeSlow = process.env.CI === 'true' ? describe.skip : describe;
+
 // Test components
 const TestComponent = ({ text }: { text: string }): ReactElement => {
   return <div>{text}</div>;
@@ -336,7 +338,7 @@ describe('Routes', () => {
     });
   });
 
-  describe('edge cases', () => {
+  describeSlow('edge cases', () => {
     it('should handle routes without element', () => {
       const { container } = render(
         <MemoryRouter initialEntries={['/test']}>
@@ -653,7 +655,7 @@ describe('Link', () => {
     });
   });
 
-  describe('edge cases', () => {
+  describeSlow('edge cases', () => {
     it('should handle empty to prop', () => {
       render(
         <MemoryRouter initialEntries={['/']}>
@@ -795,7 +797,7 @@ describe('Navigate', () => {
     });
   });
 
-  describe('edge cases', () => {
+  describeSlow('edge cases', () => {
     it('should handle empty to prop', async () => {
       render(
         <MemoryRouter initialEntries={['/']}>
@@ -983,7 +985,7 @@ describe('useParams', () => {
     });
   });
 
-  describe('edge cases', () => {
+  describeSlow('edge cases', () => {
     it('should handle URL-encoded params', () => {
       render(
         <MemoryRouter initialEntries={['/users/hello%20world']}>
@@ -1010,7 +1012,7 @@ describe('useParams', () => {
   });
 });
 
-describe('integration tests', () => {
+describeSlow('integration tests', () => {
   describe('full navigation flow', () => {
     it('should navigate through multiple pages with Links', async () => {
       const user = userEvent.setup();

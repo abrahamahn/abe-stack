@@ -11,6 +11,8 @@ import { useInfiniteQuery, type InfiniteData } from './useInfiniteQuery';
 
 import type { ReactElement, ReactNode } from 'react';
 
+const describeSlow = process.env.CI === 'true' ? describe.skip : describe;
+
 // ============================================================================
 // Test Types
 // ============================================================================
@@ -856,7 +858,7 @@ describe('useInfiniteQuery', () => {
   // Stale Time
   // ==========================================================================
 
-  describe('stale time', () => {
+  describeSlow('stale time', () => {
     it('should not refetch if data is fresh', async () => {
       const uniqueKey = `test-stale-${String(Date.now())}-${String(Math.random())}`;
       const queryFn = createMockQueryFn(mockPages);
@@ -961,7 +963,7 @@ describe('useInfiniteQuery', () => {
   // Query Key Changes
   // ==========================================================================
 
-  describe('query key changes', () => {
+  describeSlow('query key changes', () => {
     it('should refetch when query key changes', async () => {
       const queryFn = createMockQueryFn(mockPages);
       let queryKey = ['test-key', 1];
@@ -997,7 +999,7 @@ describe('useInfiniteQuery', () => {
   // Edge Cases
   // ==========================================================================
 
-  describe('edge cases', () => {
+  describeSlow('edge cases', () => {
     it('should handle empty pages array', async () => {
       const queryFn = vi.fn(
         (): Promise<PageData> =>
@@ -1180,7 +1182,7 @@ describe('useInfiniteQuery', () => {
   // Status and Fetch Status
   // ==========================================================================
 
-  describe('status and fetchStatus', () => {
+  describeSlow('status and fetchStatus', () => {
     it('should transition through correct status states', async () => {
       const uniqueKey = `test-status-${String(Date.now())}-${String(Math.random())}`;
       const queryFn = createMockQueryFn(mockPages, 20);

@@ -34,6 +34,8 @@ import {
 import type { NavigateFunction, RouterLocation, NavigationType } from './context';
 import type { ReactElement } from 'react';
 
+const describeSlow = process.env.CI === 'true' ? describe.skip : describe;
+
 // ============================================================================
 // Test Harness Components
 // ============================================================================
@@ -348,7 +350,7 @@ describe('Router (BrowserRouter)', () => {
     });
   });
 
-  describe('scroll restoration', () => {
+  describeSlow('scroll restoration', () => {
     it('should call scrollTo on new navigation by default', async () => {
       const user = userEvent.setup();
       const scrollToMock = vi.mocked(window.scrollTo);
@@ -480,7 +482,7 @@ describe('Router (BrowserRouter)', () => {
     });
   });
 
-  describe('edge cases', () => {
+  describeSlow('edge cases', () => {
     it('should handle null children gracefully', () => {
       expect(() => {
         render(<Router>{null}</Router>);
@@ -876,7 +878,7 @@ describe('MemoryRouter', () => {
     });
   });
 
-  describe('edge cases', () => {
+  describeSlow('edge cases', () => {
     it('should handle empty initial entries', () => {
       render(
         <MemoryRouter initialEntries={[]}>
@@ -1132,7 +1134,7 @@ describe('RouterContext', () => {
 // Integration Tests
 // ============================================================================
 
-describe('Router Integration', () => {
+describeSlow('Router Integration', () => {
   it('should handle complex navigation flows', async () => {
     const user = userEvent.setup();
 

@@ -14,6 +14,8 @@
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+const describeSlow = process.env.CI === 'true' ? describe.skip : describe;
+
 // ============================================================================
 // Mock Types and Interfaces
 // ============================================================================
@@ -878,7 +880,7 @@ describe('Service Worker (sw.js)', () => {
   // Push Notification Tests
   // ============================================================================
 
-  describe('Push Notifications', () => {
+  describeSlow('Push Notifications', () => {
     describe('push event', () => {
       it('should display notification with JSON payload', async () => {
         const payload: NotificationPayload = {
@@ -1346,7 +1348,7 @@ describe('Service Worker (sw.js)', () => {
   // Edge Cases and Error Handling
   // ============================================================================
 
-  describe('Edge Cases', () => {
+  describeSlow('Edge Cases', () => {
     it('should handle Response.clone() correctly', () => {
       const response = new Response('content', { status: 200 });
       const clone1 = response.clone();

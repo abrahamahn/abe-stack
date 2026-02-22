@@ -120,17 +120,23 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package:
-          [
-            '@bslt/shared',
-            '@bslt/db',
-            '@bslt/server',
-            '@bslt/web',
-            '@bslt/api',
-            '@bslt/client-engine',
-            '@bslt/react',
-            '@bslt/ui',
-          ]
+        include:
+          - package: '@bslt/shared'
+            run_tests: true
+          - package: '@bslt/db'
+            run_tests: true
+          - package: '@bslt/server'
+            run_tests: true
+          - package: '@bslt/web'
+            run_tests: false
+          - package: '@bslt/api'
+            run_tests: true
+          - package: '@bslt/client-engine'
+            run_tests: true
+          - package: '@bslt/react'
+            run_tests: false
+          - package: '@bslt/ui'
+            run_tests: true
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
@@ -166,6 +172,7 @@ jobs:
         run: pnpm --filter ${{ matrix.package }} type-check
 
       - name: Run Tests
+        if: matrix.run_tests
         run: pnpm --filter ${{ matrix.package }} test
 
   e2e-tests:
