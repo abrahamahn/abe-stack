@@ -6,6 +6,7 @@ import { mergeConfig } from 'vitest/config';
 import { baseConfig } from '../../../vitest.config';
 
 const srcDir = path.resolve(__dirname, 'src');
+const isCI = process.env.CI === 'true';
 
 export default mergeConfig(baseConfig, {
   plugins: [tsconfigPaths({ projects: [path.resolve(__dirname, 'tsconfig.json')] })],
@@ -36,8 +37,11 @@ export default mergeConfig(baseConfig, {
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
     exclude: ['**/node_modules/**', '**/dist/**', '**/*.spec.ts'],
     testTimeout: 10000,
-    pool: 'threads',
-    maxConcurrency: 4,
+    pool: isCI ? 'forks' : 'threads',
+    maxConcurrency: isCI ? 1 : 4,
+    fileParallelism: !isCI,
+    minWorkers: 1,
+    maxWorkers: isCI ? 1 : 4,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'lcov'],

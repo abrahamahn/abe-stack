@@ -191,12 +191,12 @@ export default mergeConfig(baseConfig, {
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
     // Timeout for individual tests
     testTimeout: 10000,
-    // Keep coverage runs stable in CI by reducing parallel memory pressure.
-    pool: 'threads',
-    maxConcurrency: isCI ? 2 : 4,
+    // In CI, prefer process forks over worker threads to avoid thread heap OOM during coverage.
+    pool: isCI ? 'forks' : 'threads',
+    maxConcurrency: isCI ? 1 : 4,
     fileParallelism: !isCI,
     minWorkers: 1,
-    maxWorkers: isCI ? 2 : 4,
+    maxWorkers: isCI ? 1 : 4,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'lcov'],

@@ -32,7 +32,7 @@
     "build": "[ -d dist ] || rm -f node_modules/.cache/typescript/*.tsbuildinfo && tsc --build",
     "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-bslt-react --report-unused-disable-directives",
     "type-check": "tsc -p tsconfig.lint.json",
-    "test": "vitest run",
+    "test": "NODE_OPTIONS=--max-old-space-size=6144 vitest run",
     "clean": "rm -rf dist node_modules/.cache/typescript/*.tsbuildinfo",
     "postbuild": "node --import tsx ../../tools/scripts/build/ensure-js-extensions.ts dist"
   },
