@@ -115,6 +115,7 @@ jobs:
 
   sanity-checks:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: workspace-build
     strategy:
       fail-fast: false
@@ -165,14 +166,7 @@ jobs:
         run: pnpm --filter ${{ matrix.package }} type-check
 
       - name: Run Tests
-        run: pnpm --filter ${{ matrix.package }} test -- --coverage
-
-      - name: Upload Coverage
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: test-coverage-${{ matrix.package }}
-          path: coverage/
-          retention-days: 7
+        run: pnpm --filter ${{ matrix.package }} test
 
   e2e-tests:
     runs-on: ubuntu-latest
