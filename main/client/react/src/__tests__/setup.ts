@@ -155,7 +155,14 @@ beforeAll(() => {
   const original = console.error.bind(console);
   const spy = vi.spyOn(console, 'error').mockImplementation((...args: unknown[]) => {
     const first = args[0];
-    const msg = typeof first === 'string' ? first : '';
+    const msg =
+      typeof first === 'string'
+        ? first
+        : first instanceof Error
+          ? first.message
+          : typeof (first as { message?: unknown })?.message === 'string'
+            ? (first as { message: string }).message
+            : '';
     if (
       msg.includes("Not implemented: HTMLCanvasElement's getContext() method") ||
       msg.includes('Not implemented: navigation to another Document')
