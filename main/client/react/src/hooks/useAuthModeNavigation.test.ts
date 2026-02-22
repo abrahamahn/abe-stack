@@ -4,7 +4,7 @@
  *
  * Tests hook for centralized auth-related navigation patterns.
  */
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { createElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -30,7 +30,9 @@ describe('useAuthModeNavigation', () => {
         },
         { wrapper: createWrapper('/') },
       );
-      result.current.nav.navigateToMode('login');
+      act(() => {
+        result.current.nav.navigateToMode('login');
+      });
       await waitFor(() => {
         expect(result.current.location.pathname).toBe('/login');
       });
@@ -44,7 +46,9 @@ describe('useAuthModeNavigation', () => {
         },
         { wrapper: createWrapper('/') },
       );
-      result.current.nav.navigateToMode('register');
+      act(() => {
+        result.current.nav.navigateToMode('register');
+      });
       await waitFor(() => {
         expect(result.current.location.pathname).toBe('/register');
       });
@@ -58,7 +62,9 @@ describe('useAuthModeNavigation', () => {
         },
         { wrapper: createWrapper('/') },
       );
-      result.current.nav.navigateToMode('forgot-password');
+      act(() => {
+        result.current.nav.navigateToMode('forgot-password');
+      });
       await waitFor(() => {
         expect(result.current.location.pathname).toBe('/auth');
         expect(result.current.location.search).toContain('mode=forgot-password');
@@ -73,7 +79,9 @@ describe('useAuthModeNavigation', () => {
         },
         { wrapper: createWrapper('/') },
       );
-      result.current.nav.navigateToMode('reset-password');
+      act(() => {
+        result.current.nav.navigateToMode('reset-password');
+      });
       await waitFor(() => {
         expect(result.current.location.pathname).toBe('/auth');
         expect(result.current.location.search).toContain('mode=reset-password');
@@ -90,7 +98,9 @@ describe('useAuthModeNavigation', () => {
         },
         { wrapper: createWrapper('/') },
       );
-      result.current.nav.navigateToLogin();
+      act(() => {
+        result.current.nav.navigateToLogin();
+      });
       await waitFor(() => {
         expect(result.current.location.pathname).toBe('/login');
       });
@@ -104,7 +114,9 @@ describe('useAuthModeNavigation', () => {
         },
         { wrapper: createWrapper('/dashboard') },
       );
-      result.current.nav.navigateToLogin();
+      act(() => {
+        result.current.nav.navigateToLogin();
+      });
       await waitFor(() => {
         expect(result.current.location.pathname).toBe('/login');
       });
@@ -120,7 +132,9 @@ describe('useAuthModeNavigation', () => {
         },
         { wrapper: createWrapper('/') },
       );
-      result.current.nav.navigateToRegister();
+      act(() => {
+        result.current.nav.navigateToRegister();
+      });
       await waitFor(() => {
         expect(result.current.location.pathname).toBe('/register');
       });
@@ -134,7 +148,9 @@ describe('useAuthModeNavigation', () => {
         },
         { wrapper: createWrapper('/login') },
       );
-      result.current.nav.navigateToRegister();
+      act(() => {
+        result.current.nav.navigateToRegister();
+      });
       await waitFor(() => {
         expect(result.current.location.pathname).toBe('/register');
       });
@@ -150,7 +166,9 @@ describe('useAuthModeNavigation', () => {
         },
         { wrapper: createWrapper('/') },
       );
-      result.current.nav.navigateToForgotPassword();
+      act(() => {
+        result.current.nav.navigateToForgotPassword();
+      });
       await waitFor(() => {
         expect(result.current.location.pathname).toBe('/auth');
         expect(result.current.location.search).toContain('mode=forgot-password');
@@ -165,7 +183,9 @@ describe('useAuthModeNavigation', () => {
         },
         { wrapper: createWrapper('/login') },
       );
-      result.current.nav.navigateToForgotPassword();
+      act(() => {
+        result.current.nav.navigateToForgotPassword();
+      });
       await waitFor(() => {
         expect(result.current.location.pathname).toBe('/auth');
         expect(result.current.location.search).toContain('mode=forgot-password');
@@ -178,7 +198,9 @@ describe('useAuthModeNavigation', () => {
       const { result } = renderHook(() => useAuthModeNavigation({ onBeforeNavigate }), {
         wrapper: createWrapper('/'),
       });
-      result.current.navigateToMode('login');
+      act(() => {
+        result.current.navigateToMode('login');
+      });
       await waitFor(() => {
         expect(onBeforeNavigate).toHaveBeenCalledTimes(1);
         expect(onBeforeNavigate).toHaveBeenCalledWith('login');
@@ -189,9 +211,15 @@ describe('useAuthModeNavigation', () => {
       const { result } = renderHook(() => useAuthModeNavigation({ onBeforeNavigate }), {
         wrapper: createWrapper('/'),
       });
-      result.current.navigateToLogin();
-      result.current.navigateToRegister();
-      result.current.navigateToForgotPassword();
+      act(() => {
+        result.current.navigateToLogin();
+      });
+      act(() => {
+        result.current.navigateToRegister();
+      });
+      act(() => {
+        result.current.navigateToForgotPassword();
+      });
       await waitFor(() => {
         expect(onBeforeNavigate).toHaveBeenCalledTimes(3);
         expect(onBeforeNavigate).toHaveBeenNthCalledWith(1, 'login');
@@ -204,7 +232,9 @@ describe('useAuthModeNavigation', () => {
         wrapper: createWrapper('/'),
       });
       expect(() => {
-        result.current.navigateToLogin();
+        act(() => {
+          result.current.navigateToLogin();
+        });
       }).not.toThrow();
     });
   });
@@ -218,7 +248,9 @@ describe('useAuthModeNavigation', () => {
         },
         { wrapper: createWrapper('/') },
       );
-      result.current.nav.navigateToLogin();
+      act(() => {
+        result.current.nav.navigateToLogin();
+      });
       await waitFor(() => {
         expect(result.current.location.pathname).toBe('/login');
       });
@@ -233,7 +265,9 @@ describe('useAuthModeNavigation', () => {
         { wrapper: createWrapper('/dashboard') },
       );
       const initialPath = result.current.location.pathname;
-      result.current.nav.navigateToLogin();
+      act(() => {
+        result.current.nav.navigateToLogin();
+      });
       await waitFor(() => {
         expect(result.current.location.pathname).toBe('/login');
         expect(result.current.location.pathname).not.toBe(initialPath);
@@ -252,7 +286,9 @@ describe('useAuthModeNavigation', () => {
         },
         { wrapper: createWrapper('/') },
       );
-      result.current.nav.navigateToLogin();
+      act(() => {
+        result.current.nav.navigateToLogin();
+      });
       await waitFor(() => {
         expect(result.current.location.pathname).toBe('/auth/login');
       });
@@ -268,7 +304,9 @@ describe('useAuthModeNavigation', () => {
         },
         { wrapper: createWrapper('/') },
       );
-      result.current.nav.navigateToRegister();
+      act(() => {
+        result.current.nav.navigateToRegister();
+      });
       await waitFor(() => {
         expect(result.current.location.pathname).toBe('/auth/register');
       });
@@ -284,7 +322,9 @@ describe('useAuthModeNavigation', () => {
         },
         { wrapper: createWrapper('/') },
       );
-      result.current.nav.navigateToForgotPassword();
+      act(() => {
+        result.current.nav.navigateToForgotPassword();
+      });
       await waitFor(() => {
         expect(result.current.location.pathname).toBe('/password/forgot');
       });
@@ -301,12 +341,16 @@ describe('useAuthModeNavigation', () => {
         { wrapper: createWrapper('/') },
       );
       // Custom route
-      result.current.nav.navigateToLogin();
+      act(() => {
+        result.current.nav.navigateToLogin();
+      });
       await waitFor(() => {
         expect(result.current.location.pathname).toBe('/auth/login');
       });
       // Default route
-      result.current.nav.navigateToRegister();
+      act(() => {
+        result.current.nav.navigateToRegister();
+      });
       await waitFor(() => {
         expect(result.current.location.pathname).toBe('/register');
       });
@@ -322,15 +366,21 @@ describe('useAuthModeNavigation', () => {
         },
         { wrapper: createWrapper('/') },
       );
-      result.current.nav.navigateToLogin();
+      act(() => {
+        result.current.nav.navigateToLogin();
+      });
       await waitFor(() => {
         expect(result.current.location.pathname).toBe('/custom/login');
       });
-      result.current.nav.navigateToRegister();
+      act(() => {
+        result.current.nav.navigateToRegister();
+      });
       await waitFor(() => {
         expect(result.current.location.pathname).toBe('/register');
       });
-      result.current.nav.navigateToForgotPassword();
+      act(() => {
+        result.current.nav.navigateToForgotPassword();
+      });
       await waitFor(() => {
         expect(result.current.location.pathname).toBe('/auth');
       });
@@ -374,7 +424,9 @@ describe('useAuthModeNavigation', () => {
           },
           { wrapper: createWrapper(path) },
         );
-        result.current.nav.navigateToLogin();
+        act(() => {
+          result.current.nav.navigateToLogin();
+        });
         await waitFor(() => {
           expect(result.current.location.pathname).toBe('/login');
         });
@@ -389,9 +441,15 @@ describe('useAuthModeNavigation', () => {
         },
         { wrapper: createWrapper('/') },
       );
-      result.current.nav.navigateToLogin();
-      result.current.nav.navigateToRegister();
-      result.current.nav.navigateToForgotPassword();
+      act(() => {
+        result.current.nav.navigateToLogin();
+      });
+      act(() => {
+        result.current.nav.navigateToRegister();
+      });
+      act(() => {
+        result.current.nav.navigateToForgotPassword();
+      });
       await waitFor(() => {
         expect(result.current.location.pathname).toBe('/auth');
         expect(result.current.location.search).toContain('mode=forgot-password');
@@ -406,7 +464,9 @@ describe('useAuthModeNavigation', () => {
         },
         { wrapper: createWrapper('/') },
       );
-      result.current.nav.navigateToLogin();
+      act(() => {
+        result.current.nav.navigateToLogin();
+      });
       await waitFor(() => {
         expect(result.current.location.pathname).toBe('/login');
       });
@@ -416,7 +476,9 @@ describe('useAuthModeNavigation', () => {
         wrapper: createWrapper('/'),
       });
       expect(() => {
-        result.current.navigateToLogin();
+        act(() => {
+          result.current.navigateToLogin();
+        });
       }).not.toThrow();
     });
     it('should handle routes with query params', async () => {
@@ -430,7 +492,9 @@ describe('useAuthModeNavigation', () => {
         },
         { wrapper: createWrapper('/') },
       );
-      result.current.nav.navigateToLogin();
+      act(() => {
+        result.current.nav.navigateToLogin();
+      });
       await waitFor(() => {
         expect(result.current.location.pathname).toBe('/auth/login');
         expect(result.current.location.search).toContain('redirect=/dashboard');
@@ -447,7 +511,9 @@ describe('useAuthModeNavigation', () => {
         },
         { wrapper: createWrapper('/') },
       );
-      result.current.nav.navigateToLogin();
+      act(() => {
+        result.current.nav.navigateToLogin();
+      });
       await waitFor(() => {
         expect(result.current.location.pathname).toBe('/login');
         expect(result.current.location.hash).toBe('#form');
@@ -463,7 +529,9 @@ describe('useAuthModeNavigation', () => {
           wrapper: createWrapper('/'),
         },
       );
-      result.current.navigateToLogin();
+      act(() => {
+        result.current.navigateToLogin();
+      });
       await waitFor(() => {
         expect(onBeforeNavigate).toHaveBeenCalledTimes(1);
         expect(onBeforeNavigate).toHaveBeenCalledWith('login');
@@ -482,7 +550,9 @@ describe('useAuthModeNavigation', () => {
         },
         { wrapper: createWrapper('/') },
       );
-      result.current.nav.navigateToLogin();
+      act(() => {
+        result.current.nav.navigateToLogin();
+      });
       await waitFor(() => {
         expect(onBeforeNavigate).toHaveBeenCalledWith('login');
         expect(result.current.location.pathname).toBe('/auth/login');

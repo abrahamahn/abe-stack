@@ -38,5 +38,11 @@ export default mergeConfig(baseConfig, {
     testTimeout: 10000,
     pool: 'threads',
     maxConcurrency: 4,
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'lcov'],
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: ['src/**/*.test.ts', 'src/**/*.test.tsx', 'src/**/__tests__/**'],
+    },
   },
 });

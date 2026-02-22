@@ -294,11 +294,16 @@ describe('useMutation - mutate vs mutateAsync', () => {
       wrapper: createWrapper(cache),
     });
 
-    await expect(
-      act(async () => {
+    let thrownError: unknown;
+    await act(async () => {
+      try {
         await result.current.mutateAsync({ value: 42 });
-      }),
-    ).rejects.toThrow('Mutation failed');
+      } catch (error_) {
+        thrownError = error_;
+      }
+    });
+    expect(thrownError).toBeInstanceOf(Error);
+    expect((thrownError as Error).message).toBe('Mutation failed');
   });
 });
 
@@ -579,23 +584,19 @@ describe('useMutation - Retry Logic', () => {
       wrapper: createWrapper(cache),
     });
 
-    const promise = act(async () => {
-      try {
-        await result.current.mutateAsync({ value: 42 });
-      } catch {
-        // Expected error
-      }
+    await act(async () => {
+      const mutationPromise = result.current.mutateAsync({ value: 42 }).catch(() => undefined);
+
+      // First retry: 100ms
+      await vi.advanceTimersByTimeAsync(100);
+      expect(mutationFn).toHaveBeenCalledTimes(2);
+
+      // Second retry: 200ms (exponential backoff)
+      await vi.advanceTimersByTimeAsync(200);
+      expect(mutationFn).toHaveBeenCalledTimes(3);
+
+      await mutationPromise;
     });
-
-    // First retry: 100ms
-    await vi.advanceTimersByTimeAsync(100);
-    expect(mutationFn).toHaveBeenCalledTimes(2);
-
-    // Second retry: 200ms (exponential backoff)
-    await vi.advanceTimersByTimeAsync(200);
-    expect(mutationFn).toHaveBeenCalledTimes(3);
-
-    await promise;
     vi.useRealTimers();
   });
 
@@ -778,15 +779,16 @@ describe('useMutation - Race Conditions', () => {
 
     // Start first mutation and capture the promise
     let promise1: Promise<TestData>;
-    act(() => {
+    await act(async () => {
       promise1 = result.current.mutateAsync({ value: 1 });
+      await delay(10);
     });
 
     // Start second mutation immediately (should supersede first)
-    await delay(10);
     let promise2: Promise<TestData>;
-    act(() => {
+    await act(async () => {
       promise2 = result.current.mutateAsync({ value: 2 });
+      await delay(10);
     });
 
     // First mutation should be rejected with "Mutation superseded"

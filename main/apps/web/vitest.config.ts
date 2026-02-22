@@ -133,6 +133,8 @@ function resolveWorkspaceToSource(): Plugin {
   };
 }
 
+const isCI = process.env.CI === 'true';
+
 export default mergeConfig(baseConfig, {
   plugins: [react(), resolveWorkspaceToSource()],
   resolve: {
@@ -186,10 +188,24 @@ export default mergeConfig(baseConfig, {
     name: 'web',
     environment: 'jsdom',
     setupFiles: ['./src/__tests__/setup.ts'],
+    include: ['src/**/*.{test,spec}.{ts,tsx}'],
     // Timeout for individual tests
     testTimeout: 10000,
-    // Vitest 4: Use threads pool with limited concurrency for better memory management
+    // Keep coverage runs stable in CI by reducing parallel memory pressure.
     pool: 'threads',
-    maxConcurrency: 4,
+    maxConcurrency: isCI ? 2 : 4,
+    fileParallelism: !isCI,
+    poolOptions: {
+      threads: {
+        minThreads: 1,
+        maxThreads: isCI ? 2 : 4,
+      },
+    },
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'lcov'],
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: ['src/**/*.test.ts', 'src/**/*.test.tsx', 'src/**/__tests__/**'],
+    },
   },
 });

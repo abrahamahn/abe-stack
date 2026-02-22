@@ -4,7 +4,7 @@
  *
  * Tests hook for managing Notion-style side-peek state with URL sync.
  */
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import react from 'react';
 import { describe, expect, it } from 'vitest';
 
@@ -52,7 +52,9 @@ describe('useSidePeek', () => {
     it('should open peek with given path', async () => {
       const { result } = renderHook(() => useSidePeek(), { wrapper: createWrapper('/') });
       expect(result.current.isOpen).toBe(false);
-      result.current.open('/users/123');
+      act(() => {
+        result.current.open('/users/123');
+      });
       await waitFor(() => {
         expect(result.current.isOpen).toBe(true);
         expect(result.current.peekPath).toBe('/users/123');
@@ -62,7 +64,9 @@ describe('useSidePeek', () => {
       const { result } = renderHook(() => useSidePeek(), {
         wrapper: createWrapper('/?tab=settings'),
       });
-      result.current.open('/users/123');
+      act(() => {
+        result.current.open('/users/123');
+      });
       await waitFor(() => {
         expect(result.current.peekPath).toBe('/users/123');
       });
@@ -71,7 +75,9 @@ describe('useSidePeek', () => {
       const { result } = renderHook(() => useSidePeek(), {
         wrapper: createWrapper('/#section'),
       });
-      result.current.open('/users/123');
+      act(() => {
+        result.current.open('/users/123');
+      });
       await waitFor(() => {
         expect(result.current.peekPath).toBe('/users/123');
       });
@@ -81,28 +87,36 @@ describe('useSidePeek', () => {
         wrapper: createWrapper('/?peek=/users/123'),
       });
       expect(result.current.peekPath).toBe('/users/123');
-      result.current.open('/users/456');
+      act(() => {
+        result.current.open('/users/456');
+      });
       await waitFor(() => {
         expect(result.current.peekPath).toBe('/users/456');
       });
     });
     it('should handle paths with query params', async () => {
       const { result } = renderHook(() => useSidePeek(), { wrapper: createWrapper('/') });
-      result.current.open('/users/123?tab=activity');
+      act(() => {
+        result.current.open('/users/123?tab=activity');
+      });
       await waitFor(() => {
         expect(result.current.peekPath).toBe('/users/123?tab=activity');
       });
     });
     it('should handle paths with hash', async () => {
       const { result } = renderHook(() => useSidePeek(), { wrapper: createWrapper('/') });
-      result.current.open('/users/123#profile');
+      act(() => {
+        result.current.open('/users/123#profile');
+      });
       await waitFor(() => {
         expect(result.current.peekPath).toBe('/users/123#profile');
       });
     });
     it('should handle empty path', async () => {
       const { result } = renderHook(() => useSidePeek(), { wrapper: createWrapper('/') });
-      result.current.open('');
+      act(() => {
+        result.current.open('');
+      });
       await waitFor(() => {
         expect(result.current.isOpen).toBe(true);
         expect(result.current.peekPath).toBe('');
@@ -115,7 +129,9 @@ describe('useSidePeek', () => {
         wrapper: createWrapper('/?peek=/users/123'),
       });
       expect(result.current.isOpen).toBe(true);
-      result.current.close();
+      act(() => {
+        result.current.close();
+      });
       await waitFor(() => {
         expect(result.current.isOpen).toBe(false);
         expect(result.current.peekPath).toBeNull();
@@ -125,7 +141,9 @@ describe('useSidePeek', () => {
       const { result } = renderHook(() => useSidePeek(), {
         wrapper: createWrapper('/?tab=settings&peek=/users/123&sort=date'),
       });
-      result.current.close();
+      act(() => {
+        result.current.close();
+      });
       await waitFor(() => {
         expect(result.current.isOpen).toBe(false);
         expect(result.current.peekPath).toBeNull();
@@ -135,7 +153,9 @@ describe('useSidePeek', () => {
       const { result } = renderHook(() => useSidePeek(), {
         wrapper: createWrapper('/?peek=/users/123#section'),
       });
-      result.current.close();
+      act(() => {
+        result.current.close();
+      });
       await waitFor(() => {
         expect(result.current.isOpen).toBe(false);
       });
@@ -143,7 +163,9 @@ describe('useSidePeek', () => {
     it('should be idempotent when already closed', async () => {
       const { result } = renderHook(() => useSidePeek(), { wrapper: createWrapper('/') });
       expect(result.current.isOpen).toBe(false);
-      result.current.close();
+      act(() => {
+        result.current.close();
+      });
       await waitFor(() => {
         expect(result.current.isOpen).toBe(false);
         expect(result.current.peekPath).toBeNull();
@@ -153,7 +175,9 @@ describe('useSidePeek', () => {
       const { result } = renderHook(() => useSidePeek(), {
         wrapper: createWrapper('/?peek=/users/123'),
       });
-      result.current.close();
+      act(() => {
+        result.current.close();
+      });
       await waitFor(() => {
         expect(result.current.isOpen).toBe(false);
       });
@@ -163,7 +187,9 @@ describe('useSidePeek', () => {
     it('should open peek when closed', async () => {
       const { result } = renderHook(() => useSidePeek(), { wrapper: createWrapper('/') });
       expect(result.current.isOpen).toBe(false);
-      result.current.toggle('/users/123');
+      act(() => {
+        result.current.toggle('/users/123');
+      });
       await waitFor(() => {
         expect(result.current.isOpen).toBe(true);
         expect(result.current.peekPath).toBe('/users/123');
@@ -175,7 +201,9 @@ describe('useSidePeek', () => {
       });
       expect(result.current.isOpen).toBe(true);
       expect(result.current.peekPath).toBe('/users/123');
-      result.current.toggle('/users/123');
+      act(() => {
+        result.current.toggle('/users/123');
+      });
       await waitFor(() => {
         expect(result.current.isOpen).toBe(false);
         expect(result.current.peekPath).toBeNull();
@@ -186,7 +214,9 @@ describe('useSidePeek', () => {
         wrapper: createWrapper('/?peek=/users/123'),
       });
       expect(result.current.peekPath).toBe('/users/123');
-      result.current.toggle('/users/456');
+      act(() => {
+        result.current.toggle('/users/456');
+      });
       await waitFor(() => {
         expect(result.current.isOpen).toBe(true);
         expect(result.current.peekPath).toBe('/users/456');
@@ -194,12 +224,16 @@ describe('useSidePeek', () => {
     });
     it('should handle empty path toggle', async () => {
       const { result } = renderHook(() => useSidePeek(), { wrapper: createWrapper('/') });
-      result.current.toggle('');
+      act(() => {
+        result.current.toggle('');
+      });
       await waitFor(() => {
         expect(result.current.isOpen).toBe(true);
         expect(result.current.peekPath).toBe('');
       });
-      result.current.toggle('');
+      act(() => {
+        result.current.toggle('');
+      });
       await waitFor(() => {
         expect(result.current.isOpen).toBe(false);
         expect(result.current.peekPath).toBeNull();
@@ -268,7 +302,9 @@ describe('useSidePeek', () => {
     it('should handle very long paths', async () => {
       const longPath = '/users/' + '123/'.repeat(100) + 'profile';
       const { result } = renderHook(() => useSidePeek(), { wrapper: createWrapper('/') });
-      result.current.open(longPath);
+      act(() => {
+        result.current.open(longPath);
+      });
       await waitFor(() => {
         expect(result.current.peekPath).toBe(longPath);
       });
@@ -276,7 +312,9 @@ describe('useSidePeek', () => {
     it('should handle paths with equals signs', async () => {
       const pathWithEquals = '/api/token?key=abc=def=ghi';
       const { result } = renderHook(() => useSidePeek(), { wrapper: createWrapper('/') });
-      result.current.open(pathWithEquals);
+      act(() => {
+        result.current.open(pathWithEquals);
+      });
       await waitFor(() => {
         expect(result.current.peekPath).toBe(pathWithEquals);
       });
@@ -284,7 +322,9 @@ describe('useSidePeek', () => {
     it('should handle paths with ampersands', async () => {
       const pathWithAmpersand = '/search?q=a&b&c';
       const { result } = renderHook(() => useSidePeek(), { wrapper: createWrapper('/') });
-      result.current.open(pathWithAmpersand);
+      act(() => {
+        result.current.open(pathWithAmpersand);
+      });
       await waitFor(() => {
         expect(result.current.peekPath).toBe(pathWithAmpersand);
       });
@@ -292,7 +332,9 @@ describe('useSidePeek', () => {
     it('should handle Unicode paths', async () => {
       const unicodePath = '/users/名前/profile';
       const { result } = renderHook(() => useSidePeek(), { wrapper: createWrapper('/') });
-      result.current.open(unicodePath);
+      act(() => {
+        result.current.open(unicodePath);
+      });
       await waitFor(() => {
         expect(result.current.peekPath).toBe(unicodePath);
       });

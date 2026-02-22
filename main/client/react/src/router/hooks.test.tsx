@@ -5,7 +5,7 @@
  * Tests useNavigate, useLocation, and useSearchParams hooks.
  */
 
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import { MemoryRouter } from './context';
@@ -35,7 +35,9 @@ describe('useNavigate', () => {
       { wrapper: createWrapper('/') },
     );
 
-    result.current.navigate('/about');
+    act(() => {
+      result.current.navigate('/about');
+    });
 
     await waitFor(() => {
       expect(result.current.location.pathname).toBe('/about');
@@ -51,7 +53,9 @@ describe('useNavigate', () => {
       { wrapper: createWrapper('/') },
     );
 
-    result.current.navigate('/about', { replace: true });
+    act(() => {
+      result.current.navigate('/about', { replace: true });
+    });
 
     await waitFor(() => {
       expect(result.current.location.pathname).toBe('/about');
@@ -67,7 +71,9 @@ describe('useNavigate', () => {
       { wrapper: createWrapper('/') },
     );
 
-    result.current.navigate('/about', { state: { from: 'home' } });
+    act(() => {
+      result.current.navigate('/about', { state: { from: 'home' } });
+    });
 
     await waitFor(() => {
       expect(result.current.location.state).toEqual({ from: 'home' });
@@ -83,9 +89,15 @@ describe('useNavigate', () => {
       { wrapper: createWrapper('/') },
     );
 
-    result.current.navigate('/page1');
-    result.current.navigate('/page2');
-    result.current.navigate(-1);
+    act(() => {
+      result.current.navigate('/page1');
+    });
+    act(() => {
+      result.current.navigate('/page2');
+    });
+    act(() => {
+      result.current.navigate(-1);
+    });
 
     await waitFor(() => {
       expect(result.current.location.pathname).toBe('/page1');
@@ -101,7 +113,9 @@ describe('useNavigate', () => {
       { wrapper: createWrapper('/') },
     );
 
-    result.current.navigate('about');
+    act(() => {
+      result.current.navigate('about');
+    });
 
     await waitFor(() => {
       expect(result.current.location.pathname).toBe('/about');
@@ -206,7 +220,9 @@ describe('useSearchParams', () => {
       );
 
       const [, setSearchParams] = result.current.searchParams;
-      setSearchParams({ tab: 'settings' });
+      act(() => {
+        setSearchParams({ tab: 'settings' });
+      });
 
       await waitFor(() => {
         expect(result.current.location.search).toBe('?tab=settings');
@@ -224,7 +240,9 @@ describe('useSearchParams', () => {
 
       const [, setSearchParams] = result.current.searchParams;
       const params = new URLSearchParams({ tab: 'profile' });
-      setSearchParams(params);
+      act(() => {
+        setSearchParams(params);
+      });
 
       await waitFor(() => {
         expect(result.current.location.search).toBe('?tab=profile');
@@ -241,9 +259,11 @@ describe('useSearchParams', () => {
       );
 
       const [, setSearchParams] = result.current.searchParams;
-      setSearchParams((prev) => {
-        prev.set('sort', 'date');
-        return prev;
+      act(() => {
+        setSearchParams((prev) => {
+          prev.set('sort', 'date');
+          return prev;
+        });
       });
 
       await waitFor(() => {
@@ -262,7 +282,9 @@ describe('useSearchParams', () => {
       );
 
       const [, setSearchParams] = result.current.searchParams;
-      setSearchParams({ tab: 'settings' }, { replace: true });
+      act(() => {
+        setSearchParams({ tab: 'settings' }, { replace: true });
+      });
 
       await waitFor(() => {
         expect(result.current.location.search).toBe('?tab=settings');
@@ -279,7 +301,9 @@ describe('useSearchParams', () => {
       );
 
       const [, setSearchParams] = result.current.searchParams;
-      setSearchParams({ tab: 'info' });
+      act(() => {
+        setSearchParams({ tab: 'info' });
+      });
 
       await waitFor(() => {
         expect(result.current.location.pathname).toBe('/about');
@@ -297,7 +321,9 @@ describe('useSearchParams', () => {
       );
 
       const [, setSearchParams] = result.current.searchParams;
-      setSearchParams({ tab: 'info' });
+      act(() => {
+        setSearchParams({ tab: 'info' });
+      });
 
       await waitFor(() => {
         expect(result.current.location.hash).toBe('#section');
@@ -315,7 +341,9 @@ describe('useSearchParams', () => {
       );
 
       const [, setSearchParams] = result.current.searchParams;
-      setSearchParams({});
+      act(() => {
+        setSearchParams({});
+      });
 
       await waitFor(() => {
         expect(result.current.location.search).toBe('');
@@ -332,7 +360,9 @@ describe('useSearchParams', () => {
       );
 
       const [, setSearchParams] = result.current.searchParams;
-      setSearchParams(new URLSearchParams());
+      act(() => {
+        setSearchParams(new URLSearchParams());
+      });
 
       await waitFor(() => {
         expect(result.current.location.search).toBe('');
@@ -360,7 +390,9 @@ describe('useSearchParams', () => {
       );
 
       const [, setSearchParams] = result.current.searchParams;
-      setSearchParams({ query: 'hello&world=test' });
+      act(() => {
+        setSearchParams({ query: 'hello&world=test' });
+      });
 
       await waitFor(() => {
         expect(result.current.location.search).toBeTruthy();
