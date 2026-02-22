@@ -9,7 +9,7 @@
 import { authRoutes, createAuthGuard } from '@bslt/core/auth';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { createTestServer, parseJsonResponse, type TestServer } from './test-utils';
+import { createTest, createTestServer, parseJsonResponse, type TestServer } from './test-utils';
 
 import type { AuthGuardFactory } from '@/http';
 
@@ -255,9 +255,12 @@ describe('WebAuthn API Integration Tests', () => {
   let mockLogger: ReturnType<typeof createMockLogger>;
 
   beforeAll(async () => {
+    const baseConfig = createTest();
+
     testServer = await createTestServer({
       config: {
         auth: {
+          ...baseConfig.auth,
           strategies: ['local', 'webauthn'],
           webauthn: {
             rpName: 'Test App',
