@@ -195,12 +195,8 @@ export default mergeConfig(baseConfig, {
     pool: 'threads',
     maxConcurrency: isCI ? 2 : 4,
     fileParallelism: !isCI,
-    poolOptions: {
-      threads: {
-        minThreads: 1,
-        maxThreads: isCI ? 2 : 4,
-      },
-    },
+    minWorkers: 1,
+    maxWorkers: isCI ? 2 : 4,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'lcov'],
