@@ -23,12 +23,20 @@ const config: StorybookConfig = {
             replacement: `${new URL('../../../client/engine/src/', import.meta.url).pathname}$1`,
           },
           {
+            find: /^@bslt\/react\/(.*)$/,
+            replacement: `${new URL('../../../client/react/src/', import.meta.url).pathname}$1`,
+          },
+          {
             find: '@bslt/shared',
             replacement: new URL('../../../shared/src/index.ts', import.meta.url).pathname,
           },
           {
             find: '@bslt/client-engine',
             replacement: new URL('../../../client/engine/src/index.ts', import.meta.url).pathname,
+          },
+          {
+            find: '@bslt/react',
+            replacement: new URL('../../../client/react/src/index.ts', import.meta.url).pathname,
           },
           {
             find: '@bslt/ui',
