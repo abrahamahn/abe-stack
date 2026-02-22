@@ -256,6 +256,16 @@ describe('WebAuthn API Integration Tests', () => {
 
   beforeAll(async () => {
     testServer = await createTestServer({
+      config: {
+        auth: {
+          strategies: ['local', 'webauthn'],
+          webauthn: {
+            rpName: 'Test App',
+            rpId: 'localhost',
+            origin: 'http://localhost:5173',
+          },
+        },
+      },
       enableCsrf: false,
       enableCors: false,
       enableSecurityHeaders: false,

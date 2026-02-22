@@ -1,4 +1,4 @@
-// client/react/src/__tests__/setup.ts
+// main/client/react/src/__tests__/setup.ts
 /**
  * Global test setup for @bslt/react package tests.
  *
@@ -13,7 +13,7 @@
 import '@testing-library/jest-dom/vitest';
 
 import { cleanup } from '@testing-library/react';
-import { afterEach, vi } from 'vitest';
+import { afterAll, afterEach, beforeAll, vi } from 'vitest';
 
 // ============================================================================
 // Browser API Mocks
@@ -84,6 +84,39 @@ class MockIntersectionObserver {
 vi.stubGlobal('IntersectionObserver', MockIntersectionObserver);
 
 /**
+ * Mock canvas context to avoid jsdom "Not implemented: HTMLCanvasElement.getContext" noise.
+ */
+Object.defineProperty(HTMLCanvasElement.prototype, 'getContext', {
+  writable: true,
+  value: vi.fn(() => ({
+    fillRect: vi.fn(),
+    clearRect: vi.fn(),
+    getImageData: vi.fn(() => ({ data: [] })),
+    putImageData: vi.fn(),
+    createImageData: vi.fn(() => ({ data: [] })),
+    setTransform: vi.fn(),
+    drawImage: vi.fn(),
+    save: vi.fn(),
+    fillText: vi.fn(),
+    restore: vi.fn(),
+    beginPath: vi.fn(),
+    moveTo: vi.fn(),
+    lineTo: vi.fn(),
+    closePath: vi.fn(),
+    stroke: vi.fn(),
+    translate: vi.fn(),
+    scale: vi.fn(),
+    rotate: vi.fn(),
+    arc: vi.fn(),
+    fill: vi.fn(),
+    measureText: vi.fn(() => ({ width: 0 })),
+    transform: vi.fn(),
+    rect: vi.fn(),
+    clip: vi.fn(),
+  })),
+});
+
+/**
  * Mock scrollTo for scroll-related tests.
  */
 vi.stubGlobal(
@@ -115,6 +148,25 @@ if (document.getElementById('root') === null) {
   document.body.appendChild(rootElement);
 }
 
+// Keep test output clean from known jsdom unimplemented browser APIs.
+let restoreConsoleError: (() => void) | undefined;
+
+beforeAll(() => {
+  const original = console.error.bind(console);
+  const spy = vi.spyOn(console, 'error').mockImplementation((...args: unknown[]) => {
+    const first = args[0];
+    const msg = typeof first === 'string' ? first : '';
+    if (
+      msg.includes("Not implemented: HTMLCanvasElement's getContext() method") ||
+      msg.includes('Not implemented: navigation to another Document')
+    ) {
+      return;
+    }
+    original(...args);
+  });
+  restoreConsoleError = () => spy.mockRestore();
+});
+
 // ============================================================================
 // Test Lifecycle Hooks
 // ============================================================================
@@ -128,4 +180,8 @@ afterEach(() => {
 
   // Reset timers if any test used fake timers
   vi.useRealTimers();
+});
+
+afterAll(() => {
+  restoreConsoleError?.();
 });
