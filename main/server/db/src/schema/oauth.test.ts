@@ -41,7 +41,7 @@ describe('OAuth Schema Constants', () => {
 
   describe('OAUTH_PROVIDERS', () => {
     it('should contain all supported providers', () => {
-      expect(OAUTH_PROVIDERS).toEqual(['google', 'github', 'apple']);
+      expect(OAUTH_PROVIDERS).toEqual(['google', 'github', 'kakao', 'apple']);
     });
 
     it('should be a readonly array', () => {
@@ -49,8 +49,8 @@ describe('OAuth Schema Constants', () => {
       expect(Object.isFrozen(OAUTH_PROVIDERS)).toBe(false);
     });
 
-    it('should have exactly 3 providers', () => {
-      expect(OAUTH_PROVIDERS).toHaveLength(3);
+    it('should have exactly 4 providers', () => {
+      expect(OAUTH_PROVIDERS).toHaveLength(4);
     });
 
     it('should contain unique provider names', () => {
@@ -138,7 +138,7 @@ describe('OAuth Schema Constants', () => {
 describe('OAuth Type Definitions', () => {
   describe('OAuthProvider', () => {
     it('should accept valid provider types', () => {
-      const validProviders: OAuthProvider[] = ['google', 'github', 'apple'];
+      const validProviders: OAuthProvider[] = ['google', 'github', 'kakao', 'apple'];
       validProviders.forEach((provider) => {
         expect(OAUTH_PROVIDERS).toContain(provider);
       });
@@ -147,7 +147,7 @@ describe('OAuth Type Definitions', () => {
     it('should match OAUTH_PROVIDERS constant', () => {
       // Type test: ensure OAuthProvider union matches OAUTH_PROVIDERS
       const providers: OAuthProvider[] = [...OAUTH_PROVIDERS];
-      expect(providers).toHaveLength(3);
+      expect(providers).toHaveLength(4);
     });
   });
 

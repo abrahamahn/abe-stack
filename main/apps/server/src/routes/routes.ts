@@ -51,7 +51,12 @@ function filterAuthRoutesByStrategies(
   enabledStrategies: readonly string[],
 ): DbRouteMap {
   const enabled = new Set(enabledStrategies);
-  const filtered = new Map(routes);
+  const filtered =
+    routes instanceof Map
+      ? new Map(routes)
+      : new Map<string, DbRouteDefinition>(
+          Object.entries(routes as unknown as Record<string, DbRouteDefinition>),
+        );
 
   if (!enabled.has('local')) {
     for (const key of LOCAL_AUTH_ROUTES) {
@@ -62,14 +67,6 @@ function filterAuthRoutesByStrategies(
   if (!enabled.has('magic')) {
     for (const key of [...filtered.keys()]) {
       if (key.startsWith('auth/magic-link/')) filtered.delete(key);
-    }
-  }
-
-  if (!enabled.has('webauthn')) {
-    for (const key of [...filtered.keys()]) {
-      if (key.startsWith('auth/webauthn/') || key.startsWith('users/me/passkeys')) {
-        filtered.delete(key);
-      }
     }
   }
 
