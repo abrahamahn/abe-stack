@@ -53,7 +53,10 @@ export DEBIAN_FRONTEND=noninteractive
 
 echo "[1/7] Updating apt and base packages"
 apt-get update
-apt-get upgrade -y
+apt-get -y \
+  -o Dpkg::Options::="--force-confdef" \
+  -o Dpkg::Options::="--force-confold" \
+  upgrade
 apt-get install -y \
   ca-certificates \
   curl \
@@ -96,7 +99,10 @@ ufw allow 80/tcp
 ufw allow 443/tcp
 ufw --force enable
 
-dpkg-reconfigure --frontend=noninteractive unattended-upgrades
+cat >/etc/apt/apt.conf.d/20auto-upgrades <<'EOF'
+APT::Periodic::Update-Package-Lists "1";
+APT::Periodic::Unattended-Upgrade "1";
+EOF
 systemctl enable fail2ban
 systemctl restart fail2ban
 
@@ -112,7 +118,7 @@ if ! grep -q '^PermitRootLogin prohibit-password' "$SSHD_CONFIG"; then
     echo 'PermitRootLogin prohibit-password' >> "$SSHD_CONFIG"
   fi
 fi
-systemctl restart ssh
+systemctl reload ssh || true
 
 echo "[7/7] Cleanup"
 apt-get autoremove -y
