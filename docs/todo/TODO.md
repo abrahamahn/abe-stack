@@ -101,8 +101,6 @@ Before marking a DB-backed slice as done, verify these artifacts exist:
   - Risks:
   - Rollout / config gates:
 
-```
-
 ---
 
 #### 5.2 Production Environment Setup (CHECKLIST 13 | EXECUTION)
@@ -482,4 +480,7 @@ Before marking a DB-backed slice as done, verify these artifacts exist:
 - [ ] Test: read replica routing — writes → primary, reads → replica
 
 ---
+
+```
+
 ```

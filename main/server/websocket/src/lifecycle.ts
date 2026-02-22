@@ -10,20 +10,10 @@
  */
 
 import { validateCsrfToken } from '@bslt/server-system';
-import {
-  ACCESS_TOKEN_COOKIE_NAME,
-  CSRF_COOKIE_NAME,
-  ERROR_MESSAGES,
-  HTTP_STATUS,
-  parseCookies,
-  WEBSOCKET_PATH,
-  WS_CLOSE_POLICY_VIOLATION,
-} from '@bslt/shared';
 import { WebSocketServer } from 'ws';
 
 import { decrementConnections, incrementConnections, markPluginRegistered } from './stats';
 
-import type { Logger, WebSocket as PubSubWebSocket, SubscriptionManager } from '@bslt/shared';
 import type { FastifyInstance } from 'fastify';
 import type { IncomingMessage } from 'node:http';
 import type { Duplex } from 'node:stream';
@@ -33,9 +23,39 @@ interface WebSocketDbClient {
   queryOne<T>(query: { text: string; values?: readonly unknown[] }): Promise<T | null | undefined>;
 }
 
+interface PubSubWebSocketLike {
+  readonly readyState: number;
+  send(data: string): void;
+}
+
+interface SubscriptionManagerLike {
+  handleMessage(
+    socket: PubSubWebSocketLike,
+    message: string,
+    onSubscribe?: (key: unknown) => void,
+  ): void;
+  cleanup(socket: PubSubWebSocketLike): void;
+}
+
+interface LoggerLike {
+  debug(message: string, meta?: Record<string, unknown>): void;
+  info(message: string, meta?: Record<string, unknown>): void;
+  warn(message: string, meta?: Record<string, unknown>): void;
+  error(message: string, meta?: Record<string, unknown>): void;
+}
+
 // ============================================================================
 // Local Constants
 // ============================================================================
+
+const ACCESS_TOKEN_COOKIE_NAME = 'accessToken';
+const CSRF_COOKIE_NAME = '_csrf';
+const WEBSOCKET_PATH = '/ws';
+const WS_CLOSE_POLICY_VIOLATION = 1008;
+const AUTHENTICATION_REQUIRED_MESSAGE = 'Authentication required';
+const HTTP_STATUS = {
+  FORBIDDEN: 403,
+} as const;
 
 /** Subprotocol prefix for CSRF tokens sent via Sec-WebSocket-Protocol */
 const CSRF_SUBPROTOCOL_PREFIX = 'csrf.';
@@ -53,8 +73,8 @@ const KNOWN_SUBPROTOCOLS = new Set(['graphql', 'json', 'Bearer']);
  */
 export interface WebSocketDeps {
   readonly db: WebSocketDbClient;
-  readonly pubsub: SubscriptionManager;
-  readonly log: Logger;
+  readonly pubsub: SubscriptionManagerLike;
+  readonly log: LoggerLike;
   readonly config: {
     readonly env: string;
     readonly auth: {
@@ -79,6 +99,14 @@ export interface WebSocketDeps {
  * @returns Decoded token payload with userId
  */
 export type TokenVerifier = (token: string, secret: string) => { userId: string };
+
+type ValidateCsrfTokenFn = (
+  cookieToken: string | undefined,
+  requestToken: string | undefined,
+  options: { secret: string; encrypted: boolean; signed: boolean },
+) => boolean;
+
+const validateCsrfTokenTyped = validateCsrfToken as unknown as ValidateCsrfTokenFn;
 
 // ============================================================================
 // Database Query Helpers
@@ -128,7 +156,7 @@ async function getRecordVersion(
  * @returns Minimal PubSubWebSocket interface
  * @complexity O(1)
  */
-function asPubSubWebSocket(socket: WebSocket): PubSubWebSocket {
+function asPubSubWebSocket(socket: WebSocket): PubSubWebSocketLike {
   return socket;
 }
 
@@ -147,6 +175,20 @@ function asPubSubWebSocket(socket: WebSocket): PubSubWebSocket {
 function isStringRecord(value: unknown): value is Record<string, string> {
   if (value == null || typeof value !== 'object') return false;
   return Object.values(value).every((entry) => typeof entry === 'string');
+}
+
+function parseCookiesSafe(cookieHeader: string | undefined): Record<string, string> {
+  if (cookieHeader == null || cookieHeader.trim() === '') return {};
+
+  const cookies: Record<string, string> = {};
+  for (const segment of cookieHeader.split(';')) {
+    const [rawName, ...valueParts] = segment.split('=');
+    const name = rawName?.trim();
+    const value = valueParts.join('=').trim();
+    if (name == null || name.length === 0 || value.length === 0) continue;
+    cookies[name] = value;
+  }
+  return cookies;
 }
 
 function parseRecordSubscriptionKey(key: string): { table: string; id: string } | null {
@@ -194,10 +236,8 @@ function rejectUpgrade(socket: Duplex, statusCode: number, message: string): voi
  */
 async function sendInitialData(ctx: WebSocketDeps, socket: WebSocket, key: string): Promise<void> {
   const parsed = parseRecordSubscriptionKey(key);
-  const log = ctx.log as { warn: (message: string, meta?: Record<string, unknown>) => void };
-  const ws = socket as { send: (data: string) => void };
   if (parsed == null) {
-    log.warn('Invalid subscription key format', { key });
+    ctx.log.warn('Invalid subscription key format', { key });
     return;
   }
 
@@ -206,10 +246,10 @@ async function sendInitialData(ctx: WebSocketDeps, socket: WebSocket, key: strin
 
     if (version !== undefined) {
       const msg = { type: 'update', key, version };
-      ws.send(JSON.stringify(msg));
+      socket.send(JSON.stringify(msg));
     }
   } catch (err) {
-    log.warn('Failed to fetch initial data for subscription', { err, key });
+    ctx.log.warn('Failed to fetch initial data for subscription', { err, key });
   }
 }
 
@@ -261,7 +301,7 @@ export function registerWebSocket(
     // CSRF Validation
     // =========================================================================
 
-    const rawCookies: unknown = parseCookies(request.headers.cookie);
+    const rawCookies: unknown = parseCookiesSafe(request.headers.cookie);
     const cookies = isStringRecord(rawCookies) ? rawCookies : {};
     const csrfCookie = cookies[CSRF_COOKIE_NAME];
 
@@ -282,7 +322,7 @@ export function registerWebSocket(
       }
     }
 
-    const csrfValid = validateCsrfToken(csrfCookie, csrfToken, {
+    const csrfValid = validateCsrfTokenTyped(csrfCookie, csrfToken, {
       secret: ctx.config.auth.cookie.secret,
       encrypted: isProd,
       signed: true,
@@ -339,7 +379,7 @@ function handleConnection(
 
   // Check cookies (accessToken cookie for seamless auth)
   if (token == null || token === '') {
-    const rawCookies: unknown = parseCookies(req.headers.cookie);
+    const rawCookies: unknown = parseCookiesSafe(req.headers.cookie);
     const cookies = isStringRecord(rawCookies) ? rawCookies : {};
     const accessToken = cookies[ACCESS_TOKEN_COOKIE_NAME];
     if (typeof accessToken === 'string') {
@@ -348,7 +388,7 @@ function handleConnection(
   }
 
   if (token == null || token === '') {
-    socket.close(WS_CLOSE_POLICY_VIOLATION, ERROR_MESSAGES.AUTHENTICATION_REQUIRED);
+    socket.close(WS_CLOSE_POLICY_VIOLATION, AUTHENTICATION_REQUIRED_MESSAGE);
     return;
   }
 
