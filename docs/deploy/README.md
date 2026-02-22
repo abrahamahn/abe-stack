@@ -190,6 +190,12 @@ For testing, uncomment the staging ACME server in Caddyfile to avoid rate limits
 
 ## Deployment Workflow
 
+Quick links:
+
+- [DigitalOcean Auto-Deploy (push to deploy)](./digitalocean-auto-deploy.md)
+- [Secrets Checklist](./secrets-checklist.md)
+- [Release Checklist](./release-checklist.md)
+
 ### Automated Deployment (Recommended)
 
 Use the GitHub Actions deployment workflow for reliable, repeatable deployments:
