@@ -6,7 +6,21 @@
     "composite": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@bslt/shared": ["../../shared/src/index.ts"],
+      "@bslt/shared/*": ["../../shared/src/*"],
+      "@bslt/db": ["../db/src/index.ts"],
+      "@bslt/db/*": ["../db/src/*"],
+      "@bslt/server-system": ["./src/index.ts"],
+      "@bslt/server-system/*": ["./src/*"],
+      "@bslt/websocket": ["../websocket/src/index.ts"],
+      "@bslt/websocket/*": ["../websocket/src/*"],
+      "@bslt/core": ["../core/src/index.ts"],
+      "@bslt/core/*": ["../core/src/*"],
+      "@bslt/media": ["../media/src/index.ts"],
+      "@bslt/media/*": ["../media/src/*"],
+      "@bslt/realtime": ["../realtime/src/index.ts"],
+      "@bslt/realtime/*": ["../realtime/src/*"]
     },
     "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.system.tsbuildinfo",
     "typeRoots": ["../../../node_modules/@types"]

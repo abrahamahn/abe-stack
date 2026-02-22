@@ -10,7 +10,23 @@
     "declarationMap": true,
     "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.tsbuildinfo",
     "typeRoots": ["../../../node_modules/@types"],
-    "baseUrl": "."
+    "baseUrl": ".",
+    "paths": {
+      "@bslt/shared": ["../../shared/src/index.ts"],
+      "@bslt/shared/*": ["../../shared/src/*"],
+      "@bslt/db": ["../db/src/index.ts"],
+      "@bslt/db/*": ["../db/src/*"],
+      "@bslt/server-system": ["../system/src/index.ts"],
+      "@bslt/server-system/*": ["../system/src/*"],
+      "@bslt/websocket": ["../websocket/src/index.ts"],
+      "@bslt/websocket/*": ["../websocket/src/*"],
+      "@bslt/core": ["./src/index.ts"],
+      "@bslt/core/*": ["./src/*"],
+      "@bslt/media": ["../media/src/index.ts"],
+      "@bslt/media/*": ["../media/src/*"],
+      "@bslt/realtime": ["../realtime/src/index.ts"],
+      "@bslt/realtime/*": ["../realtime/src/*"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"],

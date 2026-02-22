@@ -11,6 +11,22 @@
     "composite": true,
     "lib": ["ES2022", "ESNext"],
     "downlevelIteration": true,
+    "paths": {
+      "@bslt/shared": ["../../shared/src/index.ts"],
+      "@bslt/shared/*": ["../../shared/src/*"],
+      "@bslt/db": ["./src/index.ts"],
+      "@bslt/db/*": ["./src/*"],
+      "@bslt/server-system": ["../system/src/index.ts"],
+      "@bslt/server-system/*": ["../system/src/*"],
+      "@bslt/websocket": ["../websocket/src/index.ts"],
+      "@bslt/websocket/*": ["../websocket/src/*"],
+      "@bslt/core": ["../core/src/index.ts"],
+      "@bslt/core/*": ["../core/src/*"],
+      "@bslt/media": ["../media/src/index.ts"],
+      "@bslt/media/*": ["../media/src/*"],
+      "@bslt/realtime": ["../realtime/src/index.ts"],
+      "@bslt/realtime/*": ["../realtime/src/*"]
+    },
     "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.db.tsbuildinfo"
   },
   "include": ["src/**/*.ts"],

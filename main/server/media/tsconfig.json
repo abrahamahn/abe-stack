@@ -5,7 +5,21 @@
     "rootDir": "./src",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@bslt/shared": ["../../shared/src/index.ts"],
+      "@bslt/shared/*": ["../../shared/src/*"],
+      "@bslt/db": ["../db/src/index.ts"],
+      "@bslt/db/*": ["../db/src/*"],
+      "@bslt/server-system": ["../system/src/index.ts"],
+      "@bslt/server-system/*": ["../system/src/*"],
+      "@bslt/websocket": ["../websocket/src/index.ts"],
+      "@bslt/websocket/*": ["../websocket/src/*"],
+      "@bslt/core": ["../core/src/index.ts"],
+      "@bslt/core/*": ["../core/src/*"],
+      "@bslt/media": ["./src/index.ts"],
+      "@bslt/media/*": ["./src/*"],
+      "@bslt/realtime": ["../realtime/src/index.ts"],
+      "@bslt/realtime/*": ["../realtime/src/*"]
     },
     "typeRoots": ["../../../node_modules/@types"],
     "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.media.tsbuildinfo"
