@@ -23,7 +23,7 @@ const __dirname = path.dirname(__filename);
 const REPO_ROOT = path.resolve(__dirname, '..', '..', '..', '..');
 
 /** SQL migrations directory */
-const MIGRATIONS_DIR = path.join(REPO_ROOT, 'src', 'server', 'db', 'migrations');
+const MIGRATIONS_DIR = path.join(REPO_ROOT, 'main', 'server', 'db', 'migrations');
 
 /**
  * Runs all pending SQL migrations in order.
@@ -35,7 +35,7 @@ const MIGRATIONS_DIR = path.join(REPO_ROOT, 'src', 'server', 'db', 'migrations')
 async function runMigrations(): Promise<void> {
   console.log('Starting database migrations...');
 
-  initEnv();
+  await initEnv();
   const connectionString = buildConnectionString();
   const db = createRawDb(connectionString);
 
