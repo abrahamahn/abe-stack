@@ -9,7 +9,7 @@
     "start": "node --env-file=../../../config/env/.env.production dist/main.js",
     "build": "tsc",
     "clean": "rm -rf dist node_modules/.cache/typescript/*.tsbuildinfo",
-    "type-check": "tsc --noEmit",
+    "type-check": "tsc -p tsconfig.typecheck.json",
     "test": "vitest run --reporter=dot --silent=passed-only",
     "test:unit": "vitest run --reporter=dot --test-name-pattern '(unit|fast)'",
     "test:integration": "vitest run --reporter=dot --test-name-pattern '(integration|critical)'",

@@ -8,7 +8,7 @@
     "build": "vite build",
     "start": "vite preview --port 4173",
     "api:index": "node scripts/generate-api-index.mjs",
-    "type-check": "tsc --noEmit",
+    "type-check": "tsc -p tsconfig.typecheck.json",
     "test": "vitest run --reporter=dot --silent=passed-only",
     "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-bslt-web --report-unused-disable-directives",
     "clean": "rm -rf dist"

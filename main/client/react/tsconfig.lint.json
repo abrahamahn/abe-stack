@@ -9,8 +9,8 @@
     "paths": {
       "@bslt/shared": ["../../shared/src/index.ts"],
       "@bslt/shared/*": ["../../shared/src/*"],
-      "@bslt/client-engine": ["../engine/dist/index.d.ts"],
-      "@bslt/client-engine/*": ["../engine/dist/*"],
+      "@bslt/client-engine": ["../engine/src/index.ts"],
+      "@bslt/client-engine/*": ["../engine/src/*"],
       "@bslt/api": ["../api/src/index.ts"],
       "@bslt/api/*": ["../api/src/*"],
       "@hooks": ["./src/hooks"],

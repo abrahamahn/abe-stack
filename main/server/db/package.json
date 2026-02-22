@@ -21,7 +21,7 @@
     "build": "[ -d dist ] || rm -f node_modules/.cache/typescript/*.tsbuildinfo && tsc --build",
     "postbuild": "node --import tsx ../../tools/scripts/build/ensure-js-extensions.ts dist",
     "clean": "rm -rf dist node_modules/.cache/typescript/*.tsbuildinfo",
-    "type-check": "tsc --noEmit",
+    "type-check": "tsc -p tsconfig.typecheck.json",
     "test": "vitest run --reporter=dot --silent=passed-only",
     "lint": "eslint . --max-warnings 0"
   },

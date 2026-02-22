@@ -293,8 +293,12 @@ importers:
       '@bslt/shared':
         specifier: workspace:*
         version: link:../../shared
+    devDependencies:
+      '@types/react':
+        specifier: ^19.2.3
+        version: 19.2.13
       react:
-        specifier: ^18.0.0 || ^19.0.0
+        specifier: ^19.2.3
         version: 19.2.4
 
   main/client/react:

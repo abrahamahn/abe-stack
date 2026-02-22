@@ -11,8 +11,8 @@
     "paths": {
       "@bslt/shared": ["../../shared/src/index.ts"],
       "@bslt/shared/*": ["../../shared/src/*"],
-      "@bslt/client-engine": ["../engine/dist/index.d.ts"],
-      "@bslt/client-engine/*": ["../engine/dist/*"],
+      "@bslt/client-engine": ["../engine/src/index.ts"],
+      "@bslt/client-engine/*": ["../engine/src/*"],
       "@bslt/react": ["../react/src/index.ts"],
       "@bslt/react/*": ["../react/src/*"],
       "@components": ["./src/components"],
